@@ -1,0 +1,1197 @@
+---
+title: "Portfolio Testing"
+author: "Brian Howard"
+date: "June 27, 2017"
+output:
+  word_document:
+    toc: yes
+    toc_depth: '2'
+  pdf_document:
+    toc: yes
+    toc_depth: '2'
+  html_document:
+    toc: yes
+    toc_depth: 2
+---
+
+# Function Library
+
+This section contains the functions used in the code.
+
+```{r setup, echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options("getSymbols.warning4.0"=FALSE)
+strDateStart <- "2011-01-01"
+```
+
+```{r runopts, echo=FALSE}
+
+# Set this to true to download new data. Otherwise it pulls it in from the disk.
+bDownload = TRUE
+iRetPd <- 365
+
+```
+
+```{r libraries, echo=FALSE, message=FALSE}
+library(knitr)
+library(quantmod)
+library(zoo)
+library(stringr)
+library(ggplot2)
+library(data.table)
+library(corrplot)
+library(Hmisc)
+library(tseries)
+```
+
+
+```{r porthelp, echo=FALSE}
+
+pfUpdateReturn <- function(strPortfolio, dfData, dfSyms){
+
+  dfData[,strPortfolio] <- 0
+  for (col_name in names(dfData))
+  {
+      # Act only the numeric data
+      if (is.numeric(dfData[,col_name]))
+      {
+        
+        # Split the name ("USGFG.Close"" is "USGFG"" and "Close"")
+        lstSyms <- lstSymSplit(col_name)
+        
+        # Only if there is two terms
+        if( length(lstSyms) > 1){
+  
+          if( lstSyms[2] == 'Close_Norm' ){
+  
+            dPercent <- dfSyms[dfSyms$Symbol==lstSyms[1],strPortfolio]
+            if(length(dPercent) > 0 ){
+              dfData[,strPortfolio] <- dfData[,strPortfolio] + (dfData[,col_name] * dPercent)
+            }
+          }
+                  
+        }
+        
+      }
+  }
+  
+  return(dfData)
+  
+}
+
+```
+
+```{r funchelp, echo=FALSE}
+
+strSymOnly <- function(datay){
+  
+  return(lstSymSplit(datay)[1])
+}
+
+lstSymSplit <- function(datay){
+  
+  lstSyms <- unlist(strsplit(datay, "\\."))
+  return(lstSyms)
+}
+
+
+```
+
+```{r plothelp }
+# ------------------------------------------------------------------------------
+# Define the generic single plane plot function
+plotSingle <- function(datadf, datax, datay, titlelabel, xlabel, ylabel, xlim, ylim, bLegend){
+  
+  myplot <- ggplot()+
+    theme(plot.background = element_rect(fill = 'white', colour = 'white')) +
+    theme(panel.background = element_rect(fill = 'white', colour = 'grey')) +
+    theme(panel.grid.major.x = element_blank()) +
+    theme(panel.grid.major.y = element_line(colour="grey", size=0.5)) +
+    theme(panel.grid.minor.y = element_line(colour="grey", size=0.25, linetype = "dotted")) +
+    geom_line(data=datadf, aes_string(x=datax, y=datay, colour = factor(datay)), 
+              na.rm = TRUE, size = 1.0) +
+    scale_colour_manual(values = c("black","blue", "green")) +
+    guides(colour = guide_legend("Series"), size = guide_legend("Series"), shape = guide_legend("Series")) +
+    scale_fill_continuous(name = "V") +
+    #geom_smooth(method = "lm") + 
+    ggtitle(titlelabel) +
+    labs(x=xlabel, y = ylabel) +
+    scale_x_date(limits = xlim ) + 
+    scale_y_continuous(limits = ylim) +
+    if( bLegend){
+      theme(legend.position = "top")
+    }else{
+      theme(legend.position = "none")
+    }
+  
+  
+
+  return(myplot)
+}
+
+# ------------------------------------------------------------------------------
+# Define the function for calculating year over year growth. 
+CalcYoY <- function (datadf, strCol, iPeriods){
+  Nrow <- nrow(datadf)
+  GrowthRateYoY <- rep(0,Nrow)
+  GrowthRateYoY[(iPeriods+1):Nrow] <- diff(as.matrix(datadf[[strCol]]), lag = iPeriods)
+  GrowthRateYoY <- (GrowthRateYoY / datadf[[strCol]])
+  return(GrowthRateYoY)
+}
+
+# Define return using log
+CalcLogRet <- function(datadf, strCol, iPeriods){
+  Nrow <- nrow(datadf)
+  GrowthRate <- rep(0,Nrow)
+  GrowthRate[(iPeriods+1):Nrow] <- diff(log(datadf[[strCol]]), lag = iPeriods)
+  return(GrowthRate)
+}
+
+
+# Small helper function to get the symbol description
+getPlotTitle <- function(datay){
+  strTitle <-  paste(datay, " | ", dfSyms[grep(paste("^", datay, "$", sep=""), dfSyms$Symbol),]$Desc)
+  return(strTitle)
+}
+
+getPlotYLabel <- function(datay){
+  strY <- dfSyms[grep(paste("^", datay, "$", sep=""), dfSyms$Symbol),]$yLabel
+  return(strY)
+}
+
+plotSingleBench <- function(datay, ylim){
+  
+  if( grep('.',datay) > 0 ){
+    strSym <- strSymOnly(datay)
+    strTitle <- paste(datay, " | ", dfSyms[grep(strSym, dfSyms$Symbol),]$Desc)
+    strYLabel <- dfSyms[grep(strSym, dfSyms$Symbol),]$yLabel
+  }else{
+    strTitle <- paste(datay, " | ", dfSyms[grep(datay, dfSyms$Symbol),]$Desc)
+    strYLabel <- dfSyms[grep(datay, dfSyms$Symbol),]$yLabel
+  }
+  dataBench <- "GSPC.Close_Norm"
+  datax <- "date"
+  myPlot <- plotSingle(dfData, datax, datay, 
+            strTitle, "Date", 
+            strYLabel, c(as.Date(strDateStart), Sys.Date()), ylim, TRUE)
+  myPlot <- myPlot + geom_line(data=dfData, aes_string(x=datax, y=dataBench, colour = factor(dataBench)), 
+          na.rm = TRUE, size = 0.7)
+  
+  
+  return(myPlot)
+ 
+  
+}
+
+plotSingleQuick <- function(datay, ylim){
+  
+  if( grep('.',datay) > 0 ){
+    strSym <- strSymOnly(datay)
+    strTitle <- paste(datay, " | ", dfSyms[grep(strSym, dfSyms$Symbol),]$Desc)
+    strYLabel <- dfSyms[grep(strSym, dfSyms$Symbol),]$yLabel
+  }else{
+    strTitle <- paste(datay, " | ", dfSyms[grep(datay, dfSyms$Symbol),]$Desc)
+    strYLabel <- dfSyms[grep(datay, dfSyms$Symbol),]$yLabel
+  }
+  datax <- "date"
+  myPlot <- plotSingle(dfData, datax, datay, 
+            strTitle, "Date", 
+            strYLabel, c(as.Date(strDateStart ), Sys.Date()), ylim, TRUE)
+  
+  return(myPlot)
+ 
+  
+}
+
+plotRR <- function(datay, bIgnorePort){
+  
+  # Handle optional argurements
+  if( missing(bIgnorePort)){
+    bIgnorePort = FALSE;
+  }
+
+  # Create a new data frame for just this portfolio
+  dfRR <- dfSyms[dfSyms[datay]>0,]
+  
+  # Need a data table with just the ticker and data
+  strCols <- paste(dfRR$Symbol, ".Close_Norm_YoY", sep="")
+  dfPort <- data.table(dfData[,strCols])
+
+  # Range of expected returns from the porfolio
+  er_vals <- seq(from = min(dfRR$ExpReturn), to = max(dfRR$ExpReturn), length.out = 1000)
+  
+  # find an optimal portfolio for each possible possible expected return 
+  # (note that the values are explicitly set between the minimum and maximum of the expected returns per asset)
+  sd_vals <- rep(0,length(er_vals))
+  tryCatch({
+    sd_vals <- sapply(er_vals, function(er) {
+      op <- portfolio.optim(as.matrix(dfPort), er)
+      return(op$ps)
+    })
+  }, error = function(e) {
+    print("Failed to find efficiency boundary")
+  })
+  
+  # Collect in a table
+  plot_dt <- data.table(sd = sd_vals, er = er_vals)
+  
+  # find the lower and the upper frontier
+  minsd <- min(plot_dt$sd)
+  minsd_er <- plot_dt[sd == minsd, er]
+  minsd_er <- minsd_er[1]
+  plot_dt[, efficient := er >= minsd_er]
+  
+  # Data for the actual portfolio mix
+  dfPortRet <- dfData[datay]
+  strPfYoY <- paste(datay,"_YoY",sep="") 
+  dfPortRet[strPfYoY] <- CalcYoY(dfPortRet, datay, iRetPd)
+  Vol_pf <- sd(dfPortRet[,strPfYoY])
+  ExpRet_pf <- mean(dfPortRet[,strPfYoY])
+  #print(Vol_pf)
+  #print(ExpRet_pf)
+  
+  # Data for the portfolio mix with same returns, but lower volatility
+  dfRR[,paste(datay,"_Opt",sep="")] <- 0
+  op_pf <- data.frame(0)
+  op_pf$ps <- 0
+  tryCatch({
+      op_pf <- portfolio.optim(as.matrix(dfPort), ExpRet_pf)
+      dfRR[paste(datay,"_Opt",sep="")] <- op_pf$pw
+
+    }, error=function(e) {
+      print("Failed to find opt portfolio")
+    })
+
+# Plot the data
+  myPlot <- ggplot() + 
+    geom_point(data=dfRR, aes(x = Volatility, y = ExpReturn, size=5, color = Symbol)) +
+    geom_point(data = plot_dt[efficient == F], aes(x = sd, y = er), size = 0.5, color = "blue") +
+    geom_point(data = plot_dt[efficient == T], aes(x = sd, y = er), size = 0.5, color = "red") +
+    theme_bw() + ggtitle("Risk-Return Tradeoff (Red=Efficient), Annual Returns") + 
+    xlab("Volatility") + ylab("Expected Returns") +
+    scale_y_continuous(label = scales::percent, limits = c(-0.05, 0.15)) +
+    scale_x_continuous(label = scales::percent, limits = c(0.00, 0.30))
+
+    if( bIgnorePort==FALSE ){
+      myPlot <- myPlot + geom_point(aes(x = Vol_pf, y = ExpRet_pf, size=5, color = "Actual Portfolio")) +
+      geom_point(aes(x = op_pf$ps, y = ExpRet_pf, size=5, color = "Reduced Risk Portfolio"))
+    }
+  
+  return(list(dfRR, myPlot, plot_dt))
+
+}
+
+plotCorr <- function(strPort){
+  
+    lstActiveSyms <- paste(dfSyms[dfSyms[,strPort]>0,]$Symbol,'.Close_Norm',sep="")
+
+
+  # Correlation for the entire data set
+  training.cor <- dfData[,lstActiveSyms]
+  rcorr.data <- rcorr(as.matrix(training.cor), type = "pearson")
+  #print(rcorr.data)
+
+  corrplot(cor(training.cor), type="upper", order="original", 
+           tl.col="black", tl.srt=45, title ="All data")
+}
+
+
+```
+
+These functions help organize tables in the document
+
+```{r tabhelp}
+
+tblPort <- function(rrData, datay){
+  
+  kable(rrData[[1]][c("Symbol", "Desc", datay, paste(datay, "_Opt", sep = ""))])
+  
+}
+
+```
+
+# Introduction
+
+This is a portfolio analysis, data pulled from yahoo. I'm trying to decide what a better mix would be for this old IRA account. These next few segments load the data into the R program.
+
+## Define the symbols to be used in the analysis.
+
+This code pulls in the library stock ticker symbols that will be available for analysis.
+
+```{r defsyms, echo=FALSE}
+Symbol = c("USPRX", "USSPX")
+Source = c("yahoo", "yahoo")
+Desc = c("USAA S&P 500 Index Reward",
+         "USAA S&P 500 Index Member")
+yLabel = c("Dollars","Dollars")
+dfSyms = data.frame(Symbol, Source, Desc, yLabel, stringsAsFactors = FALSE)
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="USAWX", Source="yahoo", 
+              Desc="USAA World Growth", 
+              yLabel="Dollars" ))
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="USNQX", Source="yahoo", 
+              Desc="USAA NASDAQ-100 Index", 
+              yLabel="Dollars" ))
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="USISX", Source="yahoo", 
+              Desc="USAA Income Stock", 
+              yLabel="Dollars" ))
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="UFSGX", Source="yahoo", 
+              Desc="USAA First Start Growth", 
+              yLabel="Dollars" ))
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="USCGX", Source="yahoo", 
+              Desc="USAA Capital Growth Fund", 
+              yLabel="Dollars" ))
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="USCCX", Source="yahoo", 
+              Desc="Cornerstone Conservative Fund", 
+              yLabel="Dollars" ))
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="USAAX", Source="yahoo", 
+              Desc="Growth Fund", 
+              yLabel="Dollars" ))
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="VTWO", Source="yahoo", 
+              Desc="Vanguard Russell 2000 ETF", 
+              yLabel="Dollars" ))
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="VFINX", Source="yahoo", 
+              Desc="Vanguard 500 Index Investor", 
+              yLabel="Dollars" ))
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="VGSTX", Source="yahoo", 
+              Desc="Vanguard STAR Inv", 
+              yLabel="Dollars" ))
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="TMFGX", Source="yahoo", 
+              Desc="Motley Fool Great America Investor", 
+              yLabel="Dollars" ))
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="IWM", Source="yahoo", 
+              Desc="iShares Russell 2000", 
+              yLabel="Dollars" ))
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="QQQ", Source="yahoo", 
+              Desc="PowerShares QQQ ETF", 
+              yLabel="Dollars" ))
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="HAINX", Source="yahoo", 
+              Desc="Harbor International Institutional", 
+              yLabel="Dollars" ))
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="VEU", Source="yahoo", 
+              Desc="Vanguard FTSE All-Wld ex-US ETF", 
+              yLabel="Dollars" ))
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="IVOO", Source="yahoo", 
+              Desc="Vanguard S&P Mid-Cap 400 ETF", 
+              yLabel="Dollars" ))
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="SPY", Source="yahoo", 
+              Desc="SPDR S&P 500 ETF", 
+              yLabel="Dollars" ))
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="VIGI", Source="yahoo", 
+              Desc="Vanguard Whitehall Funds - Vanguard Int. Div.", 
+              yLabel="Dollars" ))
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="CAMIX", Source="yahoo", 
+              Desc="Cambiar International Equity Inv", 
+              yLabel="Dollars" ))
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="SCHD", Source="yahoo", 
+              Desc="Schwab U.S. Dividend Equity ETF", 
+              yLabel="Dollars" ))
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="VYM", Source="yahoo", 
+              Desc="Vanguard High Dividend Yield ETF", 
+              yLabel="Dollars" ))
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="NOBL", Source="yahoo", 
+              Desc="ProShares S&P 500 Dividend Aristocrats", 
+              yLabel="Dollars" ))
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="XOM", Source="yahoo", 
+              Desc="Exxon Mobil Corporation", 
+              yLabel="Dollars" ))
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="MSFT", Source="yahoo", 
+              Desc="Microsoft Corporation", 
+              yLabel="Dollars" ))
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="JNJ", Source="yahoo", 
+              Desc="Johnson & Johnson", 
+              yLabel="Dollars" ))
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="INTC", Source="yahoo", 
+              Desc="Intel Corporation", 
+              yLabel="Dollars" ))
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="^GSPC", Source="yahoo", 
+              Desc="S&P 500",
+              yLabel = "Dollars" ) )
+
+```
+
+## Build the data frame
+
+This code loops through the dfSyms dataframe and pulls down the symbols. The getSymbols function returns zoo objects, this snippet converts it into a dataframe, which simplifies operations in R.
+
+```{r getsyms, echo=FALSE}
+
+if( bDownload ){
+
+  # Get the data
+  for (idx in 1:nrow(dfSyms)){
+    getSymbols(as.character(dfSyms[idx,"Symbol"]),
+               src=as.character(dfSyms[idx,"Source"]), 
+               auto.assign=TRUE, 
+               from = as.Date("1900-01-01"), to = Sys.Date())
+  }
+  
+  # This snippet is needed because some of the ticker symbols include are invalid variable names
+  dfSyms$Symbol <- str_replace_all(dfSyms$Symbol, "[^[:alnum:]]", "")
+
+  xtsData <- get(dfSyms$Symbol[1])
+  for(idx in 2:nrow(dfSyms)){
+    xtsData <- merge(xtsData,  get(dfSyms$Symbol[idx]) )
+  }
+  
+  dfData <- data.frame(xtsData)
+  
+  # These two lines evenly space all the data at a daily interval
+  zooData <- zoo(dfData, as.Date(rownames(dfData)))
+  zooData <- merge.zoo(zooData, zoo(,seq(start(zooData), end(zooData), by=1)), all=TRUE)
+  dfData <- data.frame(zooData)
+
+  # Save it off
+  save(dfData,file="dfData.Rda")
+  
+}else{
+  load("dfData.Rda")
+}
+
+```
+
+
+## Interpolate data
+
+The data is interpolated to a daily basis. This is done because I also incorporate other data sampled at different intervals. When performing correlations, it is easier if all the data has the same time basis.
+
+```{r tidydata}
+
+# Linearly interpolate the data, add normalized columns (this helps speed portfolio calcs)
+
+for (col_name in names(dfData))
+{
+    if (is.numeric(dfData[,col_name]))
+    {
+      dfData[,col_name] <- na.approx(dfData[,col_name], rule=2)
+      
+    }
+}
+
+```
+
+
+## Add date column
+
+```{r adddate}
+# This speeds some of the upcoming operations
+dfData$date = as.Date(rownames(dfData))
+
+```
+
+
+
+## Normalize data
+
+```{r normdata}
+
+# Linearly interpolate the data, add normalized columns (this helps speed portfolio calcs)
+
+for (col_name in names(dfData))
+{
+    if (is.numeric(dfData[,col_name]))
+    {
+      # Normalize data
+      strColNorm <- paste(col_name, "_Norm", sep="") 
+      dfData[, strColNorm] <- dfData[,col_name] / dfData[dfData$date==as.Date(strDateStart),col_name]
+
+    }
+}
+
+```
+
+# Calculate the returns
+
+## Calculate the time based returns on annual basis
+
+In this analysis all the returns are calculated on an annual basis. It means there is a year of dead data, but it eliminates seasonal variation in data (think: Christmas).
+
+```{r Returncalcs}
+for (strName in names(dfData)){
+  
+  if( is.numeric(dfData[, strName])){
+    
+    # Year over year returns
+    strNameYoY <- paste(strName,"_YoY",sep="")
+    dfData[strNameYoY] <- CalcYoY(dfData, strName, iRetPd)
+
+    # log diff returns
+    strNameLog <- paste(strName, "_LogRet", sep="")
+    dfData[strNameLog] <- CalcLogRet(dfData, strName, iRetPd)
+    
+    strRootSym <- strName
+    strSuffix <- ""
+    if( grepl("\\.", strName)){
+      strRootSym <-  substr(strName, 1, regexpr("\\.", strName)-1)
+      strSuffix <- substr(strName, regexpr("\\.", strName)+1, nchar(strName))
+      strSuffix <- paste(" (", strSuffix, ")", sep="")
+    }
+    
+    strNewDesc <- dfSyms[grep(paste("^",strRootSym,"$",sep=""), dfSyms$Symbol),]$Desc
+    dfSyms <- rbind(dfSyms, data.frame(Symbol=strNameYoY, Source="Calc", 
+                Desc=paste(strNewDesc, strSuffix, " Year over Year", sep=""), yLabel="Percent" ))
+    
+    
+      
+  }
+
+}
+
+```
+
+
+## Truncate data
+
+A few last calculations to truncate and aggregrate the data
+
+```{r portUpdate}
+
+# Truncate by date, if needed
+dfData <- with(dfData, dfData[date>=strDateStart,])
+
+
+```
+
+
+## Summarize returns
+
+In constructing the portfolio it is importance to understand the blend of funds. We want maximum returns for minimum volatility. That's not possible in a perfect world so we plot the returns and volatility to find a nice balance in the portfolio.
+
+```{r Returns}
+
+# Linearly interpolate the data, add normalized columns (this helps speed portfolio calcs)
+
+for (col_name in names(dfData))
+{
+    if (is.numeric(dfData[,col_name]))
+    {
+
+      # Split the name ("USGFG.Close"" is "USGFG"" and "Close"")
+      lstSyms <- lstSymSplit(col_name)
+        
+      # Only if there is two terms
+      if( length(lstSyms) > 1){
+
+        if( lstSyms[2] == 'Close_YoY' ){
+
+          # Return is the mean of the series
+          dfSyms[dfSyms$Symbol==lstSyms[1],'ExpReturn'] <- mean(dfData[, col_name])
+
+          # Volatility is the standard deviation of the series.
+          dfSyms[dfSyms$Symbol==lstSyms[1],'Volatility'] <- sd(dfData[, col_name])
+          
+        }
+      }
+
+    }
+}
+
+
+
+```
+
+# Define the various portfolios
+
+This code is evaluating two portfolios. "pf_USAA_Legacy" is the original portfolio and "pf_USAA_New" is the one I'm trying out.
+
+```{r defPorts}
+
+dfSyms$pf_USAA_Legacy <- 0
+dfSyms[dfSyms$Symbol=='USSPX',]$pf_USAA_Legacy <-  0.4948
+dfSyms[dfSyms$Symbol=='USAWX',]$pf_USAA_Legacy <-  0.1429
+dfSyms[dfSyms$Symbol=='USISX',]$pf_USAA_Legacy <-  0.2383
+dfSyms[dfSyms$Symbol=='UFSGX',]$pf_USAA_Legacy <- 0.1240
+
+dfSyms$pf_USAA_New <- 0
+dfSyms[dfSyms$Symbol=='USPRX',]$pf_USAA_New <-  0.00000
+dfSyms[dfSyms$Symbol=='USSPX',]$pf_USAA_New <-  0.4500
+dfSyms[dfSyms$Symbol=='USAWX',]$pf_USAA_New <-  0.0000
+dfSyms[dfSyms$Symbol=='USISX',]$pf_USAA_New <-  0.00000
+dfSyms[dfSyms$Symbol=='USNQX',]$pf_USAA_New <- 0.5500
+dfSyms[dfSyms$Symbol=='USCGX',]$pf_USAA_New <- 0.0000
+dfSyms[dfSyms$Symbol=='UFSGX',]$pf_USAA_New <- 0.0000
+dfSyms[dfSyms$Symbol=='USCCX',]$pf_USAA_New <- 0.0001
+dfSyms[dfSyms$Symbol=='USAAX',]$pf_USAA_New <- 0.0000
+
+dfSyms$pf_Roth_Legacy <- 0
+dfSyms[dfSyms$Symbol=='VTWO',]$pf_Roth_Legacy <-  0.0947
+dfSyms[dfSyms$Symbol=='VFINX',]$pf_Roth_Legacy <-  0.5051
+dfSyms[dfSyms$Symbol=='TMFGX',]$pf_Roth_Legacy <-  0.2568
+dfSyms[dfSyms$Symbol=='IWM',]$pf_Roth_Legacy <-  0.0000
+dfSyms[dfSyms$Symbol=='QQQ',]$pf_Roth_Legacy <-  0.0000
+dfSyms[dfSyms$Symbol=='HAINX',]$pf_Roth_Legacy <-  0.0000
+dfSyms[dfSyms$Symbol=='VEU',]$pf_Roth_Legacy <-  0.0000
+
+dfSyms$pf_Roth_New <- 0
+dfSyms[dfSyms$Symbol=='VTWO',]$pf_Roth_New <-   0.0000
+dfSyms[dfSyms$Symbol=='VFINX',]$pf_Roth_New <-  0.3000
+dfSyms[dfSyms$Symbol=='TMFGX',]$pf_Roth_New <-  0.0500
+dfSyms[dfSyms$Symbol=='IWM',]$pf_Roth_New <-    0.0000
+dfSyms[dfSyms$Symbol=='QQQ',]$pf_Roth_New <-    0.4500
+dfSyms[dfSyms$Symbol=='HAINX',]$pf_Roth_New <-  0.0000
+dfSyms[dfSyms$Symbol=='CAMIX',]$pf_Roth_New <-  0.0000
+dfSyms[dfSyms$Symbol=='IVOO',]$pf_Roth_New <-   0.1500
+dfSyms[dfSyms$Symbol=='VEU',]$pf_Roth_New <-    0.0000
+dfSyms[dfSyms$Symbol=='SPY',]$pf_Roth_New <-    0.0000
+dfSyms[dfSyms$Symbol=='VIGI',]$pf_Roth_New <-   0.0000
+dfSyms[dfSyms$Symbol=='SCHD',]$pf_Roth_New <-   0.0000
+dfSyms[dfSyms$Symbol=='VYM',]$pf_Roth_New <-    0.0500
+
+dfSyms$pf_Div <- 0
+dfSyms[dfSyms$Symbol=='VFINX',]$pf_Div <-  0.1000
+dfSyms[dfSyms$Symbol=='SCHD',]$pf_Div <-  0.1000
+dfSyms[dfSyms$Symbol=='VYM',]$pf_Div <-  0.1000
+dfSyms[dfSyms$Symbol=='NOBL',]$pf_Div <-  0.1000
+
+
+# This part normalizes all the data, in case there is a typo or 
+# numerical rounding that results in somthing less than 100%
+for (col_name in names(dfSyms)){
+  
+  if( length(grep('pf_', col_name))){
+    dfSyms[,col_name] <- dfSyms[,col_name] / sum(dfSyms[,col_name])
+  }
+  
+}
+
+# Update the returns
+dfData <- pfUpdateReturn("pf_USAA_Legacy", dfData, dfSyms)
+dfData <- pfUpdateReturn("pf_USAA_New", dfData, dfSyms)
+dfData <- pfUpdateReturn("pf_Roth_Legacy", dfData, dfSyms)
+dfData <- pfUpdateReturn("pf_Roth_New", dfData, dfSyms)
+dfData <- pfUpdateReturn("pf_Div", dfData, dfSyms)
+
+kable(dfSyms[(dfSyms$pf_USAA_Legacy>0.0) | (dfSyms$pf_USAA_New>0.0)
+             | (dfSyms$pf_Roth_New>0.0)| (dfSyms$pf_Div>0.0),])
+
+```
+
+# Legacy USAA Portfolio
+
+## Time series analysis
+
+This code plots out the legacy portfolio performance. It is not great, lagging behind the S&P 500. Ideally it would keep up with or beat that bench mark.
+
+```{r portPlot1_Time}
+
+datay <- "pf_USAA_Legacy"
+ylim <- c(0, 3)
+plotSingleBench(datay, ylim)
+
+  
+```
+
+## Risk return analysis
+
+This section plots the funds on return and volatility axis. An ideal fund would be in the upper left corner of the plot. The USISX is in the wrong place, low returns and high risk. Uggh.
+
+```{r portPlot1_RiskReturn}
+
+rrData <- plotRR(datay)
+rrData[[2]]
+
+```
+
+The same data as in the plot, but presented as a table.
+
+```{r port1_RRTable}
+
+tblPort(rrData, datay)
+
+```
+
+## Time series analysis (Optimized)
+
+As a final check, plot the optimized portfolio against the inputted portfolio and the benchmark.
+
+```{r portPlot1_Check}
+
+datayOpt <- paste(datay, "_Opt", sep="")
+dfData <- pfUpdateReturn(datayOpt, dfData, rrData[[1]])
+ylim <- c(0, 4)
+myPlot <- plotSingleBench(datay, ylim)
+myPlot + geom_line(data=dfData, aes_string(x="date", y=datayOpt, colour=shQuote(datayOpt)), na.rm = TRUE)
+
+```
+
+## Correlation analysis
+
+The more funds are negatively correlated, the more volatility can be reduced. This plot shows how the funds in the portfolio correlate.
+
+```{r corplot1, echo=TRUE, fig.width=6,fig.height=6.5}
+
+plotCorr(datay)
+
+```
+
+# New USAA Portfolio
+
+## Time series analysis
+
+This one is on a much better track, actually beating the S&P 500 index. Looking at the plots below, I think the mix should be 45% USSPX and 55% USNQX. This should have less volatility and better returns than the existing portfolio, although the models suggest that even less volatility could be had by including USCCX. I have hesitation about the bonds, with all the upcoming rate hikes by the Federal Reserve. But USCCX is highly uncorrelated...need to revisit this in the fall of 2017, after the moves by the Fed.
+
+```{r portPlot2}
+
+datay <- "pf_USAA_New"
+ylim <- c(0, 4)
+plotSingleBench(datay, ylim)
+
+```
+
+## Risk return analysis
+
+This section plots the funds on return and volatility axis. An ideal fund would be in the upper left corner of the plot.
+
+```{r portPlot2_RiskReturn}
+
+datay <- "pf_USAA_New"
+rrData <- plotRR(datay)
+rrData[[2]]
+
+```
+
+This table shows the portfolio. Column `r datay` shows the inputted portfolio and `r paste(datay,"_Opt", sep="")` shows the portfolio with the same returns, but less risk. 
+
+```{r port2_RRTable}
+
+tblPort(rrData, datay)
+
+```
+
+## Time series analysis (Optimized)
+
+As a final check, plot the optimized portfolio against the inputted portfolio and the benchmark.
+
+
+```{r portPlot2_Check}
+
+datay <- "pf_USAA_New"
+datayOpt <- paste(datay, "_Opt", sep="")
+dfData <- pfUpdateReturn(datayOpt, dfData, rrData[[1]])
+ylim <- c(0, 4)
+myPlot <- plotSingleBench(datay, ylim)
+myPlot + geom_line(data=dfData, aes_string(x="date", y=datayOpt, colour=shQuote(datayOpt)), na.rm = TRUE)
+
+```
+
+## Correlation analysis
+
+The more funds are negatively correlated, the more volatility can be reduced. This plot shows how the funds in the portfolio correlate.
+
+```{r corplot2, echo=TRUE, fig.width=6,fig.height=6.5}
+
+plotCorr(datay)
+
+```
+
+
+
+# Legacy Roth Portfolio
+
+## Time series analysis
+
+Uggh, just uggh. This one is performing much worse than I expected.
+
+```{r portPlotRoth1}
+
+datay <- "pf_Roth_Legacy"
+ylim <- c(0, 4)
+plotSingleBench(datay, ylim)
+
+```
+
+## Risk return analysis
+
+This section plots the funds on return and volatility axis. An ideal fund would be in the upper left corner of the plot.
+
+```{r portPlot3_RiskReturn}
+
+rrData <- plotRR(datay)
+rrData[[2]]
+
+```
+
+This table shows the portfolio. Column `r datay` shows the inputted portfolio and `r paste(datay,"_Opt", sep="")` shows the portfolio with the same returns, but less risk. 
+
+```{r port3_RRTable}
+
+tblPort(rrData, datay)
+
+```
+
+## Time series analysis (Optimized)
+
+As a final check, plot the optimized portfolio against the inputted portfolio and the benchmark.
+
+
+```{r portPlot3_Check}
+
+datayOpt <- paste(datay, "_Opt", sep="")
+dfData <- pfUpdateReturn(datayOpt, dfData, rrData[[1]])
+ylim <- c(0, 4)
+myPlot <- plotSingleBench(datay, ylim)
+myPlot + geom_line(data=dfData, aes_string(x="date", y=datayOpt, colour=shQuote(datayOpt)), na.rm = TRUE)
+
+```
+
+## Correlation analysis
+
+The more funds are negatively correlated, the more volatility can be reduced. This plot shows how the funds in the portfolio correlate.
+
+```{r corplot3, echo=TRUE, fig.width=6,fig.height=6.5}
+
+plotCorr(datay)
+
+```
+
+# New Roth Portfolio
+
+## Time series analysis
+
+CAPM portfolio theory suggests that only TMFGX, VTWO, and QQQ are needed, but these haven't performed quite as well as the mix below. Looking at the correlation plot only TMFGX does not correlate with the other funds so it is a must have. The final mix will be 30% VFINX, 5% of TMFGX (low volatility so like a bond fund), 5% of VYM (dividend exposure), 15% to IVOO (mid cap), and 45% to QQQ.
+
+```{r portPlotRothNew}
+
+datay <- "pf_Roth_New"
+ylim <- c(0, 4)
+plotSingleBench(datay, ylim)
+
+```
+
+## Risk return analysis
+
+This section plots the funds on return and volatility axis. An ideal fund would be in the upper left corner of the plot.
+
+```{r portPlot4_RiskReturn}
+
+rrData <- plotRR(datay)
+rrData[[2]]
+
+```
+
+This table shows the portfolio. Column `r datay` shows the inputted portfolio and `r paste(datay,"_Opt", sep="")` shows the portfolio with the same returns, but less risk. 
+
+```{r port4_RRTable}
+
+tblPort(rrData, datay)
+
+```
+
+## Time series analysis (Optimized)
+
+As a final check, plot the optimized portfolio against the inputted portfolio and the benchmark.
+
+
+```{r portPlot4_Check}
+
+datayOpt <- paste(datay, "_Opt", sep="")
+dfData <- pfUpdateReturn(datayOpt, dfData, rrData[[1]])
+ylim <- c(0, 4)
+myPlot <- plotSingleBench(datay, ylim)
+myPlot + geom_line(data=dfData, aes_string(x="date", y=datayOpt, colour=shQuote(datayOpt)), na.rm = TRUE)
+
+```
+
+## Correlation analysis
+
+The more funds are negatively correlated, the more volatility can be reduced. This plot shows how the funds in the portfolio correlate.
+
+```{r corplot4, echo=TRUE, fig.width=6,fig.height=6.5}
+
+plotCorr(datay)
+
+```
+
+
+# Dividend Portfolio
+
+## Time series analysis
+
+This portfolio looks at a weighting favoring dividend funds..
+
+```{r portPlotDiv}
+
+datay <- "pf_Div"
+ylim <- c(0, 4)
+plotSingleBench(datay, ylim)
+
+```
+
+## Risk return analysis
+
+This section plots the funds on return and volatility axis. An ideal fund would be in the upper left corner of the plot.
+
+```{r portPlot5_RiskReturn}
+
+rrData <- plotRR(datay, TRUE)
+rrData[[2]]
+
+```
+
+This table shows the portfolio. Column `r datay` shows the inputted portfolio and `r paste(datay,"_Opt", sep="")` shows the portfolio with the same returns, but less risk. 
+
+```{r port5_RRTable}
+
+tblPort(rrData, datay)
+
+```
+
+## Time series analysis (Optimized)
+
+As a final check, plot the optimized portfolio against the inputted portfolio and the benchmark.
+
+
+```{r portPlot5_Check}
+
+datayOpt <- paste(datay, "_Opt", sep="")
+dfData <- pfUpdateReturn(datayOpt, dfData, rrData[[1]])
+ylim <- c(0, 4)
+myPlot <- plotSingleBench(datay, ylim)
+myPlot + geom_line(data=dfData, aes_string(x="date", y=datayOpt, colour=shQuote(datayOpt)), na.rm = TRUE)
+
+```
+
+## Correlation analysis
+
+The more funds are negatively correlated, the more volatility can be reduced. This plot shows how the funds in the portfolio correlate.
+
+```{r corplot5, echo=TRUE, fig.width=6,fig.height=6.5}
+
+plotCorr(datay)
+
+```
+
+# Appendix
+
+
+## USSPX, USAA S&P 500 Index Member
+
+
+
+```{r USPRX}
+
+datay <- "USSPX.Close_Norm"
+ylim <- c(0, 3)
+plotSingleBench(datay, ylim)
+
+```
+
+## USSPX Year over year, USAA S&P 500 Index Member
+
+
+```{r USPRX_YoY}
+
+datay <- "USSPX.Close_Norm_YoY"
+ylim <- c(-1, 1)
+plotSingleQuick(datay, ylim)
+
+```
+
+## USISX, USAA Income Stock
+
+
+```{r USISX}
+
+datay <- "USISX.Close_Norm"
+ylim <- c(0, 3)
+plotSingleBench(datay, ylim)
+
+```
+
+## USISX Year over year, USAA Income Stock
+
+
+```{r USISX_YoY}
+
+datay <- "USISX.Close_Norm_YoY"
+ylim <- c(-1, 1)
+plotSingleQuick(datay, ylim)
+
+```
+
+## UFSGX, USAA First Start Growth
+
+```{r UFSGX}
+
+datay <- "UFSGX.Close_Norm"
+ylim <- c(0, 3)
+plotSingleBench(datay, ylim)
+
+```
+
+## UFSGX Returns, USAA First Start Growth
+
+
+```{r UFSGX_Return}
+
+datay <- "UFSGX.Close_Norm_YoY"
+ylim <- c(-1, 1)
+plotSingleQuick(datay, ylim)
+
+```
+
+## USCCX, USAA Cornerstone Conservative
+
+```{r USCCX}
+
+datay <- "USCCX.Close_Norm"
+ylim <- c(0, 3)
+plotSingleBench(datay, ylim)
+
+```
+
+## USCCX Year over year, USAA Cornerstone Conservative
+
+```{r USCCX_YoY}
+
+datay <- "USCCX.Close_Norm_YoY"
+ylim <- c(-1, 1)
+plotSingleQuick(datay, ylim)
+
+```
+
+## VTWO, Vanguard Russell 2000 ETF
+
+Not as much history on this one as I would like.
+
+```{r VTWO}
+
+datay <- "VTWO.Close_Norm"
+ylim <- c(0, 3)
+plotSingleBench(datay, ylim)
+
+```
+
+
+
+## IWM, iShares Russell 2000
+
+Not as much history on this one as I would like.
+
+```{r IWM}
+
+datay <- "IWM.Close_Norm"
+ylim <- c(0, 3)
+plotSingleBench(datay, ylim)
+
+```
+
+## SPY, SPDR S&P 500 ETF Trust
+
+Should be real close to the S&P 500
+
+```{r SPY}
+
+datay <- "SPY.Close_Norm"
+ylim <- c(0, 3)
+plotSingleBench(datay, ylim)
+
+```
+
+## VFINX, Vanguard 500 Index Investor
+
+Should be real close to the S&P 500
+
+```{r VFINX}
+
+datay <- "VFINX.Close_Norm"
+ylim <- c(0, 3)
+plotSingleBench(datay, ylim)
+```
+## SCHD, Schwab U.S. Dividend Equity ETF
+
+Nice little pick of divident paying stocks on Dow Jones Dividend 100 index
+
+```{r SCHD}
+
+datay <- "SCHD.Close_Norm"
+ylim <- c(0, 3)
+plotSingleBench(datay, ylim)
+```
+
+```{r SCHD_YoY}
+
+datay <- "SCHD.Close_Norm_YoY"
+ylim <- c(-1, 1)
+plotSingleQuick(datay, ylim)
+
+```
+
+## IVOO, Vanguard S&P Mid-Cap 400 ETF 
+
+The investment seeks to track the performance of a benchmark index that measures the investment return of mid-capitalization stocks in the United States. The fund employs an indexing investment approach designed to track the performance of the S&P MidCap 400® Index. The index measures the performance of mid-capitalization stocks in the United States. The Advisor attempts to replicate the target index by investing all, or substantially all, of its assets in the stocks that make up the index, holding each stock in approximately the same proportion as its weighting in the index.
+
+Expense Ratio: 0.15%
+
+```{r IVOO}
+
+datay <- "IVOO.Close_Norm"
+ylim <- c(0, 3)
+plotSingleBench(datay, ylim)
+```
+```{r IVOO_YoY}
+
+datay <- "IVOO.Close_Norm_YoY"
+ylim <- c(-1, 1)
+plotSingleQuick(datay, ylim)
+
+```
+
+## VYM, Vanguard High Dividend Yield ETF
+
+Another nice little pick of divident paying stocks on Dow Jones Dividend 100 index. Expense ratio: 0.08%
+
+```{r VYM}
+
+datay <- "VYM.Close_Norm"
+ylim <- c(0, 3)
+plotSingleBench(datay, ylim)
+```
+
+```{r VYM_YoY}
+
+datay <- "VYM.Close_Norm_YoY"
+ylim <- c(-1, 1)
+plotSingleQuick(datay, ylim)
+
+```
+
+## CAMIX, Cambiar International Equity Inv
+
+Some exposure to foriegn stocks
+
+```{r CAMIX}
+
+datay <- "CAMIX.Close_Norm"
+ylim <- c(0, 3)
+plotSingleBench(datay, ylim)
+
+```
+
+

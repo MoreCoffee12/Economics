@@ -1,0 +1,376 @@
+---
+title: "Recession Indicators"
+author: "Brian Howard"
+date: "February 19, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options("getSymbols.warning4.0"=FALSE)
+```
+
+```{r libraries, include=FALSE}
+library(UsingR)
+library(quantmod)
+library(ggplot2)
+library(gridExtra)
+library(knitr)
+library(zoo)
+library(signal)
+library(stringr)
+```
+
+```{r plothelp, include=FALSE}
+# ------------------------------------------------------------------------------
+# Define the generic single plane plot function
+plotSingle <- function(datadf_rec, datadf, datax, datay, titlelabel, xlabel, ylabel, xlim, ylim){
+  
+  myplot <- ggplot()+
+    theme(plot.background = element_rect(fill = 'white', colour = 'white')) +
+    theme(panel.background = element_rect(fill = 'white', colour = 'grey')) +
+    theme(panel.grid.major.x = element_blank()) +
+    theme(panel.grid.major.y = element_line(colour="grey", size=0.5)) +
+    geom_line(data=datadf, aes_string(x=datax, y=datay, colour = shQuote(datay)), 
+              na.rm = TRUE, size = 1) +
+    geom_rect(data=datadf_rec,
+              aes(xmin=start,xmax=end, ymin=-Inf, ymax=Inf),
+              fill="grey", alpha=0.3, na.rm = TRUE) +
+    #geom_smooth(method = "lm") + 
+    ggtitle(titlelabel) +
+    labs(x=xlabel, y = ylabel) +
+    scale_x_date(limits = xlim ) + 
+    scale_y_continuous(limits = ylim)
+
+  return(myplot)
+}
+
+# ------------------------------------------------------------------------------
+# Define the function for calculating year over year growth. 
+CalcYoY <- function (datadf, strCol, iPeriods){
+  Nrow <- nrow(datadf)
+  GrowthRateYoY <- rep(0,Nrow)
+  GrowthRateYoY[(iPeriods+1):Nrow] <- diff(as.matrix(datadf[[strCol]]), lag = iPeriods)
+  GrowthRateYoY <- (GrowthRateYoY / datadf[[strCol]])*100
+  return(GrowthRateYoY)
+}
+```
+
+## Introduction
+
+Wouldn't it be fun to see into future? I think so. For one of my machine learning classes we had a project that consumed financial data. I have extended that project to use machine learning to see if an indicator, or predictor, can be found that identifies market tops that occur prior to recessions. 
+
+## Pull in the economic and financial data
+
+Data is pulled from several sources include FRED, yahoo, and Google. The code below shows an example that pulls in the consumer price index (CPI) from the FRED. The Appendix has a complete listing of symbols.
+
+```{r defsyms, include=FALSE}
+Symbol = c("CPIAUCSL", "USREC")
+Source = c("FRED", "FRED")
+Desc = c("Consumer Price Index for All Urban Consumers: All Items",
+         "NBER based Recession Indicators")
+yLabel = c("Index 1982-1984=100","+1 or 0")
+dfSyms = data.frame(Symbol, Source, Desc, yLabel, stringsAsFactors = FALSE)
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="UNRATE", Source="FRED", 
+              Desc="Civilian Unemployment Rate U-3", 
+              yLabel="Percent" ))
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="INDPRO", Source="FRED", 
+              Desc="Industrial Production Index", 
+              yLabel ="Index 2012=100" ) )
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="RRSFS", Source="FRED", 
+              Desc="Real Retail and Food Services Sales", 
+              yLabel ="Millions of Dollars" ) )
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="RSALES", Source="FRED", 
+              Desc="Real Retail Sales (DISCONTINUED)",
+              yLabel ="Millions of Dollars" ) )
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="W875RX1A020NBEA", Source="FRED", 
+              Desc="Real personal income excluding current transfer receipts",
+              yLabel = "Billions of Chained 2009 Dollars") )
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="PCOPPUSDM", Source="FRED", 
+              Desc="Global price of Copper",
+              yLabel = "U.S. Dollars per Metric Ton") )
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="NOBL", Source="yahoo", 
+              Desc="ProShares S&P 500 Dividend Aristocrats (NOBL)",
+              yLabel = "BATS Real Time Price") )
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="BUSLOANS", Source="FRED", 
+              Desc="Commercial and Industrial Loans, All Commercial Banks",
+              yLabel = "Billions of U.S. Dollars") )
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="NCBDBIQ027S", Source="FRED", 
+              Desc="Nonfinancial corporate business; debt securities; liability, Level",
+              yLabel = "Millions of Dollars") )
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="REALLNNSA", Source="FRED", 
+              Desc="Real Estate Loans, All Commercial Banks",
+              yLabel = "Billions of U.S. Dollars") )
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="CONSUMERNSA", Source="FRED", 
+              Desc="Consumer Loans, All Commercial Banks",
+              yLabel = "Billions of U.S. Dollars" ) )
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="DGS10", Source="FRED", 
+              Desc="10-Year Treasury Constant Maturity Rate",
+              yLabel = "Percent" ) )
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="DGS1", Source="FRED", 
+              Desc="1-Year Treasury Constant Maturity Rate",
+              yLabel = "Percent" ) )
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="DCOILWTICO", Source="FRED", 
+              Desc="Crude Oil Prices: West Texas Intermediate (WTI) - Cushing, Oklahoma",
+              yLabel = "Dollars per Barrel (Not Adjusted)") )
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="NEWORDER", Source="FRED", 
+              Desc="Manufacturers' New Orders: Nondefense Capital Goods Excluding Aircraft",
+              yLabel = "Millions of Dollars" ) )
+
+dfSyms <- rbind(dfSyms, data.frame(Symbol="^GSPC", Source="yahoo", 
+              Desc="S&P 500",
+              yLabel = "Dollars" ) )
+
+```
+
+```{r getsymexample}
+# Consumer Price Index for All Urban Consumers: All Items
+getSymbols("CPIAUCSL",src="FRED", auto.assign=TRUE)
+```
+
+Since it is tedious to do this one at a time, all the symbols were entered into a data frame, loaded, and aggregated together in a single `xts` object. 
+This is the complete list of symbol names and sources used in the project.
+
+```{r listsyms, echo=FALSE}
+kable(dfSyms)
+```
+
+```{r getsyms, include=FALSE}
+for (idx in 1:nrow(dfSyms)){
+  getSymbols(as.character(dfSyms[idx,"Symbol"]),
+             src=as.character(dfSyms[idx,"Source"]), 
+             auto.assign=TRUE, 
+             from = as.Date("1900-01-01"), to = Sys.Date())
+}
+
+# This snippet is needed because some of the ticker symbols include are invalid variable names
+dfSyms$Symbol <- str_replace_all(dfSyms$Symbol, "[^[:alnum:]]", "")
+```
+
+```{r aggsyms, include=FALSE}
+xtsData <- get(dfSyms$Symbol[1])
+for(idx in 2:nrow(dfSyms)){
+  xtsData <- merge(xtsData,  get(dfSyms$Symbol[idx]) )
+}
+
+dfData <- data.frame(xtsData)
+
+# These two lines evenly space all the data at a daily interval
+zooData <- zoo(dfData, as.Date(rownames(dfData)))
+zooData <- merge(zooData, zoo(,seq(start(zooData), end(zooData), by=1)), all=TRUE)
+dfData <- data.frame(zooData)
+```
+
+```{r tidydata, include=FALSE}
+# The recession data is binary and needs to be carried forward
+dfData$USREC <- na.locf(dfData$USREC)
+dfData$UNRATE <- na.approx(dfData$UNRATE, rule=2)
+dfData$GSPC.Open <- na.approx(dfData$GSPC.Open, rule=2)
+dfData$INDPRO <- na.approx(dfData$INDPRO, rule=2)
+```
+
+```{r YoYcalcs, include=FALSE}
+for (strName in names(dfData)){
+  strNameYoY <- paste(strName,"_YoY",sep="")
+  dfData[strNameYoY] <- CalcYoY(dfData, strName, 365)
+  
+  strRootSym <- strName
+  strSuffix <- ""
+  if( grepl("\\.", strName)){
+    strRootSym <-  substr(strName, 1, regexpr("\\.", strName)-1)
+    strSuffix <- substr(strName, regexpr("\\.", strName)+1, nchar(strName))
+    strSuffix <- paste(" (", strSuffix, ")", sep="")
+  }
+  
+  strNewDesc <- dfSyms[grep(paste("^",strRootSym,"$",sep=""), dfSyms$Symbol),]$Desc
+  dfSyms <- rbind(dfSyms, data.frame(Symbol=strNameYoY, Source="Calc", 
+              Desc=paste(strNewDesc, strSuffix, " Year over Year", sep=""), yLabel="Percent" ))
+}
+```
+
+```{r plothelper, inlcude=FALSE}
+# This speeds some of the upcoming operations
+dfData$date = as.Date(rownames(dfData))
+```
+
+
+```{r recframe, include=FALSE}
+
+# The FRED recession data is 1 for the months that
+# are in recession and 0 for months not in recession
+# so we will use the diff command to save off the 
+# indexes where the value changes from 0 to 1 or
+# 1 to 0. I found this idea in a stack overflow
+# article:
+# http://stackoverflow.com/questions/21739012/r-recession-dates-conversion
+# I found it was more robust than the nberShade()
+# command for the xts time series data.
+dtStart <- dfData$date[which(diff(dfData$USREC)==1)+1]
+dtEnd   <- dfData$date[which(diff(dfData$USREC)==-1)]
+dtInitStart <- as.Date(as.yearmon(dtStart)-15/12)
+dtInitEnd <- as.Date(as.yearmon(dtStart)-3/12)
+
+# We need to cast the recession data into
+# a dataframe.
+dfRecession <- data.frame(initStart = dtInitStart, initEnd = dtInitEnd, start=dtStart, end=dtEnd[-1])
+dfRecession <- subset(dfRecession, dtStart >= min(dfData$date))
+
+# Add the recession initiation date as a time series
+dfData$RecInit <- rep(0, nrow(dfData))
+
+for( idx in nrow(dfRecession)){
+  dfData$RecInit[which(dfData$date>dfRecession$initStart[idx] & dfData$date<dfRecession$initEnd[idx])]=1 
+}
+
+```
+
+```{r addfeatures, include=FALSE}
+dfData$UNRATE_Smooth <- sgolayfilt(dfData$UNRATE, p=3, n=21, m=0, ts=1)
+dfSyms <- rbind(dfSyms, data.frame(Symbol="UNRATE_Smooth", Source="Calc", 
+              Desc="Smoothed Civilian Unemployment Rate U-3", 
+              yLabel="Percent" ))
+
+dfData$UNRATE_SmoothDer <- sgolayfilt(dfData$UNRATE, p=3, n=501, m=1, ts=1)
+dfSyms <- rbind(dfSyms, data.frame(Symbol="UNRATE_SmoothDer", Source="Calc", 
+              Desc="Derivative of Smoothed Civilian Unemployment Rate U-3", 
+              yLabel="Percent/period" ))
+
+dfData$GSPC.Open_SmoothDer <- sgolayfilt(dfData$GSPC.Open, p=3, n=501, m=1, ts=1)
+dfSyms <- rbind(dfSyms, data.frame(Symbol="GSPC.Open_SmoothDer", Source="Calc", 
+              Desc="Derivative of Smoothed S&P 500", 
+              yLabel="Dollar/period" ))
+
+dfData$GSPC.OpenLog <- log(dfData$GSPC.Open)
+dfSyms <- rbind(dfSyms, data.frame(Symbol="GSPC.OpenLog", Source="Calc", 
+              Desc="Log of S&P 500 Open", 
+              yLabel="log(Dollar)" ))
+
+dfData$GSPC.OpenLog_SmoothDer <- sgolayfilt(dfData$GSPC.OpenLog, p=3, n=501, m=1, ts=1)
+dfSyms <- rbind(dfSyms, data.frame(Symbol="GSPC.OpenLog_SmoothDer", Source="Calc", 
+              Desc="Derivative of Smoothed Log Scale S&P 500", 
+              yLabel="Dollar/period" ))
+
+```
+
+## Data Exploration
+
+There are some great plotting and visualization tools in the `quantmod` package, but for the prediction work `ggplot` will be used. 
+
+One place to begin is with the relationship between stock prices and recessions. The predictor needs to be able to identify the onset of recession before the market declines. In theory, this predictor would give enough warning to cycle out of equity and into something more like cash or bonds. The plot below shows the S&P 500 open values in log-linear format. The market reaches a peak before most recessions, typically 6-9 months before the recession, shown by the blue shadows in the plot below. A good predictor will correlate with the peak prior to an upcoming recession. 
+
+```{r SP500plt, echo=FALSE, fig.cap="Unemployment rate"}
+datadf_rec <- dfRecession
+datadf <- dfData
+datax <- "date"
+datay <- "GSPC.OpenLog"
+titlelabel <- paste(datay, " | ", dfSyms[grep(paste("^",datay,"$", sep=""), dfSyms$Symbol),]$Desc)
+xlabel <- "Date"
+ylabel <- dfSyms[grep(paste("^",datay,"$", sep=""), dfSyms$Symbol),]$yLabel
+ylim <- c(0, 10)
+xlim <- c(as.Date("1jan1945","%d%b%Y"), Sys.Date())
+bLog = TRUE
+myPlot <- plotSingle(datadf_rec, datadf, datax, datay, titlelabel, xlabel, ylabel, xlim, ylim)
+myPlot + geom_rect(data=dfRecession,  aes(xmin=initStart, xmax=initEnd, ymin=-Inf, ymax=Inf),
+              fill="blue", alpha=0.2, na.rm = TRUE)
+```
+
+Unemployment rates will probably be useful, let's take a look at the U-3. The data is a little noisy so there is also a smoothed version plotted. There seems to be a relationship between the unemployment rate and the recessions, but it could be a lagging indicator.  This will be explored a little bit more later.
+
+```{r unrate, echo=FALSE, fig.cap="Unemployment rate"}
+datadf_rec <- dfRecession
+datadf <- dfData
+datax <- "date"
+datay <- "UNRATE"
+titlelabel <- paste(datay, " | ", dfSyms[grep(datay, dfSyms$Symbol),]$Desc)
+xlabel <- "Date"
+ylabel <- dfSyms[grep(datay, dfSyms$Symbol),]$yLabel
+ylim <- c(0, 15)
+xlim <- c(as.Date("1jan1945","%d%b%Y"), Sys.Date())
+datay_aux = "UNRATE_Smooth"
+myPlot <- plotSingle(datadf_rec, datadf, datax, datay, titlelabel, xlabel, ylabel, xlim, ylim)
+myPlot + geom_line(data=dfData, aes_string(x=datax, y=datay_aux, colour=shQuote(datay_aux)), na.rm = TRUE)
+```
+
+Looking at the unemployment rate, the eye is drawn to the rise and fall of the data, this suggests that the derivative might be helpful as well. The figure below shows the results, using a Savitzky-Golay FIR filter.
+
+```{r UnrateDer, echo=FALSE}
+
+datay = "UNRATE_SmoothDer"
+ylim <- c(-0.1, 0.1)
+datadf_rec <- dfRecession
+datadf <- dfData
+datax <- "date"
+datay <- "UNRATE_SmoothDer"
+titlelabel <- paste(datay, " | ", dfSyms[grep(datay, dfSyms$Symbol),]$Desc)
+xlabel <- "Date"
+ylabel <- dfSyms[grep(datay, dfSyms$Symbol),]$yLabel
+ylim <- c(-0.1, 0.1)
+xlim <- c(as.Date("1jan1945","%d%b%Y"), Sys.Date())
+plotSingle(datadf_rec, datadf, datax, datay, titlelabel, xlabel, ylabel, xlim, ylim)
+
+```
+
+Industrial production is also known to fall during an economic downturm, let's take a look at some of the data from the FRED on industrual production. It does seem to peak prior to a recession so let's smooth and look at the derivative as it might be a good indicator as well.
+
+```{r indpro, echo=FALSE, fig.cap="Industrial Production"}
+datadf_rec <- dfRecession
+datadf <- dfData
+datax <- "date"
+datay <- "INDPRO"
+titlelabel <- paste(datay, " | ", dfSyms[grep(datay, dfSyms$Symbol),]$Desc)
+xlabel <- "Date"
+ylabel <- dfSyms[grep(datay, dfSyms$Symbol),]$yLabel
+ylim <- c(0, 125)
+xlim <- c(as.Date("1jan1945","%d%b%Y"), Sys.Date())
+plotSingle(datadf_rec, datadf, datax, datay, titlelabel, xlabel, ylabel, xlim, ylim)
+```
+
+```{r indproder, echo=FALSE}
+dfData$INDPRO_Der <- sgolayfilt(dfData$INDPRO, p=3, n=501, m=1, ts=1)
+dfSyms <- rbind(dfSyms, data.frame(Symbol="INDPRO_Der", Source="Calc", 
+              Desc="Derivative of Smoothed Industrial Production", 
+              yLabel="index 2012=100/period" ))
+```
+
+The derivative isn't bad, but it sometimes crosses zeros well into a recession. A better measure might year over year (YoY) change.
+```{r indproderplot, echo=FALSE}
+datadf_rec <- dfRecession
+datadf <- dfData
+datax <- "date"
+datay <- "INDPRO_Der"
+titlelabel <- paste(datay, " | ", dfSyms[grep(datay, dfSyms$Symbol),]$Desc)
+xlabel <- "Date"
+ylabel <- dfSyms[grep(datay, dfSyms$Symbol),]$yLabel
+ylim <- c(-0.1, 0.1)
+xlim <- c(as.Date("1jan1945","%d%b%Y"), Sys.Date())
+plotSingle(datadf_rec, datadf, datax, datay, titlelabel, xlabel, ylabel, xlim, ylim)
+```
+
+```{r indproYoY, echo=FALSE}
+datadf_rec <- dfRecession
+datadf <- dfData
+datax <- "date"
+datay <- "INDPRO_Yoy"
+titlelabel <- paste(datay, " | ", dfSyms[grep(datay, dfSyms$Symbol),]$Desc)
+xlabel <- "Date"
+ylabel <- dfSyms[grep(datay, dfSyms$Symbol),]$yLabel
+ylim <- c(-0.1, 0.1)
+xlim <- c(as.Date("1jan1945","%d%b%Y"), Sys.Date())
+plotSingle(datadf_rec, datadf, datax, datay, titlelabel, xlabel, ylabel, xlim, ylim)
+```
+
