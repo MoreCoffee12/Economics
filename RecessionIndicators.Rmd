@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "August 18, 2019"
+date: "August 20, 2019"
 output: 
   html_document:
     toc: true
@@ -516,7 +516,7 @@ df.data <- calcInterpolate(df.data, df.symbols)
 
 Some analysis requires that two or more series be combined. For example, normallizing debt by GDP to get a sense of the proportion of debt to the total economy helps understand the debt cycle.
 
-```{r create aggregate, echo=TRUE}
+```{r create aggregate, echo=FALSE}
 
 source("calcAggregateSeries.r")
 
@@ -1048,7 +1048,7 @@ myPlot + geom_rect(data=dfRecession,  aes(xmin=initStartMod, xmax=initEndMod, ym
 
 Take a look at year-over-year as related to the recessions
 
-```{r SP500pltYoY, echo=TRUE}
+```{r SP500pltYoY, echo=FALSE}
 
 datay <- "GSPC.Open_YoY"
 ylim <- c(-75, 50)
@@ -1133,7 +1133,7 @@ print(str.training.date.range)
 
 I break the data into three sets: 50% for training, 25% for testing, and 25% for validation.
 
-```{r partdata, echo=TRUE}
+```{r partdata, echo=FALSE}
 set.seed(123456)
 inTrain <- createDataPartition(y=df.dataModel$RecInit, p = 0.50, list=FALSE)
 dfTrain <- df.dataModel[inTrain,]
@@ -1148,7 +1148,7 @@ dfTest <- df.data.rest[-inVal,]
 
 This section builds the model with just the 10 Year to 3 Month feature.
 
-```{r treepart.switch.1, echo=TRUE}
+```{r treepart.switch.1, echo=FALSE}
 
 string.equation.partition <- paste("RecInit ~ ", paste(model.features[[1]], collapse = "+", sep=""))
 model.fit <- rpart( string.equation.partition, data=dfTrain)
@@ -1158,7 +1158,7 @@ model.fit <- rpart( string.equation.partition, data=dfTrain)
 
 The plot below summarizes the correlations in a graphical format. The tree itself is a little more complicated than I like.
 
-```{r treeplot.switch.1, echo=TRUE, fig.width=10, fig.height=6}
+```{r treeplot.switch.1, echo=FALSE, fig.width=10, fig.height=6}
 
 rpart.plot(model.fit, main=paste("Recession Indicator (Switch, 10 year to 3 Month)\n", str.training.date.range), type = 2, extra = 1)
 
@@ -1213,7 +1213,7 @@ myPlot + geom_rect(
 
 This section builds the model with all features (Unemployment rate, 10 Year to 3 Month, Real personal income excluding current transfer receipts year-over-year, andd Initial jobless claims year over year)
 
-```{r treepart.switch, echo=TRUE}
+```{r treepart.switch, echo=FALSE}
 
 string.equation.partition <- paste("RecInit ~ ", paste(tail(model.features, n=1)[[1]], collapse = "+", sep=""))
 model.fit <- rpart( string.equation.partition, data=dfTrain)
@@ -1222,7 +1222,7 @@ model.fit <- rpart( string.equation.partition, data=dfTrain)
 
 The plot below summarizes the correlations in a graphical format. The tree itself is a little more complicated than I like.
 
-```{r treeplot.switch, echo=TRUE, fig.width=10, fig.height=11}
+```{r treeplot.switch, echo=FALSE, fig.width=10, fig.height=11}
 
 rpart.plot(model.fit, main=paste("Recession Indicator (Switch)\n", str.training.date.range), type = 2, extra = 1)
 
@@ -1588,7 +1588,7 @@ myPlot
 
 Much like the previous section, create the tree model for the smooth recessesion indicator.
 
-```{r treepart.smooth, echo=TRUE}
+```{r treepart.smooth, echo=FALSE}
 
 model.fitSmooth <- rpart( tail(list.equations.smooth, n=1)[[1]], data=dfTrain)
 
@@ -1620,7 +1620,7 @@ df.symbols <-
 
 The plot below summarizes the correlations in a graphical format. The tree itself is a little more complicated than I like.
 
-```{r treeplot.smooth, echo=TRUE, fig.width=10,fig.height=11}
+```{r treeplot.smooth, echo=FALSE, fig.width=10,fig.height=11}
 
 rpart.plot(
   model.fitSmooth,
@@ -1636,7 +1636,7 @@ rpart.plot(
 
 A qualitative evaluation
 
-```{r predplot.smooth}
+```{r predplot.smooth, echo = FALSE}
 
 datay <- "RecInitPredSmooth"
 datay.knn <- "recession.initiation.smooth.knn3"
@@ -1657,7 +1657,7 @@ The strategy here will be to go long when the recesion initiation signal is belo
 
 ## Create the trade rule for recession initiation
 
-```{r buysig, echo=TRUE}
+```{r buysig, echo=FALSE}
 
 # Round off the prediction
 df.data$RecInitPredRd <- round(df.data$RecInitPred, digits = 0)
@@ -1754,7 +1754,7 @@ dfTestResults
 
 The trading strategy will be compared to the S&P 500, shown below. We use this to create an S&P 500 rate of change series. The trading rule will move in and out of this series.
 
-```{r plotbackbase, fig.width=7, fig.height=10}
+```{r plotbackbase, echo=FALSE, fig.width=7, fig.height=10}
 
 dtStartBackTest = as.Date('1960-01-01')
 ylimBackTest <- c(0, 50)
@@ -2339,7 +2339,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 The series peaks in the middle of a bull market.
 
-```{r PRS88003193, echo=TRUE }
+```{r PRS88003193, echo=FALSE }
 
 datay <- "PRS88003193"
 ylim <- c(10, 120)
@@ -2420,7 +2420,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = FALSE
 
 The log of the S&P volume has some interesting patterns, but nothing that seems to help with a recession indicator.
 
-```{r SP500Vol, echo=TRUE}
+```{r SP500Vol, echo=FALSE}
 
 datay <- "GSPC.Volume_Log"
 ylim <- c(12, 23)
@@ -2433,7 +2433,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 That is one spiky data series. Not sure there is a lot to help us here.
 
 
-```{r SP500Vol_Smoott, echo=TRUE, fig.width = 9, fig.asp = 0.4}
+```{r SP500Vol_Smoott, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
 datay <- "GSPC.Volume"
 datay.aux <- "GSPC.Volume_mva050"
@@ -3122,7 +3122,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile)
 
 The second derivative of the unemployment rate does have zero crossings near the middle point of a recession. This would make it a helpful buy signal for the trading strategy.
 
-```{r UnrateDer2, echo=TRUE}
+```{r UnrateDer2, echo=FALSE}
 
 datay = "UNRATE_SmoothDer2"
 ylim <- c(-0.0001, 0.0001)
@@ -3372,7 +3372,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 The derivative isn't bad, but it sometimes crosses zeros well into a recession. That is less helpful as either a buy or sell indicator. A better measure might year over year (YoY) change.
 
-```{r indproderplot, echo=TRUE}
+```{r indproderplot, echo=FALSE}
 datay <- "INDPRO_SmoothDer"
 ylim <- c(-0.07, 0.03)
 dt.start <- as.Date('1968-01-01')
@@ -3382,7 +3382,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = TRUE
 
 The year over year change has a similar appearance. The low values at the beginning make the year over year values larger than the more recent values. Seems like it will rank low a reliable indicator.
 
-```{r indproYoY, echo=TRUE}
+```{r indproYoY, echo=FALSE}
 
 datay <- "INDPRO_YoY"
 ylim <- c(-20, 12)
@@ -3413,7 +3413,7 @@ corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, dat
 
 Retail sales also change during recession. As the plot below shows, it seems to follow the trend of industrial production. It might be too strongly correlated to add much to the model. The will be examined in the correlation section.
 
-```{r rsalesagg, echo=TRUE}
+```{r rsalesagg, echo=FALSE}
 datay <- "RSALESAGG"
 ylim <- c(50000, 200000)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
@@ -3422,7 +3422,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 The derivative of retail sales is a little more erratic than is was the industrial products. Looks like it might be helpful to include in the model as well.
 
-```{r rsalesderplot, echo=TRUE}
+```{r rsalesderplot, echo=FALSE}
 datay <- "RSALESAGG_SmoothDer" 
 ylim <- c(-50, 35)
 dt.start <- as.Date('1968-01-01')
@@ -3434,7 +3434,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = TRUE
 
 Take a look at year-over-year changes
 
-```{r rsalesderplot.yoy, echo=TRUE}
+```{r rsalesderplot.yoy, echo=FALSE}
 datay <- "RSALESAGG_YoY" 
 ylim <- c(-7.5, 7.5)
 dt.start <- as.Date('1968-01-01')
@@ -3446,7 +3446,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = TRUE
 
 Let's see how that looks on year over year basis. Interesting to compare to unemployment rates there appears to a correlation over the long term.
 
-```{r rsalesYoYToUNRATE.yoy, echo=TRUE}
+```{r rsalesYoYToUNRATE.yoy, echo=FALSE}
 datay <- "RSALESAGG_YoY" 
 datay.aux <- "UNRATE_YoY" 
 datay.aux.scale <- 0.25;
@@ -3517,7 +3517,7 @@ corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, dat
 
 This is an advanced estimate of the retail sales value.
 
-```{r rsafs, echo=TRUE}
+```{r rsafs, echo=FALSE}
 datay <- "RSAFS"
 ylim <- c(160000, 520000)
 dtStart = as.Date('1992-01-01')
@@ -3527,7 +3527,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
 Also take a look at year over year
 
-```{r rsafs.yoy, echo=TRUE}
+```{r rsafs.yoy, echo=FALSE}
 datay <- "RSAFS_YoY"
 ylim <- c(-12.5, 10.5)
 dtStart = as.Date('1992-01-01')
@@ -3537,7 +3537,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
 ### Retail sales and the labor market
 
-```{r rsalesYoYToU4, echo=TRUE}
+```{r rsalesYoYToU4, echo=FALSE}
 datay <- "RSALESAGG_YoY" 
 ylim <- c(-10, 10)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
@@ -3551,12 +3551,12 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```{r realperinc, echo=FALSE}
 datay <- "RPI"
-ylim <- c(0, 15000)
+ylim <- c(0, 17500)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
 
-```{r realperincYoY, echo=TRUE}
+```{r realperincYoY, echo=FALSE}
 datay <- "RPI_YoY"
 ylim <- c(-10, 10)
 plotSingleQuickModern(datay, ylim)
@@ -3585,7 +3585,7 @@ plotSingleQuickModern(datay, ylim)
 
 Real personal income might have some seasonal variance, but it seems the year over year change tells the same story.
 
-```{r rperincYoYplotex, echo=TRUE}
+```{r rperincYoYplotex, echo=FALSE}
 datay <- "W875RX1_YoY"
 ylim <- c(-7.5, 7.5)
 b.percentile <- TRUE
@@ -3666,7 +3666,7 @@ myPlot + scale_y_continuous(sec.axis = sec_axis(
 
 ### Producer Price Index (Commodities)
 
-```{r plot.ppi, echo=TRUE}
+```{r plot.ppi, echo=FALSE}
 datay <- "PPIACO"
 ylim <- c(0, 250)
 dtStart = as.Date('1965-01-01')
@@ -3680,7 +3680,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
 Look at a trend of West Texas Intermediate (WTI)
 
-```{r Crude, echo=TRUE}
+```{r Crude, echo=FALSE}
 
 datay <- "DCOILWTICO"
 ylim <- c(0, 150)
@@ -3718,7 +3718,7 @@ my.plot + geom_line(
 
 ```
 
-```{r Crude_YoY, echo=TRUE}
+```{r Crude_YoY, echo=FALSE}
 
 datay <- "DCOILWTICO_YoY"
 ylim <- c(-120, 80)
@@ -3729,7 +3729,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile)
 
 ```
 
-```{r crude.yoy.recent, echo=TRUE}
+```{r crude.yoy.recent, echo=FALSE}
 
 datay <- "DCOILWTICO_YoY"
 ylim <- c(-120, 120)
@@ -3835,7 +3835,7 @@ my.plot + geom_line(
 
 See how gold correlates with the VIX. Both gold and VIX should respond to investor axiety, but it doesn't look like it correlates very well.
 
-```{r corrGoldYoYVix, echo=TRUE}
+```{r corrGoldYoYVix, echo=FALSE}
 
 datax = "GOLDAMGBD228NLBM_YoY"
 datay = "VIXCLS"
@@ -3857,7 +3857,7 @@ plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, yl
 
 Dr. Copper has a reputation as an indicator of economic malaise, but it does not seem to have much of a correlation with the recessions. The series below is from CME via Quandl. It has a lot of data so I am also looking at the smoothed version.
 
-```{r plot.CHRISCMEHG1, echo=TRUE}
+```{r plot.CHRISCMEHG1, echo=FALSE}
 datay <- "CHRISCMEHG1"
 datay_aux <- "CHRISCMEHG1_Smooth"
 ylim <- c(0, 5)
@@ -3904,7 +3904,7 @@ my.plot + geom_line(
 
 The change in prices, year over year, do generally peak prior to a recession. The time and shape of this peak varies, but it still might be helpful. A couple of the large troughs do seem to correlate with the end of the recession. Likely this is because industrial production has also fallen.
 
-```{r plot.CHRISCMEHG1.yoy, echo=TRUE}
+```{r plot.CHRISCMEHG1.yoy, echo=FALSE}
 datay <- "CHRISCMEHG1_YoY"
 ylim <- c(-160, 60)
 dtStart = as.Date('1960-01-01')
@@ -3954,7 +3954,7 @@ plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, yl
 
 This is a legacy series from FRED. It has not been updated in a couple of years so I am assuming it will go away. 
 
-```{r cuprice, echo=TRUE}
+```{r cuprice, echo=FALSE}
 datay <- "PCOPPUSDM"
 ylim <- c(0, 12000)
 dtStart = as.Date('1980-01-01')
@@ -3987,7 +3987,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
 ### Reserve Balances with Federal Reserve Banks
 
-```{r WRESBALspread, echo=TRUE, fig.width = 9, fig.asp = 0.4}
+```{r WRESBALspread, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
 datay <- "WRESBAL"
 datay.aux <- "EXCSRESNW"
@@ -4037,7 +4037,7 @@ myPlot
 
 Hard to get a sense of these series in the absolute. Take a look relative to GDP.
 
-```{r WRESBALspread.GPD, echo=TRUE, fig.width = 9, fig.asp = 0.4}
+```{r WRESBALspread.GPD, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
 datay <- "WRESBAL.by.GDP"
 datay.aux <- "EXCSRESNW.by.GDP"
@@ -4089,7 +4089,7 @@ myPlot
 
 As reserves increase there should be less lending. That correlation generally holds.
 
-```{r WRESBAL_YoY, echo=TRUE, fig.width = 11, fig.asp = 0.4}
+```{r WRESBAL_YoY, echo=FALSE, fig.width = 11, fig.asp = 0.4}
 
 datay <- "WRESBAL_YoY"
 datay.aux <- "TOTLNNSA_YoY"
@@ -4246,7 +4246,7 @@ plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, yl
 
 ### Interest on excess reserves
 
-```{r IOERspread, echo=TRUE}
+```{r IOERspread, echo=FALSE}
 
 datay <- "CPIAUCSL_YoY"
 datay_aux <- "IOER"
@@ -4314,7 +4314,7 @@ myPlot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuot
 
 The European central band (ECB) has taken a different path compared to the US Federal Reserve bank.
 
-```{r ECBASSETS, echo=TRUE, fig.width = 9, fig.asp = 0.4}
+```{r ECBASSETS, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
 datay <- "ECBASSETS"
 datay.aux <- "WALCL"
@@ -4350,7 +4350,7 @@ myPlot
 ```
 
 
-```{r ECBASSETS.by.GDP, echo=TRUE, fig.width = 9, fig.asp = 0.4}
+```{r ECBASSETS.by.GDP, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
 datay <- "WALCL.by.GDP"
 datay.aux <- "ECBASSETS.by.EUNNGDP"
@@ -4444,7 +4444,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 Charlie Hatch has a nice format of deficit versus debt:
 
-```{r corrDebtDeficit, echo=TRUE}
+```{r corrDebtDeficit, echo=FALSE}
 
 datax = "FYFSGDA188S"
 datay = "GFDEGDQ188S"
@@ -4466,7 +4466,7 @@ plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, yl
 
 What about Nonfinancial corporate business and debt securities? Hopefully this doesn't follow the business loan trends.
 
-```{r nonfin, echo=TRUE}
+```{r nonfin, echo=FALSE}
 
 datay <- "NCBDBIQ027S"
 ylim <- c(-25, 7500000)
@@ -5602,7 +5602,7 @@ corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, dat
 One other items, let's see how loans do versus the federal funds rate
 
 
-```{r corrLoansFedFunds, echo=TRUE}
+```{r corrLoansFedFunds, echo=FALSE}
 
 datax = "TOTLNNSA_YoY"
 datay = "FEDFUNDS"
@@ -5639,7 +5639,7 @@ Definitions
 
 A WSJ article suggested that auto sales might be a good indicator so bring that to the mix. It does have troughs that correlate with recessions
 
-```{r LightAutoSales, echo=TRUE}
+```{r LightAutoSales, echo=FALSE}
 
 datay <- "ALTSALES"
 ylim <- c(7.5, 25)
@@ -6043,7 +6043,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 That is odd...looks like this doesn't cross zero unless we are getting close to, or into, a recession. The year over year tells about the same story. Might be a good indication of the end of a recession.
 
-```{r BusLoansYoYplot, echo=TRUE}
+```{r BusLoansYoYplot, echo=FALSE}
 
 datay <- "BUSLOANS_YoY"
 ylim <- c(-30, 30)
@@ -6064,7 +6064,7 @@ That spike in consumer loans is due to
 This included a consumer loans, credit cards and other revolving plans change of $321.9B. That was a lot of off-balance-sheet bank assets.
 
 
-```{r consumer.loans, echo=TRUE}
+```{r consumer.loans, echo=FALSE}
 
 datay <- "CONSUMERNSA"
 ylim <- c(0, 1600)
@@ -6242,7 +6242,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ## Productivity
 
-```{r OPHNFB, echo=TRUE}
+```{r OPHNFB, echo=FALSE}
 
 datay <- "OPHNFB"
 ylim <- c(20, 110)
@@ -6265,7 +6265,7 @@ plotSingleQuick(
 
 Date range to match census data
 
-```{r OPHNFB_YoY_Date, echo=TRUE}
+```{r OPHNFB_YoY_Date, echo=FALSE}
 
 plotSingleQuick(
   dfRecession,
@@ -6320,7 +6320,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile)
 
 Take a look at housing starts. These can drop as rates rise.
 
-```{r Houst, echo=TRUE}
+```{r Houst, echo=FALSE}
 
 datay <- "HOUST"
 ylim <- c(400, 2700)
@@ -6329,7 +6329,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
 ```
 
-```{r Houst_YoY, echo=TRUE}
+```{r Houst_YoY, echo=FALSE}
 
 datay <- "HOUST_YoY"
 ylim <- c(-100, 50)
@@ -6342,7 +6342,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile)
 
 Case-schiller price index
 
-```{r CSUSHPINSA, echo=TRUE}
+```{r CSUSHPINSA, echo=FALSE}
 
 datay <- "CSUSHPINSA"
 ylim <- c(60, 220)
@@ -6351,7 +6351,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
 ```
 
-```{r CSUSHPINSA_YoY, echo=TRUE}
+```{r CSUSHPINSA_YoY, echo=FALSE}
 
 datay <- "CSUSHPINSA_YoY"
 ylim <- c(-50, 50)
@@ -6366,7 +6366,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 Many of the economic series can be better understood if normalized by population. Basic population and worker data from FRED.
 
 
-```{r population, echo=TRUE}
+```{r population, echo=FALSE}
 
 datay <- "POPTHM"
 ylim <- c(160000, 350000)
@@ -6376,7 +6376,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 ```
 
 
-```{r population.yoy, echo=TRUE}
+```{r population.yoy, echo=FALSE}
 
 datay <- "POPTHM_YoY"
 ylim <- c(0, 2.5)
@@ -6387,7 +6387,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
 ### Population to GDP
 
-```{r GDPBYPOPTHM, echo=TRUE}
+```{r GDPBYPOPTHM, echo=FALSE}
 
 datay <- "GDPBYPOPTHM"
 ylim <- c(0, 75000)
@@ -6396,7 +6396,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
 ```
 
-```{r GDPBYPOPTHM.yoy, echo=TRUE}
+```{r GDPBYPOPTHM.yoy, echo=FALSE}
 
 datay <- "GDPBYPOPTHM_YoY"
 ylim <- c(-5, 15)
@@ -6411,7 +6411,7 @@ my.plot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuo
 
 Look at GDP divided by CPI per person. It flattens and even dips a little prior to a recession. Might be worth looking at the derivative of this series.
 
-```{r GDPBYCPIAUCSLBYPOPTHM, echo=TRUE}
+```{r GDPBYCPIAUCSLBYPOPTHM, echo=FALSE}
 
 datay <- "GDPBYCPIAUCSLBYPOPTHM"
 ylim <- c(10000, 30000)
@@ -6420,7 +6420,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
 ```
 
-```{r GDPBYCPIAUCSLBYPOPTHM_SmoothDer, echo=TRUE}
+```{r GDPBYCPIAUCSLBYPOPTHM_SmoothDer, echo=FALSE}
 
 datay <- "GDPBYCPIAUCSLBYPOPTHM_SmoothDer"
 ylim <- c(-5, 5)
@@ -6455,7 +6455,7 @@ Detailed correlations are explored above. Before concluding, let's take a look a
 
 As mentioned above, copper, year over year, has some correlation with the recession initiation. It could be useful.
 
-```{r corplot.commodities, echo=TRUE, fig.width=10,fig.height=10}
+```{r corplot.commodities, echo=FALSE, fig.width=10,fig.height=10}
 # Correlation for the entire data set
   training.cor <- df.data[,c("RecInit", "RecInit_Smooth", "CHRISCMEHG1", "CHRISCMEHG1_YoY","GOLDAMGBD228NLBM_YoY")]
   rcorr.data <- rcorr(as.matrix(training.cor), type = "pearson")
@@ -6470,7 +6470,7 @@ As mentioned above, copper, year over year, has some correlation with the recess
 GDP, normalized first by CPI and then by population, looks like it migh correlate inversely with the recession indicators
 
 
-```{r corplot.gdp, echo=TRUE, fig.width=10,fig.height=10}
+```{r corplot.gdp, echo=FALSE, fig.width=10,fig.height=10}
 
   # Correlation for the entire data set
   training.cor <- df.data[,c("RecInit", "RecInit_Smooth", "GDP", "GDPC1", "GDP_YoY", "GDPBYCPIAUCSLBYPOPTHM_SmoothDer")]
@@ -6488,7 +6488,7 @@ Let's see where we are so far. The correlation plot confirms some of the specula
 In this case, I want and indicator that rises prior to a recession. It looks like the unemployment rate (UNRATE), real personal income (W875RX1), and the yield curve (DGS10TO1) are all inversely correlated with the recession initiation indicator.
 
 
-```{r corplot1, echo=TRUE, fig.width=12,fig.height=12}
+```{r corplot1, echo=FALSE, fig.width=12,fig.height=12}
 # Correlation for the entire data set
   training.cor <- df.data[,c("RecInit","GSPC.Open_YoY","GSPC.Open_Log_SmoothDer",
                             "UNRATE","UNRATE_SmoothDer","UNRATE_SmoothDer2", 
