@@ -6223,11 +6223,34 @@ Sum of finance, government, and chartered institutions asset levels. https://www
 ```{r ASOLAL.z.1, echo=FALSE}
 
 datay <- "ASOLAL"
-ylim <- c(0, 5000000)
+ylim <- c(0, 5000)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
 
+#### FL893065005.Q: All sectors; total mortgages; asset
+
+https://www.federalreserve.gov/apps/fof/SeriesAnalyzer.aspx?s=FL893065005&t=L.214&suf=Q
+
+```{r ASTMA.z.1, echo=FALSE}
+
+datay <- "ASTMA"
+ylim <- c(0, 16000)
+plotSingleQuick(dfRecession, df.data, datay, ylim)
+
+```
+
+#### FL893065105.Q: All sectors; home mortgages; asset
+
+https://www.federalreserve.gov/apps/fof/DisplayTable.aspx?t=L.214
+
+```{r ASTMA.z.1, echo=FALSE}
+
+datay <- "ASHMA"
+ylim <- c(0, 12000)
+plotSingleQuick(dfRecession, df.data, datay, ylim)
+
+```
 
 
 
