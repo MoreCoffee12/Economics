@@ -438,6 +438,132 @@ df.symbols <-
   rbind(
     df.symbols,
     data.frame(
+      string.symbol = "ASTLL",
+      string.source = "FRED",
+      string.description = "All sectors; total loans; liability, Level (NSA)",
+      string.label.y = "Billions of U.S. Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "FBDILNECA",
+      string.source = "FRED",
+      string.description = "Domestic financial sectors; depository institution\nloans n.e.c.; asset, Level (NSA)",
+      string.label.y = "Billions of U.S. Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "ASOLAL",
+      string.source = "FRED",
+      string.description = "All sectors; other loans and advances;\nliability, Level (NSA)",
+      string.label.y = "Millions of U.S. Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "ASTMA",
+      string.source = "FRED",
+      string.description = "All sectors; total mortgages; asset, Level (NSA)",
+      string.label.y = "Billions of U.S. Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "ASHMA",
+      string.source = "FRED",
+      string.description = "All sectors; home mortgages; asset, Level (NSA)",
+      string.label.y = "Billions of U.S. Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "ASMRMA",
+      string.source = "FRED",
+      string.description = "All sectors; multifamily residential\nmortgages; asset, Level (NSA)",
+      string.label.y = "Billions of U.S. Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "ASCMA",
+      string.source = "FRED",
+      string.description = "All sectors; commercial mortgages;\nasset, Level  (NSA)",
+      string.label.y = "Billions of U.S. Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "ASFMA",
+      string.source = "FRED",
+      string.description = "All sectors; farm mortgages;\nasset, Level (NSA)",
+      string.label.y = "Billions of U.S. Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "CCLBSHNO",
+      string.source = "FRED",
+      string.description = "Households and nonprofit organizations;\nconsumer credit; liability, Level (NSA)",
+      string.label.y = "Billions of U.S. Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
       string.symbol = "FBDSILQ027S",
       string.source = "FRED",
       string.description = "Domestic financial sectors\ndebt securities; liability, Level (NSA)",
@@ -468,7 +594,7 @@ df.symbols <-
     data.frame(
       string.symbol = "NCBDBIQ027S",
       string.source = "FRED",
-      string.description = "Nonfinancial corporate\n business; debt securities; liability, Level",
+      string.description = "Nonfinancial corporate\nbusiness; debt securities; liability, Level",
       string.label.y = "Millions of Dollars",
       float.expense.ratio = -1.00,
       date.series.start = as.Date("1900-01-01"),

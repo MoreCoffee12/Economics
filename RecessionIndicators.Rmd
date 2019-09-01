@@ -3087,9 +3087,30 @@ datay_aux <- "UNRATE_Smooth"
 ylim <- c(2, 12)
 b.legend <- TRUE
 b.percentile <- TRUE
-myPlot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
-            getPlotYLabel(df.symbols, datay), c(as.Date("1jan1950","%d%b%Y"), Sys.Date()), ylim, b.legend, b.percentile)
-myPlot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuote(datay_aux)), na.rm = TRUE)
+myPlot <-
+  plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay,
+    getPlotTitle(df.symbols, datay),
+    "Date",
+    getPlotYLabel(df.symbols, datay),
+    c(as.Date("1jan1950", "%d%b%Y"), Sys.Date()),
+    ylim,
+    b.legend,
+    b.percentile,
+    b.long.legend = TRUE
+  )
+myPlot + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay_aux,
+    colour = shQuote(datay_aux)
+  ),
+  na.rm = TRUE
+)
 
 ```
 
@@ -4550,7 +4571,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 As long term interest rates rise, loans should start to tick down. To check this, the total loans and 10 to 1 year spreads are plotted. This is generally the trend observed.
 
-```{r totloansYield}
+```{r totloansYield, echo=FALSE}
 
 datay <- "TOTLNNSA_YoY"
 datay_aux<- "DGS10TO1"
@@ -4570,7 +4591,7 @@ There is a good correlation between these two variables. This next section plots
 
 This is the total loans. I think the picture is too broad to point to a specific sector of the economy.
 
-```{r USTotalDebt.by.GDP, fig.width = 7, fig.asp = 1.1}
+```{r USTotalDebt.by.GDP, echo=FALSE, fig.width = 7, fig.asp = 1.1}
 
 datay <- "TOTLNNSA.by.GDP"
 ylim <- c(0, 50)
@@ -4605,6 +4626,86 @@ Look at business debt normalized by GDP over the entire time series
 
 
 datay <- "TOTCINSA.by.GDP"
+datay.aux <- "CPROFIT.by.GDP"
+ylim <- c(5, 12)
+dt.start <- as.Date("1jan2000", "%d%b%Y")
+b.legend <- FALSE
+b.percentile <- FALSE
+p1 <-
+  plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay,
+    getPlotTitle(df.symbols, datay),
+    "Date",
+    getPlotYLabel(df.symbols, datay),
+    c(dt.start, Sys.Date()),
+    ylim,
+    b.legend,
+    b.percentile = TRUE
+  )
+
+datay <- "TOTCINSA.INTEREST.by.GDP"
+ylim <- c(0.0, 0.75)
+b.legend <- FALSE
+b.percentile <- TRUE
+p2 <-
+  plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay,
+    getPlotTitle(df.symbols, datay),
+    "Date",
+    getPlotYLabel(df.symbols, datay),
+    c(dt.start, Sys.Date()),
+    ylim,
+    b.legend,
+    b.percentile
+  )
+
+datay <- "A053RC1Q027SBEA.by.GDP"
+ylim <- c(5, 15)
+b.legend <- TRUE
+b.percentile <- TRUE
+p3 <-
+  plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay,
+    getPlotTitle(df.symbols, datay),
+    "Date",
+    getPlotYLabel(df.symbols, datay),
+    c(dt.start, Sys.Date()),
+    ylim,
+    b.legend,
+    b.percentile
+  )
+p3 <-
+  p3 + geom_line(
+    data = df.data,
+    aes_string(
+      x = "date",
+      y = datay.aux,
+      colour = shQuote(datay.aux)
+    ),
+    na.rm = TRUE
+  )
+
+grid.arrange(p1, p2, p3, ncol = 1, top = "Business Loans and Debt Burdens")
+
+```
+
+### Farm loans
+
+See how the farming sector is fairing.
+
+```{r FarmLoans.by.GDP, echo = FALSE, fig.width = 7, fig.asp = 1.3}
+
+
+datay <- "ASFMA.by.GDP"
 datay.aux <- "CPROFIT.by.GDP"
 ylim <- c(5, 12)
 dt.start <- as.Date("1jan2000", "%d%b%Y")
@@ -6085,6 +6186,50 @@ Data for the Financial accounts are compiled from a large number of reports and 
 
 (1)	Teplin, Albert M. “The U.S. Flow of Funds Accounts and Their Uses.” Federal Reserve Bulletin, July 2001; http://www.federalreserve.gov/pubs/bulletin/2001/0701lead.pdf. 
 (2)	Board of Governors of the Federal Reserve System. “Guide to the Flow of Funds Accounts.” 2000, http://www.federalreserve.gov/apps/fof/."
+
+### L.214 Loans
+
+#### FL894123005.Q: All sectors; total loans; liability
+
+Sum of domestic financial sectors, all sectors, total mortgages, and households/non-profits. federalreserve.gov/apps/fof/SeriesAnalyzer.aspx?s=FL894123005&t=L.107&bc=L.107:FL793068005&suf=Q
+
+
+```{r ASTLL.z.1, echo=FALSE}
+
+datay <- "ASTLL"
+ylim <- c(0, 28000)
+plotSingleQuick(dfRecession, df.data, datay, ylim)
+
+```
+
+#### FL793068005.Q: Domestic financial sectors; depository institution loans n.e.c.; asset
+
+Sum of Monetary authority; depository institution loans n.e.c.; asset and Private depository institutions; depository institution loans n.e.c.; asset. federalreserve.gov/apps/fof/SeriesAnalyzer.aspx?s=FL793068005&t=L.214&suf=Q
+
+
+```{r FBDILNECA.z.1, echo=FALSE}
+
+datay <- "FBDILNECA"
+ylim <- c(0, 4000)
+plotSingleQuick(dfRecession, df.data, datay, ylim)
+
+```
+
+#### FL893169005.Q: All sectors; other loans and advances; liability
+
+Sum of finance, government, and chartered institutions asset levels. https://www.federalreserve.gov/apps/fof/SeriesAnalyzer.aspx?s=FL893169005&t=L.214&suf=Q
+
+
+```{r ASOLAL.z.1, echo=FALSE}
+
+datay <- "ASOLAL"
+ylim <- c(0, 5000000)
+plotSingleQuick(dfRecession, df.data, datay, ylim)
+
+```
+
+
+
 
 ### B.101 Balance Sheet of Households and Nonprofit Organizations
 

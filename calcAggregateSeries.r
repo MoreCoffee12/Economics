@@ -677,6 +677,82 @@ df.symbols <-
     )
   )
 
+# Z.1 in millions, needs to be in billions. Already fixed in the descriptions
+df.data$ASTLL <- df.data$ASTLL / 1000
+df.data$FBDILNECA <- df.data$FBDILNECA / 1000
+df.data$ASOLAL <- df.data$ASOLAL / 1000
+df.data$ASTMA <- df.data$ASTMA / 1000
+df.data$ASHMA <- df.data$ASHMA / 1000
+df.data$ASMRMA <- df.data$ASMRMA / 1000
+df.data$ASCMA <- df.data$ASCMA / 1000
+df.data$CCLBSHNO <- df.data$CCLBSHNO / 1000
+
+# Total loans divided by GDP
+df.data$ASTLL.by.GDP <-
+  (df.data$ASTLL / df.data$GDP) * 100
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "ASTLL.by.GDP",
+      string.source = "Calc",
+      string.description = "All sectors; total loans;\nliability, Level (NSA)\nDivided by GDP",
+      string.label.y = "PERCENT",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(
+        c(df.symbols$date.series.start[df.symbols$Symbol == 'ASTLL'], index(GDP[1]))
+      ))  ,
+      date.series.end = as.Date(min(c(
+        df.symbols$date.series.end[df.symbols$Symbol == 'ASTLL'], index(tail(GDP, 1))
+      )))
+    )
+  )
+
+
+# Z.1 in millions, needs to be in billions. Already fixed in the descriptions
+df.data$ASFMA <- df.data$ASFMA / 1000
+
+# Farm loans divided by GDP
+df.data$ASFMA.by.GDP <-
+  (df.data$ASFMA / df.data$GDP) * 100
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "ASFMA.by.GDP",
+      string.source = "Calc",
+      string.description = "All sectors; farm\nmortgages; asset, Level (NSA)\nDivided by GDP",
+      string.label.y = "PERCENT",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(
+        c(df.symbols$date.series.start[df.symbols$Symbol == 'ASFMA'], index(GDP[1]))
+      ))  ,
+      date.series.end = as.Date(min(c(
+        df.symbols$date.series.end[df.symbols$Symbol == 'ASFMA'], index(tail(GDP, 1))
+      )))
+    )
+  )
+
+# Take a look at farm mortgages as a percentage of total loans.
+df.data$ASFMA.by.ASTLL <- (df.data$ASFMA / df.data$ASTLL) * 100 
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "ASFMA.by.ASTLL",
+      string.source = "Calc",
+      string.description = "All sectors; total loans\nDivided by farm mortgages",
+      string.label.y = "PERCENT",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(
+        c(df.symbols$date.series.start[df.symbols$Symbol == 'ASFMA'], index(ASTLL[1]))
+      ))  ,
+      date.series.end = as.Date(min(c(
+        df.symbols$date.series.end[df.symbols$Symbol == 'ASFMA'], index(tail(ASTLL, 1))
+      )))
+    )
+  )
+
 # Don't know why, but not all reserve money data series are in billions, some are in millions. Fix this.
 df.data$WALCL <- df.data$WALCL / 1000
 
