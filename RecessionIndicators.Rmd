@@ -6244,7 +6244,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 https://www.federalreserve.gov/apps/fof/DisplayTable.aspx?t=L.214
 
-```{r ASTMA.z.1, echo=FALSE}
+```{r ASHMA.z.1, echo=FALSE}
 
 datay <- "ASHMA"
 ylim <- c(0, 12000)
