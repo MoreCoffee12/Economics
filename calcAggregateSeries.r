@@ -793,6 +793,27 @@ df.symbols <-
     )
   )
 
+# Farm income divided by GDP
+df.data$FARMINCOME.by.GDP <-
+  (df.data$FARMINCOME / df.data$GDP) * 100
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "FARMINCOME.by.GDP",
+      string.source = "Calc",
+      string.description = "Farm Income (Annual, NSA)\nDivided by GDP",
+      string.label.y = "PERCENT",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(
+        c(df.symbols$date.series.start[df.symbols$Symbol == 'FARMINCOME'], index(GDP[1]))
+      ))  ,
+      date.series.end = as.Date(min(c(
+        df.symbols$date.series.end[df.symbols$Symbol == 'FARMINCOME'], index(tail(GDP, 1))
+      )))
+    )
+  )
+
 
 
 # Millios to billions

@@ -351,6 +351,42 @@ if(bRefresh) {
 
 ```
 
+```{r farm.income, echo=FALSE}
+
+# Get farm income data. From USDA website:
+# https://www.ers.usda.gov/data-products/farm-income-and-wealth-statistics/data-files-us-and-state-level-farm-income-and-wealth-statistics/
+
+# Read in th Excel file
+df.farm.income <- data.frame(read_excel('farmsectorindicators.xlsx', range='Sheet1!A2:I28'))
+
+# Extract the income and dates
+i.cols <- ncol(df.farm.income)
+d.income <- as.numeric(tail(df.farm.income,1)[2:i.cols])
+
+dt.date <- as.numeric(df.farm.income[3,2:i.cols])
+dt.date[(i.cols-1)] <- dt.date[i.cols-2] + 1
+dt.date <- as.Date(as.character(dt.date), format = "%Y")
+
+# Create the XTS object and update the symbols table
+str.symbol <- 'FARMINCOME'
+assign(str.symbol, xts(x=d.income, order.by=dt.date))
+colnames(FARMINCOME) <- "FARMINCOME"
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = str.symbol,
+      string.source = "USDA",
+      string.description =  "Net Farm Income",
+      string.label.y = "Billions of Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = dt.date[1],
+      date.series.end = tail(dt.date,1)
+    )
+  )
+
+```
 
 
 ```{r margin.debt.load, echo=FALSE}
@@ -2944,7 +2980,7 @@ grid.arrange(p1,
 
 There 
 
-```{r VIXtoGSPCCorr, fig.width = 7, fig.asp = 1.1}
+```{r VIXtoGSPCCorr, echo = FALSE, fig.width = 7, fig.asp = 1.1}
 
 datay1 <- "VIXCLS"
 ylim1 <- c(0, 45)
@@ -2952,7 +2988,7 @@ ylim1 <- c(0, 45)
 datay2 <- "GSPC.Open"
 ylim2 <- c(1500, 3000)
 
-dtStart <-  as.Date('2015-01-01')
+dtStart <-  as.Date('2005-01-01')
 
 w <- 30
 corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, datay2, ylim2, w, dtStart)
@@ -4745,8 +4781,8 @@ p2 <-
     b.percentile
   )
 
-datay <- "A053RC1Q027SBEA.by.GDP"
-ylim <- c(5, 15)
+datay <- "FARMINCOME.by.GDP"
+ylim <- c(0, 2)
 b.legend <- TRUE
 b.percentile <- TRUE
 p3 <-
@@ -4762,16 +4798,6 @@ p3 <-
     ylim,
     b.legend,
     b.percentile
-  )
-p3 <-
-  p3 + geom_line(
-    data = df.data,
-    aes_string(
-      x = "date",
-      y = datay.aux,
-      colour = shQuote(datay.aux)
-    ),
-    na.rm = TRUE
   )
 
 grid.arrange(p1, p2, p3, ncol = 1, top = "Farm Loans and Debt Burdens")
