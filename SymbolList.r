@@ -363,20 +363,6 @@ df.symbols <-
   rbind(
     df.symbols,
     data.frame(
-      string.symbol = "ASHMA",
-      string.source = "FRED",
-      string.description = "All sectors; home mortgages; asset, Level (Quarterly, NSA)",
-      string.label.y = "Billions of U.S. Dollars",
-      float.expense.ratio = -1.00,
-      date.series.start = as.Date("1900-01-01"),
-      date.series.end = as.Date("1900-01-01")
-    )
-  )
-
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
       string.symbol = "MORTGAGE30US",
       string.source = "FRED",
       string.description = "30-Year Fixed Rate Mortgage Average in the United States",

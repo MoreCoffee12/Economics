@@ -682,10 +682,8 @@ df.data$ASTLL <- df.data$ASTLL / 1000
 df.data$FBDILNECA <- df.data$FBDILNECA / 1000
 df.data$ASOLAL <- df.data$ASOLAL / 1000
 df.data$ASTMA <- df.data$ASTMA / 1000
-df.data$ASHMA <- df.data$ASHMA / 1000
 df.data$ASMRMA <- df.data$ASMRMA / 1000
 df.data$ASCMA <- df.data$ASCMA / 1000
-df.data$CCLBSHNO <- df.data$CCLBSHNO / 1000
 
 # Total loans divided by GDP
 df.data$ASTLL.by.GDP <-
@@ -753,7 +751,51 @@ df.symbols <-
     )
   )
 
-# Don't know why, but not all reserve money data series are in billions, some are in millions. Fix this.
+# Farm mortgages interest burden
+df.data$ASFMA.INTEREST <-
+  (df.data$ASFMA * df.data$MORTGAGE30US) / 100
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "ASFMA.INTEREST",
+      string.source = "Calc",
+      string.description = "Farm Mortgages (Quarterly, NSA)\n 30-Year Fixed Interest Burdens",
+      string.label.y = "Billions of U.S. Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(
+        c(df.symbols$date.series.start[df.symbols$Symbol == 'ASFMA'], index(MORTGAGE30US[1]))
+      ))  ,
+      date.series.end = as.Date(min(c(
+        df.symbols$date.series.end[df.symbols$Symbol == 'ASFMA'], index(tail(MORTGAGE30US, 1))
+      )))
+    )
+  )
+
+# Farm mortgage interest divided by GDP
+df.data$ASFMA.INTEREST.by.GDP <-
+  (df.data$ASFMA.INTEREST / df.data$GDP) * 100
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "ASFMA.INTEREST.by.GDP",
+      string.source = "Calc",
+      string.description = "Farm Mortgages (Quarterly, NSA)\nInterest Burden Divided by GDP",
+      string.label.y = "PERCENT",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(
+        c(df.symbols$date.series.start[df.symbols$Symbol == 'ASFMA.INTEREST'], index(GDP[1]))
+      ))  ,
+      date.series.end = as.Date(min(c(
+        df.symbols$date.series.end[df.symbols$Symbol == 'ASFMA.INTEREST'], index(tail(GDP, 1))
+      )))
+    )
+  )
+
+
+
+# Millios to billions
 df.data$WALCL <- df.data$WALCL / 1000
 
 # Excess reserve balances (in billions) divided by GDP

@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "August 31, 2019"
+date: "September 1, 2019"
 output: 
   html_document:
     toc: true
@@ -4707,8 +4707,8 @@ See how the farming sector is fairing.
 
 datay <- "ASFMA.by.GDP"
 datay.aux <- "CPROFIT.by.GDP"
-ylim <- c(5, 12)
-dt.start <- as.Date("1jan2000", "%d%b%Y")
+ylim <- c(0.5, 1.35)
+dt.start <- as.Date("1jan1990", "%d%b%Y")
 b.legend <- FALSE
 b.percentile <- FALSE
 p1 <-
@@ -4726,8 +4726,8 @@ p1 <-
     b.percentile = TRUE
   )
 
-datay <- "TOTCINSA.INTEREST.by.GDP"
-ylim <- c(0.0, 0.75)
+datay <- "ASFMA.INTEREST.by.GDP"
+ylim <- c(0.025, 0.125)
 b.legend <- FALSE
 b.percentile <- TRUE
 p2 <-
@@ -4774,7 +4774,7 @@ p3 <-
     na.rm = TRUE
   )
 
-grid.arrange(p1, p2, p3, ncol = 1, top = "Business Loans and Debt Burdens")
+grid.arrange(p1, p2, p3, ncol = 1, top = "Farm Loans and Debt Burdens")
 
 ```
 
@@ -6252,7 +6252,54 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
 
+#### FL893065405.Q: All sectors; multifamily residential mortgages; asset
 
+https://www.federalreserve.gov/apps/fof/SeriesAnalyzer.aspx?s=FL893065405&t=L.214&suf=Q
+
+```{r ASMRMA.z.1, echo=FALSE}
+
+datay <- "ASMRMA"
+ylim <- c(0, 1600)
+plotSingleQuick(dfRecession, df.data, datay, ylim)
+
+```
+
+#### FL893065505.Q: All sectors; commercial mortgages; asset
+
+https://www.federalreserve.gov/apps/fof/SeriesAnalyzer.aspx?s=FL893065505&t=L.214&suf=Q
+
+```{r ASCMA.z.1, echo=FALSE}
+
+datay <- "ASCMA"
+ylim <- c(0, 3200)
+plotSingleQuick(dfRecession, df.data, datay, ylim)
+
+```
+
+#### FL893065603.Q: All sectors; farm mortgages; asset
+
+https://www.federalreserve.gov/apps/fof/SeriesAnalyzer.aspx?s=FL893065603&t=L.214&suf=Q
+
+```{r ASFMA.z.1, echo=FALSE}
+
+datay <- "ASFMA"
+ylim <- c(0, 280)
+plotSingleQuick(dfRecession, df.data, datay, ylim)
+
+```
+
+
+#### FL153166000.Q: Households and nonprofit organizations; consumer credit; liability
+
+federalreserve.gov/apps/fof/SeriesAnalyzer.aspx?s=FL153166000&t=L.214&suf=Q
+
+```{r CCLBSHNO.z.1, echo=FALSE}
+
+datay <- "CCLBSHNO"
+ylim <- c(0, 5000)
+plotSingleQuick(dfRecession, df.data, datay, ylim)
+
+```
 
 ### B.101 Balance Sheet of Households and Nonprofit Organizations
 
