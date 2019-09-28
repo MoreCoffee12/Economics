@@ -418,8 +418,22 @@ df.symbols <-
 
 
 #-----------------------------------------------------------------------------------------
-# Data from the "Z.1 Financial Accounts of the United States  " table
+# Data from the "Z.1 Financial Accounts of the United States" table
 #-----------------------------------------------------------------------------------------
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "SRPSABSNNCB",
+      string.source = "FRED",
+      string.description = "Nonfinancial corporate business;\nsecurity repurchase agreements;\nasset, Level (NSA)",
+      string.label.y = "Billions of U.S. Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
 df.symbols <-
   rbind(
     df.symbols,
@@ -1212,6 +1226,20 @@ df.symbols <-
       string.symbol = "AAA",
       string.source = "FRED",
       string.description = "Moody's Seasoned Aaa Corporate Bond Yield",
+      string.label.y = "Percent",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "SOFR",
+      string.source = "FRED",
+      string.description = "Secured Overnight Financing Rate",
       string.label.y = "Percent",
       float.expense.ratio = -1.00,
       date.series.start = as.Date("1900-01-01") ,

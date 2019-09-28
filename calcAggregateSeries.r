@@ -62,7 +62,7 @@ df.symbols <-
   )
 
 
-# Normalize business loans (montlhy, SA) by GDP
+# Normalize business loans (monthly, SA) by GDP
 df.data$BUSLOANS.by.GDP <- (df.data$BUSLOANS / df.data$GDP) * 100
 df.symbols <-
   rbind(
@@ -685,6 +685,30 @@ df.data$ASTMA <- df.data$ASTMA / 1000
 df.data$ASMRMA <- df.data$ASMRMA / 1000
 df.data$ASCMA <- df.data$ASCMA / 1000
 
+# Nonfinancial corporate business; security repurchase agreements; asset, Level divided by GDP
+df.data$SRPSABSNNCB.by.GDP <-
+  (df.data$SRPSABSNNCB / df.data$GDP) * 100
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "SRPSABSNNCB.by.GDP",
+      string.source = "Calc",
+      string.description = "Nonfinancial corporate business;\nsecurity repurchase agreements;\nasset, Level (NSA)\nDivided by GDP",
+      string.label.y = "PERCENT",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(
+        c(df.symbols$date.series.start[df.symbols$Symbol == 'SRPSABSNNCB'], index(GDP[1]))
+      ))  ,
+      date.series.end = as.Date(min(c(
+        df.symbols$date.series.end[df.symbols$Symbol == 'SRPSABSNNCB'], index(tail(GDP, 1))
+      )))
+    )
+  )
+
+
+
+
 # Total loans divided by GDP
 df.data$ASTLL.by.GDP <-
   (df.data$ASTLL / df.data$GDP) * 100
@@ -1237,6 +1261,7 @@ df.symbols <-
   )
 
 # Calculate the daily swing in GSPC as percentage of opening price
+df.data$GSPC.Open[df.data$GSPC.Open <=0] <- 1
 df.data$GSPC.DailySwing <-
   ((df.data$GSPC.High - df.data$GSPC.Low) / df.data$GSPC.Open)
 df.symbols <-
