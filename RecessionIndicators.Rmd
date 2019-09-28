@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "September 27, 2019"
+date: "September 28, 2019"
 output: 
   html_document:
     toc: true
@@ -6281,6 +6281,17 @@ plotSingleQuick(dfRecession,
 
 ```
 
+```{r SRPSABSNNCB.YoY.z.1, echo=FALSE}
+
+datay <- "SRPSABSNNCB_YoY"
+ylim <- c(-250, 100)
+plotSingleQuick(dfRecession,
+                df.data,
+                datay,
+                ylim,
+                dt.start = as.Date("1jan1965", "%d%b%Y"))
+
+```
 
 ### L.214 Loans
 
