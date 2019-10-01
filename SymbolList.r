@@ -854,6 +854,26 @@ df.symbols <-
     )
   )
 
+
+#-----------------------------------------------------------------------------------------
+# Federal reserve data
+#-----------------------------------------------------------------------------------------
+
+# Native units are millions, but this gets converted to billions in the calcAggregateSeries functions.
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "WLRRAL",
+      string.source = "FRED",
+      string.description = "Liabilities and Capital:\nLiabilities: Reverse Repurchase Agreements:\nWednesday Level (NSA)",
+      string.label.y = "Billions of U.S. Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
 df.symbols <-
   rbind(
     df.symbols,
@@ -1240,6 +1260,146 @@ df.symbols <-
       string.symbol = "SOFR",
       string.source = "FRED",
       string.description = "Secured Overnight Financing Rate",
+      string.label.y = "Percent",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "SOFRVOL",
+      string.source = "FRED",
+      string.description = "Secured Overnight Financing Volume",
+      string.label.y = "Billions of U.S. Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "SOFR99",
+      string.source = "FRED",
+      string.description = "Secured Overnight Financing Rate:\n99th Percentile",
+      string.label.y = "Percent",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "SOFR75",
+      string.source = "FRED",
+      string.description = "Secured Overnight Financing Rate:\n75th Percentile",
+      string.label.y = "Percent",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "SOFR25",
+      string.source = "FRED",
+      string.description = "Secured Overnight Financing Rate:\n25th Percentile",
+      string.label.y = "Percent",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "SOFR1",
+      string.source = "FRED",
+      string.description = "Secured Overnight Financing Rate:\n1st Percentile",
+      string.label.y = "Percent",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "OBFR",
+      string.source = "FRED",
+      string.description = "Overnight Bank Funding Rate",
+      string.label.y = "Percent",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "OBFR99",
+      string.source = "FRED",
+      string.description = "Overnight Bank Funding Rate:\n99th Percentile",
+      string.label.y = "Percent",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "OBFR75",
+      string.source = "FRED",
+      string.description = "Overnight Bank Funding Rate:\n75th Percentile",
+      string.label.y = "Percent",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "OBFR25",
+      string.source = "FRED",
+      string.description = "Overnight Bank Funding Rate:\n25th Percentile",
+      string.label.y = "Percent",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "OBFR1",
+      string.source = "FRED",
+      string.description = "Overnight Bank Funding Rate:\n1st Percentile",
       string.label.y = "Percent",
       float.expense.ratio = -1.00,
       date.series.start = as.Date("1900-01-01") ,

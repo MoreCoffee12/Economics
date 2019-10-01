@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "September 28, 2019"
+date: "September 29, 2019"
 output: 
   html_document:
     toc: true
@@ -4042,16 +4042,147 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
 ```
 
+### Federal Reserve Reverse Repo Agreements
+
+Compare liabilities to reverse repo trends
+
+```{r WLRRAL}
+
+datay <- "WLRRAL"
+ylim <- c(0, 700)
+dtStart = as.Date('2003-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+
+```
+
+Spiky, might be easier to look at year-over-year
+
+```{r WLRRAL.YoY}
+
+datay <- "WLRRAL_YoY"
+ylim <- c(-100, 100)
+dtStart = as.Date('2003-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+
+```
+
+Normalized by GDP
+
+```{r WLRRAL.by.GDP}
+
+datay <- "WLRRAL.by.GDP"
+ylim <- c(0, 4)
+dtStart = as.Date('2003-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+
+```
+
+### Overnight Bank Funding Rate
+
+"The overnight bank funding rate is calculated using federal funds transactions and certain Eurodollar transactions. The federal funds market consists of domestic unsecured borrowings in U.S. dollars by depository institutions from other depository institutions and certain other entities, primarily government-sponsored enterprises, while the Eurodollar market consists of unsecured U.S. dollar deposits held at banks or bank branches outside of the United States. U.S.-based banks can also take Eurodollar deposits domestically through international banking facilities (IBFs). The overnight bank funding rate (OBFR) is calculated as a volume-weighted median of overnight federal funds transactions and Eurodollar transactions reported in the FR 2420 Report of Selected Money Market Rates.
+Volume-weighted median is the rate associated with transactions at the 50th percentile of transaction volume. Specifically, the volume-weighted median rate is calculated by ordering the transactions from lowest to highest rate, taking the cumulative sum of volumes of these transactions, and identifying the rate associated with the trades at the 50th percentile of dollar volume. The published rates are the volume-weighted median transacted rate, rounded to the nearest basis point."
+https://www.newyorkfed.org/markets/obfrinfo.
+
+
+```{r OBFR_Near, echo=FALSE, fig.width = 9, fig.asp = 0.4}
+
+datay <- "OBFR"
+ylim <- c(0, 7)
+dt.start = as.Date('2016-01-01')
+datay.aux <- "OBFR99"
+datay.aux.1 <- "OBFR1"
+my.plot <- plotSingle(
+  dfRecession,
+  df.data,
+  datax = "date",
+  datay,
+  titlelabel = getPlotTitle(df.symbols, datay),
+  xlabel = "Date",
+  ylabel = getPlotYLabel(df.symbols, datay),
+  ylim,
+  xlim = c(dt.start, Sys.Date()),
+  b.legend = TRUE,
+  b.long.legend = TRUE
+)
+
+my.plot <- my.plot + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux, str.sep = "\n"))
+  ),
+  na.rm = TRUE
+)
+
+my.plot + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux.1,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n"))
+  ),
+  na.rm = TRUE
+)
+
+
+```
+
 ### Secured Overnight Financing Rate
 
 "The Secured Overnight Financing Rate (SOFR) is a broad measure of the cost of borrowing cash overnight collateralized by Treasury securities. The SOFR includes all trades in the Broad General Collateral Rate plus bilateral Treasury repurchase agreement (repo) transactions cleared through the Delivery-versus-Payment (DVP) service offered by the Fixed Income Clearing Corporation (FICC), which is filtered to remove a portion of transactions considered “specials” "
-apps.newyorkfed.org/markets/autorates/sofr
+https://apps.newyorkfed.org/markets/autorates/sofr
 
-```{r SOFR_Near}
+```{r SOFR_Near, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
 datay <- "SOFR"
 ylim <- c(0, 10)
-dtStart = as.Date('2016-01-01')
+dt.start = as.Date('2018-01-01')
+datay.aux <- "SOFR99"
+datay.aux.1 <- "SOFR1"
+my.plot <- plotSingle(
+  dfRecession,
+  df.data,
+  datax = "date",
+  datay,
+  titlelabel = getPlotTitle(df.symbols, datay),
+  xlabel = "Date",
+  ylabel = getPlotYLabel(df.symbols, datay),
+  ylim,
+  xlim = c(dt.start, Sys.Date()),
+  b.legend = TRUE,
+  b.long.legend = TRUE
+)
+
+my.plot <- my.plot + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux, str.sep = "\n"))
+  ),
+  na.rm = TRUE
+)
+
+my.plot + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux.1,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n"))
+  ),
+  na.rm = TRUE
+)
+
+
+```
+
+Take a look at the variation (99th - 1st percentile)
+```{r SOFR.dist}
+
+datay <- "SOFR99.minus.SOFR1"
+ylim <- c(0, 4)
+dtStart = as.Date('2018-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
 ```

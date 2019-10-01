@@ -677,6 +677,52 @@ df.symbols <-
     )
   )
 
+# Federal reserve repos, from millions to billions
+df.data$WLRRAL <- df.data$WLRRAL / 1000
+
+# Reverse repos (in billions) divided by GDP
+df.data$WLRRAL.by.GDP <-
+  (df.data$WLRRAL / df.data$GDP) * 100
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "WLRRAL.by.GDP",
+      string.source = "Calc",
+      string.description = "Liabilities and Capital:\nLiabilities: Reverse Repurchase Agreements:\nWednesday Level (NSA)\nDivided by GDP",
+      string.label.y = "PERCENT",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(
+        c(df.symbols$date.series.start[df.symbols$Symbol == 'WLRRAL'], index(GDP[1]))
+      ))  ,
+      date.series.end = as.Date(min(c(
+        df.symbols$date.series.end[df.symbols$Symbol == 'WLRRAL'], index(tail(GDP, 1))
+      )))
+    )
+  )
+
+# Secured overnight variation
+df.data$SOFR99.minus.SOFR1 <-
+  (df.data$SOFR99 - df.data$SOFR1)
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "SOFR99.minus.SOFR1",
+      string.source = "Calc",
+      string.description = "Secured Overnight Financing Rate:\n99th Percentile - 1st Percentile",
+      string.label.y = "PERCENT",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(
+        c(df.symbols$date.series.start[df.symbols$Symbol == 'SOFR99'], index(SOFR1[1]))
+      ))  ,
+      date.series.end = as.Date(min(c(
+        df.symbols$date.series.end[df.symbols$Symbol == 'SOFR99'], index(tail(SOFR1, 1))
+      )))
+    )
+  )
+
+
 # Z.1 in millions, needs to be in billions. Already fixed in the descriptions
 df.data$ASTLL <- df.data$ASTLL / 1000
 df.data$FBDILNECA <- df.data$FBDILNECA / 1000
