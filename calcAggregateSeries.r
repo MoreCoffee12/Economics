@@ -723,6 +723,56 @@ df.symbols <-
   )
 
 
+# Census data in millions, needs to be billions.Already fixed in the descriptions
+df.data$IMPCH <- df.data$IMPCH / 1000
+df.data$EXPCH <- df.data$EXPCH / 1000
+
+# China trade balance
+df.data$EXPCH.minus.IMPCH <-
+  (df.data$EXPCH - df.data$IMPCH)
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "EXPCH.minus.IMPCH",
+      string.source = "Calc",
+      string.description = "U.S. Exports to China (FAS Basis) -\nU.S. Imports to China (Customs Basis)",
+      string.label.y = "Billions of dollars",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(
+        c(df.symbols$date.series.start[df.symbols$Symbol == 'EXPCH'], index(IMPCH[1]))
+      ))  ,
+      date.series.end = as.Date(min(c(
+        df.symbols$date.series.end[df.symbols$Symbol == 'EXPCH'], index(tail(IMPCH, 1))
+      )))
+    )
+  )
+
+df.data$EXPMX <- df.data$EXPMX / 1000
+df.data$IMPMX <- df.data$IMPMX / 1000
+
+# Mexico trade balance
+df.data$EXPMX.minus.IMPMX <-
+  (df.data$EXPMX - df.data$IMPMX)
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "EXPMX.minus.IMPCH",
+      string.source = "Calc",
+      string.description = "U.S. Exports to Mexico (FAS Basis) -\nU.S. Imports to Mexico (Customs Basis)",
+      string.label.y = "Billions of dollars",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(
+        c(df.symbols$date.series.start[df.symbols$Symbol == 'EXPMX'], index(IMPMX[1]))
+      ))  ,
+      date.series.end = as.Date(min(c(
+        df.symbols$date.series.end[df.symbols$Symbol == 'EXPMX'], index(tail(IMPMX, 1))
+      )))
+    )
+  )
+
+
 # Z.1 in millions, needs to be in billions. Already fixed in the descriptions
 df.data$ASTLL <- df.data$ASTLL / 1000
 df.data$FBDILNECA <- df.data$FBDILNECA / 1000

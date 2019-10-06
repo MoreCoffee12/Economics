@@ -3059,7 +3059,7 @@ p1 <-
 
 datay <- "GSPC.Open"
 datay_aux <- "GSPC.Close"
-ylim <- c(1500, 3000)
+ylim <- c(1500, 3200)
 p2 <-
   plotSingle(
     dfRecession,
@@ -3117,7 +3117,7 @@ grid.arrange(p1,
 
 Unemployment rates will probably be useful, let's take a look at the U-3. The data is a little noisy so there is also a smoothed version plotted. There seems to be a relationship between the unemployment rate and the recessions, but it could be a lagging indicator.  This will be explored a little bit more later.
 
-```{r unrate}
+```{r unrate, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 datay <- "UNRATE"
 datay_aux <- "UNRATE_Smooth"
 ylim <- c(2, 12)
@@ -3195,7 +3195,7 @@ Historically the last two years of record low unemployment appear most similar t
 
 ```{r unrate.similar}
 datay <- "UNRATE"
-ylim <- c(3.5, 4.5)
+ylim <- c(3.3, 4.5)
 i.window = 730
 my.data <- plotSimilarPeriods(df.data, dfRecession, df.symbols, datay, ylim, i.window)
 my.data[[1]]
@@ -6194,6 +6194,80 @@ plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, yl
         dtStart, b.reverse.y)
 
 ```
+
+## Census Bureau
+
+## U.S. International Trade in Goods and Services (FT900)
+
+U.S. Bureau of Economic Analysis and U.S. Census Bureau, U.S. Imports of Goods by Customs Basis from China [IMPCH], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/IMPCH, October 5, 2019.
+
+```{r IMPCH.plot, echo=FALSE, fig.width = 9, fig.asp = 0.4}
+
+datay <- "IMPCH"
+datay.aux <- "EXPCH"
+ylim <- c(0, 60)
+dt.start <- as.Date("1jan1985","%d%b%Y")
+my.plot <- plotSingle(
+  dfRecession,
+  df.data,
+  "date",
+  datay,
+  titlelabel = getPlotTitle(df.symbols, datay),
+  xlabel = "Date",
+  ylabel = getPlotYLabel(df.symbols, datay),
+  c(dt.start, Sys.Date()),
+  ylim,
+  b.legend = TRUE,
+  b.percentile = FALSE,
+  b.long.legend = TRUE
+)
+my.plot <- my.plot + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux, str.sep = "\n"))
+  ),
+  na.rm = TRUE
+)
+
+my.plot
+
+```
+
+```{r IMPCH.plot.yoy, echo=FALSE, fig.width = 9, fig.asp = 0.4}
+
+datay <- "IMPCH_YoY"
+datay.aux <- "EXPCH_YoY"
+ylim <- c(-60, 60)
+my.plot <- plotSingle(
+  dfRecession,
+  df.data,
+  "date",
+  datay,
+  titlelabel = getPlotTitle(df.symbols, datay),
+  xlabel = "Date",
+  ylabel = getPlotYLabel(df.symbols, datay),
+  c(dt.start, Sys.Date()),
+  ylim,
+  b.legend = TRUE,
+  b.percentile = FALSE,
+  b.long.legend = TRUE
+)
+my.plot <- my.plot + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux, str.sep = "\n"))
+  ),
+  na.rm = TRUE
+)
+
+my.plot
+
+```
+
 
 ## Federal reserve board H.8: Assets and Liabilities of Commercial Banks in the United States
 

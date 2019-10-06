@@ -198,6 +198,87 @@ df.symbols <-
 
 
 
+#-----------------------------------------------------------------------------------------
+# Data from US Census Bureau
+#-----------------------------------------------------------------------------------------
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "IMPCH",
+      string.source = "FRED",
+      string.description = "U.S. Imports of Goods by Customs\nBasis from China (Monthly, NSA)",
+      string.label.y = "Billions of U.S. Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "EXPCH",
+      string.source = "FRED",
+      string.description = "U.S. Exports of Goods by F.A.S.\nBasis to China, Mainland (Monthly, NSA)",
+      string.label.y = "Billions of U.S. Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "IMPMX",
+      string.source = "FRED",
+      string.description = "U.S. Imports of Goods by Customs\nBasis from Mexico (Monthly, NSA)",
+      string.label.y = "Billions of U.S. Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "EXPMX",
+      string.source = "FRED",
+      string.description = "U.S. Exports of Goods by F.A.S.\nBasis to Mexico (Monthly, NSA)",
+      string.label.y = "Billions of U.S. Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
