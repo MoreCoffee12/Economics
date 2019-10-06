@@ -6212,7 +6212,7 @@ my.plot <- plotSingle(
   df.data,
   "date",
   datay,
-  titlelabel = getPlotTitle(df.symbols, datay),
+  titlelabel ="China: Exports and Imports",
   xlabel = "Date",
   ylabel = getPlotYLabel(df.symbols, datay),
   c(dt.start, Sys.Date()),
@@ -6234,6 +6234,42 @@ my.plot <- my.plot + geom_line(
 my.plot
 
 ```
+
+
+```{r IMPCH.IMPMX.plot, echo=FALSE, fig.width = 9, fig.asp = 0.4}
+
+datay <- "EXPCH.minus.IMPCH"
+datay.aux <- "EXPMX.minus.IMPMX"
+ylim <- c(-50, 0)
+dt.start <- as.Date("1jan1985","%d%b%Y")
+my.plot <- plotSingle(
+  dfRecession,
+  df.data,
+  "date",
+  datay,
+  titlelabel ="Exports minus Imports for China and Mexico",
+  xlabel = "Date",
+  ylabel = getPlotYLabel(df.symbols, datay),
+  c(dt.start, Sys.Date()),
+  ylim,
+  b.legend = TRUE,
+  b.percentile = FALSE,
+  b.long.legend = TRUE
+)
+my.plot <- my.plot + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux, str.sep = "\n"))
+  ),
+  na.rm = TRUE
+)
+
+my.plot
+
+```
+
 
 ```{r IMPCH.plot.yoy, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
