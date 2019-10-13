@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "October 5, 2019"
+date: "October 13, 2019"
 output: 
   html_document:
     toc: true
@@ -2673,7 +2673,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 See what is happening with the options volumes for equities. (From: https://www.theocc.com/webapps/historical-volume-query)
 
-```{r OCC.equity.volume, fig.width = 7, fig.asp = 1.1 }
+```{r OCC.equity.volume, echo=FALSE, fig.width = 7, fig.asp = 1.1 }
 
 datay <- "OCCEquityVolume"
 ylim <- c(0, 35)
@@ -2691,7 +2691,7 @@ grid.arrange(p1, p2, ncol = 1, top = "Options Volumes")
 
 Looks like options on non-equity co-occurs with peaks/troughs?.
 
-```{r OCC.equity.volume.to.market, fig.width = 7, fig.asp = 1.1 }
+```{r OCC.equity.volume.to.market, echo=FALSE, fig.width = 7, fig.asp = 1.1 }
 
 
 datay <- "OCCNonEquityVolume"
@@ -6197,7 +6197,7 @@ plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, yl
 
 ## Census Bureau
 
-## U.S. International Trade in Goods and Services (FT900)
+### U.S. International Trade in Goods and Services (FT900)
 
 U.S. Bureau of Economic Analysis and U.S. Census Bureau, U.S. Imports of Goods by Customs Basis from China [IMPCH], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/IMPCH, October 5, 2019.
 
