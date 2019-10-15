@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "October 14, 2019"
+date: "October 15, 2019"
 output: 
   html_document:
     toc: true
@@ -5275,7 +5275,7 @@ This market went through some stress in 2008, it is happening again so setup som
 ```{r nonfin.corp.securty.repo.asset.by.GDP, echo=FALSE, fig.width = 7, fig.asp = 1.3}
 
 datay <- "SRPSABSNNCB.by.GDP"
-ylim <- c(10, 80)
+ylim <- c(0, 2)
 dt.start <- as.Date("1jan1955", "%d%b%Y")
 p1 <-
   plotSingle(
@@ -5291,6 +5291,7 @@ p1 <-
     b.legend = FALSE,
     b.percentile = FALSE
   )
+p1
 
 ```
 
