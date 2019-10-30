@@ -1632,7 +1632,7 @@ model.fitSmooth <- rpart( tail(list.equations.smooth, n=1)[[1]], data=dfTrain)
 
 Add the prediction to the dataframe
 
-```{r treepart.smooth.predict}
+```{r treepart.smooth.predict, echo=FALSE}
 
 df.data$RecInitPredSmooth <-
   predict(model.fitSmooth, newdata = df.data)
