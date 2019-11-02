@@ -4521,14 +4521,14 @@ The federal reserve provides liquidity to the repo market, summary of that actio
 
 datay <- "RPONTSYD"
 datay.title <- getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n")
-ylim <- c(10, 80)
+ylim <- c(0, 80)
 myPlot <-
   plotSingle(
     dfRecession,
     df.data,
     "date",
     datay,
-    "Federal Reserve Repo Market",
+    "Federal Overnight Reserve Repo Market",
     "Date",
     "Billions of Dollars/Euros",
     c(as.Date("1jan2003", "%d%b%Y"), Sys.Date()),
