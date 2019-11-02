@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "October 28, 2019"
+date: "November 1, 2019"
 output: 
   html_document:
     toc: true
@@ -4373,7 +4373,7 @@ p1 <-
 
 datay <- "GSPC.Open"
 datay_aux <- "GSPC.Close"
-ylim <- c(1500, 3000)
+ylim <- c(1500, 3200)
 p2 <-
   plotSingle(
     dfRecession,
@@ -4511,6 +4511,37 @@ myPlot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbol
 myPlot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuote(datay_aux)), na.rm = TRUE)
 
 ```
+
+### Intervention in the repo market
+
+The federal reserve provides liquidity to the repo market, summary of that action
+
+
+```{r RPONTSYD, echo=FALSE, fig.width = 9, fig.asp = 0.4}
+
+datay <- "RPONTSYD"
+datay.title <- getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n")
+ylim <- c(10, 80)
+myPlot <-
+  plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay,
+    "Federal Reserve Repo Market",
+    "Date",
+    "Billions of Dollars/Euros",
+    c(as.Date("1jan2003", "%d%b%Y"), Sys.Date()),
+    ylim,
+    b.legend = TRUE,
+    b.percentile = FALSE,
+    b.long.legend = TRUE
+  )
+
+myPlot
+
+```
+
 
 ## European central bank
 

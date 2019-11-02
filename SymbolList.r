@@ -1492,6 +1492,20 @@ df.symbols <-
   rbind(
     df.symbols,
     data.frame(
+      string.symbol = "RPONTSYD",
+      string.source = "FRED",
+      string.description = "Overnight Repurchase Agreements:\nTreasury Securities Purchased by\nthe Federal Reserve in the Temporary\nOpen Market Operations ",
+      string.label.y = "Billions of US Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
       string.symbol = "IOER",
       string.source = "FRED",
       string.description = "Interest Rate on Excess Reserves",
