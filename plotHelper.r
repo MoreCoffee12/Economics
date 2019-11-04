@@ -1,3 +1,20 @@
+#' Add quarter lines to plot
+#'
+#' @param my.plot Handle to the ggplot object
+#' @param dt.start.year Year the lines should start
+#' @param i.count Number of lines
+#'
+#' @return
+#' @export
+#'
+#' @examples
+add.quarter.lines <- function(my.plot, dt.start.year = 2016, i.count = 200){
+  x <- as.yearqtr(dt.start.year + seq(0, i.count) / 4)
+  x.date <- as.Date(x) - 1
+  my.plot + geom_vline(xintercept = as.numeric(x.date), linetype = 4)
+}
+
+
 #' Return a string describing the slope of a data series 
 #'
 #' @param dfData Data frame with the data

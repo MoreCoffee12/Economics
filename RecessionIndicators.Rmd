@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "November 1, 2019"
+date: "November 3, 2019"
 output: 
   html_document:
     toc: true
@@ -255,12 +255,12 @@ if(bRefresh) {
   df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = dfTemp$Date[[1]]
   
   # S&P 500 dividend yield
-  strQuandl = "MULTPL/SP500_DIV_MONTH"
+  str.symbol.raw = "MULTPL/SP500_DIV_MONTH"
   df.symbols <-
     rbind(
       df.symbols,
       data.frame(
-        string.symbol = strQuandl,
+        string.symbol = str.symbol.raw,
         string.source = "QUANDL",
         string.description =  "S&P 500 Dividend by Month \n (Inflation Adjusted)",
         string.label.y = "2018 Dollars",
@@ -270,8 +270,8 @@ if(bRefresh) {
       )
     )
   dfTemp <-
-    oil_daily <- Quandl(
-      strQuandl,
+    Quandl(
+      str.symbol.raw,
       type = "raw",
       collapse = "daily",
       start_date = "1871-01-01",
@@ -280,11 +280,10 @@ if(bRefresh) {
   
   strName <-
     str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-  assign(strName, xts(dfTemp[, -1], order.by = dfTemp[, 1]))
+  assign(strName, xts(dfTemp[,-1], order.by = dfTemp[, 1]))
   colnames(MULTPLSP500DIVMONTH) <- c(strName)
-  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(dfTemp$Date, 1)
-  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = dfTemp$Date[[1]]
-  
+  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw,]$date.series.start = tail(dfTemp$Date, 1)
+  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw,]$date.series.end = dfTemp$Date[[1]]
   
   # Copper prices
   str.symbol.raw = "CHRIS/CME_HG1"
@@ -351,6 +350,8 @@ if(bRefresh) {
 
 ```
 
+Loading in farm data
+
 ```{r farm.income, echo=FALSE}
 
 # Get farm income data. From USDA website:
@@ -388,6 +389,77 @@ df.symbols <-
 
 ```
 
+Loading in Silverblatt's S&P 500 spreadsheet.
+
+```{r silverblatt.data, echo=FALSE}
+
+# Get S&P 500 Silverblatt data. From USDA website:
+# https://us.spindices.com/documents/additional-material/sp-500-eps-est.xlsx
+
+# Read in th Excel file
+df.silverblatt <- data.frame(read_excel('sp-500-eps-est.xlsx', range='QUARTERLY DATA!A6:E133'))
+
+# Human readable column names
+colnames(df.silverblatt) <- c("QUARTER.END", "DIVISOR", "OP.EARNINGS.PER.SHARE", "AR.EARNINGS.PER.SHARE","CASH.DIVIDENDS.PER.SHR")
+
+# Create the XTS object and update the symbols table for operating earnings
+str.symbol <- 'OPEARNINGSPERSHARE'
+assign(str.symbol, xts(x=df.silverblatt$OP.EARNINGS.PER.SHARE, order.by=df.silverblatt$QUARTER.END))
+colnames(OPEARNINGSPERSHARE) <- "OPEARNINGSPERSHARE"
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = str.symbol,
+      string.source = "SILVERBLATT",
+      string.description =  "Operating Earnings per Share",
+      string.label.y = "Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = dt.date[1],
+      date.series.end = tail(dt.date,1)
+    )
+  )
+
+# Create the XTS object and update the symbols table for as reported earnings
+str.symbol <- 'AREARNINGSPERSHARE'
+assign(str.symbol, xts(x=df.silverblatt$AR.EARNINGS.PER.SHARE, order.by=df.silverblatt$QUARTER.END))
+colnames(AREARNINGSPERSHARE) <- "AREARNINGSPERSHARE"
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = str.symbol,
+      string.source = "SILVERBLATT",
+      string.description =  "As-Reported Earnings per Share",
+      string.label.y = "Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = dt.date[1],
+      date.series.end = tail(dt.date,1)
+    )
+  )
+
+# Create the XTS object and update the symbols table for cash divididens
+str.symbol <- 'CASHDIVIDENDSPERSHR'
+assign(str.symbol, xts(x=df.silverblatt$CASH.DIVIDENDS.PER.SHR, order.by=df.silverblatt$QUARTER.END))
+colnames(CASHDIVIDENDSPERSHR) <- "CASHDIVIDENDSPERSHR"
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = str.symbol,
+      string.source = "SILVERBLATT",
+      string.description =  "Cash Dividends per Share",
+      string.label.y = "Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = dt.date[1],
+      date.series.end = tail(dt.date,1)
+    )
+  )
+
+```
 
 ```{r margin.debt.load, echo=FALSE}
 
@@ -2280,7 +2352,7 @@ p1 <-
 
 Market prices can out-run earnings so take a look at price to earnings.
 
-```{r SP500TTMPE }
+```{r SP500TTMPE,  echo=FALSE }
 
 datay <- "MULTPLSP500PERATIOMONTH"
 datay.aux <- "MULTPLSP500PERATIOMONTH_Mean"
@@ -2318,7 +2390,7 @@ my.plot
 
 Focus on some of the more recent activity
 
-```{r SP500TTMPE.recent }
+```{r SP500TTMPE.recent, echo=FALSE }
 
 datay <- "MULTPLSP500PERATIOMONTH"
 datay.aux <- "MULTPLSP500PERATIOMONTH_Mean"
@@ -2392,12 +2464,24 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = FALS
 
 https://www.quandl.com/data/MULTPL/SP500_DIV_MONTH-S-P-500-Dividend-by-Month
 
-```{r SP500Dividend.dollar}
+```{r SP500Dividend.dollar, echo=FALSE, fig.width = 7, fig.asp = 1.1 }
 
 datay <- "MULTPLSP500DIVMONTH"
 ylim <- c(0, 60)
 dtStart = as.Date('1910-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = FALSE)
+p1 <-
+  plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = FALSE)
+
+
+datay.1 <- "CASHDIVIDENDSPERSHR"
+ylim.1 <- c(0, 20)
+p2 <-
+  plotSingleQuick(dfRecession, df.data, datay.1, ylim.1, dtStart, b.percentile = FALSE)
+
+grid.arrange(p1,
+             p2,
+             ncol = 1,
+             top = "S&P 500 Dividends by source")
 
 ```
 
@@ -4115,7 +4199,7 @@ my.plot <- my.plot + geom_line(
   na.rm = TRUE
 )
 
-my.plot + geom_line(
+my.plot <- my.plot + geom_line(
   data = df.data,
   aes_string(
     x = "date",
@@ -4124,6 +4208,10 @@ my.plot + geom_line(
   ),
   na.rm = TRUE
 )
+
+x <- as.yearqtr(2016 + seq(0, 20)/4)
+x.date <- as.Date(x)-1
+my.plot + geom_vline(xintercept=as.numeric(x.date), linetype=4)
 
 
 ```
@@ -4164,7 +4252,7 @@ my.plot <- my.plot + geom_line(
   na.rm = TRUE
 )
 
-my.plot + geom_line(
+my.plot <- my.plot + geom_line(
   data = df.data,
   aes_string(
     x = "date",
@@ -4174,16 +4262,21 @@ my.plot + geom_line(
   na.rm = TRUE
 )
 
+add.quarter.lines(my.plot, dt.start.year = 2016)
+
 
 ```
 
 Take a look at the variation (99th - 1st percentile)
-```{r SOFR.dist}
+
+```{r SOFR.dist, echo=FALSE}
 
 datay <- "SOFR99.minus.SOFR1"
 ylim <- c(0, 4)
 dtStart = as.Date('2018-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+my.plot <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+
+add.quarter.lines(my.plot, dt.start.year = 2016)
 
 ```
 
