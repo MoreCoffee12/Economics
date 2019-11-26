@@ -1419,3 +1419,25 @@ df.symbols <-
       )))
     )
   )
+
+# Census housing data
+df.data$HNFSUSNSA.minus.HSN1FNSA <-
+  (df.data$HNFSUSNSA - df.data$HSN1FNSA)
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "HNFSUSNSA.minus.HSN1FNSA",
+      string.source = "Calc",
+      string.description = "New One Family Houses Sold -\nNew One Family Houses Sales",
+      string.label.y = "Thousands of Units",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(
+        c(df.symbols$date.series.start[df.symbols$Symbol == 'HSN1FNSA'], index(HNFSUSNSA[1]))
+      ))  ,
+      date.series.end = as.Date(min(c(
+        df.symbols$date.series.end[df.symbols$Symbol == 'HSN1FNSA'], index(tail(HNFSUSNSA, 1))
+      )))
+    )
+  )
+

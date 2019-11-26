@@ -262,6 +262,35 @@ df.symbols <-
 
 
 
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "HSN1FNSA",
+      string.source = "FRED",
+      string.description = "New One Family Houses Sold: United States (Monthly, NSA)",
+      string.label.y = "Thousands of Units",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "HNFSUSNSA",
+      string.source = "FRED",
+      string.description = "New One Family Houses for Sale in the United States (Monthly, NSA)",
+      string.label.y = "Thousands of Units",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+
 
 
 
