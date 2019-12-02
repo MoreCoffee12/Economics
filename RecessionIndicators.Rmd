@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "November 23, 2019"
+date: "December 1, 2019"
 output: 
   html_document:
     toc: true
@@ -1536,8 +1536,8 @@ for (idx.feature in seq_along(model.features)) {
         string.symbol = list.column.name[[idx.feature]],
         string.source = "Predict",
         string.description = paste(
-          "Knn Prediction 1 for Recession Initiation Period, 0 For All Else (Smooth)\n",
-          list.equations.smooth[[idx.feature]],
+          "Knn Prediction 1 for Recession\nInitiation Period, 0 For All Else (Smooth)\n",
+          get.formula.formatted(list.equations.smooth[[idx.feature]]),
           sep = " "
         ),
         string.label.y = "(-)",
@@ -1576,7 +1576,7 @@ for (idx.feature in seq_along(model.features)) {
         string.symbol = list.column.name.nn[[idx.feature]],
         string.source = "Predict",
         string.description = paste(
-          "Neural Net Prediction 1 for Recession Initiation Period, 0 For All Else (Smooth)\n",
+          "Neural Net Prediction 1 for Recession\nInitiation Period, 0 For All Else (Smooth)\n",
           list.equations.smooth[[idx.feature]],
           sep = " "
         ),
@@ -1616,7 +1616,7 @@ for (idx.feature in seq_along(model.features)) {
         string.symbol = list.column.name.lm[[idx.feature]],
         string.source = "Predict",
         string.description = paste(
-          "Linear Model Prediction 1 for Recession Initiation Period, 0 For All Else (Smooth)\n",
+          "Linear Model Prediction 1 for Recession\nInitiation Period, 0 For All Else (Smooth)\n",
           list.equations.smooth[[idx.feature]],
           sep = " "
         ),

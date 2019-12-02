@@ -14,6 +14,40 @@ add.quarter.lines <- function(my.plot, dt.start.year = 2016, i.count = 200){
   my.plot + geom_vline(xintercept = as.numeric(x.date), linetype = 4)
 }
 
+#' Formats long formulas so they can be displayed in a plot header
+#'
+#' @param str.input Formula to be formatted
+#'
+#' @return
+#' @export
+#'
+#' @examples
+get.formula.formatted <-
+  function(str.input = "result ~ test+test1+test2+test3+test4") {
+    # Initialize output string
+    str.out = ''
+    
+    # Split up the string
+    str.split <- strsplit(str.input, "[+]")
+    i.count = 0
+    
+    # Reconstruct, but with newline after the 3rd '+'
+    for (str.list in str.split[[1]]) {
+      if (i.count > 0) {
+        if (i.count == 3) {
+          str.out = paste(str.out, str.list, sep = "\n")
+        }
+        else{
+          str.out = paste(str.out, str.list, sep = "+")
+        }
+      } else{
+        str.out = str.list
+      }
+      i.count <- i.count + 1
+    }
+    
+    return(str.out)
+  }
 
 #' Return a string describing the slope of a data series 
 #'
