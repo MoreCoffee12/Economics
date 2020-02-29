@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "February 25, 2020"
+date: "February 28, 2020"
 output: 
   html_document:
     toc: true
@@ -2213,7 +2213,7 @@ Take a look at recent activity in the equities market. This section looks at the
 datay <- "GSPC.Close"
 datay_aux <- "GSPC.Close_mva200"
 datay_aux2 <- "GSPC.Close_mva050"
-ylim <- c(2000, 3200)
+ylim <- c(2000, 3500)
 myPlot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
             getPlotYLabel(df.symbols, datay), c(dt.recent, Sys.Date()), ylim, TRUE)
 myPlot <- myPlot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuote(datay_aux)), na.rm = TRUE)
@@ -2227,7 +2227,7 @@ This is a longer view for the S&P 500 trend.
 ```{r SP500MA200, echo=FALSE}
 
 datay <- "GSPC.Open"
-ylim <- c(0, 3200)
+ylim <- c(0, 3500)
 datay_aux <- "GSPC.Open_mva200"
 datay_aux2 <- "GSPC.Open_mva050"
 dtStart = as.Date('1980-01-01')
