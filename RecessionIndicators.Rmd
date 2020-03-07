@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "February 28, 2020"
+date: "March 6, 2020"
 output: 
   html_document:
     toc: true
@@ -366,7 +366,9 @@ d.income <- as.numeric(tail(df.farm.income,1)[2:i.cols])
 
 dt.date <- as.numeric(df.farm.income[3,2:i.cols])
 dt.date[(i.cols-1)] <- dt.date[i.cols-2] + 1
-dt.date <- as.Date(as.character(dt.date), format = "%Y")
+# Have to append the day, otherwise it crashes on leap year.
+dt.date.c <- paste(as.character(dt.date), "-01-01", sep="")
+dt.date <- as.Date(dt.date.c)
 
 # Create the XTS object and update the symbols table
 str.symbol <- 'FARMINCOME'
@@ -6962,6 +6964,15 @@ Shipping volumes might be helpful in determining state of the economy.
 
 datay <- "FRGSHPUSM649NCIS"
 ylim <- c(0.8, 1.4)
+dtStart = as.Date('1999-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+
+```
+
+```{r CASSINDEX.yoy}
+
+datay <- "FRGSHPUSM649NCIS_YoY"
+ylim <- c(-40, 20)
 dtStart = as.Date('1999-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
