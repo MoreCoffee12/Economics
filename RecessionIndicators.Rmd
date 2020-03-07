@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "March 6, 2020"
+date: "March 7, 2020"
 output: 
   html_document:
     toc: true
@@ -4459,7 +4459,7 @@ my.plot
 
 Did the reserve balances increase after the 2016 and 2018 drops? Not in the same way. There are some relationships between the equities market and the reserves though.
 
-```{r WRESBAL_YoY.to.market, fig.width = 7, fig.asp = 1.1 }
+```{r WRESBAL_YoY.to.market, echo=FALSE, fig.width = 7, fig.asp = 1.1 }
 
 
 datay <- "WRESBAL_YoY"
