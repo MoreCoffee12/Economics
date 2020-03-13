@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "March 7, 2020"
+date: "March 13, 2020"
 output: 
   html_document:
     toc: true
@@ -61,6 +61,9 @@ b.refresh.models = FALSE
 
 # Define the plotting ranges
 dt.recent = as.Date("2017-01-01")
+
+# Define the S&P 500 limits
+d.GSPC.max = 3500
 
 ```
 
@@ -2215,7 +2218,7 @@ Take a look at recent activity in the equities market. This section looks at the
 datay <- "GSPC.Close"
 datay_aux <- "GSPC.Close_mva200"
 datay_aux2 <- "GSPC.Close_mva050"
-ylim <- c(2000, 3500)
+ylim <- c(2000, d.GSPC.max)
 myPlot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
             getPlotYLabel(df.symbols, datay), c(dt.recent, Sys.Date()), ylim, TRUE)
 myPlot <- myPlot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuote(datay_aux)), na.rm = TRUE)
@@ -2229,7 +2232,7 @@ This is a longer view for the S&P 500 trend.
 ```{r SP500MA200, echo=FALSE}
 
 datay <- "GSPC.Open"
-ylim <- c(0, 3500)
+ylim <- c(0, d.GSPC.max)
 datay_aux <- "GSPC.Open_mva200"
 datay_aux2 <- "GSPC.Open_mva050"
 dtStart = as.Date('1980-01-01')
@@ -2844,7 +2847,7 @@ p1 <-
 
 datay <- "GSPC.Open"
 datay_aux <- "GSPC.Close"
-ylim <- c(1500, 3200)
+ylim <- c(1500, d.GSPC.max)
 p2 <-
   plotSingle(
     dfRecession,
@@ -2950,7 +2953,7 @@ p1 <-
   )
 
 datay <- "GSPC.Close"
-ylim <- c(1500, 3200)
+ylim <- c(1500, d.GSPC.max)
 p2 <-
   plotSingle(
     dfRecession,
@@ -3174,7 +3177,7 @@ p1 <-
 
 datay <- "GSPC.Open"
 datay_aux <- "GSPC.Close"
-ylim <- c(1500, 3200)
+ylim <- c(1500, d.GSPC.max)
 p2 <-
   plotSingle(
     dfRecession,
@@ -4497,7 +4500,7 @@ p1 <-
 
 datay <- "GSPC.Open"
 datay_aux <- "GSPC.Close"
-ylim <- c(1500, 3200)
+ylim <- c(1500, d.GSPC.max)
 p2 <-
   plotSingle(
     dfRecession,
@@ -6845,7 +6848,7 @@ https://www.federalreserve.gov/apps/fof/SeriesAnalyzer.aspx?s=FL893065505&t=L.21
 ```{r ASCMA.z.1, echo=FALSE}
 
 datay <- "ASCMA"
-ylim <- c(0, 3200)
+ylim <- c(0, d.GSPC.max)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
