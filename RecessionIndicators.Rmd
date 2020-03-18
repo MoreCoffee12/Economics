@@ -1899,7 +1899,7 @@ The trading strategy will be compared to the S&P 500, shown below. We use this t
 ```{r plotbackbase, echo=FALSE, fig.width=7, fig.height=10}
 
 dtStartBackTest = as.Date('1960-01-01')
-ylimBackTest <- c(0, 50)
+ylimBackTest <- c(0, 60)
 
 # returns for base case (S&P 500)
 df.data$retBase <- ROC(df.data$GSPC.Close)
