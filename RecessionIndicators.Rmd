@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "March 18, 2020"
+date: "March 19, 2020"
 output: 
   html_document:
     toc: true
@@ -2269,11 +2269,42 @@ my.plot
 
 The last two years compare favorably with the period around the late 1950's. Need to dig into this one.
 
-```{r SP500pltNear.similar}
+```{r SP500SPpltNear.similar}
 datay <- "GDPSP500"
-ylim <- c(0.10, 0.16)
-my.data <- plotSimilarPeriods(df.data, dfRecession, df.symbols, datay, ylim, i.window = 730)
+ylim <- c(0.10, 0.20)
+my.data <- plotSimilarPeriods(df.data, dfRecession, df.symbols, datay, ylim, i.window = 50)
 my.data[[1]]
+
+```
+
+```{r SP500pltNear.similar}
+datay <- "GSPC.Close"
+ylim <- c(2000, 4000)
+my.data <- plotSimilarPeriods(df.data, dfRecession, df.symbols, datay, ylim, i.window = 60)
+my.data[[1]]
+
+```
+
+
+```{r SP500pltNear.similar.TimeLine, echo=FALSE, fig.width = 7, fig.asp = 1.1 }
+datay <- "GSPC.Close"
+ylim <- c(2000, 4000)
+p1 <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
+            getPlotYLabel(df.symbols, datay), c(Sys.Date()-60, Sys.Date()), ylim, TRUE)
+
+
+datay <- "GSPC.Close"
+ylim <- c(12.5, 18)
+dt.Start <- as.Date('1937-07-19')
+dt.End <- as.Date('1937-09-17')
+p2 <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
+            getPlotYLabel(df.symbols, datay), c(dt.Start, dt.End), ylim, TRUE)
+
+grid.arrange(p1,
+             p2,
+             ncol = 1,
+             top = "S&P 500 Dividends by source")
+
 
 ```
 
