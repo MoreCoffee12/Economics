@@ -1210,6 +1210,48 @@ df.symbols <-
     )
   )
 
+# Normalize crude by producer price index, commodities (PPICO)
+df.data$DCOILBRENTEU.by.PPIACO <-
+  (df.data$DCOILBRENTEU / df.data$PPIACO)
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "DCOILBRENTEU.by.PPIACO",
+      string.source = "Calc",
+      string.description = "Crude Oil - Brent, $/bbl, Normalized by\nproducer price index c.o.",
+      string.label.y = "$/bbl/Index",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(c(
+        index(DCOILBRENTEU[1]), index(PPIACO[1])
+      ))) ,
+      date.series.end = as.Date(min(c(
+        index(tail(DCOILBRENTEU, 1)), index(tail(PPIACO, 1))
+      )))
+    )
+  )
+
+df.data$DCOILWTICO.by.PPIACO <-
+  (df.data$DCOILWTICO / df.data$PPIACO)
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "DCOILWTICO.by.PPIACO",
+      string.source = "Calc",
+      string.description = "Crude Oil - WTI, $/bbl, Normalized by\nproducer price index c.o.",
+      string.label.y = "$/bbl/Index",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(c(
+        index(DCOILWTICO[1]), index(PPIACO[1])
+      ))) ,
+      date.series.end = as.Date(min(c(
+        index(tail(DCOILWTICO, 1)), index(tail(PPIACO, 1))
+      )))
+    )
+  )
+
+
 # Normalize gold by commodities producer price index (PPIACO)
 df.data$GOLDAMGBD228NLBM.by.PPIACO <-
   (df.data$GOLDAMGBD228NLBM / df.data$PPIACO)

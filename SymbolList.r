@@ -497,6 +497,20 @@ df.symbols <-
     )
   )
 
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "DRCLACBS",
+      string.source = "FRED",
+      string.description = "Delinquency Rate on Consumer Loans,\nAll Commercial Banks, SA",
+      string.label.y = "Percent",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
 
 df.symbols <-
   rbind(
