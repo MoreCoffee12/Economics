@@ -16,7 +16,7 @@ library(ggplot2)
 
 # Download 88101 - PM2.5. These are saved to local store so only need to download
 # them once
-#zipFile <- epa_downloadData(2010, "88101", '~/Data/EPA')
+zipFile <- epa_downloadData(2020, "88101", '~/Data/EPA')
 
 # Load data from local repository
 strFilePre <- "C:/Users/Rainy/Documents/Data/EPA/hourly_88101_" 
@@ -39,9 +39,9 @@ for (iYear in 2010:2019) {
   strftime(tblSeattle$dtDateTimeLocal[4], format='%d/%b/%Y:%H:%M:%S')
  
   # Create daily average table
-  tblSeattleDaily <- aggregate(tblSeattle$`Sample Measurement`, by=list(tblSeattle$dtDateTimeLocal), sum)
+  tblSeattleDaily <- aggregate(tblSeattle$`Sample Measurement`, by=list(tblSeattle$dtDateTimeLocal), mean)
   
-  if ( iYear == 2009){
+  if ( iYear == 2010){
     xtsPCMDaily <- as.xts(tblSeattleDaily$x, tblSeattleDaily$Group.1)
   }else{
     xtsPCMDaily <- rbind(xtsPCMDaily, as.xts(tblSeattleDaily$x, tblSeattleDaily$Group.1))
@@ -49,16 +49,30 @@ for (iYear in 2010:2019) {
   }
 }
 
+xts.org <- xtsPCMDaily
 
-# naming, fiscal year
+xtsPCMDaily <- xts.org
+
+# naming, adding ytd day count
 names(xtsPCMDaily) <- "Sample"
 xtsPCMDaily$ytd.day = as.numeric(strftime(index(xtsPCMDaily), "%j"))
+xtsPCMDaily$cal.year = as.factor(strftime(index(xtsPCMDaily), "%Y"))
 xtsPCMDaily$month.number = format(index(xtsPCMDaily), "%m")
-xtsPCMDaily$month.abbr = months(as.Date(index(xtsPCMDaily)), abbreviate=TRUE)
+
+# aggregate days across the years
+df.daily <- data.frame(Sample = xtsPCMDaily$Sample, ytd.day = xtsPCMDaily$ytd.day )
+df.daily <- aggregate(df.daily$Sample, by=list(df.daily$ytd.day), mean)
+colnames(df.daily) <- c("ytd.day", "Sample")
+df.daily$cal.year = 2000
 
 # Plot it out
 p1 <- ggplot() +
-  geom_point(data=xtsPCMDaily, aes(x=ytd.day, y =Sample, color=fiscal.year )) 
+  geom_point(data=xtsPCMDaily, aes(x=ytd.day, y=Sample, color=cal.year )) 
+p1
+
+p1 <- ggplot(NULL, aes(ytd.day, Sample, colour=cal.year))+
+  geom_point(data=xtsPCMDaily) +
+  geom_line(data=df.daily)  
 p1
 
 

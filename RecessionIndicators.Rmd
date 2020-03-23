@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "March 20, 2020"
+date: "March 2s, 2020"
 output: 
   html_document:
     toc: true
@@ -5422,7 +5422,15 @@ Focusing on the consumer sector the growth in debt and incomes can be directly c
 
 ### Consumer loans as percent of GDP and and income
 
-```{r ConsumerDebt.by.GDP, echo=FALSE, fig.width = 7, fig.asp = 1.4}
+```{r ConsumerDebt.by.GDP, echo=FALSE, fig.width = 7, fig.asp = 1.6}
+
+datay <- "CONSUMERNSA.by.GDP"
+ylim <- c(5, 8)
+dt.start <- as.Date("1jan1955","%d%b%Y")
+b.legend <- FALSE
+b.percentile <- FALSE
+p0 <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
+            getPlotYLabel(df.symbols, datay), c(dt.start, Sys.Date()), ylim, b.legend, b.percentile)
 
 datay <- "CONSUMERNSA_YoY"
 ylim <- c(-15, 20)
@@ -5455,7 +5463,7 @@ b.percentile <- TRUE
 p4 <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
             getPlotYLabel(df.symbols, datay), c(dt.start, Sys.Date()), ylim, b.legend, b.percentile)
 
-grid.arrange(p1, p2, p3, p4, ncol = 1, top = "Consumer Debt and Debt Burdens")
+grid.arrange(p0, p1, p2, p3, p4, ncol = 1, top = "Consumer Debt and Debt Burdens")
 
 ```
 
