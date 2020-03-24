@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "March 23, 2020"
+date: "March 24, 2020"
 output: 
   html_document:
     toc: true
@@ -5600,7 +5600,7 @@ datay <- "DGS10"
 datay.aux <- "TNX.Open"
 datay.aux1 <- "DTB3"
 datay.aux2 <- "IRX.Open"
-ylim <- c(1.7, 2.7)
+ylim <- c(0.5, 3.0)
 dtStart = as.Date('2018-01-01')
 p1 <-
   plotSingle(
@@ -5738,7 +5738,7 @@ Just the last 24 months or so.
 
 datay <- "DGS10TOTB3MS"
 datay_aux <- "DGS10TO1"
-ylim <- c(-0.5, 1.5)
+ylim <- c(-1.00, 1.5)
 datay_aux2 <- "DGS10TO2"
 datay_aux3 <- "DGS30TO10"
 dtStart = as.Date('2018-01-01')
@@ -5768,8 +5768,8 @@ The last two year compare favorably with the period around the 2015-2016 turndow
 
 ```{r YieldcurveRecent.twoyears.similar, echo=FALSE}
 datay <- "DGS10TOTB3MS"
-ylim <- c(-0.5, 2)
-i.window = 730
+ylim <- c(-1.0, 2)
+i.window = 60
 my.data <- plotSimilarPeriods(df.data, dfRecession, df.symbols, datay, ylim, i.window)
 my.data[[1]]
 
@@ -5780,7 +5780,7 @@ my.data[[1]]
 ```{r Yieldcurve_DGS10TO2, echo=FALSE}
 datay <- "DGS10TO2"
 
-ylim <- c(-5, 5)
+ylim <- c(-2.5, 5)
 p1 <- plotSingleQuickModern(datay, ylim)
 p1
 
@@ -5855,19 +5855,32 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
 ### High quality bonds to 10-year treasury
 
+High quality bonds long-term trend.
+
 ```{r AAADGS10}
 
 datay <- "DGS10ByAAA"
-ylim <- c(1, 2.5)
+ylim <- c(1, 4.0)
 dtStart = as.Date('1967-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
 ```
 
 
+High quality bonds near-term trend.
+
+```{r AAADGS10.near}
+
+datay <- "DGS10ByAAA"
+ylim <- c(1, 4.0)
+dtStart = as.Date('2007-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+
+```
+
 ### High yield spread
 
-"This data represents the Option-Adjusted Spread (OAS) of the ICE BofAML US Corporate A Index, a subset of the ICE BofAML US Corporate Master Index tracking the performance of US dollar denominated investment grade rated corporate debt publically issued in the US domestic market. This subset includes all securities with a given investment grade rating A.
+"This data represents the Option-Adjusted Spread (OAS) of the ICE BofAML US Corporate A Index, a subset of the ICE BofAML US Corporate Master Index tracking the performance of US dollar denominated investment grade rated corporate debt publicly issued in the US domestic market. This subset includes all securities with a given investment grade rating A.
 The ICE BofAML OASs are the calculated spreads between a computed OAS index of all bonds in a given rating category and a spot Treasury curve. An OAS index is constructed using each constituent bond‚Äôs OAS, weighted by market capitalization. When the last calendar day of the month takes place on the weekend, weekend observations will occur as a result of month ending accrued interest adjustments."
 
 - ICE Benchmark Administration Limited (IBA), ICE BofAML US Corporate A Option-Adjusted Spread [BAMLC0A3CA], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/BAMLC0A3CA, July 4, 2019.
@@ -5891,7 +5904,7 @@ https://www.wsj.com/articles/risky-municipal-bonds-are-on-a-hot-streak-115589494
 ```{r HYMB.plot.near, fig.width = 7, fig.asp = 1.3 }
 
 datay <- "HYMB.Close"
-ylim <- c(55, 60)
+ylim <- c(55, 62)
 dtStart = as.Date('2015-01-01')
 p1 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
@@ -5926,7 +5939,7 @@ p1 <-
   )
 
 datay <- "HYMB.Volume"
-ylim <- c(0, 1200000)
+ylim <- c(0, 1750000)
 dtStart = as.Date('2015-01-01')
 p1.vol <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
@@ -5963,7 +5976,7 @@ p1.vol <-
 
 datay <- "GSPC.Open"
 datay_aux <- "GSPC.Close"
-ylim <- c(1500, 3000)
+ylim <- c(1500, d.GSPC.max )
 p2 <-
   plotSingle(
     dfRecession,
@@ -7230,7 +7243,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 ```{r CSUSHPINSA_YoY, echo=FALSE}
 
 datay <- "CSUSHPINSA_YoY"
-ylim <- c(-50, 50)
+ylim <- c(-25, 25)
 dtStart = as.Date('1987-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
