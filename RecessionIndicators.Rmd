@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "March 30, 2020"
+date: "April 1, 2020"
 output: 
   html_document:
     toc: true
@@ -520,6 +520,15 @@ str.safe.name <-
   str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
 assign(str.safe.name, xts(df.margin[, 10], order.by = df.margin[, 1]))
 colnames(FINRAFreeCreditMargin)[[1]] <- c(str.safe.name)
+
+```
+
+```{r covid.hell, echo=FALSE}
+jhu_url <- paste("https://raw.githubusercontent.com/CSSEGISandData/", 
+  "COVID-19/master/csse_covid_19_data/", "csse_covid_19_time_series/", 
+  "time_series_covid19_confirmed_global.csv", sep = "")
+
+us_confirmed_long_jhu <- read_csv(jhu_url) %>% rename(province = "Province/State",  country_region = "Country/Region")
 
 ```
 
