@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "April 1, 2020"
+date: "April 3, 2020"
 output: 
   html_document:
     toc: true
@@ -33,6 +33,7 @@ library(rpart.plot)
 library(randomForest)
 library(Quandl)
 library(nnet)
+library(readr)
 #library(devtools)
 #install_github("andrewuhl/RollingWindow")
 library(RollingWindow)
@@ -3415,7 +3416,7 @@ We will also take a look at initial jobless claims, this should start to rise ju
 ```{r initclaims}
 
 datay <- "ICSA"
-ylim <- c(100000, 700000)
+ylim <- c(100000, 7000000)
 dt.start <- as.Date('1968-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
@@ -3425,7 +3426,7 @@ It looks like the jobless claim tend to peak more towards the end of the recessi
 
 ```{r initclaimsDer}
 datay <- "ICSA_SmoothDer"
-ylim <- c(-1500, 1500)
+ylim <- c(-3500, 3500)
 dt.start <- as.Date('1968-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = TRUE)
 
@@ -3435,7 +3436,7 @@ Jobless claims have a seasonal component to them. One way to reduce this effect 
 
 ```{r initialclaimsYoy}
 datay <- "ICSA_YoY"
-ylim <- c(-75, 75)
+ylim <- c(-75, 125)
 dt.start <- as.Date('1968-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = TRUE)
 
@@ -3446,7 +3447,7 @@ Take a closer look at recent data
 ```{r initialclaimsYoy.twoyears}
 
 datay <- "ICSA_YoY"
-ylim <- c(-50, 50)
+ylim <- c(-50, 125)
 dt.start <- as.Date('2000-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = TRUE)
 
