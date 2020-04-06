@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "April 3, 2020"
+date: "April 6, 2020"
 output: 
   html_document:
     toc: true
@@ -5037,7 +5037,7 @@ Look at business debt normalized by GDP over the entire time series
 
 datay <- "TOTCINSA.by.GDP"
 datay.aux <- "CPROFIT.by.GDP"
-ylim <- c(5, 12)
+ylim <- c(5, 14)
 dt.start <- as.Date("1jan2000", "%d%b%Y")
 b.legend <- FALSE
 b.percentile <- FALSE
