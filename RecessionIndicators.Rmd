@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "April 8, 2020"
+date: "April 9, 2020"
 output: 
   html_document:
     toc: true
@@ -2684,7 +2684,7 @@ datay.aux <- "RLG.Open_mva200"
 datay.title <- getPlotTitle(df.symbols, datay.aux, str.sep = "\n")
 datay.aux.1 <- "RLG.Open_mva050"
 datay.title.1 <- getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n")
-ylim <- c(1000, 1750)
+ylim <- c(1000, 2000)
 myPlot <-
   plotSingle(
     dfRecession,
@@ -2730,7 +2730,7 @@ datay1 <- "RLG.Open"
 ylim1 <- c(0, 2000)
 
 datay2 <- "GSPC.Open"
-ylim2 <- c(0, 3000)
+ylim2 <- c(0, d.GSPC.max)
 
 dtStart <- as.Date("1jan2003","%d%b%Y")
 
@@ -3940,7 +3940,7 @@ Real price of crude using producer price index for commodities
 
 datay <- "DCOILWTICO.by.PPIACO"
 datay.aux <- "DCOILBRENTEU.by.PPIACO"
-dtStart = as.Date('2000-01-01')
+dtStart = as.Date('1987-01-01')
 my.plot <-
   plotSingleQuick(
     dfRecession,
