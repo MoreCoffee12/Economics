@@ -4394,7 +4394,7 @@ datay.aux <- "EXCSRESNW"
 datay.title <- getPlotTitle(df.symbols, datay.aux, str.sep = "\n")
 datay.aux.1 <- "WALCL"
 datay.title.1 <- getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n")
-ylim <- c(0, 4800)
+ylim <- c(0, 5500)
 myPlot <-
   plotSingle(
     dfRecession,
