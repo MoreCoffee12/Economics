@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "April 9, 2020"
+date: "April 12, 2020"
 output: 
   html_document:
     toc: true
@@ -4537,7 +4537,7 @@ Did the reserve balances increase after the 2016 and 2018 drops? Not in the same
 
 
 datay <- "WRESBAL_YoY"
-ylim <- c(-40, 40)
+ylim <- c(-40, 50)
 dtStart = as.Date('2015-01-01')
 p1 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 p1 <-

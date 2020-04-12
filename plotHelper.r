@@ -260,9 +260,9 @@ CalcYoY <- function (datadf, strCol, iPeriods){
   Nrow <- nrow(datadf)
   GrowthRateYoY <- rep(0,Nrow)
   GrowthRateYoY[(iPeriods+1):Nrow] <- diff(as.matrix(datadf[[strCol]]), lag = iPeriods)
-  GrowthRateYoY <- (GrowthRateYoY / datadf[[strCol]])*100
+  #GrowthRateYoY <- (GrowthRateYoY / datadf[[strCol]])*100
   #GrowthRateYoY <- (GrowthRateYoY / shift(as.matrix(datadf[[strCol]]), n=iPeriods, type="lag"))*100
-  #GrowthRateYoY <- (GrowthRateYoY / lag(datadf[[strCol]], iPeriods))*100
+  GrowthRateYoY <- (GrowthRateYoY / lag(datadf[[strCol]], iPeriods))*100
   return(GrowthRateYoY)
 }
 
