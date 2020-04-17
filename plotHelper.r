@@ -255,14 +255,38 @@ plotSingle <-
 }
 
 # ------------------------------------------------------------------------------
-# Define the function for calculating year over year growth. 
+#' Define the function for calculating year over year growth. 
+#'
+#' @param datadf Data frame with date and data
+#' @param strCol Column name for calculations
+#' @param iPeriods Number of periods. Defaults to 2
+#'
+#' @return Array with YoY data
+#' @export
+#'
+#' @examples
 CalcYoY <- function (datadf, strCol, iPeriods){
+  
+  if (missing(datadf)){
+    datadf <- data.frame(c(1, 2, 3, 4, 5))
+    colnames(datadf) <- "USREC"
+  }
+  
+  if (missing(strCol)) {
+    strCol <- "USREC"
+  }
+  
+  if (missing(iPeriods)) {
+    iPeriods <- 2
+  }
+  
+  
   Nrow <- nrow(datadf)
   GrowthRateYoY <- rep(0,Nrow)
   GrowthRateYoY[(iPeriods+1):Nrow] <- diff(as.matrix(datadf[[strCol]]), lag = iPeriods)
   #GrowthRateYoY <- (GrowthRateYoY / datadf[[strCol]])*100
-  #GrowthRateYoY <- (GrowthRateYoY / shift(as.matrix(datadf[[strCol]]), n=iPeriods, type="lag"))*100
-  GrowthRateYoY <- (GrowthRateYoY / lag(datadf[[strCol]], iPeriods))*100
+  GrowthRateYoY <- (GrowthRateYoY / shift(as.matrix(datadf[[strCol]]), n=iPeriods, type="lag"))*100
+  GrowthRateYoY[is.na(GrowthRateYoY)] = 0
   return(GrowthRateYoY)
 }
 

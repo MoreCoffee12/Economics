@@ -2143,6 +2143,48 @@ df.symbols <-
   rbind(
     df.symbols,
     data.frame(
+      string.symbol = "BKR",
+      string.source = "yahoo",
+      string.description = "Baker Hughes Company",
+      string.label.y = "Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1800-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "SLB",
+      string.source = "yahoo",
+      string.description = "Schlumberger Limited",
+      string.label.y = "Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1800-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "HAL",
+      string.source = "yahoo",
+      string.description = "Halliburton Company",
+      string.label.y = "Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1800-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
       string.symbol = "A053RC1Q027SBEA",
       string.source = "FRED",
       string.description = "National income: Corporate\nprofits before tax (without IVA and CCAdj)",
