@@ -4040,27 +4040,156 @@ my.plot + geom_line(
 
 Amazing events in the first half of 2020, take a look at those
 
-```{r crude.recent.2020, echo=FALSE, fig.width = 13, fig.asp = 0.2}
-
-datay <- "DCOILWTICO_YoY"
-datay.aux <- "DCOILBRENTEU_YoY"
-dtStart = as.Date('2020-01-01')
-my.plot <-
+```{r crude.recent.bkr, echo=FALSE, fig.width = 13, fig.asp = 0.5}
+##
+# Crude
+datay <- "DCOILWTICO"
+datay.aux <- "DCOILBRENTEU"
+dtStart = as.Date('2019-01-01')
+p1 <-
   plotSingleQuick(
     dfRecession,
     df.data,
     datay,
-    ylim = c(-375, 75),
+    ylim = c(10, 80),
     dtStart,
     b.legend = TRUE,
-    b.long.legend = TRUE
+    b.long.legend = FALSE
   )
-my.plot + geom_line(
+p1 <- p1 + geom_line(
   data = df.data,
   aes_string(
     x = "date",
     y = datay.aux,
     colour = shQuote(getPlotTitle(df.symbols, datay.aux, str.sep = "\n"))
+  ),
+  na.rm = TRUE
+)
+
+# Events on the crude oil price timeline
+str.1 <- c("2020-01-20", "2020-03-05", "2020-03-08", "2020-03-30")
+txt.1 <-
+  c("First US Covid-19",
+    "OPEC Fails to Agree",
+    "S-R Price War",
+    "OPEC Prod. Cuts Expire")
+idx.list = 1
+y.1 = 0
+for (str.data in str.1) {
+  y.1[idx.list] <- df.data[rownames(df.data) == as.Date(str.1[idx.list]), datay]
+  idx.list <- idx.list + 1
+}
+d.bkr = data.table(dt = as.Date(str.1), y = y.1, txt = txt.1)
+p1 <-
+  p1 + geom_point(data = d.bkr, aes(x = dt, y = y))  + geom_text(data = d.bkr, aes(
+    x = dt,
+    y = y,
+    label = txt,
+    hjust = "right",
+    vjust = "top"
+  ))
+
+# Events on the crude oil price timeline
+str.1 <- c("2020-04-10")
+txt.1 <-
+  c("S-R Reach Deal")
+idx.list = 1
+y.1 = 0
+for (str.data in str.1) {
+  y.1[idx.list] <- df.data[rownames(df.data) == as.Date(str.1[idx.list]), datay]
+  idx.list <- idx.list + 1
+}
+d.bkr.1 = data.table(dt = as.Date(str.1), y = y.1, txt = txt.1)
+p1 <-
+  p1 + geom_point(data = d.bkr, aes(x = dt, y = y)) + geom_text(data = d.bkr, aes(
+    x = dt,
+    y = y,
+    label = txt,
+    hjust = "right",
+    vjust = "top"
+  ))  + geom_point(data = d.bkr.1, aes(x = dt, y = y)) + geom_text(data = d.bkr.1, aes(
+    x = dt,
+    y = y+5,
+    label = txt,
+    hjust = "center",
+    vjust = "bottom"
+  ))
+
+##
+# Baker
+datay <- "BKR.Close"
+p2 <-
+  plotSingleQuick(
+    dfRecession,
+    df.data,
+    datay,
+    ylim = c(5, 30),
+    dtStart,
+    b.legend = TRUE,
+    b.long.legend = FALSE
+  )
+
+# Events on the crude oil price timeline
+str.1 <- c("2020-04-13")
+txt.1 <-
+  c("Restructure\nGoodWill Impairment")
+idx.list = 1
+y.1 = 0
+for (str.data in str.1) {
+  y.1[idx.list] <- df.data[rownames(df.data) == as.Date(str.1[idx.list]), datay]
+  idx.list <- idx.list + 1
+}
+d.bkr = data.table(dt = as.Date(str.1), y = y.1, txt = txt.1)
+p2 <-
+  p2 + geom_point(data = d.bkr, aes(x = dt, y = y))  + geom_text(data = d.bkr, aes(
+    x = dt,
+    y = y,
+    label = txt,
+    hjust = "center",
+    vjust = "bottom"
+  ))
+
+
+grid.arrange(p1,
+             p2,
+             ncol = 1,
+             top = "Baker and Crude Oil Price Year-over-Year Changes")
+
+```
+
+See how the players are doing
+
+```{r crude.recent.bkr.players, echo=FALSE, fig.width = 8, fig.asp = 0.5}
+
+datay <- "BKR.Close_YoY"
+datay.aux.1 <- "SLB.Close_YoY"
+datay.aux.2 <- "HAL.Close_YoY"
+dtStart = as.Date('2020-01-01')
+p1 <-
+  plotSingleQuick(
+    dfRecession,
+    df.data,
+    datay,
+    ylim = c(-100, 50),
+    dtStart,
+    b.legend = TRUE,
+    b.long.legend = FALSE
+  )
+p1 <- p1 + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux.1,
+    colour = shQuote(datay.aux.1)
+  ),
+  na.rm = TRUE
+)
+p1 + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux.2,
+    colour = shQuote(datay.aux.2)
   ),
   na.rm = TRUE
 )
@@ -4099,7 +4228,7 @@ my.plot + geom_line(
 ```{r Crude_YoY, echo=FALSE}
 
 datay <- "DCOILWTICO_YoY"
-ylim <- c(-200, 80)
+ylim <- c(-100, 150)
 dtStart = as.Date('1987-01-01')
 b.legend <- TRUE
 b.percentile <- TRUE
@@ -4382,7 +4511,7 @@ Spiky, might be easier to look at year-over-year
 ```{r WLRRAL.YoY}
 
 datay <- "WLRRAL_YoY"
-ylim <- c(-100, 100)
+ylim <- c(-100, 300)
 dtStart = as.Date('2003-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 

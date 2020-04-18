@@ -457,6 +457,7 @@ plotSingleQuickModern <- function(datay, ylim, b.percentile) {
 #' @param dt.start Start date. End data is assumed to be today's date
 #' @param b.legend If true then plot includes a legend
 #' @param b.percentile If true then 5%/95% percentile lines are displayed
+#' @param b.long.legend If true then plot includes a legend at the side with long text
 #'
 #' @return
 #' @export
