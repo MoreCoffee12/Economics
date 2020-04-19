@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "April 17, 2020"
+date: "April 19, 2020"
 output: 
   html_document:
     toc: true
@@ -455,6 +455,155 @@ key <- "7a2672468131c5a95dffc487d741edf6"
   df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(dfTemp$Date, 1)
   df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = dfTemp$Date[[1]]
   
+  # Crude Oil and Natural Gas Rotary Rigs in Operation, Total, Monthly
+  str.symbol.raw = "TOTAL.OGNRPUS.M"
+  df.symbols <-
+    rbind(
+      df.symbols,
+      data.frame(
+        string.symbol = str.symbol.raw,
+        string.source = "EIA",
+        string.description =  "Crude Oil and Natural Gas Rotary Rigs in Operation, Total, Monthly",
+        string.label.y = "Number of rigs",
+        float.expense.ratio = -1.00,
+        date.series.start = as.Date("1900-01-01") ,
+        date.series.end = as.Date("1900-01-01")
+      )
+    )
+  
+  strName <-
+    str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+  TOTALOGNRPUSM <- getEIA(key=key, ID=str.symbol.raw )
+  colnames(TOTALOGNRPUSM) <- c(strName)
+  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(dfTemp$Date, 1)
+  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = dfTemp$Date[[1]]
+  
+  # Crude Oil Rotary Rigs in Operation, Monthly
+  str.symbol.raw = "TOTAL.PANRPUS.M"
+  df.symbols <-
+    rbind(
+      df.symbols,
+      data.frame(
+        string.symbol = str.symbol.raw,
+        string.source = "EIA",
+        string.description =  "Crude Oil Rotary Rigs in Operation, Monthly",
+        string.label.y = "Number of rigs",
+        float.expense.ratio = -1.00,
+        date.series.start = as.Date("1900-01-01") ,
+        date.series.end = as.Date("1900-01-01")
+      )
+    )
+  
+  strName <-
+    str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+  TOTALPANRPUSM <- getEIA(key=key, ID=str.symbol.raw )
+  colnames(TOTALPANRPUSM) <- c(strName)
+  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(dfTemp$Date, 1)
+  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = dfTemp$Date[[1]]
+  
+  # Natural Gas Rotary Rigs in Operation, Monthly
+  str.symbol.raw = "TOTAL.NGNRPUS.M"
+  df.symbols <-
+    rbind(
+      df.symbols,
+      data.frame(
+        string.symbol = str.symbol.raw,
+        string.source = "EIA",
+        string.description =  "Natural Gas Rotary Rigs in Operation, Monthly",
+        string.label.y = "Number of rigs",
+        float.expense.ratio = -1.00,
+        date.series.start = as.Date("1900-01-01") ,
+        date.series.end = as.Date("1900-01-01")
+      )
+    )
+  
+  strName <-
+    str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+  TOTALNGNRPUSM <- getEIA(key=key, ID=str.symbol.raw )
+  colnames(TOTALNGNRPUSM) <- c(strName)
+  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(dfTemp$Date, 1)
+  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = dfTemp$Date[[1]]
+  
+
+```
+
+The Baker Hughes rig count numbers
+
+```{r bkr.rig.count.load, echo=FALSE}
+
+# Manually change dirs for testing
+#setwd('C:/Users/Rainy/OneDrive/Documents/Hobby/GitHub/Economics')
+
+# Read in the data
+df.rig.raw <- data.frame(read_excel('North America Rotary Rig Count (Jan 2000 - Current).xlsx', sheet = "US Oil & Gas Split", skip=5))
+df.rig.raw$Date <- as.Date(df.rig.raw$Date)
+
+# Create the zoo object for total rig count
+str.symbol <- 'BKR/Total'
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = str.symbol,
+      string.source = "BKR",
+      string.description =  "Total Rig Count",
+      string.label.y = "Number of rigs",
+      float.expense.ratio = -1.00,
+      date.series.start = tail(df.rig.raw$Date, 1) ,
+      date.series.end = df.rig.raw$Date[[1]]
+    )
+  )
+
+# Process the total rig count
+str.safe.name <-
+  str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+assign(str.safe.name, xts(df.rig.raw$Total, order.by = df.rig.raw$Date))
+colnames(BKRTotal)[[1]] <- c(str.safe.name)
+
+# Create the zoo object for gas rig count
+str.symbol <- 'BKR/Gas'
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = str.symbol,
+      string.source = "BKR",
+      string.description =  "Gas Rig Count",
+      string.label.y = "Number of rigs",
+      float.expense.ratio = -1.00,
+      date.series.start = tail(df.rig.raw$Date, 1) ,
+      date.series.end = df.rig.raw$Date[[1]]
+    )
+  )
+
+# Process the total gas rig count
+str.safe.name <-
+  str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+assign(str.safe.name, xts(df.rig.raw$Gas, order.by = df.rig.raw$Date))
+colnames(BKRGas)[[1]] <- c(str.safe.name)
+
+# Create the zoo object for oil rig count
+str.symbol <- 'BKR/Oil'
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = str.symbol,
+      string.source = "BKR",
+      string.description =  "Oil Rig Count",
+      string.label.y = "Number of rigs",
+      float.expense.ratio = -1.00,
+      date.series.start = tail(df.rig.raw$Date, 1) ,
+      date.series.end = df.rig.raw$Date[[1]]
+    )
+  )
+
+# Process the total gas rig count
+str.safe.name <-
+  str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+assign(str.safe.name, xts(df.rig.raw$Oil, order.by = df.rig.raw$Date))
+colnames(BKROil)[[1]] <- c(str.safe.name)
+
 
 ```
 
@@ -4038,6 +4187,8 @@ my.plot + geom_line(
 
 ```
 
+## Oil Services
+
 Amazing events in the first half of 2020, take a look at those
 
 ```{r crude.recent.bkr, echo=FALSE, fig.width = 13, fig.asp = 0.5}
@@ -4115,7 +4266,7 @@ p1 <-
     vjust = "bottom"
   ))
 
-##
+##-----------------------------------------------------------------------------------------------------------------##
 # Baker
 datay <- "BKR.Close"
 p2 <-
@@ -4129,7 +4280,7 @@ p2 <-
     b.long.legend = FALSE
   )
 
-# Events on the crude oil price timeline
+# Events on the baker price timeline
 str.1 <- c("2020-04-13")
 txt.1 <-
   c("Restructure\nGoodWill Impairment")
@@ -4149,23 +4300,204 @@ p2 <-
     vjust = "bottom"
   ))
 
+# Events on the baker oil price timeline
+str.1 <- c("2020-02-26")
+txt.1 <-
+  c("Worrell, 3,000\nSimonelli, 11,254\nBeattie, 5000")
+idx.list = 1
+y.1 = 0
+for (str.data in str.1) {
+  y.1[idx.list] <- df.data[rownames(df.data) == as.Date(str.1[idx.list]), datay]
+  idx.list <- idx.list + 1
+}
+d.bkr = data.table(dt = as.Date(str.1), y = y.1, txt = txt.1)
+p2 <-
+  p2 + geom_point(data = d.bkr, aes(x = dt, y = y))  + geom_text(data = d.bkr, aes(
+    x = dt,
+    y = y,
+    label = txt,
+    hjust = "right",
+    vjust = "top"
+  ))
+
+##-----------------------------------------------------------------------------------------------------------------##
+# Haliburton
+datay <- "HAL.Close"
+p3 <-
+  plotSingleQuick(
+    dfRecession,
+    df.data,
+    datay,
+    ylim = c(0, 35),
+    dtStart,
+    b.legend = TRUE,
+    b.long.legend = FALSE
+  )
+
+# Events on the haliburton price timeline
+str.1 <- c("2020-03-19")
+txt.1 <-
+  c("Furlough 3,500")
+idx.list = 1
+y.1 = 0
+for (str.data in str.1) {
+  y.1[idx.list] <- df.data[rownames(df.data) == as.Date(str.1[idx.list]), datay]
+  idx.list <- idx.list + 1
+}
+d.hal = data.table(dt = as.Date(str.1), y = y.1, txt = txt.1)
+p3 <-
+  p3 + geom_point(data = d.hal, aes(x = dt, y = y))  + geom_text(data = d.hal, aes(
+    x = dt,
+    y = y,
+    label = txt,
+    hjust = "center",
+    vjust = "top"
+  ))
+
+
+
+##-----------------------------------------------------------------------------------------------------------------##
+# Schlumberger
+datay <- "SLB.Close"
+p4 <-
+  plotSingleQuick(
+    dfRecession,
+    df.data,
+    datay,
+    ylim = c(0, 50),
+    dtStart,
+    b.legend = TRUE,
+    b.long.legend = FALSE
+  )
+
+# Events on the haliburton price timeline
+str.1 <- c("2020-03-25")
+txt.1 <-
+  c("CpeEx Cut 30%")
+idx.list = 1
+y.1 = 0
+for (str.data in str.1) {
+  y.1[idx.list] <- df.data[rownames(df.data) == as.Date(str.1[idx.list]), datay]
+  idx.list <- idx.list + 1
+}
+d.slb = data.table(dt = as.Date(str.1), y = y.1, txt = txt.1)
+p4 <-
+  p4 + geom_point(data = d.slb, aes(x = dt, y = y))  + geom_text(data = d.slb, aes(
+    x = dt,
+    y = y,
+    label = txt,
+    hjust = "center",
+    vjust = "top"
+  ))
+
 
 grid.arrange(p1,
              p2,
              ncol = 1,
              top = "Baker and Crude Oil Price Year-over-Year Changes")
 
+grid.arrange(p1,
+             p3,
+             ncol = 1,
+             top = "Haliburton and Crude Oil Price Year-over-Year Changes")
+
+grid.arrange(p1,
+             p4,
+             ncol = 1,
+             top = "Schlumberger and Crude Oil Price Year-over-Year Changes")
+
+
 ```
 
 See how the players are doing
 
-```{r crude.recent.bkr.players, echo=FALSE, fig.width = 8, fig.asp = 0.5}
+```{r crude.recent.bkr.players, echo=FALSE, fig.width = 13, fig.asp = 0.4}
 
+##-----------------------------------------------------------------------------------------------------------------##
+## Rig counts
+datay <- "BKRTotal_YoY"
+ylim <- c(-50, 20)
+dtStart = as.Date('2019-01-01')
+p1 <-
+  plotSingleQuick(
+    dfRecession,
+    df.data,
+    datay,
+    ylim,
+    dtStart,
+    b.legend = TRUE,
+    b.percentile = FALSE,
+    b.long.legend = FALSE
+  )
+
+# Events on the rig count timeline
+str.1 <- c("2020-01-20")
+txt.1 <-
+  c("First US Covid-19")
+idx.list = 1
+y.1 = 0
+for (str.data in str.1) {
+  y.1[idx.list] <- df.data[rownames(df.data) == as.Date(str.1[idx.list]), datay]
+  idx.list <- idx.list + 1
+}
+d.rigtags = data.table(dt = as.Date(str.1), y = y.1, txt = txt.1)
+p1 <-
+  p1 + geom_point(data = d.rigtags, aes(x = dt, y = y))  + geom_text(data = d.rigtags, aes(
+    x = dt,
+    y = y+5,
+    label = txt,
+    hjust = "right",
+    vjust = "bottom"
+  ))
+
+# Events on the crude oil price timeline
+str.1 <- c("2020-03-08")
+txt.1 <-
+  c("S-R Price War")
+idx.list = 1
+y.1 = 0
+for (str.data in str.1) {
+  y.1[idx.list] <- df.data[rownames(df.data) == as.Date(str.1[idx.list]), datay]
+  idx.list <- idx.list + 1
+}
+d.rigtags.1 = data.table(dt = as.Date(str.1), y = y.1, txt = txt.1)
+p1 <-
+  p1 + geom_point(data = d.rigtags.1, aes(x = dt, y = y))  + geom_text(data = d.rigtags.1, aes(
+    x = dt,
+    y = y,
+    label = txt,
+    hjust = "right",
+    vjust = "bottom"
+  ))
+
+
+# Events on the crude oil price timeline
+str.1 <- c("2020-03-30", "2020-04-10")
+txt.1 <-
+  c("OPEC Prod. Cuts Expire",
+    "S-R Reach Deal")
+idx.list = 1
+y.1 = 0
+for (str.data in str.1) {
+  y.1[idx.list] <- df.data[rownames(df.data) == as.Date(str.1[idx.list]), datay]
+  idx.list <- idx.list + 1
+}
+d.rigtags.2 = data.table(dt = as.Date(str.1), y = y.1, txt = txt.1)
+p1 <-
+  p1 + geom_point(data = d.rigtags.2, aes(x = dt, y = y)) + geom_text(data = d.rigtags.2, aes(
+    x = dt,
+    y = y,
+    label = txt,
+    hjust = "right",
+    vjust = "top"
+  ))  
+
+##-----------------------------------------------------------------------------------------------------------------##
+## Ticker price change
 datay <- "BKR.Close_YoY"
 datay.aux.1 <- "SLB.Close_YoY"
 datay.aux.2 <- "HAL.Close_YoY"
-dtStart = as.Date('2020-01-01')
-p1 <-
+p2 <-
   plotSingleQuick(
     dfRecession,
     df.data,
@@ -4175,7 +4507,7 @@ p1 <-
     b.legend = TRUE,
     b.long.legend = FALSE
   )
-p1 <- p1 + geom_line(
+p2 <- p2 + geom_line(
   data = df.data,
   aes_string(
     x = "date",
@@ -4184,7 +4516,7 @@ p1 <- p1 + geom_line(
   ),
   na.rm = TRUE
 )
-p1 + geom_line(
+p2 <- p2 + geom_line(
   data = df.data,
   aes_string(
     x = "date",
@@ -4193,6 +4525,13 @@ p1 + geom_line(
   ),
   na.rm = TRUE
 )
+
+
+
+grid.arrange(p1,
+             p2,
+             ncol = 1,
+             top = "Rig Count and Oil Field Services Companies")
 
 ```
 
@@ -6493,6 +6832,104 @@ p1 + geom_line(
 
 ```
 
+### Total Energy
+
+#### Crude Oil and Natural Gas Resource Development > Crude Oil and Natural Gas Drilling Activity Measurements
+
+```{r eia.total.Oilgasdrilling, echo=FALSE, fig.width = 9, fig.asp = 0.4 }
+
+datay <- "TOTALPANRPUSM"
+datay.aux.1 <- "TOTALOGNRPUSM"
+datay.aux.2 <- "TOTALNGNRPUSM"
+ylim <- c(7.5, 2500)
+dtStart = as.Date('1983-01-01')
+p1 <-
+  plotSingleQuick(
+    dfRecession,
+    df.data,
+    datay,
+    ylim,
+    dtStart,
+    b.legend = TRUE,
+    b.percentile = FALSE,
+    b.long.legend = TRUE
+  )
+p1 <- p1 + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux.1,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n"))
+  ),
+  na.rm = TRUE
+)
+p1 <- p1 + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux.2,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux.2, str.sep = "\n"))
+  ),
+  na.rm = TRUE
+)
+p1
+
+
+```
+
+
+## Baker Hughes Rig Count
+
+```{r bkr.total.Oilgasdrilling, echo=FALSE, fig.width = 9, fig.asp = 0.4 }
+
+datay <- "BKRTotal"
+datay.aux.1 <- "TOTALOGNRPUSM"
+datay.aux.2 <- "BKROil"
+datay.aux.3 <- "BKRGas"
+ylim <- c(7.5, 2500)
+dtStart = as.Date('1983-01-01')
+p1 <-
+  plotSingleQuick(
+    dfRecession,
+    df.data,
+    datay,
+    ylim,
+    dtStart,
+    b.legend = TRUE,
+    b.percentile = FALSE,
+    b.long.legend = TRUE
+  )
+p1 <- p1 + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux.1,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n"))
+  ),
+  na.rm = TRUE
+)
+p1 <- p1 + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux.2,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux.2, str.sep = "\n"))
+  ),
+  na.rm = TRUE
+)
+p1 <- p1 + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux.3,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux.3, str.sep = "\n"))
+  ),
+  na.rm = TRUE
+)
+p1
+
+
+```
 
 
 ## BEA Supplemental Estimates, Motor Vehicles  
