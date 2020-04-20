@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "April 19, 2020"
+date: "April 20, 2020"
 output: 
   html_document:
     toc: true
@@ -4187,6 +4187,281 @@ my.plot + geom_line(
 
 ```
 
+
+Real price of crude using producer price index for commodities
+
+```{r crude.recent.real, echo=FALSE, fig.width = 9, fig.asp = 0.4}
+
+datay <- "DCOILWTICO.by.PPIACO"
+datay.aux <- "DCOILBRENTEU.by.PPIACO"
+dtStart = as.Date('1987-01-01')
+my.plot <-
+  plotSingleQuick(
+    dfRecession,
+    df.data,
+    datay,
+    ylim = c(0, 0.75),
+    dtStart,
+    b.legend = TRUE,
+    b.long.legend = TRUE
+  )
+my.plot + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux, str.sep = "\n"))
+  ),
+  na.rm = TRUE
+)
+
+```
+
+```{r Crude_YoY, echo=FALSE}
+
+datay <- "DCOILWTICO_YoY"
+ylim <- c(-100, 150)
+dtStart = as.Date('1987-01-01')
+b.legend <- TRUE
+b.percentile <- TRUE
+plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.legend, b.percentile)
+
+```
+
+```{r crude.yoy.recent, echo=FALSE}
+
+datay <- "DCOILWTICO_YoY"
+ylim <- c(-120, 120)
+dtStart = dt.recent
+b.legend <- TRUE
+b.percentile <- TRUE
+plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.legend, b.percentile)
+
+```
+
+### Gold
+
+As risks increase investors often flock to safe haven assets like gold. An up-tick in prices can indicate investor uncertainty. This can be seen in the nominal price plot around 1980 and again in 2007.
+
+
+```{r gold.nominal.price, echo=FALSE}
+
+datay <- "GOLDAMGBD228NLBM"
+ylim <- c(0, 2000)
+dtStart = as.Date('1970-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+
+```
+
+This plots out the real price of gold by two different deflators. PPI corrected price is a little higher, to be expected since CPI also includes the effects of sales tax and imports. The spike in 1980 is especially pronounced in this series.
+
+```{r gold.by.index, echo=FALSE, fig.width = 9, fig.asp = 0.4}
+
+datay <- "GOLDAMGBD228NLBM.by.CPIAUCSL"
+ylim <- c(0, 12)
+dt.start = as.Date('1970-01-01')
+datay.aux <- "GOLDAMGBD228NLBM.by.PPIACO"
+my.plot <- plotSingle(
+  dfRecession,
+  df.data,
+  datax = "date",
+  datay,
+  titlelabel = "Real Price of Gold",
+  xlabel = "Date",
+  ylabel = getPlotYLabel(df.symbols, datay),
+  ylim,
+  xlim = c(dt.start, Sys.Date()),
+  b.legend = TRUE,
+  b.long.legend = TRUE
+)
+
+my.plot + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux, str.sep = "\n"))
+  ),
+  na.rm = TRUE
+)
+
+```
+
+See how nominal and real prices look year over year. From the long-term view seems like there is little difference in the three series. Although not shown, even over the near-term there is little difference in the series.
+
+```{r gold.YoY, echo=FALSE, fig.width = 9, fig.asp = 0.4}
+
+datay <- "GOLDAMGBD228NLBM_YoY"
+ylim <- c(-75, 75)
+dtStart = as.Date('1970-01-01')
+datay.aux <- "GOLDAMGBD228NLBM.by.CPIAUCSL_YoY"
+datay.aux.1 <- "GOLDAMGBD228NLBM.by.PPIACO_YoY"
+my.plot <- plotSingle(
+  dfRecession,
+  df.data,
+  datax = "date",
+  datay,
+  titlelabel = "Price of Gold Year-Over-Year change",
+  xlabel = "Date",
+  ylabel = getPlotYLabel(df.symbols, datay),
+  ylim,
+  xlim = c(dt.start, Sys.Date()),
+  b.legend = TRUE,
+  b.long.legend = TRUE
+)
+
+my.plot <- my.plot + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux, str.sep = "\n"))
+  ),
+  na.rm = TRUE
+)
+
+my.plot + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux.1,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n"))
+  ),
+  na.rm = TRUE
+)
+
+
+```
+
+See how gold correlates with the VIX. Both gold and VIX should respond to investor axiety, but it doesn't look like it correlates very well.
+
+```{r corrGoldYoYVix, echo=FALSE}
+
+datax = "GOLDAMGBD228NLBM_YoY"
+datay = "VIXCLS"
+titlelabel <- paste(datay, " | ", datax)
+ylim <- c(0, 45)
+ylabel <- paste(datay, ", ", df.symbols[grep(datay, df.symbols$string.symbol),]$yLabel, sep="")
+xlim <- c(-50, 50)
+xlabel <- paste(datax, ", ", df.symbols[grep(datax, df.symbols$string.symbol),]$yLabel, sep="")
+bLegend <- FALSE
+bFitLinear <- TRUE
+dtStart = as.Date('2000-01-01')
+b.reverse.y = FALSE
+plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, ylim, bLegend, bFitLinear, dtStart, b.reverse.y)
+
+```
+
+
+### Copper
+
+Dr. Copper has a reputation as an indicator of economic malaise, but it does not seem to have much of a correlation with the recessions. The series below is from CME via Quandl. It has a lot of data so I am also looking at the smoothed version.
+
+```{r plot.CHRISCMEHG1, echo=FALSE}
+datay <- "CHRISCMEHG1"
+datay_aux <- "CHRISCMEHG1_Smooth"
+ylim <- c(0, 5)
+dtStart = as.Date('1959-01-01')
+myPlot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
+            getPlotYLabel(df.symbols, datay), c(dtStart, Sys.Date()), ylim, TRUE)
+myPlot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuote(datay_aux)), na.rm = TRUE)
+
+```
+
+Copper is one of the commodities in the PPI so it is a bit of a proxy for how copper is doing relative to the basket of commodities.
+
+```{r coppyer.by.index, echo=FALSE, fig.width = 9, fig.asp = 0.4}
+
+datay <- "CHRISCMEHG1.by.CPIAUCSL"
+ylim <- c(0, 0.03)
+dt.start = as.Date('1970-01-01')
+datay.aux <- "CHRISCMEHG1.by.PPIACO"
+my.plot <- plotSingle(
+  dfRecession,
+  df.data,
+  datax = "date",
+  datay,
+  titlelabel = "Real Price of Copper",
+  xlabel = "Date",
+  ylabel = getPlotYLabel(df.symbols, datay),
+  ylim,
+  xlim = c(dt.start, Sys.Date()),
+  b.legend = TRUE,
+  b.long.legend = TRUE
+)
+
+my.plot + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux, str.sep = "\n"))
+  ),
+  na.rm = TRUE
+)
+
+```
+
+The change in prices, year over year, do generally peak prior to a recession. The time and shape of this peak varies, but it still might be helpful. A couple of the large troughs do seem to correlate with the end of the recession. Likely this is because industrial production has also fallen.
+
+```{r plot.CHRISCMEHG1.yoy, echo=FALSE}
+datay <- "CHRISCMEHG1_YoY"
+ylim <- c(-160, 60)
+dtStart = as.Date('1960-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = TRUE)
+
+```
+
+There is some correlation between copper and the smooth recession initiator, especially at the end of the recession.
+
+```{r rollingcor.indpro.copper.yoy, fig.width = 10, fig.asp = .62}
+
+datay1 <- "INDPRO_YoY"
+ylim1 <- c(-25, 25)
+
+datay2 <- "CHRISCMEHG1_YoY"
+ylim2 <- c(-160, 60)
+
+dtStart = as.Date('1960-01-01')
+
+w <- 360
+corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, datay2, ylim2, w, dtStart)
+
+```
+
+Might be easier to see correlation in a dot plot format.
+
+```{r corrscatter.indpro.copper.yoy, echo=FALSE}
+
+datay = "INDPRO_YoY"
+ylim <- c(-25, 25)
+ylabel <- paste(datay, ", ", df.symbols[grep(datay, df.symbols$string.symbol),]$yLabel, sep="")
+
+datax = "CHRISCMEHG1_YoY"
+xlim <- c(-160, 60)
+xlabel <- paste(datax, ", ", df.symbols[grep(datax, df.symbols$string.symbol),]$yLabel, sep="")
+
+titlelabel <- paste(datay, " | ", datax)
+bLegend <- FALSE
+bFitLinear <- TRUE
+dtStart = as.Date('1950-01-01')
+b.reverse.y = FALSE
+plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, ylim, bLegend, bFitLinear, 
+        dtStart, b.reverse.y)
+
+```
+
+
+This is a legacy series from FRED. It has not been updated in a couple of years so I am assuming it will go away. 
+
+```{r cuprice, echo=FALSE}
+datay <- "PCOPPUSDM"
+ylim <- c(0, 12000)
+dtStart = as.Date('1980-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+
+```
+
 ## Oil Services
 
 Amazing events in the first half of 2020, take a look at those
@@ -4535,279 +4810,6 @@ grid.arrange(p1,
 
 ```
 
-Real price of crude using producer price index for commodities
-
-```{r crude.recent.real, echo=FALSE, fig.width = 9, fig.asp = 0.4}
-
-datay <- "DCOILWTICO.by.PPIACO"
-datay.aux <- "DCOILBRENTEU.by.PPIACO"
-dtStart = as.Date('1987-01-01')
-my.plot <-
-  plotSingleQuick(
-    dfRecession,
-    df.data,
-    datay,
-    ylim = c(0, 0.75),
-    dtStart,
-    b.legend = TRUE,
-    b.long.legend = TRUE
-  )
-my.plot + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay.aux,
-    colour = shQuote(getPlotTitle(df.symbols, datay.aux, str.sep = "\n"))
-  ),
-  na.rm = TRUE
-)
-
-```
-
-```{r Crude_YoY, echo=FALSE}
-
-datay <- "DCOILWTICO_YoY"
-ylim <- c(-100, 150)
-dtStart = as.Date('1987-01-01')
-b.legend <- TRUE
-b.percentile <- TRUE
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.legend, b.percentile)
-
-```
-
-```{r crude.yoy.recent, echo=FALSE}
-
-datay <- "DCOILWTICO_YoY"
-ylim <- c(-120, 120)
-dtStart = dt.recent
-b.legend <- TRUE
-b.percentile <- TRUE
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.legend, b.percentile)
-
-```
-
-### Gold
-
-As risks increase investors often flock to safe haven assets like gold. An up-tick in prices can indicate investor uncertainty. This can be seen in the nominal price plot around 1980 and again in 2007.
-
-
-```{r gold.nominal.price, echo=FALSE}
-
-datay <- "GOLDAMGBD228NLBM"
-ylim <- c(0, 2000)
-dtStart = as.Date('1970-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
-
-```
-
-This plots out the real price of gold by two different deflators. PPI corrected price is a little higher, to be expected since CPI also includes the effects of sales tax and imports. The spike in 1980 is especially pronounced in this series.
-
-```{r gold.by.index, echo=FALSE, fig.width = 9, fig.asp = 0.4}
-
-datay <- "GOLDAMGBD228NLBM.by.CPIAUCSL"
-ylim <- c(0, 12)
-dt.start = as.Date('1970-01-01')
-datay.aux <- "GOLDAMGBD228NLBM.by.PPIACO"
-my.plot <- plotSingle(
-  dfRecession,
-  df.data,
-  datax = "date",
-  datay,
-  titlelabel = "Real Price of Gold",
-  xlabel = "Date",
-  ylabel = getPlotYLabel(df.symbols, datay),
-  ylim,
-  xlim = c(dt.start, Sys.Date()),
-  b.legend = TRUE,
-  b.long.legend = TRUE
-)
-
-my.plot + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay.aux,
-    colour = shQuote(getPlotTitle(df.symbols, datay.aux, str.sep = "\n"))
-  ),
-  na.rm = TRUE
-)
-
-```
-
-See how nominal and real prices look year over year. From the long-term view seems like there is little difference in the three series. Although not shown, even over the near-term there is little difference in the series.
-
-```{r gold.YoY, echo=FALSE, fig.width = 9, fig.asp = 0.4}
-
-datay <- "GOLDAMGBD228NLBM_YoY"
-ylim <- c(-75, 75)
-dtStart = as.Date('1970-01-01')
-datay.aux <- "GOLDAMGBD228NLBM.by.CPIAUCSL_YoY"
-datay.aux.1 <- "GOLDAMGBD228NLBM.by.PPIACO_YoY"
-my.plot <- plotSingle(
-  dfRecession,
-  df.data,
-  datax = "date",
-  datay,
-  titlelabel = "Price of Gold Year-Over-Year change",
-  xlabel = "Date",
-  ylabel = getPlotYLabel(df.symbols, datay),
-  ylim,
-  xlim = c(dt.start, Sys.Date()),
-  b.legend = TRUE,
-  b.long.legend = TRUE
-)
-
-my.plot <- my.plot + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay.aux,
-    colour = shQuote(getPlotTitle(df.symbols, datay.aux, str.sep = "\n"))
-  ),
-  na.rm = TRUE
-)
-
-my.plot + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay.aux.1,
-    colour = shQuote(getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n"))
-  ),
-  na.rm = TRUE
-)
-
-
-```
-
-See how gold correlates with the VIX. Both gold and VIX should respond to investor axiety, but it doesn't look like it correlates very well.
-
-```{r corrGoldYoYVix, echo=FALSE}
-
-datax = "GOLDAMGBD228NLBM_YoY"
-datay = "VIXCLS"
-titlelabel <- paste(datay, " | ", datax)
-ylim <- c(0, 45)
-ylabel <- paste(datay, ", ", df.symbols[grep(datay, df.symbols$string.symbol),]$yLabel, sep="")
-xlim <- c(-50, 50)
-xlabel <- paste(datax, ", ", df.symbols[grep(datax, df.symbols$string.symbol),]$yLabel, sep="")
-bLegend <- FALSE
-bFitLinear <- TRUE
-dtStart = as.Date('2000-01-01')
-b.reverse.y = FALSE
-plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, ylim, bLegend, bFitLinear, dtStart, b.reverse.y)
-
-```
-
-
-### Copper
-
-Dr. Copper has a reputation as an indicator of economic malaise, but it does not seem to have much of a correlation with the recessions. The series below is from CME via Quandl. It has a lot of data so I am also looking at the smoothed version.
-
-```{r plot.CHRISCMEHG1, echo=FALSE}
-datay <- "CHRISCMEHG1"
-datay_aux <- "CHRISCMEHG1_Smooth"
-ylim <- c(0, 5)
-dtStart = as.Date('1959-01-01')
-myPlot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
-            getPlotYLabel(df.symbols, datay), c(dtStart, Sys.Date()), ylim, TRUE)
-myPlot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuote(datay_aux)), na.rm = TRUE)
-
-```
-
-Copper is one of the commodities in the PPI so it is a bit of a proxy for how copper is doing relative to the basket of commodities.
-
-```{r coppyer.by.index, echo=FALSE, fig.width = 9, fig.asp = 0.4}
-
-datay <- "CHRISCMEHG1.by.CPIAUCSL"
-ylim <- c(0, 0.03)
-dt.start = as.Date('1970-01-01')
-datay.aux <- "CHRISCMEHG1.by.PPIACO"
-my.plot <- plotSingle(
-  dfRecession,
-  df.data,
-  datax = "date",
-  datay,
-  titlelabel = "Real Price of Copper",
-  xlabel = "Date",
-  ylabel = getPlotYLabel(df.symbols, datay),
-  ylim,
-  xlim = c(dt.start, Sys.Date()),
-  b.legend = TRUE,
-  b.long.legend = TRUE
-)
-
-my.plot + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay.aux,
-    colour = shQuote(getPlotTitle(df.symbols, datay.aux, str.sep = "\n"))
-  ),
-  na.rm = TRUE
-)
-
-```
-
-The change in prices, year over year, do generally peak prior to a recession. The time and shape of this peak varies, but it still might be helpful. A couple of the large troughs do seem to correlate with the end of the recession. Likely this is because industrial production has also fallen.
-
-```{r plot.CHRISCMEHG1.yoy, echo=FALSE}
-datay <- "CHRISCMEHG1_YoY"
-ylim <- c(-160, 60)
-dtStart = as.Date('1960-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = TRUE)
-
-```
-
-There is some correlation between copper and the smooth recession initiator, especially at the end of the recession.
-
-```{r rollingcor.indpro.copper.yoy, fig.width = 10, fig.asp = .62}
-
-datay1 <- "INDPRO_YoY"
-ylim1 <- c(-25, 25)
-
-datay2 <- "CHRISCMEHG1_YoY"
-ylim2 <- c(-160, 60)
-
-dtStart = as.Date('1960-01-01')
-
-w <- 360
-corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, datay2, ylim2, w, dtStart)
-
-```
-
-Might be easier to see correlation in a dot plot format.
-
-```{r corrscatter.indpro.copper.yoy, echo=FALSE}
-
-datay = "INDPRO_YoY"
-ylim <- c(-25, 25)
-ylabel <- paste(datay, ", ", df.symbols[grep(datay, df.symbols$string.symbol),]$yLabel, sep="")
-
-datax = "CHRISCMEHG1_YoY"
-xlim <- c(-160, 60)
-xlabel <- paste(datax, ", ", df.symbols[grep(datax, df.symbols$string.symbol),]$yLabel, sep="")
-
-titlelabel <- paste(datay, " | ", datax)
-bLegend <- FALSE
-bFitLinear <- TRUE
-dtStart = as.Date('1950-01-01')
-b.reverse.y = FALSE
-plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, ylim, bLegend, bFitLinear, 
-        dtStart, b.reverse.y)
-
-```
-
-
-This is a legacy series from FRED. It has not been updated in a couple of years so I am assuming it will go away. 
-
-```{r cuprice, echo=FALSE}
-datay <- "PCOPPUSDM"
-ylim <- c(0, 12000)
-dtStart = as.Date('1980-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
-
-```
 
 ## Federal Reserve
 
