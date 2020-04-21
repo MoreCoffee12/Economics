@@ -758,6 +758,20 @@ df.symbols <-
   rbind(
     df.symbols,
     data.frame(
+      string.symbol = "CL=F",
+      string.source = "yahoo",
+      string.description = "Crude Oil Futures",
+      string.label.y = "Dollars/bbl",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
       string.symbol = "DGS30",
       string.source = "FRED",
       string.description = "10-Year Treasury Constant Maturity Rate",

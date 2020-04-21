@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "April 20, 2020"
+date: "April 21, 2020"
 output: 
   html_document:
     toc: true
@@ -103,13 +103,29 @@ if (bRefresh == TRUE) {
 if(bRefresh) {
   # This pulls in data using quantmod
   for (idx in 1:nrow(df.symbols)) {
-    getSymbols(
-      as.character(df.symbols[idx, "string.symbol"]),
-      src = as.character(df.symbols[idx, "string.source"]),
-      auto.assign = TRUE,
-      from = as.Date("1900-01-01"),
-      to = Sys.Date()
-    )
+    
+    # This ticker symbol is an odd one. R must allow '=' as variable names, but
+    # most safe names I found removed it. Manually changed here.
+    if ( grepl("=", df.symbols[idx, "string.symbol"], fixed = TRUE) ) {
+      CLF <- getSymbols(
+        as.character(df.symbols[idx, "string.symbol"]),
+        src = as.character(df.symbols[idx, "string.source"]),
+        auto.assign = FALSE,
+        from = as.Date("1900-01-01"),
+        to = Sys.Date()
+      )
+      colnames(CLF) = c("CLF.Open","CLF.High","CLF.Low","CLF.Close","CLF.Volume","CLF.Adjusted")
+      
+    } else{
+      getSymbols(
+        as.character(df.symbols[idx, "string.symbol"]),
+        src = as.character(df.symbols[idx, "string.source"]),
+        auto.assign = TRUE,
+        from = as.Date("1900-01-01"),
+        to = Sys.Date()
+      )
+      
+    }
     
     # Grab the series for some additional extractions
     xts.temp <-
@@ -4158,12 +4174,33 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
 ```
 
+This is ticker data from yahoo
+
+```{r Crude.yahoo, echo=FALSE}
+
+datay <- "CLF.Close"
+ylim <- c(0, 150)
+dtStart = as.Date('1987-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+
+# my.plot<- df.data %>% plot_ly(x = ~index(df.data), type="candlestick",
+#           open = ~CLF.Open, close = ~CLF.Close,
+#           high = ~CLF.High, low = ~CLF.Low) 
+# my.plot <- my.plot %>% layout(title = "Basic Candlestick Chart")
+# 
+# my.plot
+
+```
+
+
+
 Take a look at both WTI and Brent crude. 
 
 ```{r crude.recent, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
 datay <- "DCOILWTICO"
 datay.aux <- "DCOILBRENTEU"
+datay.aux.1 <- "CLF.Close"
 dtStart = as.Date('2000-01-01')
 my.plot <-
   plotSingleQuick(
@@ -4175,7 +4212,7 @@ my.plot <-
     b.legend = TRUE,
     b.long.legend = TRUE
   )
-my.plot + geom_line(
+my.plot <- my.plot + geom_line(
   data = df.data,
   aes_string(
     x = "date",
@@ -4184,6 +4221,17 @@ my.plot + geom_line(
   ),
   na.rm = TRUE
 )
+my.plot <- my.plot + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux.1,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n"))
+  ),
+  na.rm = TRUE
+)
+my.plot
+
 
 ```
 
