@@ -4176,12 +4176,13 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
 This is ticker data from yahoo
 
-```{r Crude.yahoo, echo=FALSE}
+```{r Crude.yahoo, echo=FALSE, fig.width = 9, fig.asp = 1.0}
 
 datay <- "CLF.Close"
 ylim <- c(0, 150)
-dtStart = as.Date('1987-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dtStart = as.Date('2000-01-01')
+p1 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+
 
 # my.plot<- df.data %>% plot_ly(x = ~index(df.data), type="candlestick",
 #           open = ~CLF.Open, close = ~CLF.Close,
@@ -4189,6 +4190,21 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 # my.plot <- my.plot %>% layout(title = "Basic Candlestick Chart")
 # 
 # my.plot
+
+datay <- "CLF.Volume"
+ylim <- c(0, 1500000)
+p2 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+
+datay <- "CLF.Volume_YoY"
+ylim <- c(-150, 150)
+p3 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+
+
+grid.arrange(p1,
+             p2,
+             p3,
+             ncol = 1,
+             top = "Crude oil prices and volume")
 
 ```
 
