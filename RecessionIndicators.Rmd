@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "April 22, 2020"
+date: "April 23, 2020"
 output: 
   html_document:
     toc: true
@@ -4168,7 +4168,7 @@ Look at a trend of West Texas Intermediate (WTI)
 ```{r Crude, echo=FALSE}
 
 datay <- "DCOILWTICO"
-ylim <- c(0, 150)
+ylim <- c(-10, 150)
 dtStart = as.Date('1987-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
@@ -4179,7 +4179,7 @@ This is ticker data from yahoo
 ```{r Crude.yahoo, echo=FALSE, fig.width = 9, fig.asp = 1.0}
 
 datay <- "CLF.Close"
-ylim <- c(0, 150)
+ylim <- c(-10, 150)
 dtStart = as.Date('2000-01-01')
 p1 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
@@ -4217,13 +4217,13 @@ Take a look at both WTI and Brent crude.
 datay <- "DCOILWTICO"
 datay.aux <- "DCOILBRENTEU"
 datay.aux.1 <- "CLF.Close"
-dtStart = as.Date('2000-01-01')
+dtStart = as.Date('2019-01-01')
 my.plot <-
   plotSingleQuick(
     dfRecession,
     df.data,
     datay,
-    ylim = c(0, 150),
+    ylim = c(-10, 150),
     dtStart,
     b.legend = TRUE,
     b.long.legend = TRUE
@@ -4470,7 +4470,7 @@ The change in prices, year over year, do generally peak prior to a recession. Th
 
 ```{r plot.CHRISCMEHG1.yoy, echo=FALSE}
 datay <- "CHRISCMEHG1_YoY"
-ylim <- c(-160, 60)
+ylim <- c(-100, 100)
 dtStart = as.Date('1960-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = TRUE)
 
@@ -4533,7 +4533,8 @@ Amazing events in the first half of 2020, take a look at those
 ```{r crude.recent.bkr, echo=FALSE, fig.width = 13, fig.asp = 0.5}
 ##
 # Crude
-datay <- "DCOILWTICO"
+#datay <- "DCOILWTICO"
+datay <- "CLF.Close"
 datay.aux <- "DCOILBRENTEU"
 dtStart = as.Date('2019-01-01')
 p1 <-
@@ -4541,7 +4542,7 @@ p1 <-
     dfRecession,
     df.data,
     datay,
-    ylim = c(10, 80),
+    ylim = c(-10, 80),
     dtStart,
     b.legend = TRUE,
     b.long.legend = FALSE
@@ -4622,7 +4623,7 @@ p2 <-
 # Events on the baker price timeline
 str.1 <- c("2020-04-13")
 txt.1 <-
-  c("Restructure\nGoodWill Impairment")
+  c("Restructure\n $15B GoodWill Impairment")
 idx.list = 1
 y.1 = 0
 for (str.data in str.1) {
@@ -4709,10 +4710,10 @@ p4 <-
     b.long.legend = FALSE
   )
 
-# Events on the haliburton price timeline
-str.1 <- c("2020-03-25")
+# Events on the schlumberger price timeline
+str.1 <- c("2019-08-13","2020-03-25")
 txt.1 <-
-  c("CpeEx Cut 30%")
+  c("%8.8B Goodwill Impairment", "CpeEx Cut 30%")
 idx.list = 1
 y.1 = 0
 for (str.data in str.1) {
