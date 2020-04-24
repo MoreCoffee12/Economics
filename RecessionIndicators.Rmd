@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "April 23, 2020"
+date: "April 24, 2020"
 output: 
   html_document:
     toc: true
@@ -3218,7 +3218,7 @@ Take a look at some of the indications of market volatility
 ```{r VIX, echo=FALSE }
 
 datay <- "VIXCLS"
-ylim <- c(10, 45)
+ylim <- c(10, 80)
 dt.start <- as.Date('1990-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
@@ -3230,7 +3230,7 @@ As markets become complacent (low VIX) and high values, peaks often occur.
 
 
 datay <- "VIXCLS"
-ylim <- c(8, 40)
+ylim <- c(0, 80)
 dtStart = as.Date('2015-01-01')
 p1 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = TRUE)
 p1 <-
@@ -3321,7 +3321,7 @@ Compare the VIX to some of the ETF's out there.
 
 
 datay <- "VIXCLS"
-ylim <- c(8, 45)
+ylim <- c(0, 80)
 dtStart = as.Date('2015-01-01')
 p1 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = TRUE)
 p1 <-
@@ -3354,7 +3354,7 @@ p1 <-
   )
 
 datay <- "VXX.Open"
-ylim <- c(20, 55)
+ylim <- c(0, 60)
 p2 <-
   plotSingle(
     dfRecession,
