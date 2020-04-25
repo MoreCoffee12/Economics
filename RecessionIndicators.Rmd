@@ -3411,10 +3411,10 @@ There
 ```{r VIXtoGSPCCorr, echo = FALSE, fig.width = 7, fig.asp = 1.1}
 
 datay1 <- "VIXCLS"
-ylim1 <- c(0, 45)
+ylim1 <- c(0, 80)
 
 datay2 <- "GSPC.Open"
-ylim2 <- c(1500, 3000)
+ylim2 <- c(1000, d.GSPC.max)
 
 dtStart <-  as.Date('2005-01-01')
 
@@ -3453,7 +3453,7 @@ More of a correlating series than a predictor.
 
 
 datay <- "GSPC.DailySwing"
-ylim <- c(0, 0.05)
+ylim <- c(0, 0.10)
 dtStart = as.Date('2015-01-01')
 p1 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 p1 <-
@@ -3597,7 +3597,7 @@ Both the headline unemployment and U-6 number changes are similar. During the up
 ```{r UnrateDer.yoy, echo=FALSE}
 
 datay <- "UNRATE_YoY"
-ylim <- c(-50, 50)
+ylim <- c(-50, 100)
 datay.aux <- "U6RATE_YoY"
 b.percentile <- TRUE
 dt.start <- as.Date('1950-01-01')
@@ -3670,7 +3670,7 @@ Difference between U6 and U3 to see how close the economy is getting to full emp
 ```{r unrateU6toU3, echo=FALSE}
 
 datay <- "U6toU3"
-ylim <- c(0, 10)
+ylim <- c(2.5, 10)
 dt.start <- as.Date("1jan1995", "%d%b%Y")
 myPlot <-
   plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
@@ -3761,7 +3761,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```{r UNEMPLOY.yoy}
 datay <- "UNEMPLOY_YoY"
-ylim <- c(-25, 50)
+ylim <- c(-25, 100)
 dt.start <- as.Date('1968-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
@@ -3935,7 +3935,7 @@ Let's see how that looks on year over year basis. Interesting to compare to unem
 datay <- "RSALESAGG_YoY" 
 datay.aux <- "UNRATE_YoY" 
 datay.aux.scale <- 0.25;
-ylim <- c(-7.5, 12.5)
+ylim <- c(-7.5, 17.5)
 dtStart = as.Date('1998-01-01')
 myPlot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
             getPlotYLabel(df.symbols, datay), c(dtStart, Sys.Date()), ylim, TRUE)
@@ -4004,7 +4004,7 @@ This is an advanced estimate of the retail sales value.
 
 ```{r rsafs, echo=FALSE}
 datay <- "RSAFS"
-ylim <- c(160000, 520000)
+ylim <- c(160000, 550000)
 dtStart = as.Date('1992-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
@@ -4054,7 +4054,7 @@ During a recession real personal income falls. In the plot the peaks can be seen
 
 ```{r realperincex}
 datay <- "W875RX1"
-ylim <- c(0, 15000)
+ylim <- c(3000, 15000)
 plotSingleQuickModern(datay, ylim)
 
 ```
@@ -4484,7 +4484,7 @@ datay1 <- "INDPRO_YoY"
 ylim1 <- c(-25, 25)
 
 datay2 <- "CHRISCMEHG1_YoY"
-ylim2 <- c(-160, 60)
+ylim2 <- c(-100, 100)
 
 dtStart = as.Date('1960-01-01')
 
@@ -4502,7 +4502,7 @@ ylim <- c(-25, 25)
 ylabel <- paste(datay, ", ", df.symbols[grep(datay, df.symbols$string.symbol),]$yLabel, sep="")
 
 datax = "CHRISCMEHG1_YoY"
-xlim <- c(-160, 60)
+xlim <- c(-100, 100)
 xlabel <- paste(datax, ", ", df.symbols[grep(datax, df.symbols$string.symbol),]$yLabel, sep="")
 
 titlelabel <- paste(datay, " | ", datax)
