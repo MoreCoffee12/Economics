@@ -2280,7 +2280,7 @@ grid.arrange(p1, p2, p3, p4, ncol = 1, top = paste("Base Case (100% long) | Grow
 
 In this final analysis step the trading rule is plotted along with the indicator in the top pane. The middle pane shows how the trading rule modified the rate of change series. The bottom plots shows how the investment performed, compared to the S&P 500. 
 
-```{r plotbackrecInit,fig.width=7,fig.height=10}
+```{r plotbackrecInit,echo=FALSE, fig.width=7,fig.height=10}
 
 df.data$retRec <- df.data$retBase * df.data$RecInitTrade
 df.symbols <-
