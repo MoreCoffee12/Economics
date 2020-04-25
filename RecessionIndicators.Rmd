@@ -3077,10 +3077,10 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 Sometimes it is more helpful to view year over year growth.
 
-```{r NYSEMargin_Yoy }
+```{r NYSEMargin_Yoy, echo=FALSE }
 
 datay <- "FINRAMarginDebt_YoY"
-ylim <- c(-100, 50)
+ylim <- c(-50, 100)
 dt.start <- as.Date('1960-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = TRUE)
 
