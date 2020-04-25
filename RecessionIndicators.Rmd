@@ -2947,7 +2947,7 @@ my.plot + geom_line(
 
 Take a look at recent activity in the small cap market.
 
-```{r Russel, fig.width = 9, fig.asp = 0.4 }
+```{r Russel, echo=FALSE, fig.width = 9, fig.asp = 0.4 }
 datay <- "RLG.Open"
 datay.aux <- "RLG.Open_mva200"
 datay.title <- getPlotTitle(df.symbols, datay.aux, str.sep = "\n")
