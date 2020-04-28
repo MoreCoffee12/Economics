@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "April 25, 2020"
+date: "April 28, 2020"
 output: 
   html_document:
     toc: true
@@ -2991,9 +2991,14 @@ myPlot + geom_line(
 
 ```
 
-### S&P 500 to Rusell 2000 Correlation
+### S&P 500 to Rusell 2000
 
-```{r rollingcorS&PtoRussell, fig.width = 10, fig.asp = .62}
+#### Thirty day movement
+
+#### Correlation
+
+
+```{r rollingcorS&PtoRussell, echo=FALSE, fig.width = 10, fig.asp = .62}
 
 datay1 <- "RLG.Open"
 ylim1 <- c(0, 2000)
