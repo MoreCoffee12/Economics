@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "April 28, 2020"
+date: "April 29, 2020"
 output: 
   html_document:
     toc: true
@@ -2590,6 +2590,16 @@ grid.arrange(p1,
 Look at how the different segments of the market move
 
 ```{r GSPCByMDY}
+
+datay <- "GSPC.CloseBYMDY.Close_YoY"
+ylim <- c(-50, 75)
+dtStart = as.Date('1980-01-01')
+plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
+            getPlotYLabel(df.symbols, datay), c(dtStart, Sys.Date()), ylim, TRUE)
+
+```
+
+```{r GSPCByMDY.yoy}
 
 datay <- "GSPC.CloseBYMDY.Close"
 ylim <- c(0, 20)
