@@ -3718,9 +3718,9 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = TRUE
 
 Jobless claims have a seasonal component to them. One way to reduce this effect is to calculate year over year growth. That helps some, the peaks seem to be more closely aligned with the middle to end of recessions.
 
-```{r initialclaimsYoy}
+```{r initialclaimsYoy, echo=FALSE}
 datay <- "ICSA_YoY"
-ylim <- c(-75, 125)
+ylim <- c(-75, 4000)
 dt.start <- as.Date('1968-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = TRUE)
 
