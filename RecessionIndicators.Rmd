@@ -3728,11 +3728,11 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = TRUE
 
 Take a closer look at recent data
 
-```{r initialclaimsYoy.twoyears}
+```{r initialclaimsYoy.twoyears, echo=FALSE}
 
 datay <- "ICSA_YoY"
-ylim <- c(-50, 125)
-dt.start <- as.Date('2000-01-01')
+ylim <- c(-50, 4000)
+dt.start <- as.Date('2005-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = TRUE)
 
 ```
