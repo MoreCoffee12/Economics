@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "April 29, 2020"
+date: "April 30, 2020"
 output: 
   html_document:
     toc: true
@@ -565,8 +565,8 @@ df.symbols <-
       string.description =  "Total Rig Count",
       string.label.y = "Number of rigs",
       float.expense.ratio = -1.00,
-      date.series.start = tail(df.rig.raw$Date, 1) ,
-      date.series.end = df.rig.raw$Date[[1]]
+      date.series.start = df.rig.raw$Date[[1]] ,
+      date.series.end = tail(df.rig.raw$Date, 1)
     )
   )
 
