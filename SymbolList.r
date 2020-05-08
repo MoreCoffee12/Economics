@@ -43,6 +43,20 @@ df.symbols <-
   rbind(
     df.symbols,
     data.frame(
+      string.symbol = "NPPTTL",
+      string.source = "FRED",
+      string.description = "Total Nonfarm Private Payroll Employment (ADP)",
+      string.label.y = "Thousands",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
       string.symbol = "U6RATE",
       string.source = "FRED",
       string.description = "Total unemployed + margin + part-time U-6",

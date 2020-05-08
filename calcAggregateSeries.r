@@ -1148,6 +1148,28 @@ df.symbols <-
     )
   )
 
+# ADP to populations. FRED keeps both of these in units of thousands of people
+df.data$NPPTTLBYPOPTHM <-
+  (df.data$NPPTTL / df.data$POPTHM) * 100
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "NPPTTLBYPOPTHM",
+      string.source = "Calc",
+      string.description = "ADP Private Employment / Population",
+      string.label.y = "%" ,
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(c(
+        index(NPPTTL[1]), index(POPTHM[1])
+      ))) ,
+      date.series.end = as.Date(min(c(
+        index(tail(NPPTTL, 1)), index(tail(POPTHM, 1))
+      )))
+    )
+  )
+
+
 # U6 to U4 unemployment
 df.data$U6toU3 <- df.data$U6RATE - df.data$UNRATE
 df.symbols <-

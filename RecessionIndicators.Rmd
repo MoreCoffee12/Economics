@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "May 6, 2020"
+date: "May 8, 2020"
 output: 
   html_document:
     toc: true
@@ -3739,7 +3739,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = TRUE
 
 Take a look at the percentage of the population looking for work
 
-```{r LNU03000000BYPOPTHM }
+```{r LNU03000000BYPOPTHM, echo=FALSE }
 
 datay <- "LNU03000000BYPOPTHM"
 ylim <- c(0, 6)
@@ -3753,7 +3753,7 @@ my.plot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuo
 
 A bit more recent trend
 
-```{r LNU03000000BYPOPTHM.recent }
+```{r LNU03000000BYPOPTHM.recent, echo=FALSE }
 
 datay <- "LNU03000000BYPOPTHM"
 ylim <- c(0, 6)
@@ -3765,12 +3765,92 @@ my.plot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuo
 ```
 
 ### Unemployment Level
+ADP data
+
+```{r NPPTTL, echo=FALSE}
+datay <- "NPPTTL"
+ylim <- c(100000, 135000)
+dt.start <- as.Date('2000-01-01')
+  plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay,
+    getPlotTitle(df.symbols, datay),
+    "Date",
+    getPlotYLabel(df.symbols, datay),
+    c(dt.start, Sys.Date()),
+    ylim,
+    TRUE,
+    b.long.legend = FALSE
+  )
+
+```
+
+Look at the year-over-year change
+
+```{r NPPTTL.YoY, echo=FALSE}
+datay <- "NPPTTL_YoY"
+ylim <- c(-10, 5)
+dt.start <- as.Date('2000-01-01')
+  plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay,
+    getPlotTitle(df.symbols, datay),
+    "Date",
+    getPlotYLabel(df.symbols, datay),
+    c(dt.start, Sys.Date()),
+    ylim,
+    TRUE,
+    b.long.legend = FALSE
+  )
+
+```
+
+ADP data divided by the population
+
+```{r NPPTTLBYPOP, echo=FALSE}
+datay <- "NPPTTLBYPOPTHM"
+ylim <- c(30, 40)
+dt.start <- as.Date('2000-01-01')
+  plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay,
+    getPlotTitle(df.symbols, datay),
+    "Date",
+    getPlotYLabel(df.symbols, datay),
+    c(dt.start, Sys.Date()),
+    ylim,
+    TRUE,
+    b.long.legend = FALSE
+  )
+
+```
+
+
 
 ```{r UNEMPLOY}
 datay <- "UNEMPLOY"
+datay.aux <- "NPPTTL"
 ylim <- c(-75, 20000)
 dt.start <- as.Date('1968-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
+  plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay,
+    getPlotTitle(df.symbols, datay),
+    "Date",
+    getPlotYLabel(df.symbols, datay),
+    c(dt.start, Sys.Date()),
+    ylim,
+    TRUE,
+    b.long.legend = FALSE
+  )
 
 ```
 
