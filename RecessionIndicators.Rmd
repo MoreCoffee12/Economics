@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "May 13, 2020"
+date: "May 14, 2020"
 output: 
   html_document:
     toc: true
@@ -2821,7 +2821,7 @@ https://www.quandl.com/data/MULTPL/SP500_DIV_MONTH-S-P-500-Dividend-by-Month
 ```{r SP500Dividend.dollar, echo=FALSE, fig.width = 7, fig.asp = 1.1 }
 
 datay <- "MULTPLSP500DIVMONTH"
-ylim <- c(0, 60)
+ylim <- c(0, 70)
 dtStart = as.Date('1910-01-01')
 p1 <-
   plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = FALSE)
@@ -4573,7 +4573,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = TRUE)
 
 There is some correlation between copper and the smooth recession initiator, especially at the end of the recession.
 
-```{r rollingcor.indpro.copper.yoy, fig.width = 10, fig.asp = .62}
+```{r rollingcor.indpro.copper.yoy, echo=FALSE, fig.width = 10, fig.asp = .62}
 
 datay1 <- "INDPRO_YoY"
 ylim1 <- c(-25, 25)
@@ -4975,10 +4975,10 @@ grid.arrange(p1,
 
 The federal reserve has an impact on the economy, here are some data series relating to that.
 
-```{r WALCL}
+```{r WALCL, echo=FALSE}
 
 datay <- "WALCL"
-ylim <- c(0, 4800)
+ylim <- c(0, 8000)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
