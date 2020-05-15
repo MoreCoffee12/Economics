@@ -1475,7 +1475,7 @@ myPlot
 
 The data series have different start dates and they are not updated at the same time. This bit of code selects a valid data range to develop the model.
 
-```{r seldata}
+```{r seldata, echo=FALSE}
 
 model.features <- list(
   c("DGS10TOTB3MS"),
@@ -1654,7 +1654,7 @@ rpart.plot(model.fit, main=paste("Recession Indicator (Switch)\n", str.training.
 
 Rather than step through a quantitative validation I am going going to plot the data against the NEBR recessions and the recession initiation indicator. There is good agreement between the model and indicator. We can create a buy signal anytime that the indicator is above 0.5
 
-```{r predplot_switch}
+```{r predplot_switch, echo=FALSE}
 
 df.data$RecInitPred <- predict(model.fit, newdata = df.data)
 df.symbols <-
@@ -1713,7 +1713,7 @@ qplot(df.dataModel$UNRATE, df.dataModel$DGS10TOTB3MS, colour=df.dataModel$RecIni
 
 These models take some time to build and, as long as the dates do not change, we can just load them from a local copy rather re-building them.
 
-```{r train.equation.smooth.1}
+```{r train.equation.smooth.1, echo=FALSE}
 
 str.model.file <- "RecessionModels.pkl"
 
@@ -1777,7 +1777,7 @@ if (b.refresh.models){
 
 With the models trained, perform the predictions
 
-```{r predict.smooth.all}
+```{r predict.smooth.all, echo=FALSE}
 
 
 # Create the average model column
@@ -1928,7 +1928,7 @@ df.data$recession.initiation.smooth.avg <- (df.data$recession.initiation.smooth.
 
 Print out the model results.
 
-```{r predict.plot.smooth.1}
+```{r predict.plot.smooth.1, echo-FALSE}
 
 ylim <- c(0, 1)
 for (idx.feature in seq_along(model.features)){
@@ -3693,6 +3693,44 @@ myPlot
 
 ```
 
+### Unemployment and market bottoms
+
+```{r U3.GSPC, echo=FALSE, fig.width = 9, fig.asp = 0.3}
+datay <- "GDPSP500" 
+datay.aux <- "UNRATE" 
+datay.aux.scale <- 0.02;
+ylim <- c(0, 0.2)
+dtStart = as.Date('1998-01-01')
+myPlot <-
+  plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay,
+    getPlotTitle(df.symbols, datay),
+    "Date",
+    getPlotYLabel(df.symbols, datay),
+    c(dtStart, Sys.Date()),
+    ylim,
+    b.legend = TRUE,
+    b.percentile = FALSE,
+    b.long.legend = TRUE
+  )
+myPlot <-
+  myPlot + geom_line(
+    data = df.data,
+    aes_string(
+      x = "date",
+      y = df.data[[datay.aux]] * datay.aux.scale,
+      colour = shQuote(datay.aux)
+    ),
+    na.rm = TRUE
+  )
+myPlot + scale_y_continuous(sec.axis = sec_axis( ~ . * (1 / datay.aux.scale), name = "Percent"), limits = ylim)
+
+```
+
+
 ### Initial jobless claims
 
 We will also take a look at initial jobless claims, this should start to rise just before the unemployment rate.
@@ -5268,7 +5306,7 @@ myPlot <-
     df.data,
     "date",
     datay,
-    "Federal Reserve Balances as Percent of GDP",
+    "Loans, Reserves and Deposits",
     "Date",
     getPlotYLabel(df.symbols, datay),
     c(as.Date("1jan1950", "%d%b%Y"), Sys.Date()),
