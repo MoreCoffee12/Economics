@@ -515,6 +515,34 @@ df.symbols <-
   rbind(
     df.symbols,
     data.frame(
+      string.symbol = "TOTLLNSA",
+      string.source = "FRED",
+      string.description = "Loans and Leases in Bank Credit,\nAll Commercial Banks",
+      string.label.y = "Billions of U.S. Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "DPSACBW027SBOG",
+      string.source = "FRED",
+      string.description = "Deposits, All Commercial Banks",
+      string.label.y = "Billions of U.S. Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
       string.symbol = "DRCLACBS",
       string.source = "FRED",
       string.description = "Delinquency Rate on Consumer Loans,\nAll Commercial Banks, SA",

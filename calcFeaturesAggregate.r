@@ -1,5 +1,47 @@
 
 
+# Loans + reserves to compare to deposits
+df.data$TOTLNNSA.PLUS.WRESBAL <- df.data$TOTLNNSA + df.data$WRESBAL
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "TOTLNNSA.PLUS.WRESBAL",
+      string.source = "Calc",
+      string.description = "Total Loans Plus All Reserves (TOTLNNSA + WRESBAL)",
+      string.label.y = "Percent",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date(max(
+        c(df.symbols$date.series.start[df.symbols$string.symbol == 'TOTLNNSA'], index(WRESBAL[1]))
+      )) ,
+      date.series.end = as.Date(min(c(
+        df.symbols$date.series.end[df.symbols$string.symbol == 'TOTLNNSA'], index(tail(WRESBAL, 1))
+      )))
+
+    )
+  )
+
+# Loans + reserves to compare to deposits
+df.data$TOTLLNSA.PLUS.WRESBAL <- df.data$TOTLLNSA + df.data$WRESBAL
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "TOTLLNSA.PLUS.WRESBAL",
+      string.source = "Calc",
+      string.description = "Total Loans Plus All Reserves (TOTLNNSA + WRESBAL)",
+      string.label.y = "Percent",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date(max(
+        c(df.symbols$date.series.start[df.symbols$string.symbol == 'TOTLLNSA'], index(WRESBAL[1]))
+      )) ,
+      date.series.end = as.Date(min(c(
+        df.symbols$date.series.end[df.symbols$string.symbol == 'TOTLLNSA'], index(tail(WRESBAL, 1))
+      )))
+      
+    )
+  )
+
 
 df.data$GDP_YoYTODGS1 <- df.data$GDP_YoY - df.data$DGS1
 df.symbols <-

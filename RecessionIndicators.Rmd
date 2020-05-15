@@ -5248,6 +5248,70 @@ myPlot
 
 ```
 
+By double entry book-keeping reserves+loans (assets) = deposit (liabilities). Does that really work?
+
+```{r double.entrey.check, echo=FALSE, fig.width = 9, fig.asp = 0.4}
+
+datay <- "TOTLNNSA"
+datay.aux <- "DPSACBW027SBOG"
+datay.title <- getPlotTitle(df.symbols, datay.aux, str.sep = "\n")
+datay.aux.1 <- "WRESBAL"
+datay.title.1 <-
+  getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n")
+datay.aux.2 <- "TOTLNNSA.PLUS.WRESBAL"
+datay.title.2 <-
+  getPlotTitle(df.symbols, datay.aux.2, str.sep = "\n")
+ylim <- c(0, 18000)
+myPlot <-
+  plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay,
+    "Federal Reserve Balances as Percent of GDP",
+    "Date",
+    getPlotYLabel(df.symbols, datay),
+    c(as.Date("1jan1980", "%d%b%Y"), Sys.Date()),
+    ylim,
+    b.legend = TRUE,
+    b.percentile = FALSE,
+    b.long.legend = TRUE
+  )
+myPlot <-
+  myPlot + geom_line(
+    data = df.data,
+    aes_string(
+      x = "date",
+      y = datay.aux,
+      colour = shQuote(datay.title)
+    ),
+    na.rm = TRUE
+  )
+myPlot <-
+  myPlot + geom_line(
+    data = df.data,
+    aes_string(
+      x = "date",
+      y = datay.aux.1,
+      colour = shQuote(datay.title.1)
+    ),
+    na.rm = TRUE
+  )
+myPlot <-
+  myPlot + geom_line(
+    data = df.data,
+    aes_string(
+      x = "date",
+      y = datay.aux.2,
+      colour = shQuote(datay.title.2)
+    ),
+    na.rm = TRUE
+  )
+myPlot
+
+```
+
+
 ### Correlation Between Reserves and Total Loans
 
 As reserves increase there should be less lending. That correlation generally holds.
@@ -5425,11 +5489,11 @@ myPlot
 
 Basic currency trend (currency component of M1)
 
-```{r currrency.trend}
+```{r currrency.trend, echo=FALSE}
 
 datay <- "WCURRNS"
 dtStart = as.Date('1980-01-01')
-ylim <- c(0, 1800)
+ylim <- c(0, 2000)
 myplot <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 myplot
 
@@ -5459,7 +5523,7 @@ myplot
 
 The rate of change of money supply could be an indicator of a recession. Let's see how that compares.
 
-```{r M1_YoY}
+```{r M1_YoY, echo=FALSE}
 
 datay <- "M1_YoY"
 ylim <- c(-15, 25)
@@ -5513,7 +5577,7 @@ The European central band (ECB) has taken a different path compared to the US Fe
 datay <- "ECBASSETS"
 datay.aux <- "WALCL"
 datay.title <- getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n")
-ylim <- c(0, 4800)
+ylim <- c(0, 7000)
 myPlot <-
   plotSingle(
     dfRecession,
@@ -5550,7 +5614,7 @@ datay <- "WALCL.by.GDP"
 datay.aux <- "ECBASSETS.by.EUNNGDP"
 datay.aux.scale <- 0.125
 datay.title <- getPlotTitle(df.symbols, datay.aux, str.sep = "\n")
-ylim <- c(0, 25)
+ylim <- c(0, 40)
 my.plot <-
   plotSingle(
     dfRecession,
@@ -7708,7 +7772,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 ```
 
 
-#### Consumer loans, all commercial banks
+#### Consumer loans, all commercial banks - Line 20
 
 Suggested Citation:
 Board of Governors of the Federal Reserve System (US), Consumer Loans, All Commercial Banks [CONSUMERNSA], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/CONSUMERNSA, July 11, 2019.
@@ -7728,6 +7792,20 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
 
+#### Deposits, All Commercial Banks, all commercial banks - Line 34
+
+Data taken from H.8 Assets and Liabilities of Commercial Banks in the United States. Take a look at SA and NSA data series as weekly and month updates. It should all be similar at this scale.
+
+Suggested Citation:
+Board of Governors of the Federal Reserve System (US), Deposits, All Commercial Banks [DPSACBW027SBOG], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/DPSACBW027SBOG, May 14, 2020.
+
+```{r DPSACBW027SBOG.plots, echo=FALSE}
+
+datay <- "DPSACBW027SBOG"
+ylim <- c(1000, 16000)
+plotSingleQuick(dfRecession, df.data, datay, ylim)
+
+```
 
 ## Federal reserve board Z.1: Financial Accounts of the United States
 
