@@ -5252,13 +5252,13 @@ By double entry book-keeping reserves+loans (assets) = deposit (liabilities). Do
 
 ```{r double.entrey.check, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
-datay <- "TOTLNNSA"
+datay <- "TOTLLNSA"
 datay.aux <- "DPSACBW027SBOG"
 datay.title <- getPlotTitle(df.symbols, datay.aux, str.sep = "\n")
 datay.aux.1 <- "WRESBAL"
 datay.title.1 <-
   getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n")
-datay.aux.2 <- "TOTLNNSA.PLUS.WRESBAL"
+datay.aux.2 <- "TOTLLNSA.PLUS.WRESBAL"
 datay.title.2 <-
   getPlotTitle(df.symbols, datay.aux.2, str.sep = "\n")
 ylim <- c(0, 18000)
@@ -5271,7 +5271,7 @@ myPlot <-
     "Federal Reserve Balances as Percent of GDP",
     "Date",
     getPlotYLabel(df.symbols, datay),
-    c(as.Date("1jan1980", "%d%b%Y"), Sys.Date()),
+    c(as.Date("1jan1950", "%d%b%Y"), Sys.Date()),
     ylim,
     b.legend = TRUE,
     b.percentile = FALSE,

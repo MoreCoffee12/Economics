@@ -29,7 +29,7 @@ df.symbols <-
     data.frame(
       string.symbol = "TOTLLNSA.PLUS.WRESBAL",
       string.source = "Calc",
-      string.description = "Total Loans Plus All Reserves (TOTLNNSA + WRESBAL)",
+      string.description = "Total Loans Plus All Reserves (TOTLLNSA + WRESBAL)",
       string.label.y = "Percent",
       float.expense.ratio = -1.00,
       date.series.start = as.Date(max(
