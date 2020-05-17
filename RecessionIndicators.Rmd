@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "May 15, 2020"
+date: "May 17, 2020"
 output: 
   html_document:
     toc: true
@@ -2642,7 +2642,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStartBackTest)
 
 ```
 
-```{r SP500MA050MinusMA200SigTrade, fig.width=7,fig.height=10}
+```{r SP500MA050MinusMA200SigTrade, echo=FALSE, fig.width=7,fig.height=10}
 
 
 df.data$ret050MAMinus200MA <- df.data$retBase * df.data$GSPC.Open_mva050_mva200_sig
@@ -2839,7 +2839,9 @@ grid.arrange(p1,
 
 ```
 
-```{r SP500Dividend.dollar.yoy}
+Evaluate year over year dividend growth.
+
+```{r SP500Dividend.dollar.yoy, echo=FALSE}
 
 datay <- "MULTPLSP500DIVMONTH_YoY"
 ylim <- c(-50, 50)
@@ -2848,10 +2850,12 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = FALSE
 
 ```
 
-```{r SP500Dividend.dollar.near}
+Real value dividend growth.
+
+```{r SP500Dividend.dollar.near, echo=FALSE}
 
 datay <- "MULTPLSP500DIVMONTH"
-ylim <- c(20, 60)
+ylim <- c(20, 70)
 dtStart = as.Date('2001-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = FALSE)
 
@@ -3695,10 +3699,10 @@ myPlot
 
 ### Unemployment and market bottoms
 
-```{r U3.GSPC, echo=FALSE, fig.width = 9, fig.asp = 0.3}
+```{r U3.GSPC, echo=FALSE, fig.width = 11, fig.asp = 0.2}
 datay <- "GDPSP500" 
 datay.aux <- "UNRATE" 
-datay.aux.scale <- 0.02;
+datay.aux.scale <- 0.01;
 ylim <- c(0, 0.2)
 dtStart = as.Date('1998-01-01')
 myPlot <-
