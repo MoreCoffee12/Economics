@@ -117,13 +117,21 @@ if(bRefresh) {
       colnames(CLF) = c("CLF.Open","CLF.High","CLF.Low","CLF.Close","CLF.Volume","CLF.Adjusted")
       
     } else{
+      str.symbol.list <- df.symbols[idx, "string.symbol"]
+
       getSymbols(
-        as.character(df.symbols[idx, "string.symbol"]),
+        as.character(str.symbol.list),
         src = as.character(df.symbols[idx, "string.source"]),
         auto.assign = TRUE,
         from = as.Date("1900-01-01"),
         to = Sys.Date()
       )
+      
+      # Projected GDP 
+      if (str.symbol.list == "GDP"){
+        GDP <- rbind(GDP, xts(x = 19384.15, as.Date("2020-03-31") ))
+      }
+
       
     }
     
@@ -2527,7 +2535,31 @@ myPlot + geom_line(data=df.data, aes_string(x="date", y=datay_aux2, colour=shQuo
 ```{r GDPSP500, echo=FALSE}
 
 datay <- "GDPSP500"
+ylim <- c(0.00, 0.18)
+dtStart = as.Date('1980-01-01')
+my.plot <-
+  plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay,
+    getPlotTitle(df.symbols, datay),
+    "Date",
+    getPlotYLabel(df.symbols, datay),
+    c(dtStart, Sys.Date()),
+    ylim,
+    TRUE
+  )
+
+my.plot 
+
+```
+
+```{r GDPSP500.close, echo=FALSE}
+
+datay <- "GDPSP500"
 ylim <- c(0.00, 0.16)
+dtStart = as.Date('2000-01-01')
 my.plot <-
   plotSingle(
     dfRecession,
