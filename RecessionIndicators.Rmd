@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "May 23, 2020"
+date: "May 28, 2020"
 output: 
   html_document:
     toc: true
@@ -3117,7 +3117,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 Take a close look at recent activity
 
-```{r FINRA.margin.debt.nearterm}
+```{r FINRA.margin.debt.nearterm, echo=FALSE}
 
 datay <- "FINRAMarginDebt"
 ylim <- c(100000, 800000)
@@ -3672,7 +3672,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile)
 
 Historically the last two years of record low unemployment appear most similar to the 1971-1973 time frame. Just before inflation took off.
 
-```{r unrate.similar}
+```{r unrate.similar, echo=FALSE}
 datay <- "UNRATE"
 ylim <- c(3.3, 4.5)
 i.window = 730
@@ -3816,7 +3816,7 @@ Take a look at the percentage of the population looking for work
 ```{r LNU03000000BYPOPTHM, echo=FALSE }
 
 datay <- "LNU03000000BYPOPTHM"
-ylim <- c(0, 6)
+ylim <- c(0, 10)
 datay_aux <- "UNEMPLOYBYPOPTHM"
 dt.start <- as.Date('1968-01-01')
 my.plot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
@@ -3830,7 +3830,7 @@ A bit more recent trend
 ```{r LNU03000000BYPOPTHM.recent, echo=FALSE }
 
 datay <- "LNU03000000BYPOPTHM"
-ylim <- c(0, 6)
+ylim <- c(0,10)
 datay_aux <- "UNEMPLOYBYPOPTHM"
 my.plot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
             getPlotYLabel(df.symbols, datay), c(dt.recent, Sys.Date()), ylim, TRUE)
@@ -3865,7 +3865,7 @@ Look at the year-over-year change
 
 ```{r NPPTTL.YoY, echo=FALSE}
 datay <- "NPPTTL_YoY"
-ylim <- c(-10, 5)
+ylim <- c(-15, 5)
 dt.start <- as.Date('2000-01-01')
   plotSingle(
     dfRecession,
@@ -5931,7 +5931,11 @@ Business loans should slow before the recession (a contraction in credit as rate
 
 ### Commercial and industrial loans as percent of GDP and and income
 
-Look at business debt normalized by GDP over the entire time series
+Look at business debt normalized by GDP over the entire time series. This ratio often peaks at the mid-point of a recession.
+
+https://www.wsj.com/articles/this-isnt-your-fathers-corporate-bond-market-11590574555
+
+"Bonds are behaving more like bank debt, which tends to remain stable or even increase at the onset of recessions, as lenders keep distressed clients afloat—and only later turn off the taps. This was confirmed by a recent report from the Bank for International Settlements. It also found a tight link between this lending cycle and the “real” economy’s booms and busts."
 
 ```{r BusinessDebt.by.GDP, echo = FALSE, fig.width = 7, fig.asp = 1.3}
 
@@ -6469,7 +6473,7 @@ p1 + geom_line(data=df.data, aes_string(x="date", y=datay.aux, colour=shQuote(da
 ```
 
 Check out LIBOR and fed funds rate
-```{r bond3monthlibor }
+```{r bond3monthlibor, echo=FALSE }
 
 datay <- "TB3MS"
 datay_aux <- "USD1MTD156N"
@@ -6485,7 +6489,7 @@ myPlot
 
 The 1-year is plotted below. The yield flattens before a recession as investors go long on bonds and short on equities.
 
-```{r bond1 }
+```{r bond1, echo=FALSE }
 
 datay <- "DGS1"
 ylim <- c(0, 20)
