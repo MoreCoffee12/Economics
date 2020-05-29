@@ -3907,10 +3907,10 @@ dt.start <- as.Date('2000-01-01')
 
 
 
-```{r UNEMPLOY}
+```{r UNEMPLOY, echo=FALSE}
 datay <- "UNEMPLOY"
 datay.aux <- "NPPTTL"
-ylim <- c(-75, 20000)
+ylim <- c(-75, 25000)
 dt.start <- as.Date('1968-01-01')
   plotSingle(
     dfRecession,
