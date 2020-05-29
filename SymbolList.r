@@ -978,19 +978,19 @@ df.symbols <-
     )
   )
 
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
-      string.symbol = "^SPX",
-      string.source = "yahoo",
-      string.description = "S&P 500",
-      string.label.y = "Dollars",
-      float.expense.ratio = -1.00,
-      date.series.start = as.Date("1900-01-01") ,
-      date.series.end = as.Date("1900-01-01")
-    )
-  )
+# df.symbols <-
+#   rbind(
+#     df.symbols,
+#     data.frame(
+#       string.symbol = "^SPX",
+#       string.source = "yahoo",
+#       string.description = "S&P 500",
+#       string.label.y = "Dollars",
+#       float.expense.ratio = -1.00,
+#       date.series.start = as.Date("1900-01-01") ,
+#       date.series.end = as.Date("1900-01-01")
+#     )
+#   )
 
 df.symbols <-
   rbind(
