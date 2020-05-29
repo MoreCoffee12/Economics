@@ -982,6 +982,48 @@ df.symbols <-
   rbind(
     df.symbols,
     data.frame(
+      string.symbol = "^SPX",
+      string.source = "yahoo",
+      string.description = "S&P 500",
+      string.label.y = "Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "^RLG",
+      string.source = "yahoo",
+      string.description = "Russell 1000 Growth ETF",
+      string.label.y = "Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "^DJI",
+      string.source = "yahoo",
+      string.description = "Dow Jones Industrial Average",
+      string.label.y = "Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
       string.symbol = "GDP",
       string.source = "FRED",
       string.description = "Gross Domestic Product",
@@ -1148,20 +1190,6 @@ df.symbols <-
       string.label.y = "Index 2012 = 100",
       float.expense.ratio = -1.00,
       date.series.start = as.Date("1900-01-01") ,
-      date.series.end = as.Date("1900-01-01")
-    )
-  )
-
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
-      string.symbol = "^RLG",
-      string.source = "yahoo",
-      string.description = "Russell 1000 Growth ETF",
-      string.label.y = "Dollars",
-      float.expense.ratio = -1.00,
-      date.series.start = as.Date("1900-01-01"),
       date.series.end = as.Date("1900-01-01")
     )
   )

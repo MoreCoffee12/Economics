@@ -45,7 +45,6 @@ calcFeatures <- function(df.data, df.symbols){
     # Start with the YoY calculation
     str.symbolYoY <- paste(str.symbol, "_YoY", sep = "")
     df.data[str.symbolYoY] <- CalcYoY(df.data, str.symbol, 365)
-    
     #print(paste(str.symbol,'-',str.symbolYoY, '-', str.description))
     df.symbols <-
       rbind(
@@ -54,7 +53,48 @@ calcFeatures <- function(df.data, df.symbols){
           string.symbol = str.symbolYoY,
           string.source = "Calc",
           string.description = paste(str.description, "\nYear over Year", sep =
-                         ""),
+                                       ""),
+          string.label.y = "Percent",
+          float.expense.ratio = -1.00,
+          date.series.start = date.temp,
+          date.series.end = date.temp.end
+        )
+      )
+    
+    
+    # These series were added to help evaluate structured products and
+    # answer the question, what is the probability of a decline over a period of
+    # 4 and 5 years.
+    str.symbolYoY4 <- paste(str.symbol, "_YoY4", sep = "")
+    df.data[str.symbolYoY4] <- CalcYoY(df.data, str.symbol, (365*4))
+    #print(paste(str.symbol,'-',str.symbolYoY4, '-', str.description))
+    df.symbols <-
+      rbind(
+        df.symbols,
+        data.frame(
+          string.symbol = str.symbolYoY4,
+          string.source = "Calc",
+          string.description = paste(str.description, "\n4 Year over 4 Year", sep =
+                                       ""),
+          string.label.y = "Percent",
+          float.expense.ratio = -1.00,
+          date.series.start = date.temp,
+          date.series.end = date.temp.end
+        )
+      )
+    
+    # The 5-year series
+    str.symbolYoY5 <- paste(str.symbol, "_YoY5", sep = "")
+    df.data[str.symbolYoY5] <- CalcYoY(df.data, str.symbol, (365*5))
+    #print(paste(str.symbol,'-',str.symbolYoY5, '-', str.description))
+    df.symbols <-
+      rbind(
+        df.symbols,
+        data.frame(
+          string.symbol = str.symbolYoY5,
+          string.source = "Calc",
+          string.description = paste(str.description, "\n5 Year over 5 Year", sep =
+                                       ""),
           string.label.y = "Percent",
           float.expense.ratio = -1.00,
           date.series.start = date.temp,
