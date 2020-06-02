@@ -43,6 +43,20 @@ df.symbols <-
   rbind(
     df.symbols,
     data.frame(
+      string.symbol = "CCSA",
+      string.source = "FRED",
+      string.description = "Continued Claims (Insured Unemployment)",
+      string.label.y = "Number",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
       string.symbol = "NPPTTL",
       string.source = "FRED",
       string.description = "Total Nonfarm Private Payroll Employment (ADP)",

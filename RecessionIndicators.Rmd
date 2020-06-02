@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "May 30, 2020"
+date: "June 1, 2020"
 output: 
   html_document:
     toc: true
@@ -3796,6 +3796,36 @@ dt.start <- as.Date('1950-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile)
 
 ```
+
+### Continuing Claims
+
+A good measure of how much unemployment is growing
+
+```{r CCSA, echo=FALSE}
+
+datay <- "CCSA"
+ylim <- c(0, 28000000)
+datay.aux <- "CCSA"
+b.percentile <- TRUE
+dt.start <- as.Date('1950-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile)
+
+```
+
+
+A good measure of how much unemployment is growing
+
+```{r CCSA.close, echo=FALSE}
+
+datay <- "CCSA"
+ylim <- c(0, 28000000)
+datay.aux <- "CCSA"
+b.percentile <- TRUE
+dt.start <- as.Date('2000-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile)
+
+```
+
 
 ### Unemployment rates, year-over-year
 
