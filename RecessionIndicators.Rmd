@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "June 1, 2020"
+date: "June 4, 2020"
 output: 
   html_document:
     toc: true
@@ -3821,7 +3821,7 @@ datay <- "CCSA"
 ylim <- c(0, 28000000)
 datay.aux <- "CCSA"
 b.percentile <- TRUE
-dt.start <- as.Date('2000-01-01')
+dt.start <- as.Date('2009-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile)
 
 ```
@@ -3834,7 +3834,7 @@ Both the headline unemployment and U-6 number changes are similar. During the up
 ```{r UnrateDer.yoy, echo=FALSE}
 
 datay <- "UNRATE_YoY"
-ylim <- c(-50, 100)
+ylim <- c(-50, 350)
 datay.aux <- "U6RATE_YoY"
 b.percentile <- TRUE
 dt.start <- as.Date('1950-01-01')
@@ -3876,7 +3876,7 @@ Let's also take a look at the total unemployed, U-6. It continues to fall as the
 
 datay <- "UNRATE"
 datay_aux <- "U6RATE"
-ylim <- c(0, 20)
+ylim <- c(0, 25)
 myPlot <-
   plotSingle(
     dfRecession,
@@ -3957,7 +3957,7 @@ myPlot + scale_y_continuous(sec.axis = sec_axis( ~ . * (1 / datay.aux.scale), na
 
 We will also take a look at initial jobless claims, this should start to rise just before the unemployment rate.
 
-```{r initclaims}
+```{r initclaims, echo=FALSE}
 
 datay <- "ICSA"
 ylim <- c(100000, 7000000)
@@ -3968,7 +3968,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 It looks like the jobless claim tend to peak more towards the end of the recession. It does not seem to be as strong of a sell indicator as the U-3 rate.
 
-```{r initclaimsDer}
+```{r initclaimsDer, echo=FALSE}
 datay <- "ICSA_SmoothDer"
 ylim <- c(-3500, 3500)
 dt.start <- as.Date('1968-01-01')
@@ -4025,7 +4025,8 @@ my.plot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuo
 ```
 
 ### Unemployment Level
-ADP data
+
+ADP data here. comes out before the official numbers.
 
 ```{r NPPTTL, echo=FALSE}
 datay <- "NPPTTL"
@@ -4047,11 +4048,11 @@ dt.start <- as.Date('2000-01-01')
 
 ```
 
-Look at the year-over-year change
+Look at the year-over-year change in ADP.
 
 ```{r NPPTTL.YoY, echo=FALSE}
 datay <- "NPPTTL_YoY"
-ylim <- c(-15, 5)
+ylim <- c(-20, 5)
 dt.start <- as.Date('2000-01-01')
   plotSingle(
     dfRecession,
@@ -4116,7 +4117,7 @@ dt.start <- as.Date('1968-01-01')
 
 ```{r UNEMPLOY.yoy}
 datay <- "UNEMPLOY_YoY"
-ylim <- c(-25, 100)
+ylim <- c(-25, 350)
 dt.start <- as.Date('1968-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
@@ -4141,7 +4142,7 @@ myPlot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuot
 ```{r PAYNSA_YoY}
 
 datay <- "PAYNSA_YoY"
-ylim <- c(-7.5, 7.5)
+ylim <- c(-17.5, 7.5)
 b.legend <- TRUE
 b.percentile <- TRUE
 plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
@@ -4152,7 +4153,7 @@ plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay),
 ```{r PAYNSA_YoY.Recent}
 
 datay <- "PAYNSA_YoY"
-ylim <- c(-7.5, 7.5)
+ylim <- c(-17.5, 7.5)
 b.legend <- TRUE
 b.percentile <- FALSE
 dt.start <- as.Date('2000-01-01')
@@ -4191,7 +4192,7 @@ A more recent look
 ```{r avghours_yoy.recent}
 
 datay <- "CEU0600000007_YoY"
-ylim <- c(-5, 5)
+ylim <- c(-7.5, 5)
 b.percentile <- FALSE
 dt.start <- as.Date('2010-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile)
@@ -4214,7 +4215,7 @@ The derivative isn't bad, but it sometimes crosses zeros well into a recession. 
 
 ```{r indproderplot, echo=FALSE}
 datay <- "INDPRO_SmoothDer"
-ylim <- c(-0.07, 0.03)
+ylim <- c(-0.25, 0.03)
 dt.start <- as.Date('1968-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = TRUE)
 
@@ -4264,7 +4265,7 @@ The derivative of retail sales is a little more erratic than is was the industri
 
 ```{r rsalesderplot, echo=FALSE}
 datay <- "RSALESAGG_SmoothDer" 
-ylim <- c(-50, 35)
+ylim <- c(-350, 35)
 dt.start <- as.Date('1968-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = TRUE)
 
@@ -4276,7 +4277,7 @@ Take a look at year-over-year changes
 
 ```{r rsalesderplot.yoy, echo=FALSE}
 datay <- "RSALESAGG_YoY" 
-ylim <- c(-7.5, 7.5)
+ylim <- c(-17.5, 7.5)
 dt.start <- as.Date('1968-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = TRUE)
 
@@ -4290,7 +4291,7 @@ Let's see how that looks on year over year basis. Interesting to compare to unem
 datay <- "RSALESAGG_YoY" 
 datay.aux <- "UNRATE_YoY" 
 datay.aux.scale <- 0.25;
-ylim <- c(-7.5, 17.5)
+ylim <- c(-17.5, 17.5)
 dtStart = as.Date('1998-01-01')
 myPlot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
             getPlotYLabel(df.symbols, datay), c(dtStart, Sys.Date()), ylim, TRUE)
@@ -4369,7 +4370,7 @@ Also take a look at year over year
 
 ```{r rsafs.yoy, echo=FALSE}
 datay <- "RSAFS_YoY"
-ylim <- c(-12.5, 10.5)
+ylim <- c(-22.5, 10.5)
 dtStart = as.Date('1992-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
@@ -4379,7 +4380,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
 ```{r rsalesYoYToU4, echo=FALSE}
 datay <- "RSALESAGG_YoY" 
-ylim <- c(-10, 10)
+ylim <- c(-20, 10)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 
@@ -4398,7 +4399,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```{r realperincYoY, echo=FALSE}
 datay <- "RPI_YoY"
-ylim <- c(-10, 10)
+ylim <- c(-10, 15)
 plotSingleQuickModern(datay, ylim)
 
 ```
@@ -4418,7 +4419,7 @@ The features we are interested in are the peaks and valleys so we'll use the der
 
 ```{r rperincderplot, echo=FALSE}
 datay <- "W875RX1_SmoothDer"
-ylim <- c(-3, 3)
+ylim <- c(-20, 3)
 plotSingleQuickModern(datay, ylim)
 
 ```
@@ -4457,7 +4458,7 @@ Check out the YoY growth
 
 ```{r CPIPlot_YoY}
 datay <- "CPIAUCSL_YoY"
-ylim <- c(-2, 13)
+ylim <- c(-2, 15)
 plotSingleQuickModern(datay, ylim)
 
 ```
@@ -5582,7 +5583,7 @@ datay <- "WRESBAL_YoY"
 datay.aux <- "TOTLNNSA_YoY"
 datay.aux.scale <- 4
 datay.title <- getPlotTitle(df.symbols, datay.aux, str.sep = "\n")
-ylim <- c(-50, 50)
+ylim <- c(-50, 100)
 my.plot <-
   plotSingle(
     dfRecession,
@@ -6659,6 +6660,7 @@ p1 + geom_line(data=df.data, aes_string(x="date", y=datay.aux, colour=shQuote(da
 ```
 
 Check out LIBOR and fed funds rate
+
 ```{r bond3monthlibor, echo=FALSE }
 
 datay <- "TB3MS"
