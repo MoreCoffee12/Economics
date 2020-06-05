@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "June 4, 2020"
+date: "June 5, 2020"
 output: 
   html_document:
     toc: true
@@ -1597,7 +1597,7 @@ rpart.plot(model.fit, main=paste("Recession Indicator (Switch, 10 year to 3 Mont
 
 Plot the data against the NEBR recessions and the recession initiation indicator. T
 
-```{r predplot_switch.1}
+```{r predplot_switch.1, echo=FALSE}
 
 df.data$RecInitPred <- predict(model.fit, newdata = df.data)
 df.symbols <-
