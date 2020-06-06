@@ -4325,11 +4325,15 @@ plotSingle(
 
 ```
 
-### Employment Correlation, U3 (UNRATE) and ICSA_YoY with PAYNSA_YoY
+### Employment Correlation, U3 (UNRATE) and ICSA 
 
-Calculate linear model fit across the series.
+Calculate linear model fit across the series. ISCA only records those claiming benefits. Presumably, only a subset of those claiming benefits will prove out to be eligible to receive benefits. It should always be greater than the contining claim numbers.
 
-```{r U3.pred, echo=FALSE}
+https://fredblog.stlouisfed.org/2020/04/things-to-know-about-initial-claims-data/
+
+The linear fit for this series will not likely be as accurate as the CCSA prediction
+
+```{r U3.pred.ICSA, echo=FALSE}
 
 # The U6 numbers do not have as much historical data as the U3 so valid data for fit
 # begins early. I also exluded the Covid 16 mess of data.
@@ -4341,14 +4345,14 @@ df.emp.model <-
 
 # Perform the fit
 list.fit.u3icsapaynsa <- train(
-  UNRATE ~ ICSA_YoY + PAYNSA_YoY,
+  UNRATE ~ ICSA,
   data = df.emp.model,
   method = "lm",
   preProcess = c('center', 'scale')
 )
 
 # Add prediction to the dataframe
-str.symbol <- "U3.lm.ICSA_YoY.PAYNSA_YoY"
+str.symbol <- "U3.lm.ICSA"
 df.data[str.symbol] <-
   predict(list.fit.u3icsapaynsa, newdata = df.data)
 
@@ -4359,7 +4363,7 @@ df.symbols <-
     data.frame(
       string.symbol = str.symbol,
       string.source = "Predict",
-      string.description = "Linear Model Prediction\nU3 given ICSA_YoY and PAYNSA_YOY",
+      string.description = "Linear Model Prediction\nU3 given ICSA",
       string.label.y = "(-)",
       float.expense.ratio = -1.00,
       Max030 = FALSE,
@@ -4370,7 +4374,7 @@ df.symbols <-
   )
 
 # Document the residual as wel
-str.symbol.res <- "U3.lm.ICSA_YoY.PAYNSA_YoY.res"
+str.symbol.res <- "U3.lm.ICSA.res"
 df.data[str.symbol.res] <- df.data$UNRATE - df.data[str.symbol]
 
 # Add the U3 linear model model prediction residual to the symbols table
@@ -4380,7 +4384,7 @@ df.symbols <-
     data.frame(
       string.symbol = str.symbol.res,
       string.source = "Predict Resid.",
-      string.description = "Linear Model Residual\nU3 given ICSA_YoY and PAYNSA_YOY",
+      string.description = "Linear Model Residual\nU3 given ICSA",
       string.label.y = "(-)",
       float.expense.ratio = -1.00,
       Max030 = FALSE,
@@ -4394,7 +4398,7 @@ df.symbols <-
 
 Plot the measured U3 (UNRATE) to U6 predicted by a linear fit to ICSA and PAYNSA_YoY.
 
-```{r U3.pred.plot, echo=FALSE,, fig.width = 10, fig.asp = .62}
+```{r U3.pred.ICSA.plot, echo=FALSE,, fig.width = 10, fig.asp = .62}
 
 
 datay <- "UNRATE"
@@ -4430,7 +4434,7 @@ myPlot + geom_line(
 
 Plot the residual for the U6 linear fit. The residuals decrease quite a bit during the Covid numbers, at least as of Jun 2020. Probably indicates uncertainty in the numbers.
 
-```{r EMP.cor.resid, echo=FALSE,, fig.width = 6, fig.asp = .82}
+```{r U3.pred.ICSA.resid, echo=FALSE,, fig.width = 6, fig.asp = .82}
 
 datay <- str.symbol.res
 ylim <- c(-4, 4)
