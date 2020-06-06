@@ -3799,7 +3799,11 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile)
 
 ### Continuing Claims
 
-A good measure of how much unemployment is growing
+A good measure of how much unemployment is growing. 
+
+Continued claims, also referred to as insured unemployment, is the number of people who have already filed an initial claim and who have experienced a week of unemployment and then filed a continued claim to claim benefits for that week of unemployment. Continued claims data are based on the week of unemployment, not the week when the initial claim was filed
+
+https://fred.stlouisfed.org/series/CCNSA
 
 ```{r CCSA, echo=FALSE}
 
@@ -3807,7 +3811,7 @@ datay <- "CCSA"
 ylim <- c(0, 28000000)
 datay.aux <- "CCSA"
 b.percentile <- TRUE
-dt.start <- as.Date('1950-01-01')
+dt.start <- as.Date('1967-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile)
 
 ```
@@ -4235,7 +4239,7 @@ df.symbols <-
       string.symbol = str.symbol,
       string.source = "Predict",
       string.description = "Linear Model Prediction\nU6 given U3",
-      string.label.y = "(-)",
+      string.label.y = df.symbols[df.symbols$string.symbol=="UNRATE","string.label.y"],
       float.expense.ratio = -1.00,
       Max030 = FALSE,
       Max180 = FALSE,
@@ -4256,7 +4260,7 @@ df.symbols <-
       string.symbol = str.symbol.res,
       string.source = "Predict Resid.",
       string.description = "Linear Model Residual\nU6 given U3",
-      string.label.y = "(-)",
+      string.label.y = df.symbols[df.symbols$string.symbol==str.symbol,"string.label.y"],
       float.expense.ratio = -1.00,
       Max030 = FALSE,
       Max180 = FALSE,
@@ -4333,7 +4337,312 @@ https://fredblog.stlouisfed.org/2020/04/things-to-know-about-initial-claims-data
 
 The linear fit for this series will not likely be as accurate as the CCSA prediction
 
+```{r U3.pred.ICSA.setup, echo=FALSE}
+
+# The U6 numbers do not have as much historical data as the U3 so valid data for fit
+# begins early. I also exluded the Covid 16 mess of data.
+dt.start.prediction <- as.Date("1967-01-07")
+dt.end.prediction <- as.Date("2020-01-01")
+df.emp.model <-
+  df.data[df.data$date >= dt.start.prediction &
+            df.data$date <= dt.end.prediction,]
+
+# I break the data into three sets: 50% for training, 25% for testing, and 25% for validation.
+set.seed(123456)
+in.train <- createDataPartition(y=df.emp.model$RecInit, p = 0.50, list=FALSE)
+df.train <- df.dataModel[in.train,]
+df.data.rest <- df.emp.model[-in.train,]
+in.val <- createDataPartition(y = df.data.rest$RecInit, p = 0.50, list = FALSE)
+df.val <- df.data.rest[in.val,]
+df.test <- df.data.rest[-in.val,]
+
+```
+
+```{r U3.pred.ICSA.setup, echo=FALSE}
+# Perform the fit
+list.fit.u3icsapaynsa <- train(
+  UNRATE ~ ICSA,
+  data = df.train,
+  method = "lm",
+  preProcess = c('center', 'scale')
+)
+
+list.fit.knn.u3icsapaynsa <- train(
+  UNRATE ~ ICSA,
+  data = df.train,
+  method = "knn",
+  preProcess = c('center', 'scale')
+)
+
+```
+
+
+
 ```{r U3.pred.ICSA, echo=FALSE}
+
+# Add linear prediction to the dataframe
+str.symbol <- "U3.lm.ICSA"
+df.data[str.symbol] <-
+  predict(list.fit.u3icsapaynsa, newdata = df.data)
+
+# Add the linear model prediction to the symbols table
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = str.symbol,
+      string.source = "Predict",
+      string.description = "Linear Model Prediction\nU3 given ICSA",
+      string.label.y = df.symbols[df.symbols$string.symbol=="UNRATE","string.label.y"],
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = dt.start.prediction,
+      date.series.end = as.Date(Sys.Date())
+    )
+  )
+
+# Document the residual as well
+str.symbol.res <- "U3.lm.ICSA.res"
+df.data[str.symbol.res] <- df.data$UNRATE - df.data[str.symbol]
+
+# Add the U3 linear model prediction residual to the symbols table
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = str.symbol.res,
+      string.source = "Predict Resid.",
+      string.description = "Linear Model Residual\nU3 given ICSA",
+      string.label.y = df.symbols[df.symbols$string.symbol==str.symbol,"string.label.y"],
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = dt.start.prediction,
+      date.series.end = as.Date(Sys.Date())
+    )
+  )
+
+# Add knn prediction to the dataframe
+str.symbol.knn <- "U3.knn.ICSA"
+df.data[str.symbol.knn] <-
+  predict(list.fit.knn.u3icsapaynsa, newdata = df.data)
+
+# Add the nearest neighbors prediction to the symbols table
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = str.symbol.knn,
+      string.source = "Predict",
+      string.description = "KNN Model Prediction\nU3 given ICSA",
+      string.label.y = df.symbols[df.symbols$string.symbol=="UNRATE","string.label.y"],
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = dt.start.prediction,
+      date.series.end = as.Date(Sys.Date())
+    )
+  )
+
+# Document the residual as well
+str.symbol.res.knn <- "U3.knn.ICSA.res"
+df.data[str.symbol.res.knn] <- df.data$UNRATE - df.data[str.symbol]
+
+# Add the U3 nearest neighbor prediction residual to the symbols table
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = str.symbol.res.knn,
+      string.source = "Predict Resid.",
+      string.description = "KNN Model Residual\nU3 given ICSA",
+      string.label.y = df.symbols[df.symbols$string.symbol==str.symbol.knn,"string.label.y"],
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = dt.start.prediction,
+      date.series.end = as.Date(Sys.Date())
+    )
+  )
+
+```
+
+Look at how the fits performed on the test data partition
+
+```{r U3.pred.ICSA.perf, echo=FALSE}
+
+d.test.resid = (df.test$UNRATE - predict(list.fit.u3icsapaynsa, newdata = df.test))
+hist(d.test.resid, main=paste("Residual For", str.symbol.res, sep=" "))
+sd.fit.u3icsapaynsa = sd(d.test.resid)
+
+
+d.test.resid.knn = (df.test$UNRATE - predict(list.fit.knn.u3icsapaynsa, newdata = df.test))
+hist(d.test.resid.knn, main=paste("Residual For", str.symbol.res.knn, sep=" "))
+sd.fit.knn.u3icsapaynsa = sd(d.test.resid.knn)
+
+```
+
+Plot the measured U3 (UNRATE) to U3 predicted by a linear fit to ICSA.
+
+```{r U3.pred.ICSA.plot, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+
+datay <- str.symbol.knn
+datay.aux <- str.symbol
+datay.aux.1 <- "UNRATE"
+ylim <- c(0, 15)
+dt.end <- Sys.Date()
+myPlot <-
+  plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay,
+    "U3 Compared to U3 predicted using initial claims, ICSA",
+    "Date",
+    getPlotYLabel(df.symbols, datay),
+    c(dt.start.prediction, dt.end),
+    ylim,
+    b.legend = TRUE,
+    b.percentile = FALSE,
+    b.long.legend = TRUE
+  )
+myPlot <- myPlot + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux))
+  ),
+  na.rm = TRUE
+)
+
+myPlot + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux.1,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux.1))
+  ),
+  na.rm = TRUE
+)
+
+```
+
+Take a closer look, given the interest around latest U3 numbers
+
+```{r U3.pred.ICSA.plot.recent, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+
+datay <- str.symbol.knn
+datay.aux <- str.symbol
+datay.aux.1 <- "UNRATE"
+ylim <- c(-10, 75)
+dt.end <- Sys.Date()
+dt.start <- as.Date("2020-01-01")
+myPlot <-
+  plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay,
+    "U3 Compared to U3 predicted using ICSA",
+    "Date",
+    getPlotYLabel(df.symbols, datay),
+    c(dt.start, dt.end),
+    ylim,
+    b.legend = TRUE,
+    b.percentile = FALSE,
+    b.long.legend = TRUE
+  )
+myPlot <- myPlot + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux))
+  ),
+  na.rm = TRUE
+)
+
+myPlot <- myPlot + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux.1,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux.1))
+  ),
+  na.rm = TRUE
+)
+
+print(myPlot)
+
+```
+
+
+Plot the residual for the U3 to predict U3 from ICSA.
+
+```{r U3.pred.ICSA.resid.lm, echo=FALSE, fig.width = 6, fig.asp = .82}
+
+datay <- str.symbol.res
+ylim <- c(-50, 10)
+myPlot <- plotSingle(
+  dfRecession,
+  df.data,
+  "date",
+  datay,
+  getPlotTitle(df.symbols, datay),
+  "Date",
+  getPlotYLabel(df.symbols, datay),
+  c(dt.start.prediction, Sys.Date()),
+  ylim,
+  b.legend = TRUE,
+  b.percentile = TRUE,
+  b.long.legend = FALSE
+)
+
+
+myPlot <- myPlot + geom_hline(yintercept=(6*sd.fit.u3icsapaynsa), color = "red", linetype="dashed")
+myPlot <- myPlot + geom_hline(yintercept=(-6*sd.fit.u3icsapaynsa), color = "red", linetype="dashed")
+
+print(myPlot)
+
+```
+
+```{r U3.pred.ICSA.resid.knn, echo=FALSE, fig.width = 6, fig.asp = .82}
+
+datay <- str.symbol.res.knn
+ylim <- c(-50, 10)
+myPlot <- plotSingle(
+  dfRecession,
+  df.data,
+  "date",
+  datay,
+  getPlotTitle(df.symbols, datay),
+  "Date",
+  getPlotYLabel(df.symbols, datay),
+  c(dt.start.prediction, Sys.Date()),
+  ylim,
+  b.legend = TRUE,
+  b.percentile = TRUE,
+  b.long.legend = FALSE
+)
+
+
+myPlot <- myPlot + geom_hline(yintercept=(6*sd.fit.knn.u3icsapaynsa), color = "red", linetype="dashed")
+myPlot <- myPlot + geom_hline(yintercept=(-6*sd.fit.knn.u3icsapaynsa), color = "red", linetype="dashed")
+
+print(myPlot)
+
+```
+
+### Employment Correlation, U3 (UNRATE) and CCSA 
+
+Calculate linear model fit across the series. CCSA only records those who have experienced a week of unemployment and the filed a continuing claim.
+
+
+```{r U3.pred.CCSA, echo=FALSE}
 
 # The U6 numbers do not have as much historical data as the U3 so valid data for fit
 # begins early. I also exluded the Covid 16 mess of data.
@@ -4345,14 +4654,14 @@ df.emp.model <-
 
 # Perform the fit
 list.fit.u3icsapaynsa <- train(
-  UNRATE ~ ICSA,
+  UNRATE ~ CCSA + CCSA^2,
   data = df.emp.model,
   method = "lm",
   preProcess = c('center', 'scale')
 )
 
 # Add prediction to the dataframe
-str.symbol <- "U3.lm.ICSA"
+str.symbol <- "U3.lm.CCSA"
 df.data[str.symbol] <-
   predict(list.fit.u3icsapaynsa, newdata = df.data)
 
@@ -4363,8 +4672,8 @@ df.symbols <-
     data.frame(
       string.symbol = str.symbol,
       string.source = "Predict",
-      string.description = "Linear Model Prediction\nU3 given ICSA",
-      string.label.y = "(-)",
+      string.description = "Linear Model Prediction\nU3 given CCSA",
+      string.label.y = df.symbols[df.symbols$string.symbol=="UNRATE","string.label.y"],
       float.expense.ratio = -1.00,
       Max030 = FALSE,
       Max180 = FALSE,
@@ -4374,7 +4683,7 @@ df.symbols <-
   )
 
 # Document the residual as wel
-str.symbol.res <- "U3.lm.ICSA.res"
+str.symbol.res <- "U3.lm.CCSA.res"
 df.data[str.symbol.res] <- df.data$UNRATE - df.data[str.symbol]
 
 # Add the U3 linear model model prediction residual to the symbols table
@@ -4384,8 +4693,8 @@ df.symbols <-
     data.frame(
       string.symbol = str.symbol.res,
       string.source = "Predict Resid.",
-      string.description = "Linear Model Residual\nU3 given ICSA",
-      string.label.y = "(-)",
+      string.description = "Linear Model Residual\nU3 given CCSA",
+      string.label.y = df.symbols[df.symbols$string.symbol==str.symbol,"string.label.y"],
       float.expense.ratio = -1.00,
       Max030 = FALSE,
       Max180 = FALSE,
@@ -4396,22 +4705,22 @@ df.symbols <-
 
 ```
 
-Plot the measured U3 (UNRATE) to U6 predicted by a linear fit to ICSA and PAYNSA_YoY.
+Plot the measured U3 (UNRATE) to U3 predicted by a linear fit to CCSA.
 
-```{r U3.pred.ICSA.plot, echo=FALSE,, fig.width = 10, fig.asp = .62}
+```{r U3.pred.CCSA.plot, echo=FALSE,, fig.width = 10, fig.asp = .62}
 
 
 datay <- "UNRATE"
 datay_aux <- str.symbol
 ylim <- c(0, 15)
-dt.end <- as.Date("2020-05-01")
+dt.end <- Sys.Date()
 myPlot <-
   plotSingle(
     dfRecession,
     df.data,
     "date",
     datay,
-    "U6 Compared to U6 predicted using U3 (UNRATE)",
+    "U3 Compared to U3 predicted using CCSA",
     "Date",
     getPlotYLabel(df.symbols, datay),
     c(dt.start.prediction, dt.end),
@@ -4432,12 +4741,50 @@ myPlot + geom_line(
 
 ```
 
-Plot the residual for the U6 linear fit. The residuals decrease quite a bit during the Covid numbers, at least as of Jun 2020. Probably indicates uncertainty in the numbers.
+Zoom in a little. There is a lot of discussion about how valid the latest U3 numbers are.
 
-```{r U3.pred.ICSA.resid, echo=FALSE,, fig.width = 6, fig.asp = .82}
+```{r U3.pred.CCSA.plot.recent, echo=FALSE,, fig.width = 10, fig.asp = .62}
+
+
+datay <- "UNRATE"
+datay_aux <- str.symbol
+ylim <- c(0, 50)
+dt.end <- Sys.Date()
+dt.start <- as.Date("2020-01-01")
+myPlot <-
+  plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay,
+    "U3 Compared to U3 predicted using CCSA",
+    "Date",
+    getPlotYLabel(df.symbols, datay),
+    c(dt.start, dt.end),
+    ylim,
+    b.legend = TRUE,
+    b.percentile = FALSE,
+    b.long.legend = TRUE
+  )
+myPlot + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay_aux,
+    colour = shQuote(getPlotTitle(df.symbols, datay_aux))
+  ),
+  na.rm = TRUE
+)
+
+```
+
+
+Plot the residual for the U3 linear fit. The residuals decrease quite a bit during the Covid numbers, at least as of Jun 2020. Probably indicates uncertainty in the numbers.
+
+```{r U3.pred.CCSA.resid, echo=FALSE,, fig.width = 6, fig.asp = .82}
 
 datay <- str.symbol.res
-ylim <- c(-4, 4)
+ylim <- c(-10, 5)
 plotSingle(
   dfRecession,
   df.data,
@@ -4446,10 +4793,10 @@ plotSingle(
   getPlotTitle(df.symbols, datay),
   "Date",
   getPlotYLabel(df.symbols, datay),
-  c(as.Date("1jan1994", "%d%b%Y"), Sys.Date()),
+  c(dt.start.prediction, Sys.Date()),
   ylim,
   b.legend = TRUE,
-  b.percentile = FALSE,
+  b.percentile = TRUE,
   b.long.legend = FALSE
 )
 
