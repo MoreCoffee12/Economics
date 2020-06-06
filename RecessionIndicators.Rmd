@@ -4115,7 +4115,7 @@ dt.start <- as.Date('1968-01-01')
 
 ```
 
-```{r UNEMPLOY.yoy}
+```{r UNEMPLOY.yoy, echo=FALSE}
 datay <- "UNEMPLOY_YoY"
 ylim <- c(-25, 350)
 dt.start <- as.Date('1968-01-01')
@@ -4127,7 +4127,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 Look at the BLS data on payrolls. Check the NSA series, then we will look at YoY data.
 
-```{r PAYNSA}
+```{r PAYNSA, echo=FALSE}
 datay <- "PAYNSA"
 datay_aux <- "PAYNSA_Smooth"
 ylim <- c(20000, 160000)
@@ -4139,7 +4139,7 @@ myPlot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuot
 
 ```
 
-```{r PAYNSA_YoY}
+```{r PAYNSA_YoY, echo=FALSE}
 
 datay <- "PAYNSA_YoY"
 ylim <- c(-17.5, 7.5)
@@ -4150,7 +4150,7 @@ plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay),
 
 ```
 
-```{r PAYNSA_YoY.Recent}
+```{r PAYNSA_YoY.Recent, echo=FALSE}
 
 datay <- "PAYNSA_YoY"
 ylim <- c(-17.5, 7.5)
@@ -4166,7 +4166,7 @@ plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay),
 
 Sparked by an article at Mises (https://mises.org/wire/how-alexandria-ocasio-cortez-misunderstands-american-poverty), take a look at average weekly hours
 
-```{r avghours}
+```{r avghours, echo=FALSE}
 
 datay <- "CEU0600000007"
 ylim <- c(36, 43)
@@ -4177,7 +4177,7 @@ plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay),
 
 The time series is pretty lumpy, plot the YoY change
 
-```{r avghours_yoy}
+```{r avghours_yoy, echo=FALSE}
 
 datay <- "CEU0600000007_YoY"
 ylim <- c(-7.5, 7.5)
@@ -4189,7 +4189,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile)
 
 A more recent look
 
-```{r avghours_yoy.recent}
+```{r avghours_yoy.recent, echo=FALSE}
 
 datay <- "CEU0600000007_YoY"
 ylim <- c(-7.5, 5)
@@ -4199,6 +4199,132 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile)
 
 
 ```
+
+### Employment Correlation
+
+Correlation across some of the series.
+
+```{r EMP.cor, echo=FALSE}
+
+# The U6 numbers do not have as much historical data as the U3 so valid data for fit
+# begins early. I also exluded the Covid 16 mess of data.
+dt.start.prediction <- as.Date("1994-01-01")
+dt.end.prediction <- as.Date("2020-01-01")
+df.emp.model <-
+  df.data[df.data$date >= dt.start.prediction &
+            df.data$date <= dt.end.prediction,]
+
+# Perform the fit
+list.fit.u3u6 <- train(
+  U6RATE ~ UNRATE + UNRATE^2,
+  data = df.emp.model,
+  method = "lm",
+  preProcess = c('center', 'scale')
+)
+
+# Add prediction to the dataframe
+str.symbol <- "U6.lm.U3"
+df.data[str.symbol] <-
+  predict(list.fit.u3u6, newdata = df.data)
+
+# Add the linear model model prediction to the symbols table
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = str.symbol,
+      string.source = "Predict",
+      string.description = "Linear Model Prediction\nU6 given U3",
+      string.label.y = "(-)",
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = dt.start.prediction,
+      date.series.end = as.Date(Sys.Date())
+    )
+  )
+
+# Document the residual as wel
+str.symbol.res <- "U6.lm.U3.res"
+df.data[str.symbol.res] <- df.data$U6RATE - df.data[str.symbol]
+
+# Add the u6 linear model model prediction residual to the symbols table
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = str.symbol.res,
+      string.source = "Predict Resid.",
+      string.description = "Linear Model Residual\nU6 given U3",
+      string.label.y = "(-)",
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = dt.start.prediction,
+      date.series.end = as.Date(Sys.Date())
+    )
+  )
+
+```
+
+Plot the measured U6 (U6RATE) to U6 predicted by a linear fit to U3.
+
+```{r EMP.cor.plot, echo=FALSE,, fig.width = 10, fig.asp = .62}
+
+
+datay <- "U6RATE"
+datay_aux <- str.symbol
+ylim <- c(0, 25)
+myPlot <-
+  plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay,
+    "U6 Compared to U6 predicted using U3 (UNRATE)",
+    "Date",
+    getPlotYLabel(df.symbols, datay),
+    c(as.Date("1jan1994", "%d%b%Y"), Sys.Date()),
+    ylim,
+    b.legend = TRUE,
+    b.percentile = FALSE,
+    b.long.legend = TRUE
+  )
+myPlot + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay_aux,
+    colour = shQuote(getPlotTitle(df.symbols, datay_aux))
+  ),
+  na.rm = TRUE
+)
+
+```
+
+Plot the residual for the U6 linear fit
+
+```{r EMP.cor.resid, echo=FALSE,, fig.width = 6, fig.asp = .82}
+
+datay <- str.symbol.res
+ylim <- c(-4, 4)
+plotSingle(
+  dfRecession,
+  df.data,
+  "date",
+  datay,
+  getPlotTitle(df.symbols, datay),
+  "Date",
+  getPlotYLabel(df.symbols, datay),
+  c(as.Date("1jan1994", "%d%b%Y"), Sys.Date()),
+  ylim,
+  b.legend = TRUE,
+  b.percentile = FALSE,
+  b.long.legend = FALSE
+)
+
+```
+
 
 ## Industrial Production
 
