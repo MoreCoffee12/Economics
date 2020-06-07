@@ -4414,6 +4414,69 @@ myPlot <- myPlot + geom_line(
 print(myPlot)
 ```
 
+This section normalizes total non-farm payroll data provided by ADP and in the NPPTTL series on FRED. Unlike ICSA or CCSA the values here are thousands rather than numbers.
+
+```{r lf.lm.NPPTTL.norm, echo=FALSE, fig.width = 8, fig.asp = .52}
+
+# Add linear prediction to the dataframe
+str.symbol <- "NPPTTL.by.CLF16OV.lm.POPTHM"
+df.data[str.symbol] <- 100 * ( 1 - (df.data$NPPTTL / df.data$CLF16OV.lm.POPTHM) )
+
+# Add the linear model prediction to the symbols table
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = str.symbol,
+      string.source = "Predict",
+      string.description = "NPPTTL (ADP) normalized by\nlabor force from POPTHM",
+      string.label.y = "Percent",
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = dt.start.prediction,
+      date.series.end = as.Date(Sys.Date())
+    )
+  )
+
+
+```
+
+
+```{r lf.lm.NPPTTL.norm.plot, echo=FALSE, fig.width = 8, fig.asp = .52}
+
+datay <- "NPPTTL.by.CLF16OV.lm.POPTHM"
+datay.aux <- "UNRATE"
+ylim <- c(0, 40)
+dt.end <- Sys.Date()
+dt.start <- as.Date("2002-04-01")
+myPlot <-
+  plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay,
+    "NPPTTL Compared to CLF16OV predicted using overall population, POPTHM",
+    "Date",
+    getPlotYLabel(df.symbols, datay),
+    c(dt.start, dt.end),
+    ylim,
+    b.legend = TRUE,
+    b.percentile = FALSE,
+    b.long.legend = TRUE
+  )
+myPlot <- myPlot + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux))
+  ),
+  na.rm = TRUE
+)
+
+print(myPlot)
+```
 
 ### Employment Correlation, U6 and U3
 
