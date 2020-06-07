@@ -4206,9 +4206,9 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile)
 
 ### Employment Correlation, U6 and U3
 
-Correlation across some of the series.
+Correlation across some of the series. This section checks that survey data is coherent within itself. Do the U3 and U5 series generally agree?
 
-```{r EMP.cor, echo=FALSE}
+```{r EMP.cor.setup, echo=FALSE}
 
 # The U6 numbers do not have as much historical data as the U3 so valid data for fit
 # begins early. I also exluded the Covid 16 mess of data.
@@ -4218,20 +4218,55 @@ df.emp.model <-
   df.data[df.data$date >= dt.start.prediction &
             df.data$date <= dt.end.prediction,]
 
-# Perform the fit
+
+# I break the data into three sets: 50% for training, 25% for testing, and 25% for validation.
+set.seed(123456)
+in.train <- createDataPartition(y=df.emp.model$U6RATE, p = 0.50, list=FALSE)
+df.train <- df.emp.model[in.train,]
+df.data.rest <- df.emp.model[-in.train,]
+in.val <- createDataPartition(y = df.data.rest$U6RATE, p = 0.50, list = FALSE)
+df.val <- df.data.rest[in.val,]
+df.test <- df.data.rest[-in.val,]
+
+```
+
+```{r EMP.cor.fit, echo=FALSE}
+
+# Perform the linear fit
 list.fit.u3u6 <- train(
-  U6RATE ~ UNRATE + UNRATE^2,
-  data = df.emp.model,
+  U6RATE ~ UNRATE,
+  data = df.train,
   method = "lm",
   preProcess = c('center', 'scale')
 )
+
+# Perform the knn fit
+list.fit.knn.u3u6 <- train(
+  U6RATE ~ UNRATE,
+  data = df.train,
+  method = "knn",
+  preProcess = c('center', 'scale')
+)
+
+# Perform the neural net fit
+list.fit.nnet.u3u6 <- train(
+  U6RATE ~ UNRATE,
+  data = df.train,
+  method = "nnet",
+  preProcess = c('center', 'scale'),
+  trace = FALSE
+)
+
+```
+
+```{r EMP.cor, echo=FALSE}
 
 # Add prediction to the dataframe
 str.symbol <- "U6.lm.U3"
 df.data[str.symbol] <-
   predict(list.fit.u3u6, newdata = df.data)
 
-# Add the linear model model prediction to the symbols table
+# Add the linear model prediction to the symbols table
 df.symbols <-
   rbind(
     df.symbols,
@@ -4248,11 +4283,11 @@ df.symbols <-
     )
   )
 
-# Document the residual as wel
+# Document the residual as well
 str.symbol.res <- "U6.lm.U3.res"
 df.data[str.symbol.res] <- df.data$U6RATE - df.data[str.symbol]
 
-# Add the u6 linear model model prediction residual to the symbols table
+# Add the u6 linear model residual to the symbols table
 df.symbols <-
   rbind(
     df.symbols,
@@ -4269,15 +4304,124 @@ df.symbols <-
     )
   )
 
+# Add knn prediction to the dataframe
+str.symbol.knn <- "U6.knn.U3"
+df.data[str.symbol.knn] <-
+  predict(list.fit.knn.u3u6, newdata = df.data)
+
+# Add the knn prediction to the symbols table
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = str.symbol.knn,
+      string.source = "Predict",
+      string.description = "KNN Model Prediction\nU6 given U3",
+      string.label.y = df.symbols[df.symbols$string.symbol=="UNRATE","string.label.y"],
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = dt.start.prediction,
+      date.series.end = as.Date(Sys.Date())
+    )
+  )
+
+# Document the residual as well
+str.symbol.res.knn <- "U6.knn.U3.res"
+df.data[str.symbol.res.knn] <- df.data$U6RATE - df.data[str.symbol.knn]
+
+# Add the u6 linear model residual to the symbols table
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = str.symbol.res.knn,
+      string.source = "Predict Resid.",
+      string.description = "KNN Model Residual\nU6 given U3",
+      string.label.y = df.symbols[df.symbols$string.symbol==str.symbol,"string.label.y"],
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = dt.start.prediction,
+      date.series.end = as.Date(Sys.Date())
+    )
+  )
+
+
+# Add nnet prediction to the dataframe
+str.symbol.nnet <- "U6.nnet.U3"
+df.data[str.symbol.nnet] <-
+  predict(list.fit.nnet.u3u6, newdata = df.data)
+
+# Add the nnet prediction to the symbols table
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = str.symbol.nnet,
+      string.source = "Predict",
+      string.description = "NN Model Prediction\nU6 given U3",
+      string.label.y = df.symbols[df.symbols$string.symbol=="UNRATE","string.label.y"],
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = dt.start.prediction,
+      date.series.end = as.Date(Sys.Date())
+    )
+  )
+
+# Document the residual as well
+str.symbol.res.nnet <- "U6.nnet.U3.res"
+df.data[str.symbol.res.nnet] <- df.data$U6RATE - df.data[str.symbol.nnet]
+
+# Add the u6 nnet model residual to the symbols table
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = str.symbol.res.nnet,
+      string.source = "Predict Resid.",
+      string.description = "NN Model Residual\nU6 given U3",
+      string.label.y = df.symbols[df.symbols$string.symbol==str.symbol,"string.label.y"],
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = dt.start.prediction,
+      date.series.end = as.Date(Sys.Date())
+    )
+  )
+
+```
+
+
+
+Look at how the fits performed on the test data partition
+
+```{r U3.EMP.cor.perf, echo=FALSE}
+
+d.test.resid = (df.test$U6RATE - predict(list.fit.u3u6, newdata = df.test))
+hist(d.test.resid, main=paste("Residual For", str.symbol.res, sep=" "))
+sd.fit.u3u6 = sd(d.test.resid)
+
+
+d.test.resid.knn = (df.test$U6RATE - predict(list.fit.knn.u3u6, newdata = df.test))
+hist(d.test.resid.knn, main=paste("Residual For", str.symbol.res.knn, sep=" "))
+sd.fit.knn.u3u6 = sd(d.test.resid.knn)
+
+d.test.resid.nnet = (df.test$U6RATE - predict(list.fit.nnet.u3u6, newdata = df.test))
+hist(d.test.resid.nnet, main=paste("Residual For", str.symbol.res.nnet, sep=" "))
+sd.fit.nnet.u3u6 = sd(d.test.resid.nnet)
+
 ```
 
 Plot the measured U6 (U6RATE) to U6 predicted by a linear fit to U3.
 
-```{r EMP.cor.plot, echo=FALSE,, fig.width = 10, fig.asp = .62}
+```{r EMP.cor.plot, echo=FALSE, fig.width = 10, fig.asp = .62}
 
-
-datay <- "U6RATE"
-datay_aux <- str.symbol
+datay <- "U6.lm.U3"
+# datay.aux <- str.symbol.nnet
+datay.aux <- "U6RATE"
+# datay.aux.1 <- "U6RATE"
 ylim <- c(0, 25)
 myPlot <-
   plotSingle(
@@ -4294,25 +4438,95 @@ myPlot <-
     b.percentile = FALSE,
     b.long.legend = TRUE
   )
-myPlot + geom_line(
+myPlot <- myPlot + geom_line(
   data = df.data,
   aes_string(
     x = "date",
-    y = datay_aux,
-    colour = shQuote(getPlotTitle(df.symbols, datay_aux))
+    y = datay.aux,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux))
   ),
   na.rm = TRUE
 )
 
+# myPlot <- myPlot + geom_line(
+#   data = df.data,
+#   aes_string(
+#     x = "date",
+#     y = datay.aux.1,
+#     colour = shQuote(getPlotTitle(df.symbols, datay.aux.1))
+#   ),
+#   na.rm = TRUE
+# )
+
+# myPlot <- myPlot + geom_line(
+#   data = df.data,
+#   aes_string(
+#     x = "date",
+#     y = datay.aux.2,
+#     colour = shQuote(getPlotTitle(df.symbols, datay.aux.2))
+#   ),
+#   na.rm = TRUE
+# )
+
+print(myPlot)
+
 ```
+
+```{r EMP.cor.plot.close, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+datay <- "U6.lm.U3"
+datay.aux <- "U6RATE"
+# datay.aux.1 <- "U6RATE"
+ylim <- c(0, 30)
+dt.start <- as.Date('2020-01-02')
+myPlot <-
+  plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay,
+    "U6 Compared to U6 predicted using U3 (UNRATE)",
+    "Date",
+    getPlotYLabel(df.symbols, datay),
+    c(dt.start, Sys.Date()),
+    ylim,
+    b.legend = TRUE,
+    b.percentile = FALSE,
+    b.long.legend = TRUE
+  )
+myPlot <- myPlot + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux))
+  ),
+  na.rm = TRUE
+)
+# myPlot <- myPlot + geom_line(
+#   data = df.data,
+#   aes_string(
+#     x = "date",
+#     y = datay.aux.1,
+#     colour = shQuote(getPlotTitle(df.symbols, datay.aux.1))
+#   ),
+#   na.rm = TRUE
+# )
+
+
+print(myPlot)
+
+```
+
 
 Plot the residual for the U6 linear fit. The residuals decrease quite a bit during the Covid numbers, at least as of Jun 2020. Probably indicates uncertainty in the numbers.
 
 ```{r EMP.cor.resid, echo=FALSE,, fig.width = 6, fig.asp = .82}
 
 datay <- str.symbol.res
+datay.aux <- str.symbol.res.knn
 ylim <- c(-4, 4)
-plotSingle(
+myPlot <- plotSingle(
   dfRecession,
   df.data,
   "date",
@@ -4323,9 +4537,14 @@ plotSingle(
   c(as.Date("1jan1994", "%d%b%Y"), Sys.Date()),
   ylim,
   b.legend = TRUE,
-  b.percentile = FALSE,
+  b.percentile = TRUE,
   b.long.legend = FALSE
 )
+
+myPlot <- myPlot + geom_hline(yintercept=(6*sd.fit.u3u6), color = "red", linetype="dashed")
+myPlot <- myPlot + geom_hline(yintercept=(-6*sd.fit.u3u6), color = "red", linetype="dashed")
+
+print(myPlot)
 
 ```
 
@@ -4349,16 +4568,16 @@ df.emp.model <-
 
 # I break the data into three sets: 50% for training, 25% for testing, and 25% for validation.
 set.seed(123456)
-in.train <- createDataPartition(y=df.emp.model$RecInit, p = 0.50, list=FALSE)
-df.train <- df.dataModel[in.train,]
+in.train <- createDataPartition(y=df.emp.model$ICSA, p = 0.50, list=FALSE)
+df.train <- df.emp.model[in.train,]
 df.data.rest <- df.emp.model[-in.train,]
-in.val <- createDataPartition(y = df.data.rest$RecInit, p = 0.50, list = FALSE)
+in.val <- createDataPartition(y = df.data.rest$ICSA, p = 0.50, list = FALSE)
 df.val <- df.data.rest[in.val,]
 df.test <- df.data.rest[-in.val,]
 
 ```
 
-```{r U3.pred.ICSA.setup, echo=FALSE}
+```{r U3.pred.ICSA.fit, echo=FALSE}
 # Perform the fit
 list.fit.u3icsapaynsa <- train(
   UNRATE ~ ICSA,
@@ -4447,7 +4666,7 @@ df.symbols <-
 
 # Document the residual as well
 str.symbol.res.knn <- "U3.knn.ICSA.res"
-df.data[str.symbol.res.knn] <- df.data$UNRATE - df.data[str.symbol]
+df.data[str.symbol.res.knn] <- df.data$UNRATE - df.data[str.symbol.knn]
 
 # Add the U3 nearest neighbor prediction residual to the symbols table
 df.symbols <-
@@ -4488,9 +4707,9 @@ Plot the measured U3 (UNRATE) to U3 predicted by a linear fit to ICSA.
 ```{r U3.pred.ICSA.plot, echo=FALSE, fig.width = 10, fig.asp = .62}
 
 
-datay <- str.symbol.knn
-datay.aux <- str.symbol
-datay.aux.1 <- "UNRATE"
+datay <- "U3.lm.ICSA"
+datay.aux <- "UNRATE"
+# datay.aux.1 <- "UNRATE"
 ylim <- c(0, 15)
 dt.end <- Sys.Date()
 myPlot <-
@@ -4518,16 +4737,17 @@ myPlot <- myPlot + geom_line(
   na.rm = TRUE
 )
 
-myPlot + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay.aux.1,
-    colour = shQuote(getPlotTitle(df.symbols, datay.aux.1))
-  ),
-  na.rm = TRUE
-)
+# myPlot + geom_line(
+#   data = df.data,
+#   aes_string(
+#     x = "date",
+#     y = datay.aux.1,
+#     colour = shQuote(getPlotTitle(df.symbols, datay.aux.1))
+#   ),
+#   na.rm = TRUE
+# )
 
+print(myPlot)
 ```
 
 Take a closer look, given the interest around latest U3 numbers
@@ -4536,7 +4756,7 @@ Take a closer look, given the interest around latest U3 numbers
 
 
 datay <- str.symbol.knn
-datay.aux <- str.symbol
+datay.aux <- "UNRATE"
 datay.aux.1 <- "UNRATE"
 ylim <- c(-10, 75)
 dt.end <- Sys.Date()
@@ -4566,15 +4786,15 @@ myPlot <- myPlot + geom_line(
   na.rm = TRUE
 )
 
-myPlot <- myPlot + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay.aux.1,
-    colour = shQuote(getPlotTitle(df.symbols, datay.aux.1))
-  ),
-  na.rm = TRUE
-)
+# myPlot <- myPlot + geom_line(
+#   data = df.data,
+#   aes_string(
+#     x = "date",
+#     y = datay.aux.1,
+#     colour = shQuote(getPlotTitle(df.symbols, datay.aux.1))
+#   ),
+#   na.rm = TRUE
+# )
 
 print(myPlot)
 
@@ -4612,7 +4832,7 @@ print(myPlot)
 
 ```{r U3.pred.ICSA.resid.knn, echo=FALSE, fig.width = 6, fig.asp = .82}
 
-datay <- str.symbol.res.knn
+datay <- "U3.knn.ICSA.res"
 ylim <- c(-50, 10)
 myPlot <- plotSingle(
   dfRecession,
@@ -4642,7 +4862,7 @@ print(myPlot)
 Calculate linear model fit across the series. CCSA only records those who have experienced a week of unemployment and the filed a continuing claim.
 
 
-```{r U3.pred.CCSA, echo=FALSE}
+```{r U3.pred.CCSA.setup, echo=FALSE}
 
 # The U6 numbers do not have as much historical data as the U3 so valid data for fit
 # begins early. I also exluded the Covid 16 mess of data.
@@ -4652,20 +4872,44 @@ df.emp.model <-
   df.data[df.data$date >= dt.start.prediction &
             df.data$date <= dt.end.prediction,]
 
+# I break the data into three sets: 50% for training, 25% for testing, and 25% for validation.
+set.seed(123456)
+in.train <- createDataPartition(y=df.emp.model$ICSA, p = 0.50, list=FALSE)
+df.train <- df.emp.model[in.train,]
+df.data.rest <- df.emp.model[-in.train,]
+in.val <- createDataPartition(y = df.data.rest$ICSA, p = 0.50, list = FALSE)
+df.val <- df.data.rest[in.val,]
+df.test <- df.data.rest[-in.val,]
+
+```
+
+```{r U3.pred.CCSA.fit, echo=FALSE}
+
 # Perform the fit
-list.fit.u3icsapaynsa <- train(
+list.fit.u3ccsa <- train(
   UNRATE ~ CCSA + CCSA^2,
   data = df.emp.model,
   method = "lm",
   preProcess = c('center', 'scale')
 )
 
-# Add prediction to the dataframe
+list.fit.knn.u3ccsa <- train(
+  UNRATE ~ ICSA,
+  data = df.train,
+  method = "knn",
+  preProcess = c('center', 'scale')
+)
+
+```
+
+```{r U3.pred.CCSA, echo=FALSE}
+
+# Add linear model prediction to the dataframe
 str.symbol <- "U3.lm.CCSA"
 df.data[str.symbol] <-
-  predict(list.fit.u3icsapaynsa, newdata = df.data)
+  predict(list.fit.u3ccsa, newdata = df.data)
 
-# Add the linear model model prediction to the symbols table
+# Add the linear model prediction to the symbols table
 df.symbols <-
   rbind(
     df.symbols,
@@ -4682,7 +4926,7 @@ df.symbols <-
     )
   )
 
-# Document the residual as wel
+# Document the residual as well
 str.symbol.res <- "U3.lm.CCSA.res"
 df.data[str.symbol.res] <- df.data$UNRATE - df.data[str.symbol]
 
@@ -4703,7 +4947,65 @@ df.symbols <-
     )
   )
 
+# Add KNN model prediction to the dataframe
+str.symbol <- "U3.knn.CCSA"
+df.data[str.symbol] <-
+  predict(list.fit.knn.u3ccsa, newdata = df.data)
+
+# Add the knn model prediction to the symbols table
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = str.symbol,
+      string.source = "Predict",
+      string.description = "KNN Prediction\nU3 given CCSA",
+      string.label.y = df.symbols[df.symbols$string.symbol=="UNRATE","string.label.y"],
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = dt.start.prediction,
+      date.series.end = as.Date(Sys.Date())
+    )
+  )
+
+# Document the residual as well
+str.symbol.res <- "U3.knn.CCSA.res"
+df.data[str.symbol.res] <- df.data$UNRATE - df.data[str.symbol]
+
+# Add the U3 knn model prediction residual to the symbols table
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = str.symbol.res,
+      string.source = "Predict Resid.",
+      string.description = "KNN Residual\nU3 given CCSA",
+      string.label.y = df.symbols[df.symbols$string.symbol==str.symbol,"string.label.y"],
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = dt.start.prediction,
+      date.series.end = as.Date(Sys.Date())
+    )
+  )
 ```
+
+Look at how the fits performed on the test data partition
+
+```{r U3.pred.CCSA.perf, echo=FALSE}
+
+d.test.resid = (df.test$UNRATE - predict(list.fit.u3ccsa, newdata = df.test))
+hist(d.test.resid, main=paste("Residual For", str.symbol.res, sep=" "))
+sd.fit.u3ccsa = sd(d.test.resid)
+
+
+d.test.resid.knn = (df.test$UNRATE - predict(list.fit.knn.u3ccsa, newdata = df.test))
+hist(d.test.resid.knn, main=paste("Residual For", str.symbol.res.knn, sep=" "))
+sd.fit.knn.u3ccsa = sd(d.test.resid.knn)
+
+```
+
 
 Plot the measured U3 (UNRATE) to U3 predicted by a linear fit to CCSA.
 
@@ -4711,7 +5013,7 @@ Plot the measured U3 (UNRATE) to U3 predicted by a linear fit to CCSA.
 
 
 datay <- "UNRATE"
-datay_aux <- str.symbol
+datay_aux <- "U3.lm.CCSA"
 ylim <- c(0, 15)
 dt.end <- Sys.Date()
 myPlot <-
@@ -4747,7 +5049,7 @@ Zoom in a little. There is a lot of discussion about how valid the latest U3 num
 
 
 datay <- "UNRATE"
-datay_aux <- str.symbol
+datay_aux <- "U3.lm.CCSA"
 ylim <- c(0, 50)
 dt.end <- Sys.Date()
 dt.start <- as.Date("2020-01-01")
@@ -4802,6 +5104,20 @@ plotSingle(
 
 ```
 
+### Correlation Summary
+
+```{r cor.summ, echo=FALSE}
+
+str.name <- c('U6 from U3','U3 from ICSA', 'U3 from CCSA')
+dt.list.start <- c(index(U6RATE[1]), index(ICSA[1]), index(CCSA[1]))
+df.emp.cor <- data.frame("Relationship"=str.name, "Start Date"=as.Date(dt.list.start))
+
+kable(df.emp.cor) %>%
+  kable_styling(bootstrap_options = c("striped", "hover")) %>%
+  column_spec(column = 1, width = "1.5in; display: inline-block;") %>%
+  column_spec(2, width = "10em")
+
+```
 
 ## Industrial Production
 
