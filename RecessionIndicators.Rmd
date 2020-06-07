@@ -4328,10 +4328,10 @@ myPlot <-
     df.data,
     "date",
     datay,
-    "CLF16OV Compared to CLF16OV predicted using overall population, POPTHM",
+    "UNRATE Compared to ICSA divided by labor force from POPTHM",
     "Date",
     getPlotYLabel(df.symbols, datay),
-    c(dt.start.prediction, dt.end),
+    c(index(ICSA[1]), dt.end),
     ylim,
     b.legend = TRUE,
     b.percentile = FALSE,
@@ -4392,10 +4392,10 @@ myPlot <-
     df.data,
     "date",
     datay,
-    "CLF16OV Compared to CLF16OV predicted using overall population, POPTHM",
+    "UnRATE Compared to ICSA divided by labor force from POPTHM",
     "Date",
     getPlotYLabel(df.symbols, datay),
-    c(dt.start.prediction, dt.end),
+    c(index(CCSA[1]), dt.end),
     ylim,
     b.legend = TRUE,
     b.percentile = FALSE,
@@ -4449,14 +4449,14 @@ datay <- "NPPTTL.by.CLF16OV.lm.POPTHM"
 datay.aux <- "UNRATE"
 ylim <- c(0, 40)
 dt.end <- Sys.Date()
-dt.start <- as.Date("2002-04-01")
+dt.start <- index(NPPTTL[1])
 myPlot <-
   plotSingle(
     dfRecession,
     df.data,
     "date",
     datay,
-    "NPPTTL Compared to CLF16OV predicted using overall population, POPTHM",
+    "NPPTTL Compared to NPPTTL divided by labor force from POPTHM",
     "Date",
     getPlotYLabel(df.symbols, datay),
     c(dt.start, dt.end),
@@ -4980,7 +4980,7 @@ sd.fit.knn.u3icsapaynsa = sd(d.test.resid.knn)
 
 Plot the measured U3 (UNRATE) to U3 predicted by a linear fit to ICSA.
 
-```{r U3.pred.ICSA.plot, echo=FALSE, fig.width = 10, fig.asp = .62}
+```{r U3.pred.ICSA.plot, echo=FALSE, fig.width = 8, fig.asp = .62}
 
 
 datay <- "U3.lm.ICSA.by.CLF16OV.lm.POPTHM"
@@ -4997,7 +4997,7 @@ myPlot <-
     "U3 Compared to U3 predicted using initial claims, ICSA",
     "Date",
     getPlotYLabel(df.symbols, datay),
-    c(dt.start.prediction, dt.end),
+    c(index(ICSA[1]), dt.end),
     ylim,
     b.legend = TRUE,
     b.percentile = FALSE,
@@ -5028,7 +5028,7 @@ print(myPlot)
 
 Take a closer look, given the interest around latest U3 numbers
 
-```{r U3.pred.ICSA.plot.recent, echo=FALSE, fig.width = 10, fig.asp = .62}
+```{r U3.pred.ICSA.plot.recent, echo=FALSE, fig.width = 8, fig.asp = .62}
 
 
 datay <- "U3.lm.ICSA.by.CLF16OV.lm.POPTHM"
@@ -5192,7 +5192,7 @@ df.symbols <-
     data.frame(
       string.symbol = str.symbol,
       string.source = "Predict",
-      string.description = "Linear Model Prediction\nU3 given CCSA",
+      string.description = "\nLinear Model Prediction\nU3 given CCSA",
       string.label.y = df.symbols[df.symbols$string.symbol=="UNRATE","string.label.y"],
       float.expense.ratio = -1.00,
       Max030 = FALSE,
@@ -5213,7 +5213,7 @@ df.symbols <-
     data.frame(
       string.symbol = str.symbol.res,
       string.source = "Predict Resid.",
-      string.description = "Linear Model Residual\nU3 given CCSA",
+      string.description = "\nLinear Model Residual\nU3 given CCSA",
       string.label.y = df.symbols[df.symbols$string.symbol==str.symbol,"string.label.y"],
       float.expense.ratio = -1.00,
       Max030 = FALSE,
@@ -5285,7 +5285,7 @@ sd.fit.knn.u3ccsa = sd(d.test.resid.knn)
 
 Plot the measured U3 (UNRATE) to U3 predicted by a linear fit to CCSA.
 
-```{r U3.pred.CCSA.plot, echo=FALSE,, fig.width = 10, fig.asp = .62}
+```{r U3.pred.CCSA.plot, echo=FALSE,, fig.width = 8, fig.asp = .62}
 
 
 datay <- "UNRATE"
@@ -5301,7 +5301,7 @@ myPlot <-
     "U3 Compared to U3 predicted using CCSA",
     "Date",
     getPlotYLabel(df.symbols, datay),
-    c(dt.start.prediction, dt.end),
+    c(index(CCSA[1]), dt.end),
     ylim,
     b.legend = TRUE,
     b.percentile = FALSE,
@@ -5321,21 +5321,21 @@ myPlot + geom_line(
 
 Zoom in a little. There is a lot of discussion about how valid the latest U3 numbers are.
 
-```{r U3.pred.CCSA.plot.recent, echo=FALSE,, fig.width = 10, fig.asp = .62}
+```{r U3.pred.CCSA.plot.recent, echo=FALSE,, fig.width = 8, fig.asp = .62}
 
 
 datay <- "UNRATE"
 datay_aux <- "U3.lm.CCSA.by.CLF16OV.lm.POPTHM"
 ylim <- c(0, 50)
 dt.end <- Sys.Date()
-dt.start <- as.Date("2020-01-01")
+dt.start <- as.Date("2019-01-01")
 myPlot <-
   plotSingle(
     dfRecession,
     df.data,
     "date",
     datay,
-    "U3 Compared to U3 predicted using CCSA",
+    "U3 Compared to U3 predicted using CCSA by labor force from POPTHM",
     "Date",
     getPlotYLabel(df.symbols, datay),
     c(dt.start, dt.end),
@@ -5362,7 +5362,7 @@ Plot the residual for the U3 linear fit. The residuals decrease quite a bit duri
 ```{r U3.pred.CCSA.resid, echo=FALSE,, fig.width = 6, fig.asp = .82}
 
 datay <- "U3.lm.CCSA.by.CLF16OV.lm.POPTHM.res"
-ylim <- c(-50, 10)
+ylim <- c(-20, 10)
 myPlot <- plotSingle(
   dfRecession,
   df.data,
@@ -5386,12 +5386,286 @@ print(myPlot)
 
 ```
 
+
+### Employment Correlation, U3 (UNRATE) and NPPTTL (ADP) normalized  
+
+Calculate linear model fit across the series. NPPTTL should be an accurate esimate of the actual number of people on payrolls.
+
+
+```{r U3.pred.NPPTTL.setup, echo=FALSE}
+
+# The U6 numbers do not have as much historical data as the U3 so valid data for fit
+# begins early. I also exluded the Covid 16 mess of data.
+dt.start.prediction <- as.Date("2002-04-01")
+dt.end.prediction <- as.Date("2020-01-01")
+df.emp.model <-
+  df.data[df.data$date >= dt.start.prediction &
+            df.data$date <= dt.end.prediction,]
+
+# I break the data into three sets: 50% for training, 25% for testing, and 25% for validation.
+set.seed(123456)
+in.train <- createDataPartition(y=df.emp.model$ICSA, p = 0.50, list=FALSE)
+df.train <- df.emp.model[in.train,]
+df.data.rest <- df.emp.model[-in.train,]
+in.val <- createDataPartition(y = df.data.rest$ICSA, p = 0.50, list = FALSE)
+df.val <- df.data.rest[in.val,]
+df.test <- df.data.rest[-in.val,]
+
+```
+
+```{r U3.pred.NPPTTL.fit, echo=FALSE}
+
+# Perform the fit
+list.fit.u3nppttl <- train(
+  UNRATE ~ NPPTTL.by.CLF16OV.lm.POPTHM,
+  data = df.emp.model,
+  method = "lm",
+  preProcess = c('center', 'scale')
+)
+
+list.fit.knn.u3nppttl <- train(
+  UNRATE ~ NPPTTL.by.CLF16OV.lm.POPTHM,
+  data = df.train,
+  method = "knn",
+  preProcess = c('center', 'scale')
+)
+
+```
+
+```{r U3.pred.NPPTTL, echo=FALSE}
+
+# Add linear model prediction to the dataframe
+str.symbol <- "U3.lm.NPPTTL.by.CLF16OV.lm.POPTHM"
+df.data[str.symbol] <-
+  predict(list.fit.u3nppttl, newdata = df.data)
+
+# Add the linear model prediction to the symbols table
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = str.symbol,
+      string.source = "Predict",
+      string.description = "Linear Model Prediction\nU3 given NPPTTL by POPTH",
+      string.label.y = df.symbols[df.symbols$string.symbol=="UNRATE","string.label.y"],
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = dt.start.prediction,
+      date.series.end = as.Date(Sys.Date())
+    )
+  )
+
+# Document the residual as well
+str.symbol.res <- "U3.lm.NPPTTL.by.CLF16OV.lm.POPTHM.res"
+df.data[str.symbol.res] <- df.data$UNRATE - df.data[str.symbol]
+
+# Add the U3 linear model model prediction residual to the symbols table
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = str.symbol.res,
+      string.source = "Predict Resid.",
+      string.description = "Linear Model Residual\nU3 given NPPTTL by POPTHM",
+      string.label.y = df.symbols[df.symbols$string.symbol==str.symbol,"string.label.y"],
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = dt.start.prediction,
+      date.series.end = as.Date(Sys.Date())
+    )
+  )
+
+# Add KNN model prediction to the dataframe
+str.symbol <- "U3.knn.NPPTTL.by.CLF16OV.lm.POPTHM"
+df.data[str.symbol] <-
+  predict(list.fit.knn.u3nppttl, newdata = df.data)
+
+# Add the knn model prediction to the symbols table
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = str.symbol,
+      string.source = "Predict",
+      string.description = "KNN Prediction\nU3 given NPPTTL by POPTHM",
+      string.label.y = df.symbols[df.symbols$string.symbol=="UNRATE","string.label.y"],
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = dt.start.prediction,
+      date.series.end = as.Date(Sys.Date())
+    )
+  )
+
+# Document the residual as well
+str.symbol.res.knn <- "U3.knn.NPPTTL.by.CLF16OV.lm.POPTHM.res"
+df.data[str.symbol.res.knn] <- df.data$UNRATE - df.data[str.symbol]
+
+# Add the U3 knn model prediction residual to the symbols table
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = str.symbol.res.knn,
+      string.source = "Predict Resid.",
+      string.description = "KNN Residual\nU3 given NPPTTL by POPTHM",
+      string.label.y = df.symbols[df.symbols$string.symbol==str.symbol,"string.label.y"],
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = dt.start.prediction,
+      date.series.end = as.Date(Sys.Date())
+    )
+  )
+```
+
+Look at how the fits performed on the test data partition
+
+```{r U3.pred.NPPTTL.perf, echo=FALSE}
+
+d.test.resid = (df.test$UNRATE - predict(list.fit.u3nppttl, newdata = df.test))
+hist(d.test.resid, main=paste("Residual For", str.symbol.res, sep=" "))
+sd.fit.u3nppttl = sd(d.test.resid)
+
+
+d.test.resid.knn = (df.test$UNRATE - predict(list.fit.knn.u3nppttl, newdata = df.test))
+hist(d.test.resid.knn, main=paste("Residual For", str.symbol.res.knn, sep=" "))
+sd.fit.knn.u3nppttl = sd(d.test.resid.knn)
+
+```
+
+The problem with ADP data is that it only goes back a few years so there really is not enough data. What there is does not have a linear relationship with the ADP numbers.
+
+```{r U3.pred.NPPTTL.outlier, fig.width = 6, fig.asp = 1.0}
+
+plot(df.emp.model$NPPTTL,
+     df.emp.model$UNRATE,
+     main = "ADP v. U3",
+     xlab = "NPPTTL (ADP), Thousands",
+     ylab = "UNRATE (U3), Percent")
+
+
+plot( 100*( df.emp.model$CLF16OV.lm.POPTHM -  df.emp.model$NPPTTL ) / df.emp.model$CLF16OV.lm.POPTHM,
+     df.emp.model$UNRATE,
+     main = "ADP v. U3",
+     xlab = "NPPTTL (ADP) normalized by labor force, Percent",
+     ylab = "UNRATE (U3), Percent")
+
+```
+
+
+Plot the measured U3 (UNRATE) to U3 predicted by a linear fit to NPPTTL normalized by labor force from POPTHM.
+
+```{r U3.pred.NPPTTL.plot, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+
+datay <- "UNRATE"
+datay_aux <- "U3.lm.NPPTTL.by.CLF16OV.lm.POPTHM"
+ylim <- c(0, 15)
+dt.end <- Sys.Date()
+myPlot <-
+  plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay,
+    "U3 Compared to U3 predicted using NPPTTL by POPTHM",
+    "Date",
+    getPlotYLabel(df.symbols, datay),
+    c(dt.start.prediction, dt.end),
+    ylim,
+    b.legend = TRUE,
+    b.percentile = FALSE,
+    b.long.legend = TRUE
+  )
+myPlot + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay_aux,
+    colour = shQuote(getPlotTitle(df.symbols, datay_aux))
+  ),
+  na.rm = TRUE
+)
+
+```
+
+Zoom in a little. There is a lot of discussion about how valid the latest U3 numbers are.
+
+```{r U3.pred.NPPTTL.plot.recent, echo=FALSE,, fig.width = 10, fig.asp = .62}
+
+
+datay <- "UNRATE"
+datay_aux <- "U3.lm.NPPTTL.by.CLF16OV.lm.POPTHM"
+ylim <- c(0, 20)
+dt.end <- Sys.Date()
+dt.start <- as.Date("2020-01-01")
+myPlot <-
+  plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay,
+    "U3 Compared to U3 predicted using NPPTTL by POPTHM",
+    "Date",
+    getPlotYLabel(df.symbols, datay),
+    c(dt.start, dt.end),
+    ylim,
+    b.legend = TRUE,
+    b.percentile = FALSE,
+    b.long.legend = TRUE
+  )
+myPlot + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay_aux,
+    colour = shQuote(getPlotTitle(df.symbols, datay_aux))
+  ),
+  na.rm = TRUE
+)
+
+```
+
+
+Plot the residual for the U3 linear fit. The residuals decrease quite a bit during the Covid numbers, at least as of Jun 2020. Probably indicates uncertainty in the numbers.
+
+```{r U3.pred.NPPTTL.resid, echo=FALSE,, fig.width = 6, fig.asp = .82}
+
+datay <- "U3.lm.NPPTTL.by.CLF16OV.lm.POPTHM.res"
+ylim <- c(-10, 10)
+myPlot <- plotSingle(
+  dfRecession,
+  df.data,
+  "date",
+  datay,
+  getPlotTitle(df.symbols, datay),
+  "Date",
+  getPlotYLabel(df.symbols, datay),
+  c(dt.start.prediction, Sys.Date()),
+  ylim,
+  b.legend = TRUE,
+  b.percentile = TRUE,
+  b.long.legend = FALSE
+)
+
+myPlot <- myPlot + geom_hline(yintercept=(6*sd.fit.u3nppttl), color = "red", linetype="dashed")
+myPlot <- myPlot + geom_hline(yintercept=(-6*sd.fit.u3nppttl), color = "red", linetype="dashed")
+
+print(myPlot)
+
+
+```
+
+
 ### Correlation Summary
 
 ```{r cor.summ, echo=FALSE}
 
-str.name <- c('U6 from U3','U3 from ICSA', 'U3 from CCSA')
-dt.list.start <- c(index(U6RATE[1]), index(ICSA[1]), index(CCSA[1]))
+str.name <- c('U6 from U3','U3 from ICSA', 'U3 from CCSA', 'U3 from NPPTTL')
+dt.list.start <- c(index(U6RATE[1]), index(ICSA[1]), index(CCSA[1]), index(NPPTTL[1]))
 df.emp.cor <- data.frame("Relationship"=str.name, "Start Date"=as.Date(dt.list.start))
 
 kable(df.emp.cor) %>%
