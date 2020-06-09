@@ -10,9 +10,17 @@
 # I found it was more robust than the nberShade()
 # command for the xts time series data.
 dtStart <- df.data$date[which(diff(df.data$USREC) == 1) + 1]
-dt.end.prediction   <- df.data$date[which(diff(df.data$USREC) == -1)]
+dt.end.prediction   <-
+  df.data$date[which(diff(df.data$USREC) == -1)]
 dtInitStart <- as.Date(as.yearmon(dtStart) - 12 / 12)
 dtInitEnd <- as.Date(as.yearmon(dtStart) - 1 / 12)
+
+# These lines are needed when running the code in the middle of a recession
+i.obs <- length(dtInitEnd)
+if (length(dt.end.prediction) <= i.obs) {
+  dt.end.prediction[i.obs + 1] <- Sys.Date()
+}
+rm(i.obs)
 
 # We need to cast the recession data into
 # a dataframe.

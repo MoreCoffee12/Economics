@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "June 7, 2020"
+date: "June 9, 2020"
 output: 
   html_document:
     toc: true
@@ -940,6 +940,14 @@ source("calcFeaturesAggregate.r")
 
 ```
 
+
+```{r data.trunc, echo=FALSE}
+
+# A very few data series do go back to 1854, but most
+# don't even go past WWII so truncate the dataframe
+df.data <- df.data[df.data$date > as.Date("1940-01-01"),]
+
+```
 
 # Recession Initiation (Switch Model)
 
@@ -4531,6 +4539,10 @@ list.fit.nnet.u3u6 <- train(
   trace = FALSE
 )
 
+rm(df.emp.model)
+rm(df.train)
+rm(df.val)
+
 ```
 
 ```{r EMP.cor, echo=FALSE}
@@ -4869,6 +4881,10 @@ list.fit.knn.u3icsapaynsa <- train(
   preProcess = c('center', 'scale')
 )
 
+rm(df.emp.model)
+rm(df.train)
+rm(df.val)
+
 ```
 
 
@@ -5161,10 +5177,12 @@ df.test <- df.data.rest[-in.val,]
 
 ```{r U3.pred.CCSA.fit, echo=FALSE}
 
+rm(df.emp.model)
+
 # Perform the fit
 list.fit.u3ccsa <- train(
   UNRATE ~ CCSA.by.CLF16OV.lm.POPTHM,
-  data = df.emp.model,
+  data = df.train,
   method = "lm",
   preProcess = c('center', 'scale')
 )
@@ -5175,6 +5193,9 @@ list.fit.knn.u3ccsa <- train(
   method = "knn",
   preProcess = c('center', 'scale')
 )
+
+rm(df.train)
+rm(df.val)
 
 ```
 
@@ -5371,7 +5392,7 @@ myPlot <- plotSingle(
   getPlotTitle(df.symbols, datay),
   "Date",
   getPlotYLabel(df.symbols, datay),
-  c(dt.start.prediction, Sys.Date()),
+  c(index(CCSA[1]), Sys.Date()),
   ylim,
   b.legend = TRUE,
   b.percentile = TRUE,
@@ -5429,6 +5450,9 @@ list.fit.knn.u3nppttl <- train(
   method = "knn",
   preProcess = c('center', 'scale')
 )
+
+rm(df.train)
+rm(df.val)
 
 ```
 
@@ -5552,6 +5576,8 @@ plot( 100*( df.emp.model$CLF16OV.lm.POPTHM -  df.emp.model$NPPTTL ) / df.emp.mod
      main = "ADP v. U3",
      xlab = "NPPTTL (ADP) normalized by labor force, Percent",
      ylab = "UNRATE (U3), Percent")
+
+rm(df.emp.model)
 
 ```
 
