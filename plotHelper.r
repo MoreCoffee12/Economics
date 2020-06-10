@@ -51,7 +51,7 @@ get.formula.formatted <-
 
 #' Return a string describing the slope of a data series 
 #'
-#' @param dfData Data frame with the data
+#' @param df.data Data frame with the data
 #' @param datay Name of column to operate on
 #' @param days How many days to include
 #'
@@ -59,10 +59,10 @@ get.formula.formatted <-
 #' @export
 #'
 #' @examples
-getTrendString <- function(dfData, datay, days) {
+getTrendString <- function(df.data, datay, days) {
   # datay <- "DGS10TOTB3MS"
-  df.data.fit <- data.frame(tail(dfData[datay], days))
-  df.data.fit$datax <- as.double(tail(dfData$date, days))
+  df.data.fit <- data.frame(tail(df.data[datay], days))
+  df.data.fit$datax <- as.double(tail(df.data$date, days))
   colnames(df.data.fit) <- c("datay", "datax")
   
   mdl.linear <- lm(datay ~ datax, data = df.data.fit)
@@ -402,7 +402,7 @@ getMostRecentDateString <- function(df.symbols, datay) {
 
 plotSingleQuickRecent <- function(datay, ylim){
   
-  plotSingle(dfRecession, dfData, "date", datay, 
+  plotSingle(dfRecession, df.data, "date", datay, 
              paste(datay, " | ", df.symbols[grep(paste("^", datay, "$", sep=""), df.symbols$string.symbol),]$string.description), "Date", 
              df.symbols[grep(datay, df.symbols$string.symbol),]$string.label.y, c(as.Date("1jan2000","%d%b%Y"), Sys.Date()), ylim, FALSE)
   
@@ -410,7 +410,7 @@ plotSingleQuickRecent <- function(datay, ylim){
 
 plotSingleQuickRecentRecent <- function(datay, ylim){
   
-  plotSingle(dfRecession, dfData, "date", datay, 
+  plotSingle(dfRecession, df.data, "date", datay, 
              paste(datay, " | ", df.symbols[grep(paste("^", datay, "$", sep=""), df.symbols$string.symbol),]$string.description), "Date", 
              df.symbols[grep(datay, df.symbols$string.symbol),]$string.label.y, c(as.Date("1jan2010","%d%b%Y"), Sys.Date()), ylim, FALSE)
   
@@ -433,7 +433,7 @@ plotSingleQuickModern <- function(datay, ylim, b.percentile) {
   }
   plotSingle(
     dfRecession,
-    dfData,
+    df.data,
     "date",
     datay,
     titlelabel = getPlotTitle(df.symbols, datay),
@@ -588,11 +588,11 @@ plotSingleBackGrowth <-
 # This link was helpful
 # http://tutorials.iq.harvard.edu/R/Rgraphics/Rgraphics.html
 # Define the generic single plane plot function
-plotXvY <- function(dfData, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, ylim, bLegend, bFitLinear, 
+plotXvY <- function(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, ylim, bLegend, bFitLinear, 
                     dtStart, b.reverse.y){
   
   # Select data of interest
-  dfPlot <- dfData[dfData$date>=dtStart,]
+  dfPlot <- df.data[df.data$date>=dtStart,]
   
   # Include date range
   titlelabel <- paste(titlelabel, "\nDate range: ", dtStart, " to ", tail(dfPlot$date, n=1), "(black since last recession)", sep="")
@@ -786,7 +786,7 @@ calcRollingCorr <-
       )
     
     # Return the updated dataframes to the global enviro
-    assign('dfData', datadf, envir = .GlobalEnv)
+    assign('df.data', datadf, envir = .GlobalEnv)
     assign('df.symbols', df.symbols, envir = .GlobalEnv)
     
     # Plot it out
@@ -824,7 +824,7 @@ calcRollingCorr <-
 #' @export
 #'
 #' @examples 
-#' my.data <- plotSimilarPeriods(dfData, dfRecession, df.symbols, "UNRATE", c(2,5), 720)
+#' my.data <- plotSimilarPeriods(df.data, dfRecession, df.symbols, "UNRATE", c(2,5), 720)
 plotSimilarPeriods <-
   function(df.data,
            df.rec,
