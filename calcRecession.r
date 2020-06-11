@@ -9,18 +9,26 @@
 # http://stackoverflow.com/questions/21739012/r-recession-dates-conversion
 # I found it was more robust than the nberShade()
 # command for the xts time series data.
+
 dtStart <- df.data$date[which(diff(df.data$USREC) == 1) + 1]
 dt.end.prediction   <-
   df.data$date[which(diff(df.data$USREC) == -1)]
 dtInitStart <- as.Date(as.yearmon(dtStart) - 12 / 12)
 dtInitEnd <- as.Date(as.yearmon(dtStart) - 1 / 12)
 
+# The NBER data starts with a trough get rid of it
+# https://www.nber.org/cycles/cyclesmain.pdf
+if (dt.end.prediction[1] < dtStart[1]){
+  dt.end.prediction <- dt.end.prediction[-1]
+}
+
 # These lines are needed when running the code in the middle of a recession
 i.obs <- length(dtInitEnd)
 if (length(dt.end.prediction) <= i.obs) {
-  dt.end.prediction[i.obs + 1] <- Sys.Date()
+  dt.end.prediction[i.obs] <- Sys.Date()
 }
 rm(i.obs)
+
 
 # We need to cast the recession data into
 # a dataframe.
@@ -29,7 +37,7 @@ dfRecession <-
     initStart = dtInitStart,
     initEnd = dtInitEnd,
     start = dtStart,
-    end = dt.end.prediction[-1]
+    end = dt.end.prediction
   )
 dfRecession <- subset(dfRecession, dtStart >= min(df.data$date))
 
