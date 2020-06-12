@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "June 11, 2020"
+date: "June 12, 2020"
 output: 
   html_document:
     toc: true
@@ -2409,7 +2409,7 @@ my.plot + geom_line(data=df.data, aes_string(x="date", y=datay_aux2, colour=shQu
 
 datay <- "UNRATE"
 datay_aux <- "U6RATE"
-ylim <- c(2.5, 10)
+ylim <- c(2.5, 15)
 dt.start <- as.Date('2010-01-01')
 plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
             getPlotYLabel(df.symbols, datay), c(dt.start, Sys.Date()), ylim, TRUE)
@@ -2589,7 +2589,7 @@ my.plot
 
 The last two years compare favorably with the period around the late 1950's. Need to dig into this one.
 
-```{r SP500SPpltNear.similar}
+```{r SP500SPpltNear.similar, echo=FALSE}
 datay <- "GDPSP500"
 ylim <- c(0.10, 0.20)
 my.data <- plotSimilarPeriods(df.data, dfRecession, df.symbols, datay, ylim, i.window = 50)
