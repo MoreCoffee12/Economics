@@ -3764,7 +3764,7 @@ Unemployment rates will probably be useful, let's take a look at the U-3. The da
 ```{r unrate, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 datay <- "UNRATE"
 datay_aux <- "UNRATE_Smooth"
-ylim <- c(2, 12)
+ylim <- c(2, 15)
 b.legend <- TRUE
 b.percentile <- TRUE
 myPlot <-
@@ -3787,7 +3787,7 @@ myPlot + geom_line(
   aes_string(
     x = "date",
     y = datay_aux,
-    colour = shQuote(datay_aux)
+    colour = shQuote(getPlotTitle(df.symbols, datay_aux))
   ),
   na.rm = TRUE
 )
