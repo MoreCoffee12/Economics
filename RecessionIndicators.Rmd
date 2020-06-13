@@ -3799,7 +3799,7 @@ Looking at the unemployment rate, the eye is drawn to the rise and fall of the d
 ```{r UnrateDer, echo=FALSE}
 
 datay = "UNRATE_SmoothDer"
-ylim <- c(-0.01, 0.02)
+ylim <- c(-0.02, 0.02)
 b.percentile <- TRUE
 dt.start <- as.Date('1950-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile)
@@ -5759,6 +5759,34 @@ myPlot
 
 ```
 
+### Monetary Base
+
+Currency trend, base
+
+```{r BOGMBASE.trend, echo=FALSE}
+
+datay <- "BOGMBASE"
+dtStart = as.Date('1959-01-01')
+ylim <- c(0, 7000)
+my.plot <-
+  plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+my.plot
+
+```
+
+This used to trend along with GDP. It doesn't anymore.
+
+```{r BOGMBASE.trend.by.GDP, echo=FALSE}
+
+datay <- "BOGMBASE.by.GDP"
+dtStart = as.Date('1959-01-01')
+ylim <- c(0, 30)
+my.plot <-
+  plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+my.plot
+
+```
+
 ### Money supplies
 
 Basic currency trend (currency component of M1)
@@ -7631,6 +7659,23 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
 
+#### DPCERC: Personal Savings Rate - Line 35
+
+BEA Account Code: DPCERC
+Personal consumption expenditures (PCE) is the primary measure of consumer spending on goods and services in the U.S. economy. 1 It accounts for about two-thirds of domestic final spending, and thus it is the primary engine that drives future economic growth. PCE shows how much of the income earned by households is being spent on
+current consumption as opposed to how much is being saved for future consumption. -https://www.bea.gov/system/files/2019-12/Chapter-5.pdf
+
+Suggested Citation:
+U.S. Bureau of Economic Analysis, Personal Consumption Expenditures [PCE], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/PCE, June 12, 2020
+
+
+```{r PCE, echo=FALSE}
+
+datay <- "PCE"
+ylim <- c(0, 16000)
+plotSingleQuick(dfRecession, df.data, datay, ylim)
+
+```
 
 #### A072RC: Personal Savings Rate - Line 35
 

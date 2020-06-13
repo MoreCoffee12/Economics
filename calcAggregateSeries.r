@@ -935,8 +935,32 @@ df.symbols <-
   )
 
 
+# Millions to billions
+df.data$BOGMBASE <- df.data$BOGMBASE / 1000
 
-# Millios to billions
+# Monetary base (in billions) divided by GDP
+df.data$BOGMBASE.by.GDP <-
+  (df.data$BOGMBASE / df.data$GDP) * 100
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "BOGMBASE.by.GDP",
+      string.source = "Calc",
+      string.description = "BOGMBASE\nDivided by GDP",
+      string.label.y = "PERCENT",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(
+        c(df.symbols$date.series.start[df.symbols$Symbol == 'BOGMBASE'], index(GDP[1]))
+      ))  ,
+      date.series.end = as.Date(min(c(
+        df.symbols$date.series.end[df.symbols$Symbol == 'BOGMBASE'], index(tail(GDP, 1))
+      )))
+    )
+  )
+
+
+# Millions to billions
 df.data$WALCL <- df.data$WALCL / 1000
 
 # Excess reserve balances (in billions) divided by GDP

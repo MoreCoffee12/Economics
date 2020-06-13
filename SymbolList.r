@@ -1791,6 +1791,20 @@ df.symbols <-
   rbind(
     df.symbols,
     data.frame(
+      string.symbol = "BOGMBASE",
+      string.source = "FRED",
+      string.description = "Monetary Base; Total",
+      string.label.y = "Billions of Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
       string.symbol = "PRS88003193",
       string.source = "FRED",
       string.description = "Nonfinancial Corporations Sector: Unit Profits",
@@ -1976,6 +1990,20 @@ df.symbols <-
       string.symbol = "PI",
       string.source = "FRED",
       string.description = "Personal income (SA)",
+      string.label.y = "Billions of Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1959-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "PCE",
+      string.source = "FRED",
+      string.description = "Personal Consumption\nExpenditures (SA)",
       string.label.y = "Billions of Dollars",
       float.expense.ratio = -1.00,
       date.series.start = as.Date("1959-01-01") ,
