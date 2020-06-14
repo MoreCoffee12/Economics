@@ -1,7 +1,7 @@
 ---
 title: "GDP Models"
 author: "Brian Howard"
-date: "June 13, 2020"
+date: "June 14, 2020"
 output: 
   html_document:
     toc: true
@@ -168,7 +168,8 @@ dt.end.prediction <- as.Date("2020-01-31")
 ```{r corplot1.gdp, echo=FALSE, fig.width=12,fig.height=12}
 
 # Correlation for the entire data set
-  training.cor <- df.data[,c("GDP","INDPRO","PCE","RSALESAGG","ALTSALES")]
+training.cor <-
+  df.data[, c("GDP", "INDPRO", "PCE", "RSALESAGG", "ALTSALES", "MSPUS.times.HOUST")]
 
   rcorr.data <- rcorr(as.matrix(training.cor), type = "pearson")
   #print(rcorr.data)
@@ -196,16 +197,16 @@ rm(df.data.rest)
 
 # Perform the linear fit
 list.fit.reg <- train(
-  GDP ~ INDPRO + PCE + RSALESAGG,
+  GDP ~ INDPRO + PCE + RSALESAGG + ALTSALES + MSPUS.times.HOUST,
   data = df.train,
   method = "lm",
   preProcess = c('center', 'scale')
 )
 
 
-# Perform the nueral net fit
+# Perform the pca fit
 list.fit.pcr <- train(
-  GDP ~ INDPRO + PCE + RSALESAGG,
+  GDP ~ INDPRO + PCE + RSALESAGG + ALTSALES,
   data = df.train,
   method = "pcr",
   preProcess = c('center', 'scale')
@@ -228,7 +229,7 @@ df.symbols <-
     data.frame(
       string.symbol = str.symbol,
       string.source = "Predict",
-      string.description = "Linear Model Prediction\nGDP given INDPRO,\nPCE, and RSALESAGG",
+      string.description = "Linear Model Prediction\nGDP given INDPRO,\nPCE, RSALESAGG, auto sales,\nand housing",
       string.label.y = getPlotYLabel(df.symbols, "POPTHM")[1],
       float.expense.ratio = -1.00,
       Max030 = FALSE,
@@ -254,7 +255,7 @@ df.symbols <-
     data.frame(
       string.symbol = str.symbol.pcr,
       string.source = "Predict",
-      string.description = "PCA regression\nGDP given INDPRO,\nPCE, and RSALESAGG",
+      string.description = "PCA regression\nGDP given INDPRO,\nPCE, and RSALESAGG, and auto sales",
       string.label.y = getPlotYLabel(df.symbols, "POPTHM")[1],
       float.expense.ratio = -1.00,
       Max030 = FALSE,
@@ -366,16 +367,30 @@ Look at how the GDP linear fit performed on the test data partition
 d.test.resid = (df.test$GDP - predict(list.fit.reg, newdata = df.test))
 hist(d.test.resid, main=paste("Residual For", str.symbol, sep=" "))
 sd.fit.gdp.m = sd(d.test.resid)
+
 ```
 
+```{r gdp.lm.modelout, echo=FALSE}
+
+list.fit.reg$finalModel
+
+```
 
 ```{r gdp.pcr.perf, echo=FALSE}
 
-d.test.resid = (df.test$GDP - predict(list.fit.reg, newdata = df.test))
+d.test.resid = (df.test$GDP - predict(list.fit.pcr, newdata = df.test))
 hist(d.test.resid, main=paste("Residual For", str.symbol.pcr, sep=" "))
 sd.fit.gdp.pcr = sd(d.test.resid)
 
 ```
+
+```{r gdp.pcr.modelout, echo=FALSE}
+
+summary(list.fit.pcr)
+
+```
+
+
 
 ```{r gdp.lm.resid, echo=FALSE}
 
@@ -391,6 +406,34 @@ df.symbols <-
       string.symbol = str.symbol.res,
       string.source = "Predict Resid.",
       string.description = "Residual for \nGDP given INDPRO,\nPCE, and RSALESAGG",
+      string.label.y = df.symbols[df.symbols$string.symbol==str.symbol,"string.label.y"],
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = dt.start.prediction,
+      date.series.end = as.Date(Sys.Date())
+    )
+  )
+
+
+```
+
+Document the PCR residual
+
+```{r gdp.pcr.resid, echo=FALSE}
+
+# Document the residual as well
+str.symbol.pcr.res <- "GDP.pcr.res"
+df.data[str.symbol.pcr.res] <- df.data$GDP - df.data[str.symbol.pcr]
+
+# Add the GDP linear model prediction residual to the symbols table
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = str.symbol.pcr.res,
+      string.source = "Predict Resid.",
+      string.description = "PCR Residual for \nGDP given INDPRO,\nPCE, and RSALESAGG",
       string.label.y = df.symbols[df.symbols$string.symbol==str.symbol,"string.label.y"],
       float.expense.ratio = -1.00,
       Max030 = FALSE,
@@ -433,3 +476,32 @@ print(myPlot)
 
 ```
 
+Plot the residual GDP to the PCR fit prediction. 
+
+The residuals decrease quite a bit during the Covid numbers, at least as of Jun 2020. Probably indicates uncertainty in the numbers.
+
+```{r gdp.cor.pcr.resid, echo=FALSE,, fig.width = 6, fig.asp = .82}
+
+datay <- str.symbol.pcr.res
+ylim <- c(-1500, 1500)
+myPlot <- plotSingle(
+  dfRecession,
+  df.data,
+  "date",
+  datay,
+  getPlotTitle(df.symbols, datay),
+  "Date",
+  getPlotYLabel(df.symbols, datay),
+  c(as.Date("1jan1967", "%d%b%Y"), Sys.Date()),
+  ylim,
+  b.legend = TRUE,
+  b.percentile = TRUE,
+  b.long.legend = FALSE
+)
+
+myPlot <- myPlot + geom_hline(yintercept=(6*sd.fit.gdp.pcr), color = "red", linetype="dashed")
+myPlot <- myPlot + geom_hline(yintercept=(-6*sd.fit.gdp.pcr), color = "red", linetype="dashed")
+
+print(myPlot)
+
+```

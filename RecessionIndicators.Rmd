@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "June 13, 2020"
+date: "June 14, 2020"
 output: 
   html_document:
     toc: true
@@ -7940,6 +7940,122 @@ grid.arrange(p1,
              top = "New Housing Sales Year-Over-Year")
 ```
 
+### New Privately-Owned Housing Units Authorized in Permit-Issuing Places
+
+As provided by the Census, start occurs when excavation begins for the footings or foundation of a building. All housing units in a multifamily building are defined as being started when this excavation begins. Beginning with data for September 1992, estimates of housing starts include units in structures being totally rebuilt on an existing foundation.
+
+Suggested Citation:
+U.S. Census Bureau and U.S. Department of Housing and Urban Development, Housing Starts: Total: New Privately Owned Housing Units Started [HOUST], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/HOUST, June 13, 2020.
+
+```{r HOUST.plot, echo=FALSE, fig.width = 9, fig.asp = 0.4}
+
+datay <- "HOUST"
+ylim <- c(0, 3000)
+dt.start <- as.Date("1jan1959","%d%b%Y")
+my.plot <- plotSingle(
+  dfRecession,
+  df.data,
+  "date",
+  datay,
+  getPlotTitle(df.symbols, datay),
+  xlabel = "Date",
+  ylabel = getPlotYLabel(df.symbols, datay),
+  c(dt.start, Sys.Date()),
+  ylim,
+  b.legend = TRUE,
+  b.percentile = FALSE,
+  b.long.legend = TRUE
+)
+
+my.plot
+
+```
+
+
+Take a look at privately owned starts
+
+```{r HOUST1F.plot, echo=FALSE, fig.width = 9, fig.asp = 0.4}
+
+datay <- "HOUST1F"
+ylim <- c(0, 3000)
+dt.start <- as.Date("1jan1959","%d%b%Y")
+my.plot <- plotSingle(
+  dfRecession,
+  df.data,
+  "date",
+  datay,
+  getPlotTitle(df.symbols, datay),
+  xlabel = "Date",
+  ylabel = getPlotYLabel(df.symbols, datay),
+  c(dt.start, Sys.Date()),
+  ylim,
+  b.legend = TRUE,
+  b.percentile = FALSE,
+  b.long.legend = TRUE
+)
+
+my.plot
+
+```
+
+
+### New Privately-Owned Houses Sold and For Sale
+
+Suggested Citation:
+U.S. Census Bureau and U.S. Department of Housing and Urban Development, Median Sales Price of Houses Sold for the United States [MSPUS], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/MSPUS, June 13, 2020.
+
+
+```{r MSPUS.plot, echo=FALSE, fig.width = 9, fig.asp = 0.4}
+
+datay <- "MSPUS"
+ylim <- c(0, 400000)
+dt.start <- as.Date("1jan1963","%d%b%Y")
+my.plot <- plotSingle(
+  dfRecession,
+  df.data,
+  "date",
+  datay,
+  getPlotTitle(df.symbols, datay),
+  xlabel = "Date",
+  ylabel = getPlotYLabel(df.symbols, datay),
+  c(dt.start, Sys.Date()),
+  ylim,
+  b.legend = TRUE,
+  b.percentile = FALSE,
+  b.long.legend = TRUE
+)
+
+my.plot
+
+```
+
+Finally, take a look at starts times the median price
+
+```{r MSPUS.times.HOUST.plot, echo=FALSE, fig.width = 9, fig.asp = 0.4}
+
+datay <- "MSPUS.times.HOUST"
+ylim <- c(0, 750)
+dt.start <- as.Date("1jan1963","%d%b%Y")
+my.plot <- plotSingle(
+  dfRecession,
+  df.data,
+  "date",
+  datay,
+  getPlotTitle(df.symbols, datay),
+  xlabel = "Date",
+  ylabel = getPlotYLabel(df.symbols, datay),
+  c(dt.start, Sys.Date()),
+  ylim,
+  b.legend = TRUE,
+  b.percentile = FALSE,
+  b.long.legend = TRUE
+)
+
+my.plot
+
+```
+
+
 ## Federal reserve board H.8: Assets and Liabilities of Commercial Banks in the United States
 
 ### Page 4: Not Seasonally adjusted, billions of dollars
@@ -8681,7 +8797,7 @@ As mentioned above, copper, year over year, has some correlation with the recess
   rcorr.data <- rcorr(as.matrix(training.cor), type = "pearson")
   #print(rcorr.data)
 
-  corrplot(cor(training.cor), type="upper", order="original", 
+  corrplot::corrplot(cor(training.cor), type="upper", order="original", 
            tl.col="black", tl.srt=45, title ="Commodities data")
 ```
 
@@ -8697,7 +8813,7 @@ GDP, normalized first by CPI and then by population, looks like it migh correlat
   rcorr.data <- rcorr(as.matrix(training.cor), type = "pearson")
   #print(rcorr.data)
 
-  corrplot(cor(training.cor), type="upper", order="original", 
+  corrplot::corrplot(cor(training.cor), type="upper", order="original", 
            tl.col="black", tl.srt=45, title ="Commodities data")
 ```
 
@@ -8725,7 +8841,7 @@ In this case, I want and indicator that rises prior to a recession. It looks lik
   rcorr.data <- rcorr(as.matrix(training.cor), type = "pearson")
   #print(rcorr.data)
 
-  corrplot(cor(training.cor), type="upper", order="original", 
+  corrplot::corrplot(cor(training.cor), type="upper", order="original", 
            tl.col="black", tl.srt=45, title ="Financial data")
 ```
 

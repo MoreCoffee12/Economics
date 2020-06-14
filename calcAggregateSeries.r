@@ -1517,7 +1517,7 @@ df.symbols <-
     data.frame(
       string.symbol = "HNFSUSNSA.minus.HSN1FNSA",
       string.source = "Calc",
-      string.description = "New One Family Houses Sold -\nNew One Family Houses Sales",
+      string.description = "Houses for sale -\n houses sold",
       string.label.y = "Thousands of Units",
       float.expense.ratio = -1.00,
       date.series.start =  as.Date(max(
@@ -1525,6 +1525,50 @@ df.symbols <-
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'HSN1FNSA'], index(tail(HNFSUSNSA, 1))
+      )))
+    )
+  )
+
+# Estimate housing input to the economy by multiplying starts by median price
+df.data$MSPUS.times.HOUST <-
+  (df.data$MSPUS * df.data$HOUST)/1000000
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "MSPUS.times.HOUST",
+      string.source = "Calc",
+      string.description = "New privately owned units start\ntimes median price",
+      string.label.y = "Millions of dollars",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(
+        c(df.symbols$date.series.start[df.symbols$Symbol == 'MSPUS'], index(HOUST[1]))
+      ))  ,
+      date.series.end = as.Date(min(c(
+        df.symbols$date.series.end[df.symbols$Symbol == 'MSPUS'], index(tail(HOUST, 1))
+      )))
+    )
+  )
+
+
+# Do all homes that are started come up for sale? Take a look at number of new
+# private homes for sale times median price.
+df.data$MSPUS.times.HNFSUSNSA <-
+  (df.data$MSPUS * df.data$HNFSUSNSA)/1000000
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "MSPUS.times.HNFSUSNSA",
+      string.source = "Calc",
+      string.description = "New privately owned 1-family units for sale\ntimes median price",
+      string.label.y = "Millions of dollars",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(
+        c(df.symbols$date.series.start[df.symbols$Symbol == 'MSPUS'], index(HOUST[1]))
+      ))  ,
+      date.series.end = as.Date(min(c(
+        df.symbols$date.series.end[df.symbols$Symbol == 'MSPUS'], index(tail(HOUST, 1))
       )))
     )
   )
