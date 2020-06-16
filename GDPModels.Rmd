@@ -152,7 +152,7 @@ source("calcRecession.r")
 
 ## GDP Models
 
-### Regression
+### Regression, Retail sales
 
 See if we can get there with a simple regression model. Begin by taking a look at how these datapoints correlate
 
@@ -505,3 +505,222 @@ myPlot <- myPlot + geom_hline(yintercept=(-6*sd.fit.gdp.pcr), color = "red", lin
 print(myPlot)
 
 ```
+
+### Regression, Advanced Retail sales
+
+See if we can get there with a simple regression model. Begin by taking a look at how these datapoints correlate with advanced retail sales
+
+
+```{r corplot1.gdp.adv, echo=FALSE, fig.width=12,fig.height=12}
+
+# Correlation for the entire data set
+training.cor <-
+  df.data[, c("GDP", "INDPRO", "PCE", "RSAFS", "ALTSALES", "MSPUS.times.HOUST")]
+
+  rcorr.data <- rcorr(as.matrix(training.cor), type = "pearson")
+  #print(rcorr.data)
+
+  corrplot::corrplot(cor(training.cor), type="upper", order="original", 
+           tl.col="black", tl.srt=45, title ="GDP Data")
+```
+
+
+```{r gdp.lm.adv.setup, echo=FALSE}
+
+df.gdp.model <-
+  df.data[df.data$date >= dt.start.prediction &
+            df.data$date <= dt.end.prediction,]
+
+# I break the data into three sets: 50% for training, 25% for testing, and 25% for validation.
+set.seed(123456)
+in.train <- createDataPartition(y=df.gdp.model$GDP, p = 0.50, list=FALSE)
+df.train <- df.gdp.model[in.train,]
+df.data.rest <- df.gdp.model[-in.train,]
+in.val <- createDataPartition(y = df.data.rest$GDP, p = 0.50, list = FALSE)
+df.val <- df.data.rest[in.val,]
+df.test <- df.data.rest[-in.val,]
+rm(df.data.rest)
+
+# Perform the linear fit
+list.fit.reg.adv <- train(
+  GDP ~ INDPRO + PCE + RSAFS + ALTSALES + MSPUS.times.HOUST,
+  data = df.train,
+  method = "lm",
+  preProcess = c('center', 'scale')
+)
+
+```
+
+```{r gdp.lm.adv.update, echo=FALSE}
+
+# Add linear prediction to the dataframe
+str.symbol <- "GDP.lm.adv"
+df.data[str.symbol] <-
+  predict(list.fit.reg.adv, newdata = df.data)
+
+# Add the linear model prediction to the symbols table
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = str.symbol,
+      string.source = "Predict",
+      string.description = "Linear Model Prediction\nGDP given INDPRO,\nPCE, RSAFS, auto sales,\nand housing",
+      string.label.y = getPlotYLabel(df.symbols, "POPTHM")[1],
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = dt.start.prediction,
+      date.series.end = as.Date(Sys.Date())
+    )
+  )
+
+```
+
+```{r gdp.lm.adv.setup.plot, echo=FALSE, fig.width = 8, fig.asp = .52}
+
+datay <- "GDP.lm.adv"
+datay.aux <- "GDP"
+ylim <- c(0, 25000)
+dt.end <- Sys.Date()
+myPlot <- 
+  plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay,
+    "GDP Compared to GDP predicted using linear model",
+    "Date",
+    getPlotYLabel(df.symbols, datay),
+    c(dt.start.prediction, dt.end),
+    ylim,
+    b.legend = TRUE,
+    b.percentile = FALSE,
+    b.long.legend = TRUE
+  )
+myPlot <- myPlot + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux))
+  ),
+  na.rm = TRUE
+)
+
+print(myPlot)
+```
+
+Looking at some more recent data points
+
+
+```{r gdp.lm.adv.setup.plot.recent, echo=FALSE, fig.width = 8, fig.asp = .52}
+
+datay <- "GDP.lm.adv"
+datay.aux <- "GDP"
+ylim <- c(10000, 25000)
+dt.end <- Sys.Date()
+dt.start <- as.Date("2018-01-01")
+myPlot <-
+  plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay,
+    "GDP Compared to GDP predicted using linear model",
+    "Date",
+    getPlotYLabel(df.symbols, datay),
+    c(dt.start, dt.end),
+    ylim,
+    b.legend = TRUE,
+    b.percentile = FALSE,
+    b.long.legend = TRUE
+  )
+myPlot <- myPlot + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux))
+  ),
+  na.rm = TRUE
+)
+
+print(myPlot)
+```
+
+
+Look at how the GDP linear fit performed on the test data partition
+
+```{r gdp.lm.adv.perf, echo=FALSE}
+
+d.test.resid.adv = (df.test$GDP - predict(list.fit.reg.adv, newdata = df.test))
+hist(d.test.resid, main=paste("Residual For", str.symbol, sep=" "))
+sd.fit.gdp.lm.adv = sd(d.test.resid)
+
+```
+
+```{r gdp.lm.modelout.adv, echo=FALSE}
+
+list.fit.reg.adv$finalModel
+
+```
+
+
+```{r gdp.lm.adv.resid, echo=FALSE}
+
+# Document the residual as well
+str.symbol.res <- "GDP.lm.adv.res"
+df.data[str.symbol.res] <- df.data$GDP - df.data[str.symbol]
+
+# Add the GDP linear model prediction residual to the symbols table
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = str.symbol.res,
+      string.source = "Predict Resid.",
+      string.description = "Residual for \nGDP given INDPRO,\nPCE, and RSALESAGG",
+      string.label.y = df.symbols[df.symbols$string.symbol==str.symbol,"string.label.y"],
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = dt.start.prediction,
+      date.series.end = as.Date(Sys.Date())
+    )
+  )
+
+
+```
+
+Plot the residual  GDP to the linear fit prediction. 
+
+The residuals decrease quite a bit during the Covid numbers, at least as of Jun 2020. Probably indicates uncertainty in the numbers.
+
+```{r gdp.cor.adv.resid, echo=FALSE,, fig.width = 6, fig.asp = .82}
+
+datay <- str.symbol.res
+ylim <- c(-2000, 2000)
+myPlot <- plotSingle(
+  dfRecession,
+  df.data,
+  "date",
+  datay,
+  getPlotTitle(df.symbols, datay),
+  "Date",
+  getPlotYLabel(df.symbols, datay),
+  c(as.Date("1jan1967", "%d%b%Y"), Sys.Date()),
+  ylim,
+  b.legend = TRUE,
+  b.percentile = TRUE,
+  b.long.legend = FALSE
+)
+
+myPlot <- myPlot + geom_hline(yintercept=(6*sd.fit.gdp.lm.adv), color = "red", linetype="dashed")
+myPlot <- myPlot + geom_hline(yintercept=(-6*sd.fit.gdp.lm.adv), color = "red", linetype="dashed")
+
+print(myPlot)
+
+```
+
+
