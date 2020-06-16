@@ -7659,7 +7659,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
 
-#### DPCERC: Personal Savings Rate - Line 35
+#### DPCERC: Personal consumption expenditures (PCE) - Line ...
 
 BEA Account Code: DPCERC
 Personal consumption expenditures (PCE) is the primary measure of consumer spending on goods and services in the U.S. economy. 1 It accounts for about two-thirds of domestic final spending, and thus it is the primary engine that drives future economic growth. PCE shows how much of the income earned by households is being spent on
