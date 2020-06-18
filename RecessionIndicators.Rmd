@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "June 16, 2020"
+date: "June 18, 2020"
 output: 
   html_document:
     toc: true
@@ -43,6 +43,9 @@ library(gtable)
 library(data.table)
 library(readxl)
 library(plotly)
+#install.packages('coronavirus')
+library(coronavirus)
+
 ```
 
 ```{r helper functions, echo=FALSE}
@@ -801,12 +804,23 @@ colnames(FINRAFreeCreditMargin)[[1]] <- c(str.safe.name)
 
 ```
 
-```{r covid.hell, echo=FALSE}
-jhu_url <- paste("https://raw.githubusercontent.com/CSSEGISandData/", 
-  "COVID-19/master/csse_covid_19_data/", "csse_covid_19_time_series/", 
-  "time_series_covid19_confirmed_global.csv", sep = "")
+Get the Covid-19 data from JHU
 
-us_confirmed_long_jhu <- read_csv(jhu_url) %>% rename(province = "Province/State",  country_region = "Country/Region")
+```{r covid.hell, echo=FALSE}
+
+data("coronavirus")
+coronavirus::update_dataset(silence = TRUE)
+
+```
+
+```{r covid.hell.tidy, echo=FALSE}
+
+df.corona.region <- coronavirus %>%
+filter(type == "confirmed") %>%
+group_by(country) %>%
+summarise(total = sum(cases)) %>%
+arrange(-total) %>%
+head(20)
 
 ```
 
@@ -3304,7 +3318,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = TRUE
 
 More near-term trend.
 
-```{r NYSEMargin_Yoy.nearterm }
+```{r NYSEMargin_Yoy.nearterm, echo=FALSE }
 
 datay <- "FINRAMarginDebt_YoY"
 ylim <- c(-100, 75)
