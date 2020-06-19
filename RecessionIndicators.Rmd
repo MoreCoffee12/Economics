@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "June 18, 2020"
+date: "June 19, 2020"
 output: 
   html_document:
     toc: true
@@ -17,6 +17,7 @@ options("getSymbols.warning4.0"=FALSE)
 ```{r libraries, echo=FALSE, message=FALSE}
 library(UsingR)
 library(quantmod)
+library(dplyr)
 library(ggplot2)
 library(grid)
 library(gridExtra)
@@ -809,7 +810,7 @@ Get the Covid-19 data from JHU
 ```{r covid.hell, echo=FALSE}
 
 data("coronavirus")
-coronavirus::update_dataset(silence = TRUE)
+#coronavirus::update_dataset(silence = TRUE)
 
 ```
 
@@ -821,6 +822,44 @@ group_by(country) %>%
 summarise(total = sum(cases)) %>%
 arrange(-total) %>%
 head(20)
+
+df.corona.date <- coronavirus %>%
+filter(type == "confirmed") %>%
+group_by(country, date) %>%
+summarise(total = sum(cases)) %>%
+arrange(country) 
+
+df.corona.date.us <- df.corona.date[df.corona.date$country=='US',]
+df.corona.date.us$day <- as.factor(weekdays(df.corona.date.us$date))
+df.corona.date.us$day_number <- recode(df.corona.date.us$day, 
+       "Sunday" = "0",
+       "Monday" = "1",
+       "Tuesday" = "2",
+       "Wednesday" = "3",
+       "Thursday" = "4",
+       "Friday" = "5",
+       "Saturday"= "6")
+df.corona.date.us$day_number <- as.numeric(as.character((df.corona.date.us$day_number)))
+
+qplot(df.corona.date.us$date, df.corona.date.us$total)
+
+
+my.plot <- qplot(day_number, total, data=df.corona.date.us[1:4,], geom=c("point", "line"))
+i.lines <- floor(nrow(df.corona.date.us)/7)-2
+idx.start <- 5
+for (idx in 1:i.lines){
+  idx.end = idx.start+6
+  my.plot <- my.plot + geom_line(data = df.corona.date.us[idx.start:idx.end,], aes(x = day_number, y = total)) 
+  idx.start = idx.end + 1
+}
+idx.end = idx.start+6
+my.plot <-
+  my.plot + geom_line(data = df.corona.date.us[idx.start:idx.end, ], aes(x = day_number, y = total), color="red") 
+
+my.plot <- my.plot + ggtitle("US Daily Cases, JHU Data (Red is most recent)")
+my.plot <- my.plot + xlab("Day Number, 0=Sunday, 6 = Saturday")
+my.plot <- my.plot + ylab("Daily Total")
+my.plot
 
 ```
 
@@ -6023,7 +6062,7 @@ Charlie Hatch has a nice format of deficit versus debt:
 datax = "FYFSGDA188S"
 datay = "GFDEGDQ188S"
 titlelabel <- paste(datay, " | ", datax)
-ylim <- c(30, 110)
+ylim <- c(30, 180)
 ylabel <- paste(datay, ", ", df.symbols[grep(datay, df.symbols$string.symbol),]$yLabel, sep="")
 xlim <- c(-20, 5)
 xlabel <- paste(datax, ", ", df.symbols[grep(datax, df.symbols$string.symbol),]$yLabel, sep="")
