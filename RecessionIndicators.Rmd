@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "June 20, 2020"
+date: "June 22, 2020"
 output: 
   html_document:
     toc: true
@@ -844,19 +844,40 @@ df.corona.date.us$day_number <- as.numeric(as.character((df.corona.date.us$day_n
 qplot(df.corona.date.us$date, df.corona.date.us$total)
 
 
-my.plot <- qplot(day_number, total, data=df.corona.date.us[1:4,], geom=c("point", "line"))
-i.lines <- floor(nrow(df.corona.date.us)/7)-2
+
+my.plot <-
+  qplot(day_number,
+        total,
+        data = df.corona.date.us[1:4, ],
+        geom = c("point", "line"))
+i.lines <- floor(nrow(df.corona.date.us) / 7) - 2
 idx.start <- 5
-for (idx in 1:i.lines){
-  idx.end = idx.start+6
-  my.plot <- my.plot + geom_line(data = df.corona.date.us[idx.start:idx.end,], aes(x = day_number, y = total)) 
+for (idx in 1:i.lines) {
+  idx.end = idx.start + 6
+  my.plot <-
+    my.plot + geom_line(data = df.corona.date.us[idx.start:idx.end, ], aes(x = day_number, y = total))
   idx.start = idx.end + 1
 }
-idx.end = idx.start+6
+idx.end = idx.start + 6
 my.plot <-
-  my.plot + geom_line(data = df.corona.date.us[idx.start:idx.end, ], aes(x = day_number, y = total), color="red") 
+  my.plot + geom_line(
+    data = df.corona.date.us[idx.start:idx.end,],
+    aes(x = day_number, y = total),
+    color = "blue",
+    size = 2
+  )
+idx.start <- idx.end + 1
+idx.end = idx.start + 6
+my.plot <-
+  my.plot + geom_line(
+    data = df.corona.date.us[idx.start:idx.end,],
+    aes(x = day_number, y = total),
+    color = "red",
+    size = 2
+  )
 
-my.plot <- my.plot + ggtitle("US Daily Cases, JHU Data (Red is most recent)")
+my.plot <-
+  my.plot + ggtitle("US Daily Cases, JHU Data (Blue is last week, red is most recent)")
 my.plot <- my.plot + xlab("Day Number, 0=Sunday, 6 = Saturday")
 my.plot <- my.plot + ylab("Daily Total")
 my.plot
