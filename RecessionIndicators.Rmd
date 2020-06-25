@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "June 24, 2020"
+date: "June 25, 2020"
 output: 
   html_document:
     toc: true
@@ -812,7 +812,7 @@ Get the Covid-19 data from JHU
 ```{r covid.hell, echo=FALSE}
 
 data("coronavirus")
-#coronavirus::update_dataset(silence = TRUE)
+coronavirus::update_dataset(silence = TRUE)
 
 ```
 
