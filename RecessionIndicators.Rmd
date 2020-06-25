@@ -7549,6 +7549,57 @@ p1
 ```
 
 
+```{r bkr.total.Oilgasdrilling.near, echo=FALSE, fig.width = 9, fig.asp = 0.4 }
+
+datay <- "BKRTotal"
+datay.aux.1 <- "TOTALOGNRPUSM"
+datay.aux.2 <- "BKROil"
+datay.aux.3 <- "BKRGas"
+ylim <- c(7.5, 2500)
+dtStart = as.Date('2019-01-01')
+p1 <-
+  plotSingleQuick(
+    dfRecession,
+    df.data,
+    datay,
+    ylim,
+    dtStart,
+    b.legend = TRUE,
+    b.percentile = FALSE,
+    b.long.legend = TRUE
+  )
+p1 <- p1 + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux.1,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n"))
+  ),
+  na.rm = TRUE
+)
+p1 <- p1 + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux.2,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux.2, str.sep = "\n"))
+  ),
+  na.rm = TRUE
+)
+p1 <- p1 + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux.3,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux.3, str.sep = "\n"))
+  ),
+  na.rm = TRUE
+)
+p1
+
+
+```
+
 ## BEA Supplemental Estimates, Motor Vehicles  
 
 Definitions								
