@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "June 25, 2020"
+date: "June 26, 2020"
 output: 
   html_document:
     toc: true
@@ -132,9 +132,9 @@ if(bRefresh) {
       )
       
       # Projected GDP 
-      if (str.symbol.list == "GDP"){
-        GDP <- rbind(GDP, xts(x = 19384.15, as.Date("2020-03-31") ))
-      }
+      # if (str.symbol.list == "GDP"){
+      #   GDP <- rbind(GDP, xts(x = 19384.15, as.Date("2020-03-31") ))
+      # }
 
       
     }
@@ -386,7 +386,7 @@ if(bRefresh) {
 
 Load up the EIA data
 
-```{r EIA data}
+```{r EIA data, echo=FALSE}
 key <- "7a2672468131c5a95dffc487d741edf6"
 
 
@@ -2651,7 +2651,7 @@ my.plot
 ```{r GDPSP500.close, echo=FALSE}
 
 datay <- "GDPSP500"
-ylim <- c(0.00, 0.16)
+ylim <- c(0.00, 0.18)
 dtStart = as.Date('2000-01-01')
 my.plot <-
   plotSingle(
@@ -5346,7 +5346,7 @@ Little bit closer
 ```{r WALCL_Near}
 
 datay <- "WALCL"
-ylim <- c(0, 4800)
+ylim <- c(0, 7500)
 dtStart = as.Date('2003-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
@@ -7555,7 +7555,7 @@ datay <- "BKRTotal"
 datay.aux.1 <- "TOTALOGNRPUSM"
 datay.aux.2 <- "BKROil"
 datay.aux.3 <- "BKRGas"
-ylim <- c(7.5, 2500)
+ylim <- c(7.5, 1200)
 dtStart = as.Date('2019-01-01')
 p1 <-
   plotSingleQuick(
@@ -7568,15 +7568,15 @@ p1 <-
     b.percentile = FALSE,
     b.long.legend = TRUE
   )
-p1 <- p1 + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay.aux.1,
-    colour = shQuote(getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n"))
-  ),
-  na.rm = TRUE
-)
+# p1 <- p1 + geom_line(
+#   data = df.data,
+#   aes_string(
+#     x = "date",
+#     y = datay.aux.1,
+#     colour = shQuote(getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n"))
+#   ),
+#   na.rm = TRUE
+# )
 p1 <- p1 + geom_line(
   data = df.data,
   aes_string(

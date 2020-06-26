@@ -1,7 +1,7 @@
 ---
 title: "GDP Models"
 author: "Brian Howard"
-date: "June 14, 2020"
+date: "June 26, 2020"
 output: 
   html_document:
     toc: true
@@ -321,7 +321,7 @@ datay.aux <- "GDP.pcr"
 datay.aux.1 <- "GDP"
 ylim <- c(10000, 25000)
 dt.end <- Sys.Date()
-dt.start <- as.Date("2018-01-01")
+dt.start <- as.Date("2015-01-01")
 myPlot <-
   plotSingle(
     dfRecession,
@@ -405,7 +405,7 @@ df.symbols <-
     data.frame(
       string.symbol = str.symbol.res,
       string.source = "Predict Resid.",
-      string.description = "Residual for \nGDP given INDPRO,\nPCE, and RSALESAGG",
+      string.description = "Residual for \nGDP given INDPRO,PCE, RSALESAGG,\nauto sales, and home sales",
       string.label.y = df.symbols[df.symbols$string.symbol==str.symbol,"string.label.y"],
       float.expense.ratio = -1.00,
       Max030 = FALSE,
@@ -453,7 +453,7 @@ The residuals decrease quite a bit during the Covid numbers, at least as of Jun 
 ```{r gdp.cor.resid, echo=FALSE,, fig.width = 6, fig.asp = .82}
 
 datay <- str.symbol.res
-ylim <- c(-1500, 1500)
+ylim <- c(-2000, 2000)
 myPlot <- plotSingle(
   dfRecession,
   df.data,
@@ -483,7 +483,7 @@ The residuals decrease quite a bit during the Covid numbers, at least as of Jun 
 ```{r gdp.cor.pcr.resid, echo=FALSE,, fig.width = 6, fig.asp = .82}
 
 datay <- str.symbol.pcr.res
-ylim <- c(-1500, 1500)
+ylim <- c(-2000, 2000)
 myPlot <- plotSingle(
   dfRecession,
   df.data,
