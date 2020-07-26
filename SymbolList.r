@@ -1052,6 +1052,34 @@ df.symbols <-
   rbind(
     df.symbols,
     data.frame(
+      string.symbol = "^STOXX50E",
+      string.source = "yahoo",
+      string.description = "Euro Stoxx 50",
+      string.label.y = "Euros",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "EFA",
+      string.source = "yahoo",
+      string.description = "iShares MSCI EAFE ETF",
+      string.label.y = "Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
       string.symbol = "GDP",
       string.source = "FRED",
       string.description = "Gross Domestic Product",
