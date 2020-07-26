@@ -551,6 +551,29 @@ df.symbols <-
     )
   )
 
+# Create the ratio of Dow Jones industrial average close to GDP
+df.data$DJISP500 <- df.data$DJI.Close / df.data$GDP
+df.data$DJISP500 <- na.approx(df.data$DJISP500, rule = 2)
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "DJISP500",
+      string.source = "Ratio",
+      string.description =  "Dow Jones (DJI.Close)/GDP",
+      string.label.y = "Ratio ($/$)" ,
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = as.Date(max(c(
+        index(DJI[1]), index(GDP[1])
+      ))) ,
+      date.series.end = as.Date(min(c(
+        index(tail(DJI, 1)), index(tail(GDP, 1))
+      )))
+    )
+  )
+
 
 
 # This is the NY Fed's model for recession basedon the 10 y to 3 month spread

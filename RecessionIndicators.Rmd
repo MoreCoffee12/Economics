@@ -2333,6 +2333,8 @@ myPlot + geom_line(data=df.data, aes_string(x="date", y=datay_aux2, colour=shQuo
 
 datay <- "GDPSP500"
 datay.aux <- "RLGSP500"
+datay.aux.1 <- "DJISP500"
+datay.aux.scale <- 0.1
 ylim <- c(0.00, 0.18)
 dtStart = as.Date('1980-01-01')
 my.plot <-
@@ -2348,7 +2350,7 @@ my.plot <-
     ylim,
     TRUE
   )
-my.plot + geom_line(
+my.plot <- my.plot + geom_line(
   data = df.data,
   aes_string(
     x = "date",
@@ -2357,6 +2359,21 @@ my.plot + geom_line(
   ),
   na.rm = TRUE
 )
+my.plot <- my.plot + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = df.data[[datay.aux.1]] * datay.aux.scale,
+    colour = shQuote(datay.aux.1)
+  ),
+  na.rm = TRUE
+)
+my.plot <-
+  my.plot + scale_y_continuous(
+    sec.axis = sec_axis( ~ . * (1 / datay.aux.scale), 
+    name = paste(datay.aux.1, " ($/$)", sep ="")), 
+    limits = ylim
+  )
 
 my.plot 
 
@@ -2905,161 +2922,6 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
-### Year over year
-
-How much did the market change in a year, or 4, or 5? This data is used to evaluate the probability of a XX% decline in a certain period.
-
-Start with year-over-year
-
-```{r GSPC.Close_YoY1, echo=FALSE, echo=FALSE, fig.width = 8, fig.asp = 0.8  }
-datay.in <- "GSPC.Close_YoY"
-datay.aux.1 <- "DJI.Close_YoY"
-datay.aux.2 <- "RLG.Close_YoY"
-ylim.in <- c(-75, 75)
-dt.start <- as.Date('1940-01-01')
-p1 <- plotSingle(datadf_rec=dfRecession,
-           datadf=df.data,
-           datax="date",
-           datay = datay.in,
-           titlelabel = getPlotTitle(df.symbols, datay.in),
-           xlabel = "Date",
-           ylabel = getPlotYLabel(df.symbols, datay.in),
-           xlim = c(dt.start, Sys.Date()),
-           ylim = ylim.in,
-           b.legend = TRUE,
-           b.percentile = TRUE,
-           b.long.legend = TRUE) 
-p1 <-p1 + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay.aux.1,
-    colour = shQuote(datay.aux.1)
-  ),
-  na.rm = TRUE
-)
-
-p1 + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay.aux.2,
-    colour = shQuote(datay.aux.2)
-  ),
-  na.rm = TRUE
-)
-
-```
-
-See how it looks over a 4-year period
-
-```{r GSPC.Close_YoY4, echo=FALSE, fig.width = 8, fig.asp = 0.8  }
-datay.in <- "GSPC.Close_YoY4"
-datay.aux.1 <- "DJI.Close_YoY4"
-datay.aux.2 <- "RLG.Close_YoY4"
-ylim.in <- c(-100, 200)
-dt.start <- as.Date('1940-01-01')
-p1 <- plotSingle(datadf_rec=dfRecession,
-           datadf=df.data,
-           datax="date",
-           datay = datay.in,
-           titlelabel = "4 Year - 4 Year change, GSPC, DJI, RLS",
-           xlabel = "Date",
-           ylabel = getPlotYLabel(df.symbols, datay.in),
-           xlim = c(dt.start, Sys.Date()),
-           ylim = ylim.in,
-           b.legend = TRUE,
-           b.percentile = TRUE,
-           b.long.legend = TRUE) 
-p1 <-p1 + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay.aux.1,
-    colour = shQuote(getPlotTitle(df.symbols, datay.aux.1))
-  ),
-  na.rm = TRUE
-)
-
-p1 + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay.aux.2,
-    colour = shQuote(getPlotTitle(df.symbols, datay.aux.2))
-  ),
-  na.rm = TRUE
-)
-```
-
-With a 4-year window, what are the probabilities of certain returns?
-
-```{r GSPC.Close_YoY4.hist, echo=FALSE, fig.width = 8, fig.asp = 0.8  }
-
-data.hist <- df.data$GSPC.Close_YoY4[df.data$date>dt.start]
-my.h <- hist(data.hist,breaks=500,main="S&P 500 4 year returns")
-abline(v = median(data.hist), col = "blue", lwd = 2)
-my.h$counts=100*my.h$counts/sum(my.h$counts)
-plot(my.h)
-abline(v = median(data.hist), col = "blue", lwd = 2)
-
-```
-
-
-See how it looks over a 5-year period
-
-```{r GSPC.Close_YoY5, echo=FALSE, fig.width = 8, fig.asp = 0.8  }
-datay.in <- "GSPC.Close_YoY5"
-datay.aux.1 <- "DJI.Close_YoY5"
-datay.aux.2 <- "RLG.Close_YoY5"
-ylim.in <- c(-100, 300)
-dt.start <- as.Date('1930-01-01')
-p1 <- plotSingle(datadf_rec=dfRecession,
-           datadf=df.data,
-           datax="date",
-           datay = datay.in,
-           titlelabel = "5 Year - 5 Year change, GSPC, DJI, RLS",
-           xlabel = "Date",
-           ylabel = getPlotYLabel(df.symbols, datay.in),
-           xlim = c(dt.start, Sys.Date()),
-           ylim = ylim.in,
-           b.legend = TRUE,
-           b.percentile = TRUE,
-           b.long.legend = TRUE) 
-p1 <-p1 + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay.aux.1,
-    colour = shQuote(getPlotTitle(df.symbols, datay.aux.1))
-  ),
-  na.rm = TRUE
-)
-
-p1 + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay.aux.2,
-    colour = shQuote(getPlotTitle(df.symbols, datay.aux.2))
-  ),
-  na.rm = TRUE
-)
-```
-
-With a 5-year window, what are the probabilities of certain returns?
-
-```{r GSPC.Close_YoY5.hist, echo=FALSE, fig.width = 8, fig.asp = 0.8  }
-
-data.hist <- df.data$GSPC.Close_YoY5[df.data$date>dt.start]
-my.h <- hist(data.hist,breaks=500,main="S&P 500 5 year returns")
-abline(v = median(data.hist), col = "blue", lwd = 2)
-my.h$counts=100*my.h$counts/sum(my.h$counts)
-plot(my.h)
-abline(v = median(data.hist), col = "blue", lwd = 2)
-
-
-```
 
 ## Margin and option data
 

@@ -428,7 +428,7 @@ print(myPlot)
 
 ### Employment Correlation, U6 and U3
 
-Correlation across some of the series. This section checks that survey data is coherent within itself. Do the U3 and U5 series generally agree?
+Correlation across some of the series. This section checks that survey data is coherent within itself. Do the U3 and U6 series generally agree?
 
 ```{r EMP.cor.setup, echo=FALSE}
 

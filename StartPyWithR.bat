@@ -7,7 +7,8 @@ IF NOT EXIST %condaPath% SET condaPath=%USERPROFILE%\AppData\Local\Continuum\ana
 REM ---------------------------------------------------------------------------------
 REM Set the environment
 REM ---------------------------------------------------------------------------------
-call activate R-basics
+REM call activate r-basics
+call activate base
 
 REM ---------------------------------------------------------------------------------
 REM Instantiate the notebook using the current directory
