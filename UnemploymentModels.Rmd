@@ -79,7 +79,6 @@ load("C:/Users/Rainy/OneDrive//RecessionIndicator_Buffer.RData")
 
 ```
 
-
 ```{r symTidy, echo=FALSE}
 
 #This snippet is needed because some of the ticker symbols include are invalid variable names so re-cast those variable names.
@@ -99,6 +98,16 @@ The code performs interpolation for continuous data or carries it forward for bi
 
 source("calcInterpolate.r")
 df.data <- calcInterpolate(df.data, df.symbols)
+
+```
+
+## Truncate data
+
+```{r data.trunc, echo=FALSE}
+
+# A very few data series do go back to 1854, but most
+# don't even go past WWII so truncate the dataframe
+df.data1 <- df.data[as.Date(rownames(df.data)) > as.Date("1940-01-01"),]
 
 ```
 
@@ -131,15 +140,7 @@ source("calcFeaturesAggregate.r")
 ```
 
 
-```{r data.trunc, echo=FALSE}
-
-# A very few data series do go back to 1854, but most
-# don't even go past WWII so truncate the dataframe
-df.data <- df.data[df.data$date > as.Date("1940-01-01"),]
-
-```
-
-# Recession Initiation (Switch Model)
+# Recession initiation and termination dates/times
 
 Build the recession and recession initiation dates
 

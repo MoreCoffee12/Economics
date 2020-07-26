@@ -251,3 +251,327 @@ for (strName in names(df.data)) {
 
 # This speeds some of the upcoming operations
 df.data$date = as.Date(rownames(df.data))
+
+
+# These are auxilliary series that will be used a bit later.
+
+# Add a smoothed U-3 unemployement rate with 21 day kernel
+df.data$UNRATE_Smooth <-
+  sgolayfilt(
+    df.data$UNRATE,
+    p = 3,
+    n = 21,
+    m = 0,
+    ts = 1
+  )
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "UNRATE_Smooth_21",
+      string.source = "Calc",
+      string.description =  "Smoothed Civilian Unemployment Rate U-3",
+      string.label.y = "Percent",
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = as.Date(index(UNRATE[1])),
+      date.series.end = as.Date(index(tail(UNRATE, 1)))
+    )
+  )
+
+# Second derivative of the U-3 unemployment rate
+df.data$UNRATE_SmoothDer2 <-
+  sgolayfilt(
+    df.data$UNRATE,
+    p = 3,
+    n = 501,
+    m = 2,
+    ts = 1
+  )
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "UNRATE_SmoothDer2",
+      string.source = "Calc",
+      string.description =  "2nd Derivative of Smoothed U-3",
+      string.label.y = "Percent/period/period" ,
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = as.Date(index(UNRATE[1])),
+      date.series.end = as.Date(index(tail(UNRATE, 1)))
+    )
+  )
+
+# Add a smoothed U-6 unemployement rate with 21 day kernel
+df.data$U6RATE_Smooth <-
+  sgolayfilt(
+    df.data$U6RATE,
+    p = 3,
+    n = 21,
+    m = 0,
+    ts = 1
+  )
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "U6RATE_Smooth_21",
+      string.source = "Calc",
+      string.description =  "Smoothed Total Unemployed U-6",
+      string.label.y = "Percent",
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = as.Date(index(U6RATE[1])),
+      date.series.end = as.Date(index(tail(U6RATE, 1)))
+    )
+  )
+
+# Second derivative of the U-6 unemployment rate
+df.data$U6RATE_SmoothDer2 <-
+  sgolayfilt(
+    df.data$U6RATE,
+    p = 3,
+    n = 501,
+    m = 2,
+    ts = 1
+  )
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "UNRATE_SmoothDer2",
+      string.source = "Calc",
+      string.description =  "2nd Derivative of Smoothed U-6",
+      string.label.y = "Percent/period/period" ,
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = as.Date(index(U6RATE[1])),
+      date.series.end = as.Date(index(tail(U6RATE, 1)))
+    )
+  )
+
+# Smoothed derivative of the S&P 500 log values
+df.data$GSPC.Open_Log_SmoothDer <-
+  sgolayfilt(
+    df.data$GSPC.Open_Log,
+    p = 3,
+    n = 501,
+    m = 1,
+    ts = 1
+  )
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "GSPC.Open_Log_SmoothDer",
+      string.source = "Calc",
+      string.description =  "Derivative of Smoothed Log Scale S&P 500",
+      string.label.y = "Dollar/period",
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = as.Date(index(GSPC[1])),
+      date.series.end = as.Date(index(tail(GSPC, 1)))
+    )
+  )
+
+# Smoothed derivative of the S&P 500 log values, normalized by the GDP deflator
+df.data$GSPC.Open.by.GDPDEF_Log_SmoothDer <-
+  sgolayfilt(
+    df.data$GSPC.Open.by.GDPDEF_Log,
+    p = 3,
+    n = 501,
+    m = 1,
+    ts = 1
+  )
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "GSPC.Open.by.GDPDEF_Log_SmoothDer",
+      string.source = "Calc",
+      string.description =  "Derivative of Smoothed Log Scale S&P 500\ndivided by GDP deflator",
+      string.label.y = "Dollar/period",
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = as.Date(index(GSPC[1])),
+      date.series.end = as.Date(index(tail(GSPC, 1)))
+    )
+  )
+
+# Smoothed second derivative of the S&P 500 log values
+df.data$GSPC.Open_Log_SmoothDerDer <-
+  sgolayfilt(
+    df.data$GSPC.Open_Log_SmoothDer,
+    p = 3,
+    n = 501,
+    m = 1,
+    ts = 1
+  )
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "GSPC.Open_Log_SmoothDerDer",
+      string.source = "Calc",
+      string.description =  "Derivative of Smoothed Log Scale S&P 500",
+      string.label.y = "Dollar/period/period",
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = as.Date(index(GSPC[1])),
+      date.series.end = as.Date(index(tail(GSPC, 1)))
+    )
+  )
+
+# Smoothed business debt levels
+df.data$NCBDBIQ027S_Log_Der <-
+  sgolayfilt(
+    df.data$NCBDBIQ027S_Log,
+    p = 3,
+    n = 501,
+    m = 1,
+    ts = 1
+  )
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "NCBDBIQ027S_Log_Der",
+      string.source = "Calc",
+      string.description =  "Derivative of Smoothed Log Nonfinancial corporate business; debt securities; liability, Level",
+      string.label.y = "log(Milllons of Dollars)/period" ,
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = as.Date(index(NCBDBIQ027S[1])),
+      date.series.end = as.Date(index(tail(NCBDBIQ027S, 1)))
+    )
+  )
+
+
+# Smoothed business loan levels
+df.data$BUSLOANS_Log_Der <-
+  sgolayfilt(
+    df.data$BUSLOANS_Log,
+    p = 3,
+    n = 501,
+    m = 1,
+    ts = 1
+  )
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "BUSLOANS_Log_Der",
+      string.source = "Calc",
+      string.description =  "Derivative of Smoothed Log Commercial and Industrial Loans",
+      string.label.y = "log(Billlons of U.S. Dollars)/period" ,
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = as.Date(index(BUSLOANS[1])),
+      date.series.end = as.Date(index(tail(BUSLOANS, 1)))
+    )
+  )
+
+df.data$GPDI_Log_Der <-
+  sgolayfilt(
+    df.data$GPDI_Log,
+    p = 3,
+    n = 501,
+    m = 1,
+    ts = 1
+  )
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "GPDI_Log_Der",
+      string.source = "FRED",
+      string.description =  "Gross Private Domestic Investment",
+      string.label.y = "log(Billions of Dollars)",
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = as.Date(index(GPDI[1])),
+      date.series.end = as.Date(index(tail(GPDI, 1)))
+    )
+  )
+
+# Create the ratio of S&P 500 close to GDP
+df.data$GDPSP500 <- df.data$GSPC.Close / df.data$GDP
+df.data$GDPSP500 <- na.approx(df.data$GDPSP500, rule = 2)
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "GDPSP500",
+      string.source = "Ratio",
+      string.description =  "S&P 500 (GSPC.Close)/GDP",
+      string.label.y = "Ratio ($/$)" ,
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = as.Date(max(c(
+        index(GSPC[1]), index(GDP[1])
+      ))) ,
+      date.series.end = as.Date(min(c(
+        index(tail(GSPC, 1)), index(tail(GDP, 1))
+      )))
+    )
+  )
+
+# Create the ratio of Russell 2000 close to GDP
+df.data$RLGSP500 <- df.data$RLG.Close / df.data$GDP
+df.data$RLGSP500 <- na.approx(df.data$RLGSP500, rule = 2)
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "RLGSP500",
+      string.source = "Ratio",
+      string.description =  "Russell 2000 (RLG.Close)/GDP",
+      string.label.y = "Ratio ($/$)" ,
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = as.Date(max(c(
+        index(RLG[1]), index(GDP[1])
+      ))) ,
+      date.series.end = as.Date(min(c(
+        index(tail(RLG, 1)), index(tail(GDP, 1))
+      )))
+    )
+  )
+
+
+
+# This is the NY Fed's model for recession basedon the 10 y to 3 month spread
+nyfed.alpha = -0.5333
+nyfed.beta = -0.6330
+#df.data$nyfed.recession <- shift(pnorm(nyfed.beta + df.data$DGS10TOTB3MS*nyfed.alpha), n=360, fill = 0)
+df.data$nyfed.recession <-
+  pnorm(nyfed.beta + df.data$DGS10TOTB3MS * nyfed.alpha)
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "nyfed.recession",
+      string.source = "Calc",
+      string.description =  "Probability of US Recession Predicted by Treasury Spread (12 month)",
+      string.label.y = "-",
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = as.Date(df.symbols$date.series.start[df.symbols$string.symbol == 'DGS10TOTB3MS']),
+      date.series.end = as.Date(df.symbols$date.series.end[df.symbols$string.symbol == 'DGS10TOTB3MS'])
+    )
+  )
+
