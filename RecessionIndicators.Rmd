@@ -82,7 +82,7 @@ For one of my machine learning classes we had a project that consumed financial 
 
 Acquiring the data consists of two steps. First the code pulls the data into zoo objects which are then collapsed into a single data frame (df.data). Features are extracted from these series and added to the df.data data frame.
 
-# Sample call to pull data
+## Sample call to pull economic data
 
 Data is pulled from several sources include FRED, yahoo, and Google. The code below shows an example that pulls in the consumer price index (CPI) from the FRED. I pull data using quantmod, Quandl, and some manual extractions stored in spreadsheets. 
 
@@ -384,7 +384,7 @@ if(bRefresh) {
 
 ```
 
-Load up the EIA data
+## Load up the EIA data
 
 ```{r EIA data, echo=FALSE}
 key <- "7a2672468131c5a95dffc487d741edf6"
@@ -555,6 +555,8 @@ key <- "7a2672468131c5a95dffc487d741edf6"
 
 ```
 
+## Load rig count data
+
 The Baker Hughes rig count numbers
 
 ```{r bkr.rig.count.load, echo=FALSE}
@@ -634,6 +636,8 @@ colnames(BKROil)[[1]] <- c(str.safe.name)
 
 
 ```
+
+## USDA data
 
 Loading in farm data
 
