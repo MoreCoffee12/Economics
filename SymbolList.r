@@ -235,6 +235,92 @@ df.symbols <-
     )
   )
 
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "LFMIX",
+      string.source = "yahoo",
+      string.description = "LoCorr Macro Strategies Fund Class I",
+      string.label.y = "Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+rbind(
+  df.symbols,
+  data.frame(
+    string.symbol = "LFMCX",
+    string.source = "yahoo",
+    string.description = "LoCorr Macro Strategies Fund Class C",
+    string.label.y = "Dollars",
+    float.expense.ratio = -1.00,
+    date.series.start = as.Date("1900-01-01"),
+    date.series.end = as.Date("1900-01-01")
+  )
+)
+
+rbind(
+  df.symbols,
+  data.frame(
+    string.symbol = "LFMAX",
+    string.source = "yahoo",
+    string.description = "LoCorr Macro Strategies Fund Class A",
+    string.label.y = "Dollars",
+    float.expense.ratio = -1.00,
+    date.series.start = as.Date("1900-01-01"),
+    date.series.end = as.Date("1900-01-01")
+  )
+)
+
+rbind(
+  df.symbols,
+  data.frame(
+    string.symbol = "LCSIX",
+    string.source = "yahoo",
+    string.description = "LoCorr Long/Short Commodity Strategies Fund Class I",
+    string.label.y = "Dollars",
+    float.expense.ratio = -1.00,
+    date.series.start = as.Date("1900-01-01"),
+    date.series.end = as.Date("1900-01-01")
+  )
+)
+
+rbind(
+  df.symbols,
+  data.frame(
+    string.symbol = "BSV",
+    string.source = "yahoo",
+    string.description = "Vanguard Short-Term Bond Index Fund ETF Shares",
+    string.label.y = "Dollars",
+    float.expense.ratio = -1.00,
+    date.series.start = as.Date("1900-01-01"),
+    date.series.end = as.Date("1900-01-01")
+  )
+)
+
+rbind(
+  df.symbols,
+  data.frame(
+    string.symbol = "PTTRX",
+    string.source = "yahoo",
+    string.description = "PIMCO Total Return Fund Institutional Class ",
+    string.label.y = "Dollars",
+    float.expense.ratio = -1.00,
+    date.series.start = as.Date("1900-01-01"),
+    date.series.end = as.Date("1900-01-01")
+  )
+)
+
+
+
+
+
+
+
+
 
 
 
