@@ -252,7 +252,272 @@ plotSingle <-
   }
   
   return(my.plot)
+  }
+
+
+#' Return color-blind friendly pallette with black
+#'
+#' @return Vector with colors
+#' @export
+#'
+#' @examples
+getPaletteBlack <- function() {
+  # From http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/#a-colorblind-friendly-palette
+  
+  cbbPalette <-
+    c(
+      "#000000",
+      "#E69F00",
+      "#56B4E9",
+      "#009E73",
+      "#F0E442",
+      "#0072B2",
+      "#D55E00",
+      "#CC79A7"
+    )
+  
+  return(cbbPalette)
+  
 }
+
+#' Return color-blind friendly pallette with grey
+#'
+#' @return Vector with colors
+#' @export
+#'
+#' @examples
+getPaletteGrey <- function() {
+  # From http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/#a-colorblind-friendly-palette
+  
+  cbPalette <-
+    c(
+      "#999999",
+      "#E69F00",
+      "#56B4E9",
+      "#009E73",
+      "#F0E442",
+      "#0072B2",
+      "#D55E00",
+      "#CC79A7"
+    )
+  
+  return(cbPalette)
+  
+}
+
+
+#' Plot a single series bench mark
+#'
+#' @param datadf_rec Dataframe with recession indicator 
+#' @param datay Column with data to be plotted against the benchmark
+#' @param ylim Vertical plotting limits
+#' @param df.symbols Data frame with the symbol information
+#' @param df.data Data frame with the financial series
+#' @param string.analysis.start Starting data for the analysis
+#'
+#' @return
+#' @export
+#'
+#' @examples
+plotSingleBench <-
+  function(datadf_rec, datay,
+           ylim,
+           df.symbols,
+           df.data,
+           string.analysis.start) {
+    # The palette with black:
+    cbbPalette <- getPaletteBlack()
+    
+    if (grep('.', datay) > 0) {
+      strSym <- strSymOnly(datay)
+      strTitle <-
+        paste(datay, " | ", df.symbols[grep(strSym, df.symbols$string.symbol),]$string.description)
+      strYLabel <-
+        df.symbols[grep(strSym, df.symbols$Symbol),]$string.label.y
+    } else{
+      strTitle <-
+        paste(datay, " | ", df.symbols[grep(datay, df.symbols$string.symbol),]$string.description)
+      strYLabel <-
+        df.symbols[grep(datay, df.symbols$Symbol),]$string.label.y
+    }
+    dataBench <- "GSPC.Close_Norm"
+    datax <- "date"
+    my.plot <- plotSingle(datadf_rec, df.data,
+                          datax,
+                          datay,
+                          strTitle,
+                          "Date",
+                          strYLabel,
+                          c(as.Date(string.analysis.start), Sys.Date()),
+                          ylim,
+                          TRUE)
+    # Label the end point for the data being compared to the benchmark
+    d.y.value <- tail(df.data[[datay]], 1)
+    my.plot <-
+      my.plot + annotate(
+        geom = "point",
+        x = tail(df.data$date, 1),
+        y = d.y.value,
+        color = cbbPalette[2],
+        size = 1.75
+      )
+    my.plot <-
+      my.plot + annotate(
+        geom = "text",
+        x = tail(df.data$date, 1),
+        y = d.y.value,
+        label = format(d.y.value, digits = 3, nsmall = 2),
+        vjust = 0.5,
+        hjust = -0.1,
+        color = cbbPalette[2]
+      )
+    
+    my.plot <-
+      my.plot + geom_line(
+        data = df.data,
+        aes_string(
+          x = datax,
+          y = dataBench,
+          colour = factor(dataBench)
+        ),
+        na.rm = TRUE,
+        size = 0.7
+      )
+    
+    return(my.plot)
+    
+    
+  }
+
+#' Calculate efficiency frontier, plot return versus volatility
+#'
+#' @param string.portfolio.in Name of the portfolio to plot
+#' @param df.data.in Data frame with the time history for the stock symbols
+#' @param df.symbols.in Data frame with meta data for the stock symbols
+#'
+#' @return List: dfRR (data frame of symbols in portfolio),
+#'               myPlot (handle to time series plot)
+#'               plot_dt (efficiency frontier)
+#'
+#' @export
+#'
+#' @examples
+plotReturnVolatility <-
+  function(string.portfolio.in,
+           df.data.in,
+           df.symbols.in) {
+    dfRR <- df.symbols.in[df.symbols.in[string.portfolio.in] > 0, ]
+    
+    # Need a data table with just the ticker and data
+    strCols <-
+      paste(dfRR$string.symbol, ".Close_Norm_YoY", sep = "")
+    dfPort <- data.table(df.data.in[, strCols])
+    
+    # Range of expected returns from the porfolio
+    er_vals <-
+      seq(
+        from = min(dfRR$ExpReturn),
+        to = max(dfRR$ExpReturn),
+        length.out = 1000
+      )
+    
+    # find an optimal portfolio for each possible possible expected return
+    # (note that the values are explicitly set between the minimum and maximum of
+    # the expected returns per asset)
+    sd_vals <- rep(0, length(er_vals))
+    tryCatch({
+      sd_vals <- sapply(er_vals, function(er) {
+        op <- portfolio.optim(as.matrix(dfPort), er)
+        return(op$ps)
+      })
+    }, error = function(e) {
+      print("Failed to find efficiency boundary")
+    })
+    
+    # Collect in a table
+    plot_dt <- data.table(sd = sd_vals, er = er_vals)
+    
+    # find the lower and the upper frontier
+    minsd <- min(plot_dt$sd)
+    minsd_er <- plot_dt[sd == minsd, er]
+    minsd_er <- minsd_er[1]
+    plot_dt[, efficient := er >= minsd_er]
+    
+    # Data for the actual portfolio mix
+    dfPortRet <- dfData[string.portfolio.in]
+    strPfYoY <- paste(string.portfolio.in, "_YoY", sep = "")
+    dfPortRet[strPfYoY] <-
+      CalcYoY(dfPortRet, string.portfolio.in, iRetPd)
+    Vol_pf <- sd(dfPortRet[, strPfYoY])
+    ExpRet_pf <- mean(dfPortRet[, strPfYoY])
+    #print(Vol_pf)
+    #print(ExpRet_pf)
+    
+    # Data for the portfolio mix with same returns, but lower volatility
+    op_pf <- portfolio.optim(as.matrix(dfPort), ExpRet_pf)
+    dfRR[paste(string.portfolio.in, "_Opt", sep = "")] <- op_pf$pw
+    
+    # Plot the data
+    myPlot <- ggplot() +
+      # Plot the portfolio elements
+      geom_point(data = dfRR,
+                 aes(
+                   x = Volatility,
+                   y = ExpReturn,
+                   color = string.symbol
+                 ),
+                 size = 3,
+                 shape=15) +
+      labs(color = "Symbol") +
+      # Plot the efficiency frontier
+      geom_line(data = plot_dt[efficient == F],
+                aes(x = sd, y = er),
+                size = 0.5,
+                color = "blue") +
+      geom_line(data = plot_dt[efficient == T],
+                aes(x = sd, y = er),
+                size = 0.5,
+                color = "red") +
+      annotate(geom = "point",
+               x = Vol_pf,
+               y = ExpRet_pf,
+               size = 5
+      ) +
+      annotate(geom = "text",
+               label = "As-found",
+               x = Vol_pf,
+               y = ExpRet_pf,
+               hjust = -0.15,
+               vjust = 0.5,
+               size = 4
+      ) +
+      annotate(geom = "point",
+               x = op_pf$ps,
+               y = ExpRet_pf,
+               size = 5,
+               color = "blue"
+      ) +
+      annotate(geom = "text",
+               label = "Optimized",
+               x = op_pf$ps,
+               y = ExpRet_pf,
+               hjust = 1.15,
+               vjust = 0.5,
+               size = 4
+      ) +
+      theme_bw() + ggtitle("Risk-Return Tradeoff (Red/Blue=Efficient), Annual Returns") +
+      guides(fill=guide_legend(title="New Legend Title")) +
+      xlab("Volatility") +
+      ylab("Expected Returns") +
+      scale_y_continuous(label = scales::percent, limits = c(-0.05, 0.1)) +
+      scale_x_continuous(label = scales::percent, limits = c(-0.05, 0.25))
+    
+    #myPlot$labels$colour <- "Symbol"
+    
+    return(list(dfRR, myPlot, plot_dt))
+    
+  }
+
 
 # ------------------------------------------------------------------------------
 #' Define the function for calculating year over year growth. 

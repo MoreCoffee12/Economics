@@ -229,7 +229,7 @@ df.symbols <-
       string.source = "yahoo",
       string.description = "ProShares S&P 500 Dividend Aristocrats (NOBL)",
       string.label.y = "BATS Real Time Price",
-      float.expense.ratio = -1.00,
+      float.expense.ratio = 0.35,
       date.series.start = as.Date("1900-01-01"),
       date.series.end = as.Date("1900-01-01")
     )
@@ -243,76 +243,207 @@ df.symbols <-
       string.source = "yahoo",
       string.description = "LoCorr Macro Strategies Fund Class I",
       string.label.y = "Dollars",
-      float.expense.ratio = -1.00,
+      float.expense.ratio = 2.00,
       date.series.start = as.Date("1900-01-01"),
       date.series.end = as.Date("1900-01-01")
     )
   )
 
-rbind(
+df.symbols <-
+  rbind(
   df.symbols,
   data.frame(
     string.symbol = "LFMCX",
     string.source = "yahoo",
     string.description = "LoCorr Macro Strategies Fund Class C",
     string.label.y = "Dollars",
-    float.expense.ratio = -1.00,
+    float.expense.ratio = 3.00,
     date.series.start = as.Date("1900-01-01"),
     date.series.end = as.Date("1900-01-01")
   )
 )
 
-rbind(
+df.symbols <-
+  rbind(
   df.symbols,
   data.frame(
     string.symbol = "LFMAX",
     string.source = "yahoo",
     string.description = "LoCorr Macro Strategies Fund Class A",
     string.label.y = "Dollars",
-    float.expense.ratio = -1.00,
+    float.expense.ratio = 2.25,
     date.series.start = as.Date("1900-01-01"),
     date.series.end = as.Date("1900-01-01")
   )
 )
 
-rbind(
+df.symbols <-
+  rbind(
   df.symbols,
   data.frame(
     string.symbol = "LCSIX",
     string.source = "yahoo",
     string.description = "LoCorr Long/Short Commodity Strategies Fund Class I",
     string.label.y = "Dollars",
-    float.expense.ratio = -1.00,
+    float.expense.ratio = 2.40,
     date.series.start = as.Date("1900-01-01"),
     date.series.end = as.Date("1900-01-01")
   )
 )
 
-rbind(
+df.symbols <-
+  rbind(
   df.symbols,
   data.frame(
     string.symbol = "BSV",
     string.source = "yahoo",
     string.description = "Vanguard Short-Term Bond Index Fund ETF Shares",
     string.label.y = "Dollars",
-    float.expense.ratio = -1.00,
+    float.expense.ratio = 0.05,
     date.series.start = as.Date("1900-01-01"),
     date.series.end = as.Date("1900-01-01")
   )
 )
 
-rbind(
+df.symbols <-
+  rbind(
   df.symbols,
   data.frame(
     string.symbol = "PTTRX",
     string.source = "yahoo",
     string.description = "PIMCO Total Return Fund Institutional Class ",
     string.label.y = "Dollars",
-    float.expense.ratio = -1.00,
+    float.expense.ratio = 0.71,
     date.series.start = as.Date("1900-01-01"),
     date.series.end = as.Date("1900-01-01")
   )
 )
+
+df.symbols <-
+  rbind(
+  df.symbols,
+  data.frame(
+    string.symbol = "VTWO",
+    string.source = "yahoo",
+    string.description = "Vanguard Russell 2000 Index Fund ETF Shares",
+    string.label.y = "Dollars",
+    float.expense.ratio = 0.10,
+    date.series.start = as.Date("1900-01-01"),
+    date.series.end = as.Date("1900-01-01")
+  )
+)
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "EIFAX",
+      string.source = "yahoo",
+      string.description = "Eaton Vance Floating-Rate Advantage Fund Class I",
+      string.label.y = "Dollars",
+      float.expense.ratio = 1.62,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "ASDAX",
+      string.source = "yahoo",
+      string.description = "AAM/HIMCO Short Duration Fund Class A",
+      string.label.y = "Dollars",
+      float.expense.ratio = 0.84,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "TRBUX",
+      string.source = "yahoo",
+      string.description = "T. Rowe Price Ultra Short-Term Bond Fund",
+      string.label.y = "Dollars",
+      float.expense.ratio = 0.32,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "PRWCX",
+      string.source = "yahoo",
+      string.description = "T. Rowe Price Capital Appreciation Fund",
+      string.label.y = "Dollars",
+      float.expense.ratio = 0.70,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "MERFX",
+      string.source = "yahoo",
+      string.description = "The Merger Fund Investor Class",
+      string.label.y = "Dollars",
+      float.expense.ratio = 1.99,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "CMNIX",
+      string.source = "yahoo",
+      string.description = "Calamos Market Neutral Income Fund Institutional Class",
+      string.label.y = "Dollars",
+      float.expense.ratio = 1.01,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "CIHEX",
+      string.source = "yahoo",
+      string.description = "Calamos Hedged Equity Fund Class I ",
+      string.label.y = "Dollars",
+      float.expense.ratio = 0.92,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+
+
+
+
+
+
+
+
+
+
 
 
 
