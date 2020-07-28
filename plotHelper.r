@@ -406,6 +406,8 @@ plotReturnVolatility <-
   function(string.portfolio.in,
            df.data.in,
            df.symbols.in) {
+    
+    # Setup a local dataframe with the symbols in the portfolio
     dfRR <- df.symbols.in[df.symbols.in[string.portfolio.in] > 0, ]
     
     # Need a data table with just the ticker and data
