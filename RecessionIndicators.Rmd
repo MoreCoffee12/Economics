@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "July 26, 2020"
+date: "July 30, 2020"
 output: 
   html_document:
     toc: true
@@ -1006,7 +1006,7 @@ df.data <- calcInterpolate(df.data, df.symbols)
 
 # A very few data series do go back to 1854, but most
 # don't even go past WWII so truncate the dataframe
-df.data1 <- df.data[as.Date(rownames(df.data)) > as.Date("1940-01-01"),]
+df.data <- df.data[as.Date(rownames(df.data)) > as.Date("1950-01-01"),]
 
 ```
 
@@ -5637,7 +5637,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 ```{r GFDEBTN_YoY}
 
 datay <- "GFDEBTN_YoY"
-ylim <- c(-10, 20)
+ylim <- c(-10, 25)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```

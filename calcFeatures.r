@@ -45,7 +45,7 @@ calcFeatures <- function(df.data, df.symbols){
     # Start with the YoY calculation
     str.symbolYoY <- paste(str.symbol, "_YoY", sep = "")
     df.data[str.symbolYoY] <- CalcYoY(df.data, str.symbol, 365)
-    print(paste(str.symbol,'-',str.symbolYoY, '-', str.description))
+    #print(paste(str.symbol,'-',str.symbolYoY, '-', str.description))
     df.symbols <-
       rbind(
         df.symbols,
@@ -193,7 +193,8 @@ calcFeatures <- function(df.data, df.symbols){
       )
     
     # Take the log
-    # print(str.symbol)
+    #print('Taking log......')
+    #print(str.symbol)
     strNewYLabel <-
       df.symbols[grep(paste("^", str.symbol.root, "$", sep = ""), df.symbols$string.symbol), ]$tring.label.y 
     str.symbolLog <- paste(str.symbol, "_Log", sep = "")

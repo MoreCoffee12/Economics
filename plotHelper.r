@@ -446,7 +446,7 @@ plotReturnVolatility <-
     plot_dt[, efficient := er >= minsd_er]
     
     # Data for the actual portfolio mix
-    dfPortRet <- dfData[string.portfolio.in]
+    dfPortRet <- df.data.in[string.portfolio.in]
     strPfYoY <- paste(string.portfolio.in, "_YoY", sep = "")
     dfPortRet[strPfYoY] <-
       CalcYoY(dfPortRet, string.portfolio.in, iRetPd)
@@ -458,6 +458,21 @@ plotReturnVolatility <-
     # Data for the portfolio mix with same returns, but lower volatility
     op_pf <- portfolio.optim(as.matrix(dfPort), ExpRet_pf)
     dfRR[paste(string.portfolio.in, "_Opt", sep = "")] <- op_pf$pw
+    
+    # Plot limits
+    x.max <- round(max(dfRR$Volatility), digits = -1)+5
+    x.min <- round(min(dfRR$Volatility), digits = -1)-5
+    print( paste('Volatility: ',
+                 toString(x.min),
+                 ' | ', 
+                 toString(x.max)))
+    
+    y.max <- round(max(dfRR$ExpReturn), digits = -1)+5
+    y.min <- round(min(dfRR$ExpReturn), digits = -1)-5
+    print( paste('Returns: ',
+                 toString(y.min),
+                 ' | ', 
+                 toString(y.max)))
     
     # Plot the data
     myPlot <- ggplot() +
@@ -511,10 +526,11 @@ plotReturnVolatility <-
       guides(fill=guide_legend(title="New Legend Title")) +
       xlab("Volatility") +
       ylab("Expected Returns") +
-      scale_y_continuous(label = scales::percent, limits = c(-0.05, 0.1)) +
-      scale_x_continuous(label = scales::percent, limits = c(-0.05, 0.25))
+      scale_y_continuous(labels = scales::percent_format(accuracy = NULL,scale = 1000 ), limits = c(y.min, y.max)) +
+      scale_x_continuous(labels = scales::percent_format(accuracy = NULL,scale = 1000 ), limits = c(x.min, x.max))
     
     #myPlot$labels$colour <- "Symbol"
+
     
     return(list(dfRR, myPlot, plot_dt))
     
