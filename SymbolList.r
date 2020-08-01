@@ -1311,6 +1311,19 @@ df.symbols <-
   rbind(
     df.symbols,
     data.frame(
+      string.symbol = "GDPNOW",
+      string.source = "FRED",
+      string.description = "Fed Atlanta GDPNow",
+      string.label.y = "Percent Change at Annual Rate (SA)",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
       string.symbol = "GDPC1",
       string.source = "FRED",
       string.description = "Real Gross Domestic Product",
