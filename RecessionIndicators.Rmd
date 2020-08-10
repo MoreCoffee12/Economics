@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "August 8, 2020"
+date: "August 9, 2020"
 output: 
   html_document:
     toc: true
@@ -688,10 +688,21 @@ Loading in Silverblatt's S&P 500 spreadsheet.
 # https://us.spindices.com/documents/additional-material/sp-500-eps-est.xlsx
 
 # Read in th Excel file
-df.silverblatt <- data.frame(read_excel('sp-500-eps-est.xlsx', range='QUARTERLY DATA!A6:E133'))
+df.silverblatt <- data.frame(read_excel('sp-500-eps-est.xlsx', range='QUARTERLY DATA!A6:I136'))
 
 # Human readable column names
-colnames(df.silverblatt) <- c("QUARTER.END", "DIVISOR", "OP.EARNINGS.PER.SHARE", "AR.EARNINGS.PER.SHARE","CASH.DIVIDENDS.PER.SHR")
+colnames(df.silverblatt) <-
+  c(
+    "QUARTER.END",
+    "OP.EARNINGS.PER.SHARE",
+    "AR.EARNINGS.PER.SHARE",
+    "CASH.DIVIDENDS.PER.SHR",
+    "SALES.PER.SHR",
+    "BOOKVAL.PER.SHR",
+    "CAPEX.PER.SHR",
+    "PRICE",
+    "DIVISOR"
+  )
 
 # Create the XTS object and update the symbols table for operating earnings
 str.symbol <- 'OPEARNINGSPERSHARE'
@@ -731,7 +742,7 @@ df.symbols <-
     )
   )
 
-# Create the XTS object and update the symbols table for cash divididens
+# Create the XTS object and update the symbols table for cash dividends
 str.symbol <- 'CASHDIVIDENDSPERSHR'
 assign(str.symbol, xts(x=df.silverblatt$CASH.DIVIDENDS.PER.SHR, order.by=df.silverblatt$QUARTER.END))
 colnames(CASHDIVIDENDSPERSHR) <- "CASHDIVIDENDSPERSHR"
@@ -749,6 +760,85 @@ df.symbols <-
       date.series.end = tail(dt.date,1)
     )
   )
+
+# Create the XTS object and update the symbols table for sales per share
+str.symbol <- 'SALESPERSHR'
+assign(str.symbol, xts(x=df.silverblatt$SALES.PER.SHR, order.by=df.silverblatt$QUARTER.END))
+colnames(SALESPERSHR) <- "SALES.PER.SHR"
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = str.symbol,
+      string.source = "SILVERBLATT",
+      string.description =  "Sales per Share",
+      string.label.y = "Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = dt.date[1],
+      date.series.end = tail(dt.date,1)
+    )
+  )
+
+# Create the XTS object and update the symbols table for book value per share
+str.symbol <- 'BOOKVALPERSHR'
+assign(str.symbol, xts(x=df.silverblatt$BOOKVAL.PER.SHR, order.by=df.silverblatt$QUARTER.END))
+colnames(BOOKVALPERSHR) <- "BOOKVAL.PER.SHR"
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = str.symbol,
+      string.source = "SILVERBLATT",
+      string.description =  "Book value per Share",
+      string.label.y = "Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = dt.date[1],
+      date.series.end = tail(dt.date,1)
+    )
+  )
+
+
+# Create the XTS object and update the symbols table for cap ex per share
+str.symbol <- 'CAPEXPERSHR'
+assign(str.symbol, xts(x=df.silverblatt$CAPEX.PER.SHR, order.by=df.silverblatt$QUARTER.END))
+colnames(CAPEXPERSHR) <- "CAPEX.PER.SHR"
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = str.symbol,
+      string.source = "SILVERBLATT",
+      string.description =  "Cap ex per Share",
+      string.label.y = "Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = dt.date[1],
+      date.series.end = tail(dt.date,1)
+    )
+  )
+
+# Create the XTS object and update the symbols table for price
+str.symbol <- 'PRICE'
+assign(str.symbol, xts(x=df.silverblatt$PRICE, order.by=df.silverblatt$QUARTER.END))
+colnames(PRICE) <- "PRICE"
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = str.symbol,
+      string.source = "SILVERBLATT",
+      string.description =  "Price",
+      string.label.y = "Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = dt.date[1],
+      date.series.end = tail(dt.date,1)
+    )
+  )
+
+
 
 ```
 
