@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "August 9, 2020"
+date: "August 12, 2020"
 output: 
   html_document:
     toc: true
@@ -764,7 +764,7 @@ df.symbols <-
 # Create the XTS object and update the symbols table for sales per share
 str.symbol <- 'SALESPERSHR'
 assign(str.symbol, xts(x=df.silverblatt$SALES.PER.SHR, order.by=df.silverblatt$QUARTER.END))
-colnames(SALESPERSHR) <- "SALES.PER.SHR"
+colnames(SALESPERSHR) <- "SALESPERSHR"
 
 df.symbols <-
   rbind(
@@ -783,7 +783,7 @@ df.symbols <-
 # Create the XTS object and update the symbols table for book value per share
 str.symbol <- 'BOOKVALPERSHR'
 assign(str.symbol, xts(x=df.silverblatt$BOOKVAL.PER.SHR, order.by=df.silverblatt$QUARTER.END))
-colnames(BOOKVALPERSHR) <- "BOOKVAL.PER.SHR"
+colnames(BOOKVALPERSHR) <- "BOOKVALPERSHR"
 
 df.symbols <-
   rbind(
@@ -803,7 +803,7 @@ df.symbols <-
 # Create the XTS object and update the symbols table for cap ex per share
 str.symbol <- 'CAPEXPERSHR'
 assign(str.symbol, xts(x=df.silverblatt$CAPEX.PER.SHR, order.by=df.silverblatt$QUARTER.END))
-colnames(CAPEXPERSHR) <- "CAPEX.PER.SHR"
+colnames(CAPEXPERSHR) <- "CAPEXPERSHR"
 
 df.symbols <-
   rbind(
@@ -2247,14 +2247,23 @@ In this worksheet a model predicting the onset of recession was built. From the 
 
 ## Market Conditions
 
-The model is predicting a `r paste(sprintf("%3.0f", tail(df.data$recession.initiation.smooth.avg,1)[[1]]*100), "%", sep="")` chance of recession in the next 12 months. The press is all over the map on whether or not a recession will materialize. Some of the auxillary series of note:
+```{r old.code}
 
-- P/E ratio of `r sprintf("%3.2f", tail(df.data$MULTPLSP500PERATIOMONTH,1))` compares to a historical mean value over the last decade of `r sprintf("%3.2f", df.data$MULTPLSP500PERATIOMONTH_Mean[1])`. Since 2008 recession P/E has only fallen below historical norm a few times. The current value is high, but well off the peaks. If earnings are +2-4% year-over-year then it is not unrealistic.
+#The model is predicting a `r paste(sprintf("%3.0f", tail(df.data$recession.initiation.smooth.avg,1)[[1]]*100), "%", sep="")` chance of recession in the next 12 months. :
+
+#- P/E ratio of `r sprintf("%3.2f", tail(df.data$MULTPLSP500PERATIOMONTH,1))` compares to a historical mean value over the last decade of `r sprintf("%3.2f", df.data$MULTPLSP500PERATIOMONTH_Mean[1])`. Since 2008 recession P/E has only fallen below historical norm a few times. The current value is high, but well off the peaks. If earnings are +2-4% year-over-year then it is not unrealistic.
+
+```
+
+As of Feb 2020 we have entered a recession as defined by the NBER yet the market continues to rise.
+
+P/E ratio of `r sprintf("%3.2f", tail(df.data$MULTPLSP500PERATIOMONTH,1))` compares to a historical mean value over the last decade of `r sprintf("%3.2f", df.data$MULTPLSP500PERATIOMONTH_Mean[1])`. Since 2008 recession P/E has only fallen below historical norm a few times. The current value is high, but well off the peaks. If earnings are +2-4% year-over-year then it is not unrealistic.
+
 
 ```{r bullet1, echo = FALSE}
 datay <- "MULTPLSP500PERATIOMONTH"
 datay.aux <- "MULTPLSP500PERATIOMONTH_Mean"
-ylim <- c(10, 25)
+ylim <- c(10, 30)
 dt.start <- as.Date('2010-01-01')
 b.legend <- TRUE
 my.plot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
