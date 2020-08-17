@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "August 12, 2020"
+date: "August 17, 2020"
 output: 
   html_document:
     toc: true
@@ -680,14 +680,14 @@ df.symbols <-
 
 ```
 
-Loading in Silverblatt's S&P 500 spreadsheet.
+Loading in Silverblatt's S&P 500 spreadsheet starting with the quarterly data.
 
 ```{r silverblatt.data, echo=FALSE}
 
 # Get S&P 500 Silverblatt data. From USDA website:
 # https://us.spindices.com/documents/additional-material/sp-500-eps-est.xlsx
 
-# Read in th Excel file
+# Read in th Excel file, starting with the quaterly data
 df.silverblatt <- data.frame(read_excel('sp-500-eps-est.xlsx', range='QUARTERLY DATA!A6:I136'))
 
 # Human readable column names
@@ -841,6 +841,83 @@ df.symbols <-
 
 
 ```
+
+Now load in the estimates
+
+```{r silverblatt.est, echo=FALSE}
+
+# Read in th Excel file, now for the estimates
+df.silverblatt.act <-
+  data.frame(read_excel(
+    'sp-500-eps-est.xlsx',
+    range = 'ESTIMATES&PEs!A135:J261',
+    col_types = c(
+      "date",
+      "numeric",
+      "numeric",
+      "numeric",
+      "numeric",
+      "numeric",
+      "numeric",
+      "numeric",
+      "numeric",
+      "numeric"
+    )
+  ))
+df.silverblatt.est <-
+  data.frame(read_excel('sp-500-eps-est.xlsx', range = 'ESTIMATES&PEs!A127:J133'))
+
+# Human readable column names
+colnames(df.silverblatt.act) <-
+  c(
+    "QUARTER.END",
+    "PRICE",
+    "OP.EARNINGS.PER.SHARE",
+    "AR.EARNINGS.PER.SHARE",
+    "EMPTY",
+    "OP.EARNINGS.PE",
+    "AR.EARNINGS.PE",
+    "EMPTY1",
+    "OP.EARNINGS.12.MONTH",
+    "AR.EARNINGS.12.MONTH"
+  )
+
+colnames(df.silverblatt.est) <-
+  c(
+    "QUARTER.END",
+    "PRICE",
+    "OP.EARNINGS.PER.SHARE",
+    "AR.EARNINGS.PER.SHARE",
+    "EMPTY",
+    "OP.EARNINGS.PE",
+    "AR.EARNINGS.PE",
+    "EMPTY1",
+    "OP.EARNINGS.12.MONTH",
+    "AR.EARNINGS.12.MONTH"
+  )
+
+# Create the XTS object and update the symbols table for trailing 12-month operating earnings
+str.symbol <- 'OPEARNINGSTTM'
+assign(str.symbol, xts(x=df.silverblatt.act$OP.EARNINGS.12.MONTH, order.by=df.silverblatt.act$QUARTER.END))
+colnames(OPEARNINGSTTM) <- "OPEARNINGSTTM"
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = str.symbol,
+      string.source = "SILVERBLATT",
+      string.description =  "TTM Operating Earnings",
+      string.label.y = "Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = dt.date[1],
+      date.series.end = tail(dt.date,1)
+    )
+  )
+
+
+```
+
 
 ```{r margin.debt.load, echo=FALSE}
 
