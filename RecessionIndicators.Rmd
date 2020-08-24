@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "August 23, 2020"
+date: "August 24, 2020"
 output: 
   html_document:
     toc: true
@@ -908,6 +908,24 @@ df.symbols <-
       string.symbol = str.symbol,
       string.source = "SILVERBLATT",
       string.description =  "TTM Operating Earnings",
+      string.label.y = "Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = dt.date[1],
+      date.series.end = tail(dt.date,1)
+    )
+  )
+
+str.symbol <- 'AREARNINGSTTM'
+assign(str.symbol, xts(x=df.silverblatt.act$AR.EARNINGS.12.MONTH, order.by=df.silverblatt.act$QUARTER.END))
+colnames(AREARNINGSTTM) <- "AREARNINGSTTM"
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = str.symbol,
+      string.source = "SILVERBLATT",
+      string.description =  "TTM Reported Earnings",
       string.label.y = "Dollars",
       float.expense.ratio = -1.00,
       date.series.start = dt.date[1],
@@ -2736,13 +2754,52 @@ p1 <-
 
 ### S&P 500 TTM P/E
 
+Take a look at some of the earnings trends from SilverBlatt's sheet.
+
+```{r SP500TTMPE.Silver,  echo=FALSE, fig.width = 9, fig.asp = 0.4 }
+
+datay <- "AREARNINGSTTM"
+datay.aux.1 <- "OPEARNINGSTTM"
+ylim <- c(0, 200)
+dt.start <- as.Date('1980-01-01')
+my.plot <-
+  plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay,
+    getPlotTitle(df.symbols, datay),
+    "Date",
+    getPlotYLabel(df.symbols, datay),
+    c(dt.start, Sys.Date()),
+    ylim,
+    b.legend = TRUE,
+    b.percentile = FALSE,
+    b.long.legend = TRUE
+  )
+my.plot <-
+  my.plot + geom_line(
+    data = df.data,
+    aes_string(
+      x = "date",
+      y = datay.aux.1,
+      colour = shQuote(datay.aux.1)
+    ),
+    na.rm = TRUE
+  )
+
+my.plot
+
+```
+
 Market prices can out-run earnings so take a look at price to earnings.
 
-```{r SP500TTMPE,  echo=FALSE }
+```{r SP500TTMPE,  echo=FALSE, fig.width = 9, fig.asp = 0.4 }
 
 datay <- "MULTPLSP500PERATIOMONTH"
 datay.aux <- "MULTPLSP500PERATIOMONTH_Mean"
-ylim <- c(0, 100)
+datay.aux.1 <- "AREARNINGSTTM"
+ylim <- c(0, 150)
 dt.start <- as.Date('1950-01-01')
 my.plot <-
   plotSingle(
@@ -2757,7 +2814,7 @@ my.plot <-
     ylim,
     b.legend = TRUE,
     b.percentile = FALSE,
-    b.long.legend = FALSE
+    b.long.legend = TRUE
   )
 my.plot <- my.plot + geom_line(
   data = df.data,
@@ -2768,6 +2825,16 @@ my.plot <- my.plot + geom_line(
   ),
   na.rm = TRUE
 )
+# my.plot <-
+#   my.plot + geom_line(
+#     data = df.data,
+#     aes_string(
+#       x = "date",
+#       y = datay.aux.1,
+#       colour = shQuote(datay.aux.1)
+#     ),
+#     na.rm = TRUE
+#   )
 
 my.plot
 
@@ -2780,7 +2847,7 @@ Focus on some of the more recent activity
 
 datay <- "MULTPLSP500PERATIOMONTH"
 datay.aux <- "MULTPLSP500PERATIOMONTH_Mean"
-ylim <- c(10, 25)
+ylim <- c(10, 30)
 dt.start <- as.Date('2010-01-01')
 b.legend <- TRUE
 my.plot <-
