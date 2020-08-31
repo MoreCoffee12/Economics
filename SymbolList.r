@@ -239,6 +239,20 @@ df.symbols <-
   rbind(
     df.symbols,
     data.frame(
+      string.symbol = "GSFTX",
+      string.source = "yahoo",
+      string.description = "Columbia Dividend Income Fund Institutional Class",
+      string.label.y = "Dollars",
+      float.expense.ratio = 0.71,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
       string.symbol = "LFMIX",
       string.source = "yahoo",
       string.description = "LoCorr Macro Strategies Fund Class I",
@@ -309,6 +323,20 @@ df.symbols <-
   rbind(
     df.symbols,
     data.frame(
+      string.symbol = "VBIRX",
+      string.source = "yahoo",
+      string.description = "Vanguard Short-Term Bond Index Fund Admiral Shares",
+      string.label.y = "Dollars",
+      float.expense.ratio = 0.07,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
       string.symbol = "BIV",
       string.source = "yahoo",
       string.description = "Vanguard Intermediate-term Bond Index Fund ETF Shares",
@@ -321,17 +349,151 @@ df.symbols <-
 
 df.symbols <-
   rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "VFSUX",
+      string.source = "yahoo",
+      string.description = "Vanguard Short-Term Investment-Grade Fund Admiral Shares",
+      string.label.y = "Dollars",
+      float.expense.ratio = 0.10,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "LTUIX",
+      string.source = "yahoo",
+      string.description = "Thornburg Limited Term U.S. Government Fund Class I",
+      string.label.y = "Dollars",
+      float.expense.ratio = 0.62,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "PTTPX",
+      string.source = "yahoo",
+      string.description = "PIMCO Total Return Fund Class I-2",
+      string.label.y = "Dollars",
+      float.expense.ratio = 0.81,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "NERYX",
+      string.source = "yahoo",
+      string.description = "Loomis Sayles Core Plus Bond Fund Class Y",
+      string.label.y = "Dollars",
+      float.expense.ratio = 0.48,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "STIGX",
+      string.source = "yahoo",
+      string.description = "Virtus Seix Core Bond Fund Class I",
+      string.label.y = "Dollars",
+      float.expense.ratio = 0.50,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "HLGAX",
+      string.source = "yahoo",
+      string.description = "JPMorgan Government Bond Fund Class I",
+      string.label.y = "Dollars",
+      float.expense.ratio = 0.48,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "FTRGX",
+      string.source = "yahoo",
+      string.description = "Federated Hermes Total Return Government Bond Fund Institutional Shares",
+      string.label.y = "Dollars",
+      float.expense.ratio = 0.33,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "THIIX",
+      string.source = "yahoo",
+      string.description = "Thornburg Limited Term Income Fund Class I",
+      string.label.y = "Dollars",
+      float.expense.ratio = 0.49,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+
+df.symbols <-
+  rbind(
   df.symbols,
   data.frame(
     string.symbol = "PTTRX",
     string.source = "yahoo",
-    string.description = "PIMCO Total Return Fund Institutional Class ",
+    string.description = "PIMCO Total Return Fund Institutional Class",
     string.label.y = "Dollars",
     float.expense.ratio = 0.71,
     date.series.start = as.Date("1900-01-01"),
     date.series.end = as.Date("1900-01-01")
   )
 )
+
+
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "BFIGX",
+      string.source = "yahoo",
+      string.description = "American Funds Inflation Linked Bond Fund Class F-2",
+      string.label.y = "Dollars",
+      float.expense.ratio = 0.43,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
 
 df.symbols <-
   rbind(
@@ -399,6 +561,20 @@ df.symbols <-
       string.description = "T. Rowe Price Capital Appreciation Fund",
       string.label.y = "Dollars",
       float.expense.ratio = 0.70,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "ADOZX",
+      string.source = "yahoo",
+      string.description = "Alger Dynamic Opportunities Fund Class Z",
+      string.label.y = "Dollars",
+      float.expense.ratio = 1.75,
       date.series.start = as.Date("1900-01-01"),
       date.series.end = as.Date("1900-01-01")
     )
@@ -1686,6 +1862,21 @@ df.symbols <-
       string.description = "Gold Fixing Price 10:30 A.M. (London time) \n in London Bullion Market",
       string.label.y = "USD/Troy Ounce",
       float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "GOLD",
+      string.source = "yahoo",
+      string.description = "Barrick Gold Corporation",
+      string.label.y = "Dollars",
+      float.expense.ratio = 0.00,
       date.series.start = as.Date("1900-01-01"),
       date.series.end = as.Date("1900-01-01")
     )
