@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "September 11, 2020"
+date: "September 21, 2020"
 output: 
   html_document:
     toc: true
@@ -70,7 +70,7 @@ b.refresh.models = FALSE
 dt.recent = as.Date("2017-01-01")
 
 # Define the S&P 500 limits
-d.GSPC.max = 3500
+d.GSPC.max = 4000
 
 ```
 
@@ -2847,7 +2847,7 @@ Focus on some of the more recent activity
 
 datay <- "MULTPLSP500PERATIOMONTH"
 datay.aux <- "MULTPLSP500PERATIOMONTH_Mean"
-ylim <- c(10, 30)
+ylim <- c(10, 35)
 dt.start <- as.Date('2010-01-01')
 b.legend <- TRUE
 my.plot <-
@@ -5697,7 +5697,7 @@ Basic currency trend (currency component of M1)
 ```{r currrency.trend, echo=FALSE}
 
 datay <- "WCURRNS"
-dtStart = as.Date('1980-01-01')
+dtStart = as.Date('1970-01-01')
 ylim <- c(0, 2000)
 myplot <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 myplot
@@ -5708,7 +5708,7 @@ myplot
 
 datay <- "WCURRNS_YoY"
 dtStart = as.Date('1980-01-01')
-ylim <- c(0, 15)
+ylim <- c(0, 17)
 myplot <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 myplot
 
@@ -5863,7 +5863,7 @@ The government is a big driver of the economy, let's see what it is doing in the
 ```{r GFDEBTN}
 
 datay <- "GFDEBTN"
-ylim <- c(0, 24000000)
+ylim <- c(0, 28000000)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
@@ -5912,7 +5912,7 @@ Charlie Hatch has a nice format of deficit versus debt:
 datax = "FYFSGDA188S"
 datay = "GFDEGDQ188S"
 titlelabel <- paste(datay, " | ", datax)
-ylim <- c(30, 180)
+ylim <- c(30, 200)
 ylabel <- paste(datay, ", ", df.symbols[grep(datay, df.symbols$string.symbol),]$yLabel, sep="")
 xlim <- c(-20, 5)
 xlabel <- paste(datax, ", ", df.symbols[grep(datax, df.symbols$string.symbol),]$yLabel, sep="")
