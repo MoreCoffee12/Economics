@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "October 29, 2020"
+date: "November 2, 2020"
 output: 
   html_document:
     toc: true
@@ -688,7 +688,7 @@ Loading in Silverblatt's S&P 500 spreadsheet starting with the quarterly data.
 # https://us.spindices.com/documents/additional-material/sp-500-eps-est.xlsx
 
 # Read in th Excel file, starting with the quaterly data
-df.silverblatt <- data.frame(read_excel('sp-500-eps-est.xlsx', range='QUARTERLY DATA!A6:I136'))
+df.silverblatt <- data.frame(read_excel('sp-500-eps-est.xlsx', range='QUARTERLY DATA!A6:I137'))
 
 # Human readable column names
 colnames(df.silverblatt) <-
@@ -850,7 +850,7 @@ Now load in the estimates
 df.silverblatt.act <-
   data.frame(read_excel(
     'sp-500-eps-est.xlsx',
-    range = 'ESTIMATES&PEs!A135:J261',
+    range = 'ESTIMATES&PEs!A135:J262',
     col_types = c(
       "date",
       "numeric",
@@ -8150,7 +8150,7 @@ That's a little better, let's see what the smoothed derivative looks like.
 
 ```{r busloansderplot, echo=FALSE}
 datay <- "BUSLOANS_Log_Der"
-ylim <- c(-0.001, 0.001)
+ylim <- c(-0.01, 0.01)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
@@ -8276,7 +8276,7 @@ Sum of Monetary authority; depository institution loans n.e.c.; asset and Privat
 ```{r FBDILNECA.z.1, echo=FALSE}
 
 datay <- "FBDILNECA"
-ylim <- c(0, 4000)
+ylim <- c(0, 5000)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
@@ -8325,7 +8325,7 @@ https://www.federalreserve.gov/apps/fof/SeriesAnalyzer.aspx?s=FL893065405&t=L.21
 ```{r ASMRMA.z.1, echo=FALSE}
 
 datay <- "ASMRMA"
-ylim <- c(0, 1600)
+ylim <- c(0, 2000)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
@@ -8622,7 +8622,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 ```{r Houst_YoY, echo=FALSE}
 
 datay <- "HOUST_YoY"
-ylim <- c(-100, 50)
+ylim <- c(-50, 100)
 dtStart = as.Date('1960-01-01')
 b.percentile <- TRUE
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile)
