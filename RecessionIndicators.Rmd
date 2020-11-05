@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "November 2, 2020"
+date: "November 3, 2020"
 output: 
   html_document:
     toc: true
@@ -3066,7 +3066,7 @@ datay.aux <- "RLG.Open_mva200"
 datay.title <- getPlotTitle(df.symbols, datay.aux, str.sep = "\n")
 datay.aux.1 <- "RLG.Open_mva050"
 datay.title.1 <- getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n")
-ylim <- c(1000, 2000)
+ylim <- c(1000, 2500)
 myPlot <-
   plotSingle(
     dfRecession,
@@ -3114,7 +3114,7 @@ myPlot + geom_line(
 ```{r rollingcorS&PtoRussell, echo=FALSE, fig.width = 10, fig.asp = .62}
 
 datay1 <- "RLG.Open"
-ylim1 <- c(0, 2000)
+ylim1 <- c(0, 2500)
 
 datay2 <- "GSPC.Open"
 ylim2 <- c(0, d.GSPC.max)
@@ -3131,7 +3131,7 @@ corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, dat
 ```{r rollingcorS&PtoMDY, fig.width = 10, fig.asp = .62}
 
 datay1 <- "RLG.Open"
-ylim1 <- c(0, 2000)
+ylim1 <- c(0, 2500)
 
 datay2 <- "MDY.Open"
 ylim2 <- c(0, 500)
