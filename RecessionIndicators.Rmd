@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "November 16, 2020"
+date: "November 19, 2020"
 output: 
   html_document:
     toc: true
@@ -1271,7 +1271,7 @@ The growth of equities makes it hard to compare peaks. For example, using the GD
 
 ```{r SP500plt.by.GDPDEF, echo=FALSE }
 datay <- "GSPC.Open.by.GDPDEF"
-ylim <- c(2.5, 3000)
+ylim <- c(2.5, 3500)
 myPlot <- plotSingleQuick(dfRecession, df.data, datay, ylim)
 myPlot + geom_rect(
   data = dfRecession,
@@ -3159,7 +3159,7 @@ This is an interesting series, they should perform better through the recessions
 
 ```{r DivStocks }
 datay <- "NOBL.Open"
-ylim <- c(40, 80)
+ylim <- c(40, 90)
 dt.start <- as.Date('2014-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
