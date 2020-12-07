@@ -239,6 +239,33 @@ df.symbols <-
   rbind(
     df.symbols,
     data.frame(
+      string.symbol = "PFF",
+      string.source = "yahoo",
+      string.description = "iShares Preferred and Income Securities ETF",
+      string.label.y = "BATS Real Time Price",
+      float.expense.ratio = 0.35,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "HPI",
+      string.source = "yahoo",
+      string.description = "John Hancock Preferred Income Fund",
+      string.label.y = "BATS Real Time Price",
+      float.expense.ratio = 0.35,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
       string.symbol = "GSFTX",
       string.source = "yahoo",
       string.description = "Columbia Dividend Income Fund Institutional Class",
