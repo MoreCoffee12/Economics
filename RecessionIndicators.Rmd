@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "December 7, 2020"
+date: "December 16, 2020"
 output: 
   html_document:
     toc: true
@@ -5977,7 +5977,7 @@ One business cycle theory describes recessions as a market adjustment to mis-all
 ```{r realloans, echo=FALSE}
 
 datay <- "TOTLNNSA"
-ylim <- c(-25, 9000)
+ylim <- c(-25, 10000)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
@@ -6073,7 +6073,7 @@ https://www.wsj.com/articles/this-isnt-your-fathers-corporate-bond-market-115905
 
 datay <- "TOTCINSA.by.GDP"
 datay.aux <- "CPROFIT.by.GDP"
-ylim <- c(5, 14)
+ylim <- c(5, 15)
 dt.start <- as.Date("1jan1980", "%d%b%Y")
 b.legend <- FALSE
 b.percentile <- FALSE
@@ -6153,7 +6153,7 @@ See how the farming sector is fairing.
 
 datay <- "ASFMA.by.GDP"
 datay.aux <- "CPROFIT.by.GDP"
-ylim <- c(0.5, 1.35)
+ylim <- c(0.5, 1.50)
 dt.start <- as.Date("1jan1990", "%d%b%Y")
 b.legend <- FALSE
 b.percentile <- FALSE

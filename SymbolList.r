@@ -1631,6 +1631,20 @@ df.symbols <-
   rbind(
     df.symbols,
     data.frame(
+      string.symbol = "W790RC1Q027SBEA",
+      string.source = "FRED",
+      string.description = "Net domestic investment: Private: Domestic busines",
+      string.label.y = "Billions of Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
       string.symbol = "MZMV",
       string.source = "FRED",
       string.description = " Velocity of MZM Money Stock",
