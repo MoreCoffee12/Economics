@@ -1340,6 +1340,70 @@ df.symbols <-
     )
   )
 
+# Normalize gold by GDP
+df.data$GOLDAMGBD228NLBM.by.GDP <-
+  (df.data$GOLDAMGBD228NLBM / df.data$GDP)
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "GOLDAMGBD228NLBM.by.GDP",
+      string.source = "Calc",
+      string.description = "Gold, USD/Troy OUnce, Normalized by GDP",
+      string.label.y = "$/t oz/Index",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(c(
+        index(GOLDAMGBD228NLBM[1]), index(GDP[1])
+      ))) ,
+      date.series.end = as.Date(min(c(
+        index(tail(GOLDAMGBD228NLBM, 1)), index(tail(GDP, 1))
+      )))
+    )
+  )
+
+# Normalize GSG (close) commodities by GDP
+df.data$GSG.Close.by.GDPDEF <-
+  (df.data$GSG.Close / df.data$GDP)
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "GSG.Close.by.GDP",
+      string.source = "Calc",
+      string.description = "GSCI Commodity-Indexed Trust, Normalized by GDP",
+      string.label.y = "(-)",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(c(
+        index(GSG[1]), index(GDP[1])
+      ))) ,
+      date.series.end = as.Date(min(c(
+        index(tail(GSG, 1)), index(tail(GDP, 1))
+      )))
+    )
+  )
+
+# Normalize GSG (close) commodities by S&P 500
+df.data$GSG.Close.by.GSPC.Close <-
+  (df.data$GSG.Close / df.data$GSPC.Close)
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "GSG.Close.by.GSPC.Close",
+      string.source = "Calc",
+      string.description = "GSCI Commodity-Indexed Trust, Normalized by S&P 500",
+      string.label.y = "(-)",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(c(
+        index(GSG[1]), index(GSPC[1])
+      ))) ,
+      date.series.end = as.Date(min(c(
+        index(tail(GSG, 1)), index(tail(GSPC, 1))
+      )))
+    )
+  )
+
+
 # GDP divided by population
 df.data$GDPBYPOPTHM <-
   ((df.data$GDP * 1e9) / (df.data$POPTHM * 1e3))

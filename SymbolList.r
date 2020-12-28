@@ -1923,6 +1923,22 @@ df.symbols <-
     )
   )
 
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "GSG",
+      string.source = "yahoo",
+      string.description = "iShares S&P GSCI Commodity-Indexed Trust",
+      string.label.y = "Dollars",
+      float.expense.ratio = 0.00,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+
 # This data comes in as millions of dollars, but is converted to billions later so it can be compared with other fed data series.
 df.symbols <-
   rbind(

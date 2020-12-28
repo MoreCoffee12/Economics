@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "December 16, 2020"
+date: "December 28, 2020"
 output: 
   html_document:
     toc: true
@@ -8815,8 +8815,8 @@ string.colnames[3] <- "Description"
 string.colnames[4] <- "Label"
 string.colnames[5] <- "Series Start"
 kable(df.symbols, col.names = string.colnames) %>%
-  kable_styling(bootstrap_options = c("striped", "hover")) %>%
-  column_spec(column = 1, width = "1.5in; display: inline-block;") %>%
-  column_spec(2, width = "10em")
+ kable_styling(bootstrap_options = c("striped", "hover")) %>%
+ column_spec(column = 1, width = "1.5in; display: inline-block;") %>%
+ column_spec(2, width = "10em")
 
 ```
