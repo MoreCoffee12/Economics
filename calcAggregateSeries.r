@@ -1361,23 +1361,23 @@ df.symbols <-
     )
   )
 
-# Normalize GSG (close) commodities by GDP
+# Normalize GSG (close) commodities by GDP deflator
 df.data$GSG.Close.by.GDPDEF <-
-  (df.data$GSG.Close / df.data$GDP)
+  (df.data$GSG.Close / df.data$GDPDEF)
 df.symbols <-
   rbind(
     df.symbols,
     data.frame(
-      string.symbol = "GSG.Close.by.GDP",
+      string.symbol = "GSG.Close.by.GDPDEF",
       string.source = "Calc",
-      string.description = "GSCI Commodity-Indexed Trust, Normalized by GDP",
+      string.description = "GSCI Commodity-Indexed Trust, Normalized by GDP def",
       string.label.y = "(-)",
       float.expense.ratio = -1.00,
       date.series.start =  as.Date(max(c(
-        index(GSG[1]), index(GDP[1])
+        index(GSG[1]), index(GDPDEF[1])
       ))) ,
       date.series.end = as.Date(min(c(
-        index(tail(GSG, 1)), index(tail(GDP, 1))
+        index(tail(GSG, 1)), index(tail(GDPDEF, 1))
       )))
     )
   )

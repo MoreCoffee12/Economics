@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "December 28, 2020"
+date: "December 29, 2020"
 output: 
   html_document:
     toc: true
@@ -4432,6 +4432,29 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 ```
 
 ## Commodities
+
+### Basket
+
+Take a look at some trends of baskets of commodities.
+
+```{r comm.basket, echo=FALSE}
+
+datay <- "GSG.Close"
+ylim <- c(-10, 100)
+dtStart = as.Date('2005-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+
+```
+
+
+```{r comm.basket.sp, echo=FALSE}
+
+datay <- "GSG.Close.by.GSPC.Close"
+ylim <- c(0, 0.10)
+dtStart = as.Date('2005-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+
+```
 
 ### Crude oil
 
