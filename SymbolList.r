@@ -239,6 +239,21 @@ df.symbols <-
   rbind(
     df.symbols,
     data.frame(
+      string.symbol = "SCHD",
+      string.source = "yahoo",
+      string.description = "Schwab U.S. Dividend Equity ETF",
+      string.label.y = "Dollars",
+      float.expense.ratio = 0.06,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
       string.symbol = "PFF",
       string.source = "yahoo",
       string.description = "iShares Preferred and Income Securities ETF",
@@ -1923,6 +1938,35 @@ df.symbols <-
     )
   )
 
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "GDX",
+      string.source = "yahoo",
+      string.description = "VanEck Vectors Gold Miners ETF",
+      string.label.y = "Dollars",
+      float.expense.ratio = 0.53,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "XLE",
+      string.source = "yahoo",
+      string.description = "Energy Select Sector SPDR Fund",
+      string.label.y = "Dollars",
+      float.expense.ratio = 0.13,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+
 
 df.symbols <-
   rbind(
@@ -2489,6 +2533,21 @@ df.symbols <-
       date.series.end = as.Date("1900-01-01")
     )
   )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "BOPGTB",
+      string.source = "FRED",
+      string.description = "Trade Balance: Goods,\nBalance of Payments Basis (SA)",
+      string.label.y = "Millions of dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1999-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
 
 df.symbols <-
   rbind(

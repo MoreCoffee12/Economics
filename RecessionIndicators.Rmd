@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "December 29, 2020"
+date: "December 31, 2020"
 output: 
   html_document:
     toc: true
@@ -8487,11 +8487,24 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 ```{r CASSINDEX.yoy}
 
 datay <- "FRGSHPUSM649NCIS_YoY"
-ylim <- c(-40, 20)
+ylim <- c(-30, 30)
 dtStart = as.Date('1999-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
 ```
+
+
+Freight, loosely, moves inversely to the trade deficit.
+
+```{r BOPGTB.yoy}
+
+datay <- "BOPGTB_YoY"
+ylim <- c(-30, 30)
+dtStart = as.Date('1999-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+
+```
+
 
 World bank air transportation. Only updated annually so less usefull, but interesting reference to above.
 
