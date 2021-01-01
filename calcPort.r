@@ -9,6 +9,8 @@
 #' @export
 #'
 #' @examples
+#' 
+#' @note Updated to use the adjusted return rather than the close, 1 Jan 2021
 pfUpdateReturn <-
   function(string.portfolio.in.in,
            df.data.in,
@@ -23,12 +25,12 @@ pfUpdateReturn <-
       # Act only if the data is numeric
       if (is.numeric(df.data.in[, col_name]))
       {
-        # Split the name ("USGFG.Close" is "USGFG" and "Close")
+        # Split the name ("USGFG.Adjusted" is "USGFG" and "Adjusted")
         lstSyms <- lstSymSplit(col_name)
 
         # Only if there is two terms
         if (length(lstSyms) > 1) {
-          if (lstSyms[2] == 'Close_Norm') {
+          if (lstSyms[2] == 'Adjusted_Norm') {
             dPercent <-
               df.symbols.in[df.symbols.in$string.symbol == lstSyms[1], string.portfolio.in.in]
             if (length(dPercent) > 0) {
