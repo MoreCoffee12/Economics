@@ -1,7 +1,7 @@
 ---
 title: "Recession Indicators"
 author: "Brian Howard"
-date: "December 31, 2020"
+date: "January 5, 2020"
 output: 
   html_document:
     toc: true
@@ -4207,7 +4207,7 @@ Let's see how that looks on year over year basis. Interesting to compare to unem
 datay <- "RSALESAGG_YoY" 
 datay.aux <- "UNRATE_YoY" 
 datay.aux.scale <- 0.25;
-ylim <- c(-17.5, 17.5)
+ylim <- c(-10, 70)
 dtStart = as.Date('1998-01-01')
 myPlot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
             getPlotYLabel(df.symbols, datay), c(dtStart, Sys.Date()), ylim, TRUE)
@@ -4276,7 +4276,7 @@ This is an advanced estimate of the retail sales value.
 
 ```{r rsafs, echo=FALSE}
 datay <- "RSAFS"
-ylim <- c(160000, 550000)
+ylim <- c(150000, 600000)
 dtStart = as.Date('1992-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
