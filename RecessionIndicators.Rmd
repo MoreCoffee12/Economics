@@ -2978,7 +2978,7 @@ https://www.quandl.com/data/MULTPL/SP500_DIV_YIELD_MONTH-S-P-500-Dividend-Yield-
 
 datay <- "MULTPLSP500DIVYIELDMONTH"
 ylim <- c(0, 12)
-dtStart = as.Date('1910-01-01')
+dtStart = as.Date('1950-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = FALSE)
 
 
