@@ -4308,7 +4308,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```{r realperinc, echo=FALSE}
 datay <- "RPI"
-ylim <- c(0, 17500)
+ylim <- c(0, 20000)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
@@ -6006,7 +6006,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 ```{r GFDEGDQ188S}
 
 datay <- "GFDEGDQ188S"
-ylim <- c(30, 110)
+ylim <- c(30, 150)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
