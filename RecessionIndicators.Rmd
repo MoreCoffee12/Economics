@@ -3216,6 +3216,59 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
+Take a look at some of the correlations
+
+
+```{r rollingcor.FINRAMarginDebt_YoY.by.GSPC.Close_YoY, fig.width = 10, fig.asp = .62}
+
+datay1 <- "FINRAMarginDebt_YoY"
+ylim1 <- c(-100, 100)
+
+datay2 <- "GSPC.Close_YoY"
+ylim2 <- c(-100, 100)
+
+dtStart <- as.Date("1jan1995","%d%b%Y")
+
+w <- 90
+corrName <-
+  calcRollingCorr(dfRecession,
+                  df.data,
+                  df.symbols,
+                  datay1,
+                  ylim1,
+                  datay2,
+                  ylim2,
+                  w,
+                  dtStart)
+
+```
+
+Comparison to the Russell 2000
+
+```{r rollingcor.FINRAMarginDebt_YoY.by.RLG.Close_YoY, fig.width = 10, fig.asp = .62}
+
+datay1 <- "FINRAMarginDebt_YoY"
+ylim1 <- c(-100, 100)
+
+datay2 <- "RLG.Close_YoY"
+ylim2 <- c(-100, 100)
+
+dtStart <- as.Date("1jan1995","%d%b%Y")
+
+w <- 90
+corrName <-
+  calcRollingCorr(dfRecession,
+                  df.data,
+                  df.symbols,
+                  datay1,
+                  ylim1,
+                  datay2,
+                  ylim2,
+                  w,
+                  dtStart)
+
+```
+
 ### OCC Options Volumes
 
 See what is happening with the options volumes for equities. (From: https://www.theocc.com/webapps/historical-volume-query)
