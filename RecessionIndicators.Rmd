@@ -850,7 +850,7 @@ Now load in the estimates
 df.silverblatt.act <-
   data.frame(read_excel(
     'sp-500-eps-est.xlsx',
-    range = 'ESTIMATES&PEs!A135:J262',
+    range = 'ESTIMATES&PEs!A136:J266',
     col_types = c(
       "date",
       "numeric",
@@ -865,7 +865,7 @@ df.silverblatt.act <-
     )
   ))
 df.silverblatt.est <-
-  data.frame(read_excel('sp-500-eps-est.xlsx', range = 'ESTIMATES&PEs!A127:J133'))
+  data.frame(read_excel('sp-500-eps-est.xlsx', range = 'ESTIMATES&PEs!A129:J133'))
 
 # Human readable column names
 colnames(df.silverblatt.act) <-
