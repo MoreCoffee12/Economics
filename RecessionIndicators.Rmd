@@ -688,7 +688,7 @@ Loading in Silverblatt's S&P 500 spreadsheet starting with the quarterly data.
 # https://us.spindices.com/documents/additional-material/sp-500-eps-est.xlsx
 
 # Read in th Excel file, starting with the quaterly data
-df.silverblatt <- data.frame(read_excel('sp-500-eps-est.xlsx', range='QUARTERLY DATA!A6:I137'))
+df.silverblatt <- data.frame(read_excel('sp-500-eps-est.xlsx', range='QUARTERLY DATA!A6:I138'))
 
 # Human readable column names
 colnames(df.silverblatt) <-
