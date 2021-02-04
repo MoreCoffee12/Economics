@@ -2847,7 +2847,7 @@ Focus on some of the more recent activity
 
 datay <- "MULTPLSP500PERATIOMONTH"
 datay.aux <- "MULTPLSP500PERATIOMONTH_Mean"
-ylim <- c(10, 35)
+ylim <- c(10, 40)
 dt.start <- as.Date('2010-01-01')
 b.legend <- TRUE
 my.plot <-
