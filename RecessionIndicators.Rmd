@@ -4184,7 +4184,7 @@ The derivative isn't bad, but it sometimes crosses zeros well into a recession. 
 
 ```{r indproderplot, echo=FALSE}
 datay <- "INDPRO_SmoothDer"
-ylim <- c(-0.25, 0.03)
+ylim <- c(-0.10, 0.10)
 dt.start <- as.Date('1968-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = TRUE)
 
@@ -4234,7 +4234,7 @@ The derivative of retail sales is a little more erratic than is was the industri
 
 ```{r rsalesderplot, echo=FALSE}
 datay <- "RSALESAGG_SmoothDer" 
-ylim <- c(-350, 35)
+ylim <- c(-100, 100)
 dt.start <- as.Date('1968-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = TRUE)
 
@@ -4278,7 +4278,7 @@ datay1 <- "RSALESAGG_YoY"
 ylim1 <- c(-12.5, 7.5)
 
 datay2 <- "UNEMPLOY_YoY"
-ylim2 <- c(-30, 50)
+ylim2 <- c(-30, 100)
 
 dtStart <- as.Date("1jan1970","%d%b%Y")
 
