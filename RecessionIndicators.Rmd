@@ -6200,7 +6200,7 @@ There is a good correlation between these two variables. This next section plots
 
 ### Total loans as percent of GDP
 
-This is the total loans. I think the picture is too broad to point to a specific sector of the economy.
+This is the total loans. I think the picture is too broad to point to a specific sector of the economy. The debt burden assumes interest rates are tied to the 10-year treasury: (TOTLNNSA * DGS10) / 100
 
 ```{r USTotalDebt.by.GDP, echo=FALSE, fig.width = 7, fig.asp = 1.1}
 
@@ -6237,12 +6237,14 @@ https://www.wsj.com/articles/this-isnt-your-fathers-corporate-bond-market-115905
 
 "Bonds are behaving more like bank debt, which tends to remain stable or even increase at the onset of recessions, as lenders keep distressed clients afloat—and only later turn off the taps. This was confirmed by a recent report from the Bank for International Settlements. It also found a tight link between this lending cycle and the “real” economy’s booms and busts."
 
+I assume that interest is related to the 10-year treasure: (TOTCINSA * DGS10) / 100
+
 ```{r BusinessDebt.by.GDP, echo = FALSE, fig.width = 7, fig.asp = 1.3}
 
 
 datay <- "TOTCINSA.by.GDP"
 datay.aux <- "CPROFIT.by.GDP"
-ylim <- c(5, 15)
+ylim <- c(5, 20)
 dt.start <- as.Date("1jan1980", "%d%b%Y")
 b.legend <- FALSE
 b.percentile <- FALSE
@@ -6600,7 +6602,7 @@ p2 <-
 
 datay <- "A065RC1A027NBEA.by.GDP"
 datay.aux <- "PI.by.GDP"
-ylim <- c(75, 90)
+ylim <- c(75, 125)
 b.legend <- TRUE
 b.percentile <- TRUE
 p3 <-
@@ -6649,7 +6651,7 @@ p0 <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, d
             getPlotYLabel(df.symbols, datay), c(dt.start, Sys.Date()), ylim, b.legend, b.percentile)
 
 datay <- "CONSUMERNSA_YoY"
-ylim <- c(-15, 20)
+ylim <- c(-15, 30)
 dt.start <- as.Date("1jan1955","%d%b%Y")
 b.legend <- FALSE
 b.percentile <- FALSE
@@ -6657,7 +6659,7 @@ p1 <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, d
             getPlotYLabel(df.symbols, datay), c(dt.start, Sys.Date()), ylim, b.legend, b.percentile)
 
 datay<- "CONSUMERNSA.INTEREST_YoY"
-ylim <- c(-15, 20)
+ylim <- c(-15, 30)
 b.legend <- FALSE
 b.percentile <- TRUE
 p2 <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
