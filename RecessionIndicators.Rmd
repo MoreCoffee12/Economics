@@ -7722,6 +7722,30 @@ plotSingleQuickModern(datay, ylim)
 
 ```
 
+#### A824RC: National defense Federal Gov't Expenditures - Line 24
+
+U.S. Bureau of Economic Analysis, Federal Government: National Defense Consumption Expenditures and Gross Investment [FDEFX], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/FDEFX, April 6, 2021.
+
+```{r FDEFX, echo=FALSE}
+
+datay <- "FDEFX"
+ylim <- c(0.0, 1000.0)
+plotSingleQuickModern(datay, ylim)
+
+```
+
+
+#### A825RC: Nondefense Federal Gov't Expenditures - Line 25
+
+U.S. Bureau of Economic Analysis, Federal Government: Nondefense Consumption Expenditures and Gross Investment [FNDEFX], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/FNDEFX, April 6, 2021.
+
+```{r FNDEFX, echo=FALSE}
+
+datay <- "FNDEFX"
+ylim <- c(0.0, 700.0)
+plotSingleQuickModern(datay, ylim)
+
+```
 
 ### Table 6.16D. Corporate Profits by Industry
 
@@ -7778,7 +7802,7 @@ U.S. Bureau of Economic Analysis, Personal Income [PI], retrieved from FRED, Fed
 ```{r PI, echo=FALSE}
 
 datay <- "PI"
-ylim <- c(0, 20000)
+ylim <- c(0, 25000)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 
@@ -8667,6 +8691,15 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
 ## Gross private domestic investment
 Spending most certainly tips down prior to a recession. The gross private domestic investment data series, plotted in log format below, show how private investment pulls back prior to recessions.
+
+```{r GPDI.by.GDP, echo=FALSE}
+
+datay <- "GPDI.by.GDP"
+ylim <- c(-5, 5)
+plotSingleQuick(dfRecession, df.data, datay, ylim)
+
+
+```
 
 ```{r GPDI_Log, echo=FALSE}
 

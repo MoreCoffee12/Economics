@@ -598,3 +598,26 @@ df.symbols <-
     )
   )
 
+# Gross Private Domestic Investment to GDP
+df.data$GPDI.by.GDP <- df.data$GPDI / df.data$GDP
+df.data$GPDI.by.GDP <- na.approx(df.data$GPDI.by.GDP, rule = 2)
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "GPDI.by.GDP",
+      string.source = "Ratio",
+      string.description =  "Gross Private Domestic Investment/GDP",
+      string.label.y = "Ratio ($/$)" ,
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = as.Date(max(c(
+        index(GPDI[1]), index(GDP[1])
+      ))) ,
+      date.series.end = as.Date(min(c(
+        index(tail(GPDI, 1)), index(tail(GDP, 1))
+      )))
+    )
+  )
+

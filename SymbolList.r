@@ -1543,6 +1543,34 @@ df.symbols <-
   rbind(
     df.symbols,
     data.frame(
+      string.symbol = "FNDEFX",
+      string.source = "FRED",
+      string.description = "Federal Government: Nondefense\nConsumption Expenditures and Gross Investment (SA, Annual Rate)",
+      string.label.y = "Billions of Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "FDEFX",
+      string.source = "FRED",
+      string.description = "Federal Government: National Defense\nConsumption Expenditures and Gross Investment (SA, Annual Rate)",
+      string.label.y = "Billions of Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
       string.symbol = "GDPNOW",
       string.source = "FRED",
       string.description = "Fed Atlanta GDPNow",
@@ -1552,6 +1580,7 @@ df.symbols <-
       date.series.end = as.Date("1900-01-01")
     )
   )
+
 df.symbols <-
   rbind(
     df.symbols,
