@@ -69,8 +69,9 @@ b.refresh.models = FALSE
 # Define the plotting ranges
 dt.recent = as.Date("2017-01-01")
 
-# Define the S&P 500 limits
-d.GSPC.max = 4000
+# Define trend limits
+d.GSPC.max = 4500
+d.Russell.max = 3000
 
 ```
 
@@ -688,7 +689,7 @@ Loading in Silverblatt's S&P 500 spreadsheet starting with the quarterly data.
 # https://us.spindices.com/documents/additional-material/sp-500-eps-est.xlsx
 
 # Read in th Excel file, starting with the quaterly data
-df.silverblatt <- data.frame(read_excel('sp-500-eps-est.xlsx', range='QUARTERLY DATA!A6:I138'))
+df.silverblatt <- data.frame(read_excel('sp-500-eps-est.xlsx', range='QUARTERLY DATA!A6:I139'))
 
 # Human readable column names
 colnames(df.silverblatt) <-
@@ -850,7 +851,7 @@ Now load in the estimates
 df.silverblatt.act <-
   data.frame(read_excel(
     'sp-500-eps-est.xlsx',
-    range = 'ESTIMATES&PEs!A136:J266',
+    range = 'ESTIMATES&PEs!A137:J268',
     col_types = c(
       "date",
       "numeric",
@@ -865,7 +866,7 @@ df.silverblatt.act <-
     )
   ))
 df.silverblatt.est <-
-  data.frame(read_excel('sp-500-eps-est.xlsx', range = 'ESTIMATES&PEs!A129:J133'))
+  data.frame(read_excel('sp-500-eps-est.xlsx', range = 'ESTIMATES&PEs!A127:J134'))
 
 # Human readable column names
 colnames(df.silverblatt.act) <-
@@ -3066,7 +3067,7 @@ datay.aux <- "RLG.Open_mva200"
 datay.title <- getPlotTitle(df.symbols, datay.aux, str.sep = "\n")
 datay.aux.1 <- "RLG.Open_mva050"
 datay.title.1 <- getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n")
-ylim <- c(1000, 2500)
+ylim <- c(1000, d.Russell.max)
 myPlot <-
   plotSingle(
     dfRecession,
@@ -3114,7 +3115,7 @@ myPlot + geom_line(
 ```{r rollingcorS&PtoRussell, echo=FALSE, fig.width = 10, fig.asp = .62}
 
 datay1 <- "RLG.Open"
-ylim1 <- c(0, 2500)
+ylim1 <- c(0, d.Russell.max )
 
 datay2 <- "GSPC.Open"
 ylim2 <- c(0, d.GSPC.max)
@@ -3188,7 +3189,7 @@ Take a close look at recent activity
 ```{r FINRA.margin.debt.nearterm, echo=FALSE}
 
 datay <- "FINRAMarginDebt"
-ylim <- c(100000, 800000)
+ylim <- c(100000, 900000)
 dt.start <- as.Date('2000-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
