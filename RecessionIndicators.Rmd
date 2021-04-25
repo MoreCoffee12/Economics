@@ -851,7 +851,7 @@ Now load in the estimates
 df.silverblatt.act <-
   data.frame(read_excel(
     'sp-500-eps-est.xlsx',
-    range = 'ESTIMATES&PEs!A137:J268',
+    range = 'ESTIMATES&PEs!A136:J268',
     col_types = c(
       "date",
       "numeric",
@@ -866,7 +866,7 @@ df.silverblatt.act <-
     )
   ))
 df.silverblatt.est <-
-  data.frame(read_excel('sp-500-eps-est.xlsx', range = 'ESTIMATES&PEs!A127:J134'))
+  data.frame(read_excel('sp-500-eps-est.xlsx', range = 'ESTIMATES&PEs!A126:J134'))
 
 # Human readable column names
 colnames(df.silverblatt.act) <-
@@ -2848,7 +2848,7 @@ Focus on some of the more recent activity
 
 datay <- "MULTPLSP500PERATIOMONTH"
 datay.aux <- "MULTPLSP500PERATIOMONTH_Mean"
-ylim <- c(10, 40)
+ylim <- c(10, 45)
 dt.start <- as.Date('2010-01-01')
 b.legend <- TRUE
 my.plot <-
@@ -4181,6 +4181,17 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
 
+Industrial production over the last ten years or so
+
+```{r indpro.recent, echo=FALSE}
+datay <- "INDPRO"
+ylim <- c(80, 120)
+dt.start <- as.Date('2000-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = TRUE)
+
+```
+
+
 The derivative isn't bad, but it sometimes crosses zeros well into a recession. That is less helpful as either a buy or sell indicator. A better measure might year over year (YoY) change.
 
 ```{r indproderplot, echo=FALSE}
@@ -4441,6 +4452,7 @@ Suggested by Charlie, it can be helpful to look at the relationship between prod
 datay <- "CPIAUCSL_YoY"
 datay.aux <- "PPIACO_YoY"
 datay.aux.scale <- 0.5
+datay.aux.1 <- "PCEPI_YoY"
 
 ylim <- c(-10, 10)
 dtStart = as.Date('2007-01-01')
@@ -4467,6 +4479,17 @@ myPlot <- myPlot + geom_line(
   ),
   na.rm = TRUE
 )
+
+myPlot <- myPlot + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = df.data[[datay.aux.1]] * datay.aux.scale,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n"))
+  ),
+  na.rm = TRUE
+)
+
 
 myPlot + scale_y_continuous(sec.axis = sec_axis(
   ~ . * (1 / datay.aux.scale),
@@ -4644,7 +4667,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.legend, b.percenti
 ```{r crude.yoy.recent, echo=FALSE}
 
 datay <- "DCOILWTICO_YoY"
-ylim <- c(-120, 120)
+ylim <- c(-100, 150)
 dtStart = dt.recent
 b.legend <- TRUE
 b.percentile <- TRUE
@@ -5868,7 +5891,7 @@ Basic currency trend (currency component of M1)
 
 datay <- "WCURRNS"
 dtStart = as.Date('1970-01-01')
-ylim <- c(0, 2000)
+ylim <- c(0, 2500)
 myplot <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 myplot
 
@@ -5889,7 +5912,7 @@ myplot
 
 datay <- "WCURRNS_YoY"
 dtStart = as.Date('2000-01-01')
-ylim <- c(0, 15)
+ylim <- c(0, 20)
 myplot <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 myplot
 
@@ -5901,7 +5924,7 @@ The rate of change of money supply could be an indicator of a recession. Let's s
 ```{r M1_YoY, echo=FALSE}
 
 datay <- "M1_YoY"
-ylim <- c(-15, 25)
+ylim <- c(-15, 35)
 datay_aux <- "M2_YoY"
 dtStart = as.Date('1980-01-01')
 myplot <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
@@ -7780,7 +7803,7 @@ Profits look a bit flat over the last several years in this series.
 ```{r A053RC1Q027SBEA, echo=FALSE}
 
 datay <- "A053RC1Q027SBEA"
-ylim <- c(0, 2400)
+ylim <- c(0, 2500)
 plotSingleQuickModern(datay, ylim)
 
 
@@ -7809,7 +7832,8 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
 
-#### DPCERC: Personal consumption expenditures (PCE) - Line ...
+
+#### DPCERC: Personal consumption expenditures (PCE) - Table 2.1, Line 29
 
 BEA Account Code: DPCERC
 Personal consumption expenditures (PCE) is the primary measure of consumer spending on goods and services in the U.S. economy. 1 It accounts for about two-thirds of domestic final spending, and thus it is the primary engine that drives future economic growth. PCE shows how much of the income earned by households is being spent on
@@ -7826,6 +7850,74 @@ ylim <- c(0, 16000)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
+
+```{r PCE.recent, echo=FALSE}
+
+datay <- "PCE"
+ylim <- c(6000, 16000)
+dtStart = as.Date('2000-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+
+```
+
+```{r PCE.YoY, echo=FALSE}
+
+datay <- "PCE_YoY"
+ylim <- c(-20, 25)
+dtStart = as.Date('2000-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+
+```
+
+
+#### DPCERG: Personal consumption expenditures Price Index (PCEPI) - Table 2.1, Line 29
+
+BEA Account Code: DPCERG
+The gross domestic product price index measures changes in prices paid for goods and services produced in the United States, including those exported to other countries. Prices of imports are excluded. The gross domestic product implicit price deflator, or GDP deflator, basically measures the same things and closely mirrors the GDP price index, although the two price measures are calculated differently. The GDP deflator is used by some firms to adjust payments in contracts.
+
+The gross domestic purchases price index is BEA's featured measure of inflation for the U.S. economy overall. It measures changes in prices paid by consumers, businesses, and governments in the United States, including the prices of the imports they buy.
+
+BEA's closely followed personal consumption expenditures price index, or PCE price index, is a narrower measure. It looks at the changing prices of goods and services purchased by consumers in the United States. It's similar to the Bureau of Labor Statistics' consumer price index for urban consumers. The two indexes, which have their own purposes and uses, are constructed differently, resulting in different inflation rates.
+
+The PCE price index is known for capturing inflation (or deflation) across a wide range of consumer expenses and for reflecting changes in consumer behavior. For example, if the price of beef rises, shoppers may buy less beef and more chicken. Also, BEA revises previously published PCE data to reflect updated information or new methodology, providing consistency across decades of data that’s valuable for researchers. The PCE price index is used primarily for macroeconomic analysis and forecasting.
+-https://www.bea.gov/resources/learning-center/what-to-know-prices-inflation
+
+Suggested Citation:
+U.S. Bureau of Economic Analysis, Personal Consumption Expenditures: Chain-type Price Index [PCEPI], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/PCEPI, April 25, 2021.
+
+
+```{r PCE, echo=FALSE}
+
+datay <- "PCEPI"
+ylim <- c(0, 120)
+plotSingleQuick(dfRecession, df.data, datay, ylim)
+
+```
+
+```{r PCE.recent, echo=FALSE}
+
+datay <- "PCEPI"
+ylim <- c(60, 120)
+dtStart = as.Date('2000-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+
+```
+
+```{r PCE.YoY, echo=FALSE}
+
+datay <- "PCEPI_YoY"
+ylim <- c(-5, 5)
+dtStart = as.Date('2000-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+
+```
+
+
+
+
+
+
+
 
 #### A072RC: Personal Savings Rate - Line 35
 
@@ -7844,9 +7936,35 @@ U.S. Bureau of Economic Analysis, Personal Saving Rate [PSAVERT], retrieved from
 ```{r PSAVERT, echo=FALSE}
 
 datay <- "PSAVERT"
-ylim <- c(0, 20)
+ylim <- c(0, 35)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
+
+```
+
+Take a closer look at the last decade
+
+
+```{r PSAVERT.plot.close, echo=FALSE, fig.width = 9, fig.asp = 0.4}
+
+datay <- "PSAVERT"
+ylim <- c(0, 35)
+dt.start <- as.Date("1jan2000","%d%b%Y")
+my.plot <- plotSingle(
+  dfRecession,
+  df.data,
+  "date",
+  datay,
+  titlelabel = getPlotTitle(df.symbols, datay, str.sep = "\n"),
+  xlabel = "Date",
+  ylabel = getPlotYLabel(df.symbols, datay),
+  c(dt.start, Sys.Date()),
+  ylim,
+  b.legend = TRUE,
+  b.percentile = FALSE,
+  b.long.legend = TRUE
+)
+my.plot
 
 ```
 
@@ -7989,7 +8107,7 @@ my.plot
 
 datay <- "IMPCH_YoY"
 datay.aux <- "EXPCH_YoY"
-ylim <- c(-100, 60)
+ylim <- c(-50, 100)
 my.plot <- plotSingle(
   dfRecession,
   df.data,
