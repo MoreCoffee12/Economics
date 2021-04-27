@@ -1875,7 +1875,7 @@ df.symbols <-
       string.symbol = "HOUST",
       string.source = "FRED",
       string.description = "Housing Starts: Total: New Privately\nOwned Housing Units Started",
-      string.label.y = "Thousands of units",
+      string.label.y = "Billions of Dollars",
       float.expense.ratio = -1.00,
       date.series.start = as.Date("1900-01-01"),
       date.series.end = as.Date("1900-01-01")
@@ -1890,6 +1890,34 @@ df.symbols <-
       string.symbol = "MSPUS",
       string.source = "FRED",
       string.description = "Median Sales Price of\nHouses Sold for the United States",
+      string.label.y = "Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "UMDMNO",
+      string.source = "FRED",
+      string.description = "Manufacturers' New Orders: Durable Goods (NSA)",
+      string.label.y = "Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "DGORDER",
+      string.source = "FRED",
+      string.description = "Manufacturers' New Orders: Durable Goods (SA)",
       string.label.y = "Dollars",
       float.expense.ratio = -1.00,
       date.series.start = as.Date("1900-01-01"),
@@ -1967,20 +1995,6 @@ df.symbols <-
     )
   )
 
-
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
-      string.symbol = "GOLD",
-      string.source = "yahoo",
-      string.description = "Barrick Gold Corporation",
-      string.label.y = "Dollars",
-      float.expense.ratio = 0.00,
-      date.series.start = as.Date("1900-01-01"),
-      date.series.end = as.Date("1900-01-01")
-    )
-  )
 
 df.symbols <-
   rbind(
@@ -2653,6 +2667,34 @@ df.symbols <-
   rbind(
     df.symbols,
     data.frame(
+      string.symbol = "A053RC1Q027SBEA",
+      string.source = "FRED",
+      string.description = "National income: Corporate\nprofits before tax (without IVA and CCAdj)",
+      string.label.y = "Billions of dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1947-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "CPROFIT",
+      string.source = "FRED",
+      string.description = "Corporate Profits with Inventory\nValuation Adjustment (IVA) and\nCapital Consumption Adjustment (CCAdj)",
+      string.label.y = "Billions of dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1947-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
       string.symbol = "SPY",
       string.source = "yahoo",
       string.description = "SPDR S&P 500 ETF",
@@ -2959,6 +3001,26 @@ df.symbols <-
     )
   )
 
+#-----------------------------------------------------------------------------------------
+# Company specific data
+#-----------------------------------------------------------------------------------------
+
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "GOLD",
+      string.source = "yahoo",
+      string.description = "Barrick Gold Corporation",
+      string.label.y = "Dollars",
+      float.expense.ratio = 0.00,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+
 df.symbols <-
   rbind(
     df.symbols,
@@ -3000,17 +3062,31 @@ df.symbols <-
       date.series.end = as.Date("1900-01-01")
     )
   )
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "IP",
+      string.source = "yahoo",
+      string.description = "International Paper Company",
+      string.label.y = "Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1800-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
 
 df.symbols <-
   rbind(
     df.symbols,
     data.frame(
-      string.symbol = "A053RC1Q027SBEA",
-      string.source = "FRED",
-      string.description = "National income: Corporate\nprofits before tax (without IVA and CCAdj)",
-      string.label.y = "Billions of dollars",
+      string.symbol = "PKG",
+      string.source = "yahoo",
+      string.description = "Packaging Corporation of America",
+      string.label.y = "Dollars",
       float.expense.ratio = -1.00,
-      date.series.start = as.Date("1947-01-01") ,
+      date.series.start = as.Date("1800-01-01") ,
       date.series.end = as.Date("1900-01-01")
     )
   )
@@ -3019,12 +3095,55 @@ df.symbols <-
   rbind(
     df.symbols,
     data.frame(
-      string.symbol = "CPROFIT",
-      string.source = "FRED",
-      string.description = "Corporate Profits with Inventory\nValuation Adjustment (IVA) and\nCapital Consumption Adjustment (CCAdj)",
-      string.label.y = "Billions of dollars",
+      string.symbol = "UPS",
+      string.source = "yahoo",
+      string.description = "United Parcel Service, Inc.",
+      string.label.y = "Dollars",
       float.expense.ratio = -1.00,
-      date.series.start = as.Date("1947-01-01") ,
+      date.series.start = as.Date("1800-01-01") ,
       date.series.end = as.Date("1900-01-01")
     )
   )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "FDX",
+      string.source = "yahoo",
+      string.description = "FedEx Corporation",
+      string.label.y = "Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1800-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "T",
+      string.source = "yahoo",
+      string.description = "AT&T",
+      string.label.y = "Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1800-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "VZ",
+      string.source = "yahoo",
+      string.description = "Verizon",
+      string.label.y = "Dollars",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1800-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+

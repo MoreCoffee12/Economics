@@ -437,6 +437,52 @@ df.symbols <-
     )
   )
 
+# All durable goods as percet of GDP. Have to convert from millions to
+# billions to be consistent with H.8 and GDP series
+df.data$UMDMNO <- df.data$UMDMNO / 1000
+df.data$UMDMNO.by.GDP <-
+  (df.data$UMDMNO / df.data$GDP) * 100
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "UMDMNO.by.GDP",
+      string.source = "Calc",
+      string.description = "Durable Goods (Monthly, NSA)\ndivided by GDP",
+      string.label.y = "Percent",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(
+        c(df.symbols$date.series.start[df.symbols$Symbol == 'UMDMNO'], index(GDP[1]))
+      ))  ,
+      date.series.end = as.Date(min(c(
+        df.symbols$date.series.end[df.symbols$Symbol == 'UMDMNO'], index(tail(GDP, 1))
+      )))
+    )
+  )
+
+# All durable goods as percet of GDP. Have to convert from millions to
+# billions to be consistent with H.8 and GDP series
+df.data$DGORDER <- df.data$DGORDER / 1000
+df.data$DGORDER.by.GDP <-
+  (df.data$DGORDER / df.data$GDP) * 100
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "DGORDER.by.GDP",
+      string.source = "Calc",
+      string.description = "Durable Goods (Monthly, NSA)\ndivided by GDP",
+      string.label.y = "Percent",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(
+        c(df.symbols$date.series.start[df.symbols$Symbol == 'UMDMNO'], index(GDP[1]))
+      ))  ,
+      date.series.end = as.Date(min(c(
+        df.symbols$date.series.end[df.symbols$Symbol == 'UMDMNO'], index(tail(GDP, 1))
+      )))
+    )
+  )
+
 # All home mortgages as percet of GDP. Have to convert from millions to
 # billions to be consistent with H.8 and GDP series
 df.data$ASHMA <- df.data$ASHMA / 1000

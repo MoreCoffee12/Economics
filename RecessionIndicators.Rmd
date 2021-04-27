@@ -8324,6 +8324,113 @@ my.plot
 ```
 
 
+### Durable Goods
+
+Suggested Citation:
+U.S. Census Bureau, Manufacturers' New Orders: Durable Goods [UMDMNO], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/UMDMNO, April 26, 2021.
+
+
+```{r UMDMNO.plot, echo=FALSE, fig.width = 9, fig.asp = 0.4}
+
+datay <- "UMDMNO"
+ylim <- c(120, 300)
+dt.start <- as.Date("1jan1992","%d%b%Y")
+my.plot <- plotSingle(
+  dfRecession,
+  df.data,
+  "date",
+  datay,
+  getPlotTitle(df.symbols, datay),
+  xlabel = "Date",
+  ylabel = getPlotYLabel(df.symbols, datay),
+  c(dt.start, Sys.Date()),
+  ylim,
+  b.legend = TRUE,
+  b.percentile = FALSE,
+  b.long.legend = TRUE
+)
+
+my.plot
+
+```
+
+Durable goods, not seasonally adjusted, divided by GDP
+
+```{r UMDMNO.by.GDP.plot, echo=FALSE, fig.width = 9, fig.asp = 0.4}
+
+datay <- "UMDMNO.by.GDP"
+ylim <- c(0, 3)
+dt.start <- as.Date("1jan1992","%d%b%Y")
+my.plot <- plotSingle(
+  dfRecession,
+  df.data,
+  "date",
+  datay,
+  getPlotTitle(df.symbols, datay),
+  xlabel = "Date",
+  ylabel = getPlotYLabel(df.symbols, datay),
+  c(dt.start, Sys.Date()),
+  ylim,
+  b.legend = TRUE,
+  b.percentile = FALSE,
+  b.long.legend = TRUE
+)
+
+my.plot
+
+```
+
+
+```{r UMDMNO.plot, echo=FALSE, fig.width = 9, fig.asp = 0.4}
+
+datay <- "DGORDER"
+ylim <- c(120, 300)
+dt.start <- as.Date("1jan1992","%d%b%Y")
+my.plot <- plotSingle(
+  dfRecession,
+  df.data,
+  "date",
+  datay,
+  getPlotTitle(df.symbols, datay),
+  xlabel = "Date",
+  ylabel = getPlotYLabel(df.symbols, datay),
+  c(dt.start, Sys.Date()),
+  ylim,
+  b.legend = TRUE,
+  b.percentile = FALSE,
+  b.long.legend = TRUE
+)
+
+my.plot
+
+```
+
+Durable goods, seasonally adjusted, divided by GDP
+
+```{r DGORDER.by.GDP.plot, echo=FALSE, fig.width = 9, fig.asp = 0.4}
+
+datay <- "DGORDER.by.GDP"
+ylim <- c(0, 3)
+dt.start <- as.Date("1jan1992","%d%b%Y")
+my.plot <- plotSingle(
+  dfRecession,
+  df.data,
+  "date",
+  datay,
+  getPlotTitle(df.symbols, datay),
+  xlabel = "Date",
+  ylabel = getPlotYLabel(df.symbols, datay),
+  c(dt.start, Sys.Date()),
+  ylim,
+  b.legend = TRUE,
+  b.percentile = FALSE,
+  b.long.legend = TRUE
+)
+
+my.plot
+
+```
+
 ## Federal reserve board H.8: Assets and Liabilities of Commercial Banks in the United States
 
 ### Page 4: Not Seasonally adjusted, billions of dollars
