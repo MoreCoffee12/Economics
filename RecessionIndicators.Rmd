@@ -7886,7 +7886,7 @@ Suggested Citation:
 U.S. Bureau of Economic Analysis, Personal Consumption Expenditures: Chain-type Price Index [PCEPI], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/PCEPI, April 25, 2021.
 
 
-```{r PCE, echo=FALSE}
+```{r PCEPI, echo=FALSE}
 
 datay <- "PCEPI"
 ylim <- c(0, 120)
@@ -7894,7 +7894,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
 
-```{r PCE.recent, echo=FALSE}
+```{r PCEPI.recent, echo=FALSE}
 
 datay <- "PCEPI"
 ylim <- c(60, 120)
@@ -7903,7 +7903,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
 ```
 
-```{r PCE.YoY, echo=FALSE}
+```{r PCEPI.YoY, echo=FALSE}
 
 datay <- "PCEPI_YoY"
 ylim <- c(-5, 5)
@@ -8381,7 +8381,7 @@ my.plot
 ```
 
 
-```{r UMDMNO.plot, echo=FALSE, fig.width = 9, fig.asp = 0.4}
+```{r DGORDER.plot, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
 datay <- "DGORDER"
 ylim <- c(120, 300)
