@@ -621,3 +621,85 @@ df.symbols <-
     )
   )
 
+#--------------------------------------------------------------------------
+# Calculate returns
+#--------------------------------------------------------------------------
+
+# returns for base case (S&P 500)
+df.data$retBase <- ROC(df.data$GSPC.Close)
+df.data$retBase[is.na(df.data$retBase)] <- 0
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "retBase",
+      string.source = "Calc",
+      string.description =  "S&P 500 Rate of Change",
+      string.label.y = "Percent",
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = dt.start.prediction ,
+      date.series.end = as.Date(Sys.Date())
+    )
+  )
+
+# returns for 3-month t-bills (assumed to be short position)
+df.data$retBaseShort_TB3MS <- df.data$TB3MS / 365
+df.data$retBaseShort_TB3MS[is.na(df.data$retBaseShort_TB3MS)] <- 0
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "retBaseShort_TB3MS",
+      string.source = "Calc",
+      string.description =  "retBaseShort_TB3MS Rate of Change",
+      string.label.y = "Percent",
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = dt.start.prediction ,
+      date.series.end = as.Date(Sys.Date())
+    )
+  )
+
+# Growth for base case (S&P 500)
+df.data$eqBase <- exp(cumsum(df.data$retBase))
+df.data$eqBase <-
+  df.data$eqBase / df.data[min(which(df.data$date > dtStartBackTest)), "eqBase"]
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "eqBase",
+      string.source = "Calc",
+      string.description =  "Equity Return, 100% long",
+      string.label.y = "$1 Invested",
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = dt.start.prediction ,
+      date.series.end = as.Date(Sys.Date())
+    )
+  )
+
+# Growth for 3-month t-bill
+df.data$eqBaseShort_TB3MS <- cumsum(df.data$retBaseShort_TB3MS)
+df.data$eqBaseShort_TB3MS <-
+  df.data$eqBaseShort_TB3MS / df.data[min(which(df.data$date > dtStartBackTest)), "eqBaseShort_TB3MS"]
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "eqBaseShort_TB3MS",
+      string.source = "Calc",
+      string.description =  "3-Month t-Bill Return, 100% long",
+      string.label.y = "$1 Invested",
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = dt.start.prediction,
+      date.series.end = as.Date(Sys.Date())
+    )
+  )
+
