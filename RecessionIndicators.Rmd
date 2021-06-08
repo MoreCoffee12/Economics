@@ -6902,7 +6902,7 @@ datay1 <- "UNRATE"
 ylim1 <- c(2, 12)
 
 datay2 <- "PSAVERT"
-ylim2 <- c(0, 15)
+ylim2 <- c(0, 35)
 
 dtStart <- as.Date("1jan1985","%d%b%Y")
 
@@ -7082,10 +7082,10 @@ grid.arrange(p1,
 
 New housing yoy
 
-```{r newhousing.yoy, fig.width = 7, fig.asp = 1.3 }
+```{r newhousing.yoy, fig.width = 7, fig.asp = 1.3, echo=FALSE}
 
 datay <- "HSN1FNSA_YoY"
-ylim <- c(-100, 50)
+ylim <- c(-50, 100)
 dtStart = as.Date('1964-01-01')
 p1 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
@@ -7523,7 +7523,7 @@ Board of Governors of the Federal Reserve System (US), Deposits, All Commercial 
 ```{r DPSACBW027SBOG.plots, echo=FALSE}
 
 datay <- "DPSACBW027SBOG"
-ylim <- c(1000, 16000)
+ylim <- c(1000, 18000)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
