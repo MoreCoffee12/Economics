@@ -44,7 +44,7 @@ calcFeatures <- function(df.data, df.symbols){
     
     # Start with the YoY calculation
     str.symbolYoY <- paste(str.symbol, "_YoY", sep = "")
-    print(paste(str.symbol,'-',str.symbolYoY, '-', str.description))
+    # print(paste(str.symbol,'-',str.symbolYoY, '-', str.description))
     df.data[str.symbolYoY] <- CalcYoY(df.data, str.symbol, 365)
     df.symbols <-
       rbind(

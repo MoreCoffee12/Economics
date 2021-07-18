@@ -46,6 +46,7 @@ library(readxl)
 library(plotly)
 #install.packages('coronavirus')
 library(coronavirus)
+library(lubridate)
 
 ```
 
@@ -391,171 +392,175 @@ if(bRefresh) {
 ## Load up the EIA data
 
 ```{r EIA data, echo=FALSE}
-key <- "7a2672468131c5a95dffc487d741edf6"
 
-
-
-# Refiner Motor Gasoline Sales Volumes
-  str.symbol.raw = "PET.A103600001.M"
-  df.symbols <-
-    rbind(
-      df.symbols,
-      data.frame(
-        string.symbol = str.symbol.raw,
-        string.source = "EIA",
-        string.description =  "U.S. Total Gasoline Retail Sales by Refiners, Monthly",
-        string.label.y = "Thousand Gallons per Day",
-        float.expense.ratio = -1.00,
-        date.series.start = as.Date("1900-01-01") ,
-        date.series.end = as.Date("1900-01-01")
+if (bRefresh){
+  
+  key <- "7a2672468131c5a95dffc487d741edf6"
+  
+  
+  
+  # Refiner Motor Gasoline Sales Volumes
+    str.symbol.raw = "PET.A103600001.M"
+    df.symbols <-
+      rbind(
+        df.symbols,
+        data.frame(
+          string.symbol = str.symbol.raw,
+          string.source = "EIA",
+          string.description =  "U.S. Total Gasoline Retail Sales by Refiners, Monthly",
+          string.label.y = "Thousand Gallons per Day",
+          float.expense.ratio = -1.00,
+          date.series.start = as.Date("1900-01-01") ,
+          date.series.end = as.Date("1900-01-01")
+        )
       )
-    )
-  
-  strName <-
-    str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-  PETA103600001M <- getEIA(key=key, ID=str.symbol.raw )
-  colnames(PETA103600001M) <- c(strName)
-  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(dfTemp$Date, 1)
-  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = dfTemp$Date[[1]]
-  
-# U.S. Regular Gasoline Retail Sales by Refiners, Monthly
-  str.symbol.raw = "PET.A123600001.M"
-  df.symbols <-
-    rbind(
-      df.symbols,
-      data.frame(
-        string.symbol = str.symbol.raw,
-        string.source = "EIA",
-        string.description =  "U.S. Regular Gasoline Retail Sales\nby Refiners, Monthly",
-        string.label.y = "Thousand Gallons per Day",
-        float.expense.ratio = -1.00,
-        date.series.start = as.Date("1900-01-01") ,
-        date.series.end = as.Date("1900-01-01")
+    
+    strName <-
+      str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+    PETA103600001M <- getEIA(key=key, ID=str.symbol.raw )
+    colnames(PETA103600001M) <- c(strName)
+    df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(dfTemp$Date, 1)
+    df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = dfTemp$Date[[1]]
+    
+  # U.S. Regular Gasoline Retail Sales by Refiners, Monthly
+    str.symbol.raw = "PET.A123600001.M"
+    df.symbols <-
+      rbind(
+        df.symbols,
+        data.frame(
+          string.symbol = str.symbol.raw,
+          string.source = "EIA",
+          string.description =  "U.S. Regular Gasoline Retail Sales\nby Refiners, Monthly",
+          string.label.y = "Thousand Gallons per Day",
+          float.expense.ratio = -1.00,
+          date.series.start = as.Date("1900-01-01") ,
+          date.series.end = as.Date("1900-01-01")
+        )
       )
-    )
-  
-  strName <-
-    str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-  PETA123600001M <- getEIA(key=key, ID=str.symbol.raw )
-  colnames(PETA123600001M) <- c(strName)
-  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(dfTemp$Date, 1)
-  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = dfTemp$Date[[1]]
-  
-# U.S. Gasoline Midgrade Bulk Sales (Volume) by Refiners, Monthly
-  str.symbol.raw = "PET.A143B00001.M"
-  df.symbols <-
-    rbind(
-      df.symbols,
-      data.frame(
-        string.symbol = str.symbol.raw,
-        string.source = "EIA",
-        string.description =  "U.S. Midgrade Gasoline Retail Sales\nby Refiners, Monthly",
-        string.label.y = "Thousand Gallons per Day",
-        float.expense.ratio = -1.00,
-        date.series.start = as.Date("1900-01-01") ,
-        date.series.end = as.Date("1900-01-01")
+    
+    strName <-
+      str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+    PETA123600001M <- getEIA(key=key, ID=str.symbol.raw )
+    colnames(PETA123600001M) <- c(strName)
+    df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(dfTemp$Date, 1)
+    df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = dfTemp$Date[[1]]
+    
+  # U.S. Gasoline Midgrade Bulk Sales (Volume) by Refiners, Monthly
+    str.symbol.raw = "PET.A143B00001.M"
+    df.symbols <-
+      rbind(
+        df.symbols,
+        data.frame(
+          string.symbol = str.symbol.raw,
+          string.source = "EIA",
+          string.description =  "U.S. Midgrade Gasoline Retail Sales\nby Refiners, Monthly",
+          string.label.y = "Thousand Gallons per Day",
+          float.expense.ratio = -1.00,
+          date.series.start = as.Date("1900-01-01") ,
+          date.series.end = as.Date("1900-01-01")
+        )
       )
-    )
-  
-  strName <-
-    str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-  PETA143B00001M <- getEIA(key=key, ID=str.symbol.raw )
-  colnames(PETA143B00001M) <- c(strName)
-  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(dfTemp$Date, 1)
-  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = dfTemp$Date[[1]]
-  
-# U.S. Premium Gasoline Bulk Sales (Volume) by Refiners, Monthly
-  str.symbol.raw = "PET.A133B00001.M"
-  df.symbols <-
-    rbind(
-      df.symbols,
-      data.frame(
-        string.symbol = str.symbol.raw,
-        string.source = "EIA",
-        string.description =  "U.S. Premium Gasoline Bulk Sales\n(Volume) by Refiners, Monthly",
-        string.label.y = "Thousand Gallons per Day",
-        float.expense.ratio = -1.00,
-        date.series.start = as.Date("1900-01-01") ,
-        date.series.end = as.Date("1900-01-01")
+    
+    strName <-
+      str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+    PETA143B00001M <- getEIA(key=key, ID=str.symbol.raw )
+    colnames(PETA143B00001M) <- c(strName)
+    df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(dfTemp$Date, 1)
+    df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = dfTemp$Date[[1]]
+    
+  # U.S. Premium Gasoline Bulk Sales (Volume) by Refiners, Monthly
+    str.symbol.raw = "PET.A133B00001.M"
+    df.symbols <-
+      rbind(
+        df.symbols,
+        data.frame(
+          string.symbol = str.symbol.raw,
+          string.source = "EIA",
+          string.description =  "U.S. Premium Gasoline Bulk Sales\n(Volume) by Refiners, Monthly",
+          string.label.y = "Thousand Gallons per Day",
+          float.expense.ratio = -1.00,
+          date.series.start = as.Date("1900-01-01") ,
+          date.series.end = as.Date("1900-01-01")
+        )
       )
-    )
-  
-  strName <-
-    str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-  PETA133B00001M <- getEIA(key=key, ID=str.symbol.raw )
-  colnames(PETA133B00001M) <- c(strName)
-  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(dfTemp$Date, 1)
-  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = dfTemp$Date[[1]]
-  
-  # Crude Oil and Natural Gas Rotary Rigs in Operation, Total, Monthly
-  str.symbol.raw = "TOTAL.OGNRPUS.M"
-  df.symbols <-
-    rbind(
-      df.symbols,
-      data.frame(
-        string.symbol = str.symbol.raw,
-        string.source = "EIA",
-        string.description =  "Crude Oil and Natural Gas Rotary Rigs in Operation, Total, Monthly",
-        string.label.y = "Number of rigs",
-        float.expense.ratio = -1.00,
-        date.series.start = as.Date("1900-01-01") ,
-        date.series.end = as.Date("1900-01-01")
+    
+    strName <-
+      str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+    PETA133B00001M <- getEIA(key=key, ID=str.symbol.raw )
+    colnames(PETA133B00001M) <- c(strName)
+    df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(dfTemp$Date, 1)
+    df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = dfTemp$Date[[1]]
+    
+    # Crude Oil and Natural Gas Rotary Rigs in Operation, Total, Monthly
+    str.symbol.raw = "TOTAL.OGNRPUS.M"
+    df.symbols <-
+      rbind(
+        df.symbols,
+        data.frame(
+          string.symbol = str.symbol.raw,
+          string.source = "EIA",
+          string.description =  "Crude Oil and Natural Gas Rotary Rigs in Operation, Total, Monthly",
+          string.label.y = "Number of rigs",
+          float.expense.ratio = -1.00,
+          date.series.start = as.Date("1900-01-01") ,
+          date.series.end = as.Date("1900-01-01")
+        )
       )
-    )
-  
-  strName <-
-    str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-  TOTALOGNRPUSM <- getEIA(key=key, ID=str.symbol.raw )
-  colnames(TOTALOGNRPUSM) <- c(strName)
-  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(dfTemp$Date, 1)
-  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = dfTemp$Date[[1]]
-  
-  # Crude Oil Rotary Rigs in Operation, Monthly
-  str.symbol.raw = "TOTAL.PANRPUS.M"
-  df.symbols <-
-    rbind(
-      df.symbols,
-      data.frame(
-        string.symbol = str.symbol.raw,
-        string.source = "EIA",
-        string.description =  "Crude Oil Rotary Rigs in Operation, Monthly",
-        string.label.y = "Number of rigs",
-        float.expense.ratio = -1.00,
-        date.series.start = as.Date("1900-01-01") ,
-        date.series.end = as.Date("1900-01-01")
+    
+    strName <-
+      str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+    TOTALOGNRPUSM <- getEIA(key=key, ID=str.symbol.raw )
+    colnames(TOTALOGNRPUSM) <- c(strName)
+    df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(dfTemp$Date, 1)
+    df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = dfTemp$Date[[1]]
+    
+    # Crude Oil Rotary Rigs in Operation, Monthly
+    str.symbol.raw = "TOTAL.PANRPUS.M"
+    df.symbols <-
+      rbind(
+        df.symbols,
+        data.frame(
+          string.symbol = str.symbol.raw,
+          string.source = "EIA",
+          string.description =  "Crude Oil Rotary Rigs in Operation, Monthly",
+          string.label.y = "Number of rigs",
+          float.expense.ratio = -1.00,
+          date.series.start = as.Date("1900-01-01") ,
+          date.series.end = as.Date("1900-01-01")
+        )
       )
-    )
-  
-  strName <-
-    str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-  TOTALPANRPUSM <- getEIA(key=key, ID=str.symbol.raw )
-  colnames(TOTALPANRPUSM) <- c(strName)
-  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(dfTemp$Date, 1)
-  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = dfTemp$Date[[1]]
-  
-  # Natural Gas Rotary Rigs in Operation, Monthly
-  str.symbol.raw = "TOTAL.NGNRPUS.M"
-  df.symbols <-
-    rbind(
-      df.symbols,
-      data.frame(
-        string.symbol = str.symbol.raw,
-        string.source = "EIA",
-        string.description =  "Natural Gas Rotary Rigs in Operation, Monthly",
-        string.label.y = "Number of rigs",
-        float.expense.ratio = -1.00,
-        date.series.start = as.Date("1900-01-01") ,
-        date.series.end = as.Date("1900-01-01")
+    
+    strName <-
+      str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+    TOTALPANRPUSM <- getEIA(key=key, ID=str.symbol.raw )
+    colnames(TOTALPANRPUSM) <- c(strName)
+    df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(dfTemp$Date, 1)
+    df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = dfTemp$Date[[1]]
+    
+    # Natural Gas Rotary Rigs in Operation, Monthly
+    str.symbol.raw = "TOTAL.NGNRPUS.M"
+    df.symbols <-
+      rbind(
+        df.symbols,
+        data.frame(
+          string.symbol = str.symbol.raw,
+          string.source = "EIA",
+          string.description =  "Natural Gas Rotary Rigs in Operation, Monthly",
+          string.label.y = "Number of rigs",
+          float.expense.ratio = -1.00,
+          date.series.start = as.Date("1900-01-01") ,
+          date.series.end = as.Date("1900-01-01")
+        )
       )
-    )
+    
+    strName <-
+      str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+    TOTALNGNRPUSM <- getEIA(key=key, ID=str.symbol.raw )
+    colnames(TOTALNGNRPUSM) <- c(strName)
+    df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(dfTemp$Date, 1)
+    df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = dfTemp$Date[[1]]
   
-  strName <-
-    str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-  TOTALNGNRPUSM <- getEIA(key=key, ID=str.symbol.raw )
-  colnames(TOTALNGNRPUSM) <- c(strName)
-  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(dfTemp$Date, 1)
-  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = dfTemp$Date[[1]]
-  
+}
 
 ```
 
@@ -565,79 +570,82 @@ The Baker Hughes rig count numbers
 
 ```{r bkr.rig.count.load, echo=FALSE}
 
-# Manually change dirs for testing
-#setwd('C:/Users/Rainy/OneDrive/Documents/Hobby/GitHub/Economics')
-
-# Read in the data
-df.rig.raw <- data.frame(read_excel('North America Rotary Rig Count (Jan 2000 - Current).xlsx', sheet = "US Oil & Gas Split", skip=5))
-df.rig.raw$Date <- as.Date(df.rig.raw$Date)
-
-# Create the zoo object for total rig count
-str.symbol <- 'BKR/Total'
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
-      string.symbol = str.symbol,
-      string.source = "BKR",
-      string.description =  "Total Rig Count",
-      string.label.y = "Number of rigs",
-      float.expense.ratio = -1.00,
-      date.series.start = df.rig.raw$Date[[1]] ,
-      date.series.end = tail(df.rig.raw$Date, 1)
+if(bRefresh){
+  
+  # Manually change dirs for testing
+  #setwd('C:/Users/Rainy/OneDrive/Documents/Hobby/GitHub/Economics')
+  
+  # Read in the data
+  df.rig.raw <- data.frame(read_excel('North America Rotary Rig Count (Jan 2000 - Current).xlsx', sheet = "US Oil & Gas Split", skip=5))
+  df.rig.raw$Date <- as.Date(df.rig.raw$Date)
+  
+  # Create the zoo object for total rig count
+  str.symbol <- 'BKR/Total'
+  df.symbols <-
+    rbind(
+      df.symbols,
+      data.frame(
+        string.symbol = str.symbol,
+        string.source = "BKR",
+        string.description =  "Total Rig Count",
+        string.label.y = "Number of rigs",
+        float.expense.ratio = -1.00,
+        date.series.start = df.rig.raw$Date[[1]] ,
+        date.series.end = tail(df.rig.raw$Date, 1)
+      )
     )
-  )
-
-# Process the total rig count
-str.safe.name <-
-  str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-assign(str.safe.name, xts(df.rig.raw$Total, order.by = df.rig.raw$Date))
-colnames(BKRTotal)[[1]] <- c(str.safe.name)
-
-# Create the zoo object for gas rig count
-str.symbol <- 'BKR/Gas'
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
-      string.symbol = str.symbol,
-      string.source = "BKR",
-      string.description =  "Gas Rig Count",
-      string.label.y = "Number of rigs",
-      float.expense.ratio = -1.00,
-      date.series.start = tail(df.rig.raw$Date, 1) ,
-      date.series.end = df.rig.raw$Date[[1]]
+  
+  # Process the total rig count
+  str.safe.name <-
+    str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+  assign(str.safe.name, xts(df.rig.raw$Total, order.by = df.rig.raw$Date))
+  colnames(BKRTotal)[[1]] <- c(str.safe.name)
+  
+  # Create the zoo object for gas rig count
+  str.symbol <- 'BKR/Gas'
+  df.symbols <-
+    rbind(
+      df.symbols,
+      data.frame(
+        string.symbol = str.symbol,
+        string.source = "BKR",
+        string.description =  "Gas Rig Count",
+        string.label.y = "Number of rigs",
+        float.expense.ratio = -1.00,
+        date.series.start = tail(df.rig.raw$Date, 1) ,
+        date.series.end = df.rig.raw$Date[[1]]
+      )
     )
-  )
-
-# Process the total gas rig count
-str.safe.name <-
-  str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-assign(str.safe.name, xts(df.rig.raw$Gas, order.by = df.rig.raw$Date))
-colnames(BKRGas)[[1]] <- c(str.safe.name)
-
-# Create the zoo object for oil rig count
-str.symbol <- 'BKR/Oil'
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
-      string.symbol = str.symbol,
-      string.source = "BKR",
-      string.description =  "Oil Rig Count",
-      string.label.y = "Number of rigs",
-      float.expense.ratio = -1.00,
-      date.series.start = tail(df.rig.raw$Date, 1) ,
-      date.series.end = df.rig.raw$Date[[1]]
+  
+  # Process the total gas rig count
+  str.safe.name <-
+    str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+  assign(str.safe.name, xts(df.rig.raw$Gas, order.by = df.rig.raw$Date))
+  colnames(BKRGas)[[1]] <- c(str.safe.name)
+  
+  # Create the zoo object for oil rig count
+  str.symbol <- 'BKR/Oil'
+  df.symbols <-
+    rbind(
+      df.symbols,
+      data.frame(
+        string.symbol = str.symbol,
+        string.source = "BKR",
+        string.description =  "Oil Rig Count",
+        string.label.y = "Number of rigs",
+        float.expense.ratio = -1.00,
+        date.series.start = tail(df.rig.raw$Date, 1) ,
+        date.series.end = df.rig.raw$Date[[1]]
+      )
     )
-  )
+  
+  # Process the total gas rig count
+  str.safe.name <-
+    str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+  assign(str.safe.name, xts(df.rig.raw$Oil, order.by = df.rig.raw$Date))
+  colnames(BKROil)[[1]] <- c(str.safe.name)
 
-# Process the total gas rig count
-str.safe.name <-
-  str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-assign(str.safe.name, xts(df.rig.raw$Oil, order.by = df.rig.raw$Date))
-colnames(BKROil)[[1]] <- c(str.safe.name)
-
+}
 
 ```
 
@@ -647,40 +655,43 @@ Loading in farm data
 
 ```{r farm.income, echo=FALSE}
 
-# Get farm income data. From USDA website:
-# https://www.ers.usda.gov/data-products/farm-income-and-wealth-statistics/data-files-us-and-state-level-farm-income-and-wealth-statistics/
-
-# Read in th Excel file
-df.farm.income <- data.frame(read_excel('farmsectorindicators.xlsx', range='Sheet1!A2:I28'))
-
-# Extract the income and dates
-i.cols <- ncol(df.farm.income)
-d.income <- as.numeric(tail(df.farm.income,1)[2:i.cols])
-
-dt.date <- as.numeric(df.farm.income[3,2:i.cols])
-dt.date[(i.cols-1)] <- dt.date[i.cols-2] + 1
-# Have to append the day, otherwise it crashes on leap year.
-dt.date.c <- paste(as.character(dt.date), "-01-01", sep="")
-dt.date <- as.Date(dt.date.c)
-
-# Create the XTS object and update the symbols table
-str.symbol <- 'FARMINCOME'
-assign(str.symbol, xts(x=d.income, order.by=dt.date))
-colnames(FARMINCOME) <- "FARMINCOME"
-
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
-      string.symbol = str.symbol,
-      string.source = "USDA",
-      string.description =  "Net Farm Income",
-      string.label.y = "Billions of Dollars",
-      float.expense.ratio = -1.00,
-      date.series.start = dt.date[1],
-      date.series.end = tail(dt.date,1)
+if(bRefresh){
+  
+  # Get farm income data. From USDA website:
+  # https://www.ers.usda.gov/data-products/farm-income-and-wealth-statistics/data-files-us-and-state-level-farm-income-and-wealth-statistics/
+  
+  # Read in th Excel file
+  df.farm.income <- data.frame(read_excel('farmsectorindicators.xlsx', range='Sheet1!A2:I28'))
+  
+  # Extract the income and dates
+  i.cols <- ncol(df.farm.income)
+  d.income <- as.numeric(tail(df.farm.income,1)[2:i.cols])
+  
+  dt.date <- as.numeric(df.farm.income[3,2:i.cols])
+  dt.date[(i.cols-1)] <- dt.date[i.cols-2] + 1
+  # Have to append the day, otherwise it crashes on leap year.
+  dt.date.c <- paste(as.character(dt.date), "-01-01", sep="")
+  dt.date <- as.Date(dt.date.c)
+  
+  # Create the XTS object and update the symbols table
+  str.symbol <- 'FARMINCOME'
+  assign(str.symbol, xts(x=d.income, order.by=dt.date))
+  colnames(FARMINCOME) <- "FARMINCOME"
+  
+  df.symbols <-
+    rbind(
+      df.symbols,
+      data.frame(
+        string.symbol = str.symbol,
+        string.source = "USDA",
+        string.description =  "Net Farm Income",
+        string.label.y = "Billions of Dollars",
+        float.expense.ratio = -1.00,
+        date.series.start = dt.date[1],
+        date.series.end = tail(dt.date,1)
+      )
     )
-  )
+}
 
 ```
 
@@ -688,313 +699,312 @@ Loading in Silverblatt's S&P 500 spreadsheet starting with the quarterly data.
 
 ```{r silverblatt.data, echo=FALSE}
 
-# Get S&P 500 Silverblatt data. From USDA website:
-# https://us.spindices.com/documents/additional-material/sp-500-eps-est.xlsx
-
-# Read in th Excel file, starting with the quaterly data
-df.silverblatt <- data.frame(read_excel('sp-500-eps-est.xlsx', range='QUARTERLY DATA!A6:I139'))
-
-# Human readable column names
-colnames(df.silverblatt) <-
-  c(
-    "QUARTER.END",
-    "OP.EARNINGS.PER.SHARE",
-    "AR.EARNINGS.PER.SHARE",
-    "CASH.DIVIDENDS.PER.SHR",
-    "SALES.PER.SHR",
-    "BOOKVAL.PER.SHR",
-    "CAPEX.PER.SHR",
-    "PRICE",
-    "DIVISOR"
-  )
-
-# Create the XTS object and update the symbols table for operating earnings
-str.symbol <- 'OPEARNINGSPERSHARE'
-assign(str.symbol, xts(x=df.silverblatt$OP.EARNINGS.PER.SHARE, order.by=df.silverblatt$QUARTER.END))
-colnames(OPEARNINGSPERSHARE) <- "OPEARNINGSPERSHARE"
-
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
-      string.symbol = str.symbol,
-      string.source = "SILVERBLATT",
-      string.description =  "Operating Earnings per Share",
-      string.label.y = "Dollars",
-      float.expense.ratio = -1.00,
-      date.series.start = dt.date[1],
-      date.series.end = tail(dt.date,1)
+if(bRefresh){
+  
+  # Get S&P 500 Silverblatt data. From USDA website:
+  # https://us.spindices.com/documents/additional-material/sp-500-eps-est.xlsx
+  
+  # Read in th Excel file, starting with the quaterly data
+  df.silverblatt <- data.frame(read_excel('sp-500-eps-est.xlsx', range='QUARTERLY DATA!A7:I140'))
+  
+  # Human readable column names
+  colnames(df.silverblatt) <-
+    c(
+      "QUARTER.END",
+      "OP.EARNINGS.PER.SHARE",
+      "AR.EARNINGS.PER.SHARE",
+      "CASH.DIVIDENDS.PER.SHR",
+      "SALES.PER.SHR",
+      "BOOKVAL.PER.SHR",
+      "CAPEX.PER.SHR",
+      "PRICE",
+      "DIVISOR"
     )
-  )
-
-# Create the XTS object and update the symbols table for as reported earnings
-str.symbol <- 'AREARNINGSPERSHARE'
-assign(str.symbol, xts(x=df.silverblatt$AR.EARNINGS.PER.SHARE, order.by=df.silverblatt$QUARTER.END))
-colnames(AREARNINGSPERSHARE) <- "AREARNINGSPERSHARE"
-
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
-      string.symbol = str.symbol,
-      string.source = "SILVERBLATT",
-      string.description =  "As-Reported Earnings per Share",
-      string.label.y = "Dollars",
-      float.expense.ratio = -1.00,
-      date.series.start = dt.date[1],
-      date.series.end = tail(dt.date,1)
+  
+  # Re-cast the dates characters as datetime values
+  df.silverblatt$QUARTER.END <-
+    as.Date(df.silverblatt$QUARTER.END, "%m/%d/%Y", tz = 'America/Los_Angeles')
+  
+  # Create the XTS object and update the symbols table for operating earnings
+  str.symbol <- 'OPEARNINGSPERSHARE'
+  assign(str.symbol, xts(x=df.silverblatt$OP.EARNINGS.PER.SHARE, order.by=df.silverblatt$QUARTER.END))
+  colnames(OPEARNINGSPERSHARE) <- "OPEARNINGSPERSHARE"
+  
+  df.symbols <-
+    rbind(
+      df.symbols,
+      data.frame(
+        string.symbol = str.symbol,
+        string.source = "SILVERBLATT",
+        string.description =  "Operating Earnings per Share",
+        string.label.y = "Dollars",
+        float.expense.ratio = -1.00,
+        date.series.start = dt.date[1],
+        date.series.end = tail(dt.date,1)
+      )
     )
-  )
-
-# Create the XTS object and update the symbols table for cash dividends
-str.symbol <- 'CASHDIVIDENDSPERSHR'
-assign(str.symbol, xts(x=df.silverblatt$CASH.DIVIDENDS.PER.SHR, order.by=df.silverblatt$QUARTER.END))
-colnames(CASHDIVIDENDSPERSHR) <- "CASHDIVIDENDSPERSHR"
-
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
-      string.symbol = str.symbol,
-      string.source = "SILVERBLATT",
-      string.description =  "Cash Dividends per Share",
-      string.label.y = "Dollars",
-      float.expense.ratio = -1.00,
-      date.series.start = dt.date[1],
-      date.series.end = tail(dt.date,1)
+  
+  # Create the XTS object and update the symbols table for as reported earnings
+  str.symbol <- 'AREARNINGSPERSHARE'
+  assign(str.symbol, xts(x=df.silverblatt$AR.EARNINGS.PER.SHARE, order.by=df.silverblatt$QUARTER.END))
+  colnames(AREARNINGSPERSHARE) <- "AREARNINGSPERSHARE"
+  
+  df.symbols <-
+    rbind(
+      df.symbols,
+      data.frame(
+        string.symbol = str.symbol,
+        string.source = "SILVERBLATT",
+        string.description =  "As-Reported Earnings per Share",
+        string.label.y = "Dollars",
+        float.expense.ratio = -1.00,
+        date.series.start = dt.date[1],
+        date.series.end = tail(dt.date,1)
+      )
     )
-  )
-
-# Create the XTS object and update the symbols table for sales per share
-str.symbol <- 'SALESPERSHR'
-assign(str.symbol, xts(x=df.silverblatt$SALES.PER.SHR, order.by=df.silverblatt$QUARTER.END))
-colnames(SALESPERSHR) <- "SALESPERSHR"
-
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
-      string.symbol = str.symbol,
-      string.source = "SILVERBLATT",
-      string.description =  "Sales per Share",
-      string.label.y = "Dollars",
-      float.expense.ratio = -1.00,
-      date.series.start = dt.date[1],
-      date.series.end = tail(dt.date,1)
+  
+  # Create the XTS object and update the symbols table for cash dividends
+  str.symbol <- 'CASHDIVIDENDSPERSHR'
+  assign(str.symbol, xts(x=df.silverblatt$CASH.DIVIDENDS.PER.SHR, order.by=df.silverblatt$QUARTER.END))
+  colnames(CASHDIVIDENDSPERSHR) <- "CASHDIVIDENDSPERSHR"
+  
+  df.symbols <-
+    rbind(
+      df.symbols,
+      data.frame(
+        string.symbol = str.symbol,
+        string.source = "SILVERBLATT",
+        string.description =  "Cash Dividends per Share",
+        string.label.y = "Dollars",
+        float.expense.ratio = -1.00,
+        date.series.start = dt.date[1],
+        date.series.end = tail(dt.date,1)
+      )
     )
-  )
-
-# Create the XTS object and update the symbols table for book value per share
-str.symbol <- 'BOOKVALPERSHR'
-assign(str.symbol, xts(x=df.silverblatt$BOOKVAL.PER.SHR, order.by=df.silverblatt$QUARTER.END))
-colnames(BOOKVALPERSHR) <- "BOOKVALPERSHR"
-
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
-      string.symbol = str.symbol,
-      string.source = "SILVERBLATT",
-      string.description =  "Book value per Share",
-      string.label.y = "Dollars",
-      float.expense.ratio = -1.00,
-      date.series.start = dt.date[1],
-      date.series.end = tail(dt.date,1)
+  
+  # Create the XTS object and update the symbols table for sales per share
+  str.symbol <- 'SALESPERSHR'
+  assign(str.symbol, xts(x=df.silverblatt$SALES.PER.SHR, order.by=df.silverblatt$QUARTER.END))
+  colnames(SALESPERSHR) <- "SALESPERSHR"
+  
+  df.symbols <-
+    rbind(
+      df.symbols,
+      data.frame(
+        string.symbol = str.symbol,
+        string.source = "SILVERBLATT",
+        string.description =  "Sales per Share",
+        string.label.y = "Dollars",
+        float.expense.ratio = -1.00,
+        date.series.start = dt.date[1],
+        date.series.end = tail(dt.date,1)
+      )
     )
-  )
-
-
-# Create the XTS object and update the symbols table for cap ex per share
-str.symbol <- 'CAPEXPERSHR'
-assign(str.symbol, xts(x=df.silverblatt$CAPEX.PER.SHR, order.by=df.silverblatt$QUARTER.END))
-colnames(CAPEXPERSHR) <- "CAPEXPERSHR"
-
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
-      string.symbol = str.symbol,
-      string.source = "SILVERBLATT",
-      string.description =  "Cap ex per Share",
-      string.label.y = "Dollars",
-      float.expense.ratio = -1.00,
-      date.series.start = dt.date[1],
-      date.series.end = tail(dt.date,1)
+  
+  # Create the XTS object and update the symbols table for book value per share
+  str.symbol <- 'BOOKVALPERSHR'
+  assign(str.symbol, xts(x=df.silverblatt$BOOKVAL.PER.SHR, order.by=df.silverblatt$QUARTER.END))
+  colnames(BOOKVALPERSHR) <- "BOOKVALPERSHR"
+  
+  df.symbols <-
+    rbind(
+      df.symbols,
+      data.frame(
+        string.symbol = str.symbol,
+        string.source = "SILVERBLATT",
+        string.description =  "Book value per Share",
+        string.label.y = "Dollars",
+        float.expense.ratio = -1.00,
+        date.series.start = dt.date[1],
+        date.series.end = tail(dt.date,1)
+      )
     )
-  )
-
-# Create the XTS object and update the symbols table for price
-str.symbol <- 'PRICE'
-assign(str.symbol, xts(x=df.silverblatt$PRICE, order.by=df.silverblatt$QUARTER.END))
-colnames(PRICE) <- "PRICE"
-
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
-      string.symbol = str.symbol,
-      string.source = "SILVERBLATT",
-      string.description =  "Price",
-      string.label.y = "Dollars",
-      float.expense.ratio = -1.00,
-      date.series.start = dt.date[1],
-      date.series.end = tail(dt.date,1)
+  
+  
+  # Create the XTS object and update the symbols table for cap ex per share
+  str.symbol <- 'CAPEXPERSHR'
+  assign(str.symbol, xts(x=df.silverblatt$CAPEX.PER.SHR, order.by=df.silverblatt$QUARTER.END))
+  colnames(CAPEXPERSHR) <- "CAPEXPERSHR"
+  
+  df.symbols <-
+    rbind(
+      df.symbols,
+      data.frame(
+        string.symbol = str.symbol,
+        string.source = "SILVERBLATT",
+        string.description =  "Cap ex per Share",
+        string.label.y = "Dollars",
+        float.expense.ratio = -1.00,
+        date.series.start = dt.date[1],
+        date.series.end = tail(dt.date,1)
+      )
     )
-  )
+  
+  # Create the XTS object and update the symbols table for price
+  str.symbol <- 'PRICE'
+  assign(str.symbol, xts(x=df.silverblatt$PRICE, order.by=df.silverblatt$QUARTER.END))
+  colnames(PRICE) <- "PRICE"
+  
+  df.symbols <-
+    rbind(
+      df.symbols,
+      data.frame(
+        string.symbol = str.symbol,
+        string.source = "SILVERBLATT",
+        string.description =  "Price",
+        string.label.y = "Dollars",
+        float.expense.ratio = -1.00,
+        date.series.start = dt.date[1],
+        date.series.end = tail(dt.date,1)
+      )
+    )
 
-
+}
 
 ```
 
 Now load in the estimates
 
 ```{r silverblatt.est, echo=FALSE}
+if(bRefresh){
+  
+  # Read in th Excel file, now for the estimates
+  df.silverblatt.act <-
+    data.frame(read_excel(
+      'sp-500-eps-est.xlsx',
+      range = 'ESTIMATES&PEs!A137:J269',
+      col_types = c(
+        "date",
+        "numeric",
+        "numeric",
+        "numeric",
+        "numeric",
+        "numeric",
+        "numeric",
+        "numeric",
+        "numeric",
+        "numeric"
+      )
+    ))
 
-# Read in th Excel file, now for the estimates
-df.silverblatt.act <-
-  data.frame(read_excel(
-    'sp-500-eps-est.xlsx',
-    range = 'ESTIMATES&PEs!A136:J268',
-    col_types = c(
-      "date",
-      "numeric",
-      "numeric",
-      "numeric",
-      "numeric",
-      "numeric",
-      "numeric",
-      "numeric",
-      "numeric",
-      "numeric"
+  # Human readable column names
+  colnames(df.silverblatt.act) <-
+    c(
+      "QUARTER.END",
+      "PRICE",
+      "OP.EARNINGS.PER.SHARE",
+      "AR.EARNINGS.PER.SHARE",
+      "EMPTY",
+      "OP.EARNINGS.PE",
+      "AR.EARNINGS.PE",
+      "EMPTY1",
+      "OP.EARNINGS.12.MONTH",
+      "AR.EARNINGS.12.MONTH"
     )
-  ))
-df.silverblatt.est <-
-  data.frame(read_excel('sp-500-eps-est.xlsx', range = 'ESTIMATES&PEs!A126:J134'))
+  
 
-# Human readable column names
-colnames(df.silverblatt.act) <-
-  c(
-    "QUARTER.END",
-    "PRICE",
-    "OP.EARNINGS.PER.SHARE",
-    "AR.EARNINGS.PER.SHARE",
-    "EMPTY",
-    "OP.EARNINGS.PE",
-    "AR.EARNINGS.PE",
-    "EMPTY1",
-    "OP.EARNINGS.12.MONTH",
-    "AR.EARNINGS.12.MONTH"
-  )
+  # Re-cast the dates characters as datetime values
+  df.silverblatt.act$QUARTER.END <-
+    as.Date(df.silverblatt.act$QUARTER.END, "%m/%d/%Y", tz = 'America/Los_Angeles')
 
-colnames(df.silverblatt.est) <-
-  c(
-    "QUARTER.END",
-    "PRICE",
-    "OP.EARNINGS.PER.SHARE",
-    "AR.EARNINGS.PER.SHARE",
-    "EMPTY",
-    "OP.EARNINGS.PE",
-    "AR.EARNINGS.PE",
-    "EMPTY1",
-    "OP.EARNINGS.12.MONTH",
-    "AR.EARNINGS.12.MONTH"
-  )
-
-# Create the XTS object and update the symbols table for trailing 12-month operating earnings
-str.symbol <- 'OPEARNINGSTTM'
-assign(str.symbol, xts(x=df.silverblatt.act$OP.EARNINGS.12.MONTH, order.by=df.silverblatt.act$QUARTER.END))
-colnames(OPEARNINGSTTM) <- "OPEARNINGSTTM"
-
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
-      string.symbol = str.symbol,
-      string.source = "SILVERBLATT",
-      string.description =  "TTM Operating Earnings",
-      string.label.y = "Dollars",
-      float.expense.ratio = -1.00,
-      date.series.start = dt.date[1],
-      date.series.end = tail(dt.date,1)
+  # Create the XTS object and update the symbols table for trailing 12-month operating earnings
+  str.symbol <- 'OPEARNINGSTTM'
+  assign(str.symbol, xts(x=df.silverblatt.act$OP.EARNINGS.12.MONTH, order.by=df.silverblatt.act$QUARTER.END))
+  colnames(OPEARNINGSTTM) <- "OPEARNINGSTTM"
+  
+  df.symbols <-
+    rbind(
+      df.symbols,
+      data.frame(
+        string.symbol = str.symbol,
+        string.source = "SILVERBLATT",
+        string.description =  "TTM Operating Earnings",
+        string.label.y = "Dollars",
+        float.expense.ratio = -1.00,
+        date.series.start = dt.date[1],
+        date.series.end = tail(dt.date,1)
+      )
     )
-  )
-
-str.symbol <- 'AREARNINGSTTM'
-assign(str.symbol, xts(x=df.silverblatt.act$AR.EARNINGS.12.MONTH, order.by=df.silverblatt.act$QUARTER.END))
-colnames(AREARNINGSTTM) <- "AREARNINGSTTM"
-
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
-      string.symbol = str.symbol,
-      string.source = "SILVERBLATT",
-      string.description =  "TTM Reported Earnings",
-      string.label.y = "Dollars",
-      float.expense.ratio = -1.00,
-      date.series.start = dt.date[1],
-      date.series.end = tail(dt.date,1)
+  
+  str.symbol <- 'AREARNINGSTTM'
+  assign(str.symbol, xts(x=df.silverblatt.act$AR.EARNINGS.12.MONTH, order.by=df.silverblatt.act$QUARTER.END))
+  colnames(AREARNINGSTTM) <- "AREARNINGSTTM"
+  
+  df.symbols <-
+    rbind(
+      df.symbols,
+      data.frame(
+        string.symbol = str.symbol,
+        string.source = "SILVERBLATT",
+        string.description =  "TTM Reported Earnings",
+        string.label.y = "Dollars",
+        float.expense.ratio = -1.00,
+        date.series.start = dt.date[1],
+        date.series.end = tail(dt.date,1)
+      )
     )
-  )
-
+}
 
 ```
 
 
 ```{r margin.debt.load, echo=FALSE}
-
-# Manually change dirs for testing
-#setwd('C:/Users/Rainy/OneDrive/Documents/Hobby/GitHub/Economics')
-
-# Read in the data
-df.margin <- data.frame(read_excel('MarginData.xlsx'))
-df.margin$Date <- as.Date(df.margin$Date)
-list.margin.names <- names(df.margin)
-
-# Create the zoo object for margin debt
-str.symbol <- 'FINRA/MarginDebt'
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
-      string.symbol = str.symbol,
-      string.source = "FINRA",
-      string.description =  "Margin Debt",
-      string.label.y = "Dollars",
-      float.expense.ratio = -1.00,
-      date.series.start = tail(df.margin$Date, 1) ,
-      date.series.end = df.margin$Date[[1]]
+if(bRefresh){
+  
+  # Manually change dirs for testing
+  #setwd('C:/Users/Rainy/OneDrive/Documents/Hobby/GitHub/Economics')
+  
+  # Read in the data
+  df.margin <- data.frame(read_excel('MarginData.xlsx'))
+  df.margin$Date <- as.Date(df.margin$Date)
+  list.margin.names <- names(df.margin)
+  
+  # Create the zoo object for margin debt
+  str.symbol <- 'FINRA/MarginDebt'
+  df.symbols <-
+    rbind(
+      df.symbols,
+      data.frame(
+        string.symbol = str.symbol,
+        string.source = "FINRA",
+        string.description =  "Margin Debt",
+        string.label.y = "Dollars",
+        float.expense.ratio = -1.00,
+        date.series.start = tail(df.margin$Date, 1) ,
+        date.series.end = df.margin$Date[[1]]
+      )
     )
-  )
-
-# Process the margin debt
-str.safe.name <-
-  str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-assign(str.safe.name, xts(df.margin[, 8], order.by = df.margin[, 1]))
-colnames(FINRAMarginDebt)[[1]] <- c(str.safe.name)
-
-
-# Create the zoo object for free credit in margin
-str.symbol <- 'FINRA/FreeCreditMargin'
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
-      string.symbol = str.symbol,
-      string.source = "FINRA",
-      string.description =  "Free Credit Balances in Customers' Securities Margin Accounts",
-      string.label.y = "Dollars",
-      float.expense.ratio = -1.00,
-      date.series.start = tail(df.margin$Date, 1)  ,
-      date.series.end = as.Date("1900-01-01")
+  
+  # Process the margin debt
+  str.safe.name <-
+    str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+  assign(str.safe.name, xts(df.margin[, 8], order.by = df.margin[, 1]))
+  colnames(FINRAMarginDebt)[[1]] <- c(str.safe.name)
+  
+  
+  # Create the zoo object for free credit in margin
+  str.symbol <- 'FINRA/FreeCreditMargin'
+  df.symbols <-
+    rbind(
+      df.symbols,
+      data.frame(
+        string.symbol = str.symbol,
+        string.source = "FINRA",
+        string.description =  "Free Credit Balances in Customers' Securities Margin Accounts",
+        string.label.y = "Dollars",
+        float.expense.ratio = -1.00,
+        date.series.start = tail(df.margin$Date, 1)  ,
+        date.series.end = as.Date("1900-01-01")
+      )
     )
-  )
+  
+  # Process the free credit in margin
+  str.safe.name <-
+    str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+  assign(str.safe.name, xts(df.margin[, 10], order.by = df.margin[, 1]))
+  colnames(FINRAFreeCreditMargin)[[1]] <- c(str.safe.name)
 
-# Process the free credit in margin
-str.safe.name <-
-  str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-assign(str.safe.name, xts(df.margin[, 10], order.by = df.margin[, 1]))
-colnames(FINRAFreeCreditMargin)[[1]] <- c(str.safe.name)
+}
 
 ```
 
@@ -1003,93 +1013,52 @@ colnames(FINRAFreeCreditMargin)[[1]] <- c(str.safe.name)
 Get the Covid-19 data from JHU
 
 ```{r covid.hell, echo=FALSE}
-
+if(bRefresh){
+  
 data("coronavirus")
 coronavirus::update_dataset(silence = TRUE)
+}
 
 ```
 
 ```{r covid.hell.tidy, echo=FALSE}
-
-df.corona.region <- coronavirus %>%
-filter(type == "confirmed") %>%
-group_by(country) %>%
-summarise(total = sum(cases)) %>%
-arrange(-total) %>%
-head(20)
-
-df.corona.date <- coronavirus %>%
-filter(type == "confirmed") %>%
-group_by(country, date) %>%
-summarise(total = sum(cases)) %>%
-arrange(country) 
-
-df.corona.date.us <- df.corona.date[df.corona.date$country=='US',]
-df.corona.date.us$day <- as.factor(weekdays(df.corona.date.us$date))
-df.corona.date.us$day_number <- recode(df.corona.date.us$day, 
-       "Sunday" = "0",
-       "Monday" = "1",
-       "Tuesday" = "2",
-       "Wednesday" = "3",
-       "Thursday" = "4",
-       "Friday" = "5",
-       "Saturday"= "6")
-df.corona.date.us$day_number <- as.numeric(as.character((df.corona.date.us$day_number)))
-
-qplot(df.corona.date.us$date, df.corona.date.us$total)
-
-
-
-my.plot <-
-  qplot(day_number,
-        total,
-        data = df.corona.date.us[1:4, ],
-        geom = c("point", "line"))
-i.lines <- floor(nrow(df.corona.date.us) / 7) - 3
-idx.start <- 5
-for (idx in 1:i.lines) {
-  idx.end = idx.start + 6
-  my.plot <-
-    my.plot + geom_line(data = df.corona.date.us[idx.start:idx.end, ], aes(x = day_number, y = total))
-  idx.start = idx.end + 1
+if(bRefresh){
+  
+  df.corona.region <- coronavirus %>%
+  filter(type == "confirmed") %>%
+  group_by(country) %>%
+  summarise(total = sum(cases)) %>%
+  arrange(-total) %>%
+  head(20)
+  
+  df.corona.date <- coronavirus %>%
+  filter(type == "confirmed") %>%
+  group_by(country, date) %>%
+  summarise(total = sum(cases)) %>%
+  arrange(country) 
+  
+  df.corona.date.us <- df.corona.date[df.corona.date$country=='US',]
+  df.corona.date.us$day <- as.factor(weekdays(df.corona.date.us$date))
+  df.corona.date.us$day_number <- recode(df.corona.date.us$day, 
+         "Sunday" = "0",
+         "Monday" = "1",
+         "Tuesday" = "2",
+         "Wednesday" = "3",
+         "Thursday" = "4",
+         "Friday" = "5",
+         "Saturday"= "6")
+  df.corona.date.us$day_number <- as.numeric(as.character((df.corona.date.us$day_number)))
 }
-idx.end = idx.start + 6
-my.plot <-
-  my.plot + geom_line(
-    data = df.corona.date.us[idx.start:idx.end,],
-    aes(x = day_number, y = total),
-    color = "green",
-    size = 2
-  )
-idx.start <- idx.end + 1
-idx.end = idx.start + 6
-my.plot <-
-  my.plot + geom_line(
-    data = df.corona.date.us[idx.start:idx.end,],
-    aes(x = day_number, y = total),
-    color = "blue",
-    size = 2
-  )
-idx.start <- idx.end + 1
-idx.end = idx.start + 6
-my.plot <-
-  my.plot + geom_line(
-    data = df.corona.date.us[idx.start:idx.end,],
-    aes(x = day_number, y = total),
-    color = "red",
-    size = 2
-  )
-my.plot <-
-  my.plot + ggtitle("US Daily Cases, JHU Data (Red is most recent, Blue is last week,\nGreen the week before that )")
-my.plot <- my.plot + xlab("Day Number, 0=Sunday, 6 = Saturday")
-my.plot <- my.plot + ylab("Daily Total")
-my.plot
+
+
 
 ```
 
 
 ```{r options.volume, echo=FALSE }
 
+if(bRefresh){
+  
 # Tracking option volume. Data is freely avaliable from OCC at https://www.theocc.com/webapps/historical-volume-query. 
 
 # Manually change dirs for testing
@@ -1147,6 +1116,8 @@ str.safe.name <-
 assign(str.safe.name, xts(df.options[, 3], order.by = df.options[, 1]))
 colnames(OCCNonEquityVolume)[[1]] <- c(str.safe.name)
 
+}
+
 ```
 
 
@@ -1166,6 +1137,57 @@ if( bRefresh ){
 
 ```
 
+```{r covid.hell.plot, echo=FALSE}
+qplot(df.corona.date.us$date, df.corona.date.us$total)
+
+
+
+my.plot <-
+  qplot(day_number,
+        total,
+        data = df.corona.date.us[1:4, ],
+        geom = c("point", "line"))
+i.lines <- floor(nrow(df.corona.date.us) / 7) - 3
+idx.start <- 5
+for (idx in 1:i.lines) {
+  idx.end = idx.start + 6
+  my.plot <-
+    my.plot + geom_line(data = df.corona.date.us[idx.start:idx.end, ], aes(x = day_number, y = total))
+  idx.start = idx.end + 1
+}
+idx.end = idx.start + 6
+my.plot <-
+  my.plot + geom_line(
+    data = df.corona.date.us[idx.start:idx.end,],
+    aes(x = day_number, y = total),
+    color = "green",
+    size = 2
+  )
+idx.start <- idx.end + 1
+idx.end = idx.start + 6
+my.plot <-
+  my.plot + geom_line(
+    data = df.corona.date.us[idx.start:idx.end,],
+    aes(x = day_number, y = total),
+    color = "blue",
+    size = 2
+  )
+idx.start <- idx.end + 1
+idx.end = idx.start + 6
+my.plot <-
+  my.plot + geom_line(
+    data = df.corona.date.us[idx.start:idx.end,],
+    aes(x = day_number, y = total),
+    color = "red",
+    size = 2
+  )
+my.plot <-
+  my.plot + ggtitle("US Daily Cases, JHU Data (Red is most recent, Blue is last week,\nGreen the week before that )")
+my.plot <- my.plot + xlab("Day Number, 0=Sunday, 6 = Saturday")
+my.plot <- my.plot + ylab("Daily Total")
+my.plot
+
+```
 
 ```{r symTidy, echo=FALSE}
 
@@ -1265,7 +1287,7 @@ P/E ratio of `r sprintf("%3.2f", tail(df.data$MULTPLSP500PERATIOMONTH,1))` compa
 ```{r bullet1, echo = FALSE}
 datay <- "MULTPLSP500PERATIOMONTH"
 datay.aux <- "MULTPLSP500PERATIOMONTH_Mean"
-ylim <- c(10, 30)
+ylim <- c(10, 40)
 dt.start <- as.Date('2010-01-01')
 b.legend <- TRUE
 my.plot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
@@ -1436,7 +1458,7 @@ datay <- "GDPSP500"
 datay.aux <- "RLGSP500"
 datay.aux.1 <- "DJISP500"
 datay.aux.scale <- 0.1
-ylim <- c(0.00, 0.18)
+ylim <- c(0.00, 0.25)
 dtStart = as.Date('1980-01-01')
 my.plot <-
   plotSingle(
@@ -1483,8 +1505,8 @@ my.plot
 ```{r GDPSP500.close, echo=FALSE}
 
 datay <- "GDPSP500"
-ylim <- c(0.00, 0.18)
-dtStart = as.Date('2000-01-01')
+ylim <- c(0.00, 0.22)
+dtStart = as.Date('1995-01-01')
 my.plot <-
   plotSingle(
     dfRecession,
@@ -1515,32 +1537,9 @@ my.data[[1]]
 
 ```{r SP500pltNear.similar}
 datay <- "GSPC.Close"
-ylim <- c(2000, 4000)
+ylim <- c(2000, d.GSPC.max)
 my.data <- plotSimilarPeriods(df.data, dfRecession, df.symbols, datay, ylim, i.window = 60)
 my.data[[1]]
-
-```
-
-
-```{r SP500pltNear.similar.TimeLine, echo=FALSE, fig.width = 7, fig.asp = 1.1 }
-datay <- "GSPC.Close"
-ylim <- c(2000, 4000)
-p1 <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
-            getPlotYLabel(df.symbols, datay), c(Sys.Date()-60, Sys.Date()), ylim, TRUE)
-
-
-datay <- "GSPC.Close"
-ylim <- c(12.5, 18)
-dt.Start <- as.Date('1937-07-19')
-dt.End <- as.Date('1937-09-17')
-p2 <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
-            getPlotYLabel(df.symbols, datay), c(dt.Start, dt.End), ylim, TRUE)
-
-grid.arrange(p1,
-             p2,
-             ncol = 1,
-             top = "S&P 500 Dividends by source")
-
 
 ```
 
@@ -1663,12 +1662,232 @@ p1 <-
 
 Take a look at some of the earnings trends from SilverBlatt's sheet.
 
+```{r SP500TTTMPE.silver.est, echo=FALSE}
+
+#################################################################
+# Import first estimate
+#################################################################
+str.est1 <- 'sp-500-eps-est_170715.xlsx'
+str.range.est1 <- 'ESTIMATES&PEs!A105:J111'
+
+df.silverblatt.est1 <-
+  data.frame(read_excel(str.est1, range = str.range.est1))
+
+# Human readable names
+colnames(df.silverblatt.est1) <-
+  c(
+    "QUARTER.END",
+    "PRICE",
+    "OP.EARNINGS.PER.SHARE",
+    "AR.EARNINGS.PER.SHARE",
+    "EMPTY",
+    "OP.EARNINGS.PE",
+    "AR.EARNINGS.PE",
+    "EMPTY1",
+    "OP.EARNINGS.12.MONTH",
+    "AR.EARNINGS.12.MONTH"
+  )
+
+# Create the XTS object and update the symbols table for estimated trailing 12-month operating earnings
+assign(
+  'OPEARNINGSTTM.est1',
+  xts(
+    x = df.silverblatt.est1$OP.EARNINGS.12.MONTH,
+    order.by = as.Date(df.silverblatt.est1$QUARTER.END, "%m/%d/%Y")
+  )
+)
+# Assign column names
+colnames(OPEARNINGSTTM.est1) <- c("data.est")
+
+#################################################################
+# Next estimate
+#################################################################
+str.est2 <- 'sp-500-eps-est_180713.xlsx'
+str.range.est2 <- 'ESTIMATES&PEs!A107:J114'
+
+df.silverblatt.est2 <-
+  data.frame(read_excel(str.est2, range = str.range.est2))
+
+# Human readable names
+colnames(df.silverblatt.est2) <-
+  c(
+    "QUARTER.END",
+    "PRICE",
+    "OP.EARNINGS.PER.SHARE",
+    "AR.EARNINGS.PER.SHARE",
+    "EMPTY",
+    "OP.EARNINGS.PE",
+    "AR.EARNINGS.PE",
+    "EMPTY1",
+    "OP.EARNINGS.12.MONTH",
+    "AR.EARNINGS.12.MONTH"
+  )
+
+# Create the XTS object and update the symbols table for estimated trailing 12-month operating earnings
+assign(
+  'OPEARNINGSTTM.est2',
+  xts(
+    x = df.silverblatt.est2$OP.EARNINGS.12.MONTH,
+    order.by = as.Date(df.silverblatt.est2$QUARTER.END, "%m/%d/%Y")
+  )
+)
+# Assign column names
+colnames(OPEARNINGSTTM.est2) <- c("data.est")
+
+
+#################################################################
+# Next estimate
+#################################################################
+str.est3 <- 'sp-500-eps-est_190421.xlsx'
+str.range.est3 <- 'ESTIMATES&PEs!A125:J132'
+
+df.silverblatt.est3 <-
+  data.frame(read_excel(str.est3, range = str.range.est3))
+
+# Human readable names
+colnames(df.silverblatt.est3) <-
+  c(
+    "QUARTER.END",
+    "PRICE",
+    "OP.EARNINGS.PER.SHARE",
+    "AR.EARNINGS.PER.SHARE",
+    "EMPTY",
+    "OP.EARNINGS.PE",
+    "AR.EARNINGS.PE",
+    "EMPTY1",
+    "OP.EARNINGS.12.MONTH",
+    "AR.EARNINGS.12.MONTH"
+  )
+
+# Create the XTS object and update the symbols table for estimated trailing 12-month operating earnings
+assign(
+  'OPEARNINGSTTM.est3',
+  xts(
+    x = df.silverblatt.est3$OP.EARNINGS.12.MONTH,
+    order.by = as.Date(df.silverblatt.est3$QUARTER.END, "%m/%d/%Y")
+  )
+)
+# Assign column names
+colnames(OPEARNINGSTTM.est3) <- c("data.est")
+
+#################################################################
+# Next estimate
+#################################################################
+str.est4 <- 'sp-500-eps-est.xlsx'
+str.range.est4 <- 'ESTIMATES&PEs!A127:J134'
+
+df.silverblatt.est4 <-
+  data.frame(read_excel(str.est4, range = str.range.est4))
+
+# Human readable names
+colnames(df.silverblatt.est4) <-
+  c(
+    "QUARTER.END",
+    "PRICE",
+    "OP.EARNINGS.PER.SHARE",
+    "AR.EARNINGS.PER.SHARE",
+    "EMPTY",
+    "OP.EARNINGS.PE",
+    "AR.EARNINGS.PE",
+    "EMPTY1",
+    "OP.EARNINGS.12.MONTH",
+    "AR.EARNINGS.12.MONTH"
+  )
+
+# Create the XTS object and update the symbols table for estimated trailing 12-month operating earnings
+assign(
+  'OPEARNINGSTTM.est4',
+  xts(
+    x = df.silverblatt.est4$OP.EARNINGS.12.MONTH,
+    order.by = as.Date(df.silverblatt.est4$QUARTER.END, "%m/%d/%Y")
+  )
+)
+# Assign column names
+colnames(OPEARNINGSTTM.est4) <- c("data.est")
+
+
+
+```
+
 ```{r SP500TTMPE.Silver,  echo=FALSE, fig.width = 9, fig.asp = 0.4 }
+
+datay <- "OPEARNINGSTTM"
+ylim <- c(0, 250)
+dt.start <- as.Date('2010-01-01')
+my.plot <-
+  plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay,
+    getPlotTitle(df.symbols, datay),
+    "Date",
+    getPlotYLabel(df.symbols, datay),
+    c(dt.start, Sys.Date()%m+% months(24)),
+    ylim,
+    b.legend = TRUE,
+    b.percentile = FALSE,
+    b.long.legend = TRUE
+  )
+
+my.plot <-
+  my.plot + geom_point(
+    data = OPEARNINGSTTM.est1,
+    aes_string(
+      x = index(OPEARNINGSTTM.est1),
+      y = "data.est",
+      colour = shQuote('OE Est. 7/15/17')
+    ),
+    na.rm = TRUE
+  )
+
+my.plot <-
+  my.plot + geom_point(
+    data = OPEARNINGSTTM.est2,
+    aes_string(
+      x = index(OPEARNINGSTTM.est2),
+      y = "data.est",
+      colour = shQuote('OE Est. 7/13/18')
+    ),
+    na.rm = TRUE
+  )
+
+
+my.plot <-
+  my.plot + geom_point(
+    data = OPEARNINGSTTM.est3,
+    aes_string(
+      x = index(OPEARNINGSTTM.est3),
+      y = "data.est",
+      colour = shQuote('OE Est. 4/21/19')
+    ),
+    na.rm = TRUE
+  )
+
+
+my.plot <-
+  my.plot + geom_point(
+    data = OPEARNINGSTTM.est4,
+    aes_string(
+      x = index(OPEARNINGSTTM.est4),
+      y = "data.est",
+      colour = shQuote('OE Est. 7/18/21')
+    ),
+    na.rm = TRUE
+  )
+
+my.plot
+
+```
+
+Take a longer look back at as-reported and operating earnings
+
+```{r SP500TTMPE.Silver.long,  echo=FALSE, fig.width = 9, fig.asp = 0.4 }
 
 datay <- "AREARNINGSTTM"
 datay.aux.1 <- "OPEARNINGSTTM"
 ylim <- c(0, 200)
-dt.start <- as.Date('1980-01-01')
+dt.start <- as.Date('1990-01-01')
 my.plot <-
   plotSingle(
     dfRecession,
@@ -1698,6 +1917,7 @@ my.plot <-
 my.plot
 
 ```
+
 
 Market prices can out-run earnings so take a look at price to earnings.
 
@@ -4161,7 +4381,7 @@ The federal reserve has an impact on the economy, here are some data series rela
 ```{r WALCL, echo=FALSE}
 
 datay <- "WALCL"
-ylim <- c(0, 8000)
+ylim <- c(0, 9000)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
@@ -4171,7 +4391,7 @@ Little bit closer
 ```{r WALCL_Near}
 
 datay <- "WALCL"
-ylim <- c(0, 7500)
+ylim <- c(0, 8500)
 dtStart = as.Date('2003-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
@@ -4184,7 +4404,7 @@ Compare liabilities to reverse repo trends
 ```{r WLRRAL, echo=FALSE}
 
 datay <- "WLRRAL"
-ylim <- c(0, 700)
+ylim <- c(0, 1200)
 dtStart = as.Date('2003-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
@@ -4195,7 +4415,7 @@ Spiky, might be easier to look at year-over-year
 ```{r WLRRAL.YoY, echo=FALSE}
 
 datay <- "WLRRAL_YoY"
-ylim <- c(-100, 300)
+ylim <- c(-100, 500)
 dtStart = as.Date('2003-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
@@ -4340,7 +4560,7 @@ datay.aux <- "EXCSRESNW"
 datay.title <- getPlotTitle(df.symbols, datay.aux, str.sep = "\n")
 datay.aux.1 <- "WALCL"
 datay.title.1 <- getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n")
-ylim <- c(0, 5500)
+ylim <- c(0, 8000)
 myPlot <-
   plotSingle(
     dfRecession,
@@ -5887,7 +6107,7 @@ Just the last 24 months or so.
 
 datay <- "DGS10TOTB3MS"
 datay_aux <- "DGS10TO1"
-ylim <- c(-1.00, 1.5)
+ylim <- c(-1.00, 2.00)
 datay_aux2 <- "DGS10TO2"
 datay_aux3 <- "DGS30TO10"
 dtStart = as.Date('2018-01-01')
