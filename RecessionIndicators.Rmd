@@ -739,8 +739,8 @@ if(bRefresh){
         string.description =  "Operating Earnings per Share",
         string.label.y = "Dollars",
         float.expense.ratio = -1.00,
-        date.series.start = dt.date[1],
-        date.series.end = tail(dt.date,1)
+        date.series.start = tail(df.silverblatt$QUARTER.END,1),
+        date.series.end = df.silverblatt$QUARTER.END[1]
       )
     )
   
@@ -758,8 +758,8 @@ if(bRefresh){
         string.description =  "As-Reported Earnings per Share",
         string.label.y = "Dollars",
         float.expense.ratio = -1.00,
-        date.series.start = dt.date[1],
-        date.series.end = tail(dt.date,1)
+        date.series.start = tail(df.silverblatt$QUARTER.END,1),
+        date.series.end = df.silverblatt$QUARTER.END[1]
       )
     )
   
@@ -777,8 +777,8 @@ if(bRefresh){
         string.description =  "Cash Dividends per Share",
         string.label.y = "Dollars",
         float.expense.ratio = -1.00,
-        date.series.start = dt.date[1],
-        date.series.end = tail(dt.date,1)
+        date.series.start = tail(df.silverblatt$QUARTER.END,1),
+        date.series.end = df.silverblatt$QUARTER.END[1]
       )
     )
   
@@ -796,8 +796,8 @@ if(bRefresh){
         string.description =  "Sales per Share",
         string.label.y = "Dollars",
         float.expense.ratio = -1.00,
-        date.series.start = dt.date[1],
-        date.series.end = tail(dt.date,1)
+        date.series.start = tail(df.silverblatt$QUARTER.END,1),
+        date.series.end = df.silverblatt$QUARTER.END[1]
       )
     )
   
@@ -815,8 +815,8 @@ if(bRefresh){
         string.description =  "Book value per Share",
         string.label.y = "Dollars",
         float.expense.ratio = -1.00,
-        date.series.start = dt.date[1],
-        date.series.end = tail(dt.date,1)
+        date.series.start = tail(df.silverblatt$QUARTER.END,1),
+        date.series.end = df.silverblatt$QUARTER.END[1]
       )
     )
   
@@ -835,8 +835,8 @@ if(bRefresh){
         string.description =  "Cap ex per Share",
         string.label.y = "Dollars",
         float.expense.ratio = -1.00,
-        date.series.start = dt.date[1],
-        date.series.end = tail(dt.date,1)
+        date.series.start = tail(df.silverblatt$QUARTER.END,1),
+        date.series.end = df.silverblatt$QUARTER.END[1]
       )
     )
   
@@ -854,8 +854,8 @@ if(bRefresh){
         string.description =  "Price",
         string.label.y = "Dollars",
         float.expense.ratio = -1.00,
-        date.series.start = dt.date[1],
-        date.series.end = tail(dt.date,1)
+        date.series.start = tail(df.silverblatt$QUARTER.END,1),
+        date.series.end = df.silverblatt$QUARTER.END[1]
       )
     )
 
@@ -872,7 +872,7 @@ if(bRefresh){
   df.silverblatt.act <-
     data.frame(read_excel(
       'sp-500-eps-est.xlsx',
-      range = 'ESTIMATES&PEs!A137:J269',
+      range = 'ESTIMATES&PEs!A136:J269',
       col_types = c(
         "date",
         "numeric",
@@ -921,8 +921,8 @@ if(bRefresh){
         string.description =  "TTM Operating Earnings",
         string.label.y = "Dollars",
         float.expense.ratio = -1.00,
-        date.series.start = dt.date[1],
-        date.series.end = tail(dt.date,1)
+        date.series.start = tail(df.silverblatt.act$QUARTER.END,1),
+        date.series.end = df.silverblatt.act$QUARTER.END[1]
       )
     )
   
@@ -939,8 +939,8 @@ if(bRefresh){
         string.description =  "TTM Reported Earnings",
         string.label.y = "Dollars",
         float.expense.ratio = -1.00,
-        date.series.start = dt.date[1],
-        date.series.end = tail(dt.date,1)
+        date.series.start = tail(df.silverblatt.act$QUARTER.END,1),
+        date.series.end = df.silverblatt.act$QUARTER.END[1]
       )
     )
 }
@@ -1696,8 +1696,20 @@ assign(
     order.by = as.Date(df.silverblatt.est1$QUARTER.END, "%m/%d/%Y")
   )
 )
+
 # Assign column names
 colnames(OPEARNINGSTTM.est1) <- c("data.est")
+
+# Create the XTS object and update the symbols table for estimated trailing 12-month as-reported earnings
+assign(
+  'AREARNINGSTTM.est1',
+  xts(
+    x = df.silverblatt.est1$AR.EARNINGS.12.MONTH,
+    order.by = as.Date(df.silverblatt.est1$QUARTER.END, "%m/%d/%Y")
+  )
+)
+# Assign column names
+colnames(AREARNINGSTTM.est1) <- c("data.est")
 
 #################################################################
 # Next estimate
@@ -1733,6 +1745,17 @@ assign(
 )
 # Assign column names
 colnames(OPEARNINGSTTM.est2) <- c("data.est")
+
+# Create the XTS object and update the symbols table for estimated trailing 12-month as-reported earnings
+assign(
+  'AREARNINGSTTM.est2',
+  xts(
+    x = df.silverblatt.est2$AR.EARNINGS.12.MONTH,
+    order.by = as.Date(df.silverblatt.est2$QUARTER.END, "%m/%d/%Y")
+  )
+)
+# Assign column names
+colnames(AREARNINGSTTM.est2) <- c("data.est")
 
 
 #################################################################
@@ -1770,6 +1793,18 @@ assign(
 # Assign column names
 colnames(OPEARNINGSTTM.est3) <- c("data.est")
 
+# Create the XTS object and update the symbols table for estimated trailing 12-month as-reported earnings
+assign(
+  'AREARNINGSTTM.est3',
+  xts(
+    x = df.silverblatt.est3$AR.EARNINGS.12.MONTH,
+    order.by = as.Date(df.silverblatt.est3$QUARTER.END, "%m/%d/%Y")
+  )
+)
+# Assign column names
+colnames(AREARNINGSTTM.est3) <- c("data.est")
+
+
 #################################################################
 # Next estimate
 #################################################################
@@ -1805,11 +1840,20 @@ assign(
 # Assign column names
 colnames(OPEARNINGSTTM.est4) <- c("data.est")
 
-
+# Create the XTS object and update the symbols table for estimated trailing 12-month as-reported earnings
+assign(
+  'AREARNINGSTTM.est4',
+  xts(
+    x = df.silverblatt.est4$AR.EARNINGS.12.MONTH,
+    order.by = as.Date(df.silverblatt.est4$QUARTER.END, "%m/%d/%Y")
+  )
+)
+# Assign column names
+colnames(AREARNINGSTTM.est4) <- c("data.est")
 
 ```
 
-```{r SP500TTMPE.Silver,  echo=FALSE, fig.width = 9, fig.asp = 0.4 }
+```{r SP500TTMPE.Silver.or,  echo=FALSE, fig.width = 9, fig.asp = 0.4 }
 
 datay <- "OPEARNINGSTTM"
 ylim <- c(0, 250)
@@ -1872,6 +1916,76 @@ my.plot <-
       x = index(OPEARNINGSTTM.est4),
       y = "data.est",
       colour = shQuote('OE Est. 7/18/21')
+    ),
+    na.rm = TRUE
+  )
+
+my.plot
+
+```
+```{r SP500TTMPE.Silver.ar,  echo=FALSE, fig.width = 9, fig.asp = 0.4 }
+
+datay <- "AREARNINGSTTM"
+ylim <- c(0, 250)
+dt.start <- as.Date('2010-01-01')
+my.plot <-
+  plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay,
+    paste("As-Reported Earnings\n",getPlotTitle(df.symbols, datay), sep=""),
+    "Date",
+    getPlotYLabel(df.symbols, datay),
+    c(dt.start, Sys.Date()%m+% months(24)),
+    ylim,
+    b.legend = TRUE,
+    b.percentile = FALSE,
+    b.long.legend = TRUE
+  )
+
+my.plot <-
+  my.plot + geom_point(
+    data = AREARNINGSTTM.est1,
+    aes_string(
+      x = index(OPEARNINGSTTM.est1),
+      y = "data.est",
+      colour = shQuote('AR Est. 7/15/17')
+    ),
+    na.rm = TRUE
+  )
+
+my.plot <-
+  my.plot + geom_point(
+    data = AREARNINGSTTM.est2,
+    aes_string(
+      x = index(OPEARNINGSTTM.est2),
+      y = "data.est",
+      colour = shQuote('AR Est. 7/13/18')
+    ),
+    na.rm = TRUE
+  )
+
+
+my.plot <-
+  my.plot + geom_point(
+    data = AREARNINGSTTM.est3,
+    aes_string(
+      x = index(AREARNINGSTTM.est3),
+      y = "data.est",
+      colour = shQuote('AR Est. 4/21/19')
+    ),
+    na.rm = TRUE
+  )
+
+
+my.plot <-
+  my.plot + geom_point(
+    data = AREARNINGSTTM.est4,
+    aes_string(
+      x = index(AREARNINGSTTM.est4),
+      y = "data.est",
+      colour = shQuote('AR Est. 7/18/21')
     ),
     na.rm = TRUE
   )
@@ -8377,15 +8491,15 @@ Since it is tedious to do this one at a time, all the symbols were entered into 
 This is the complete list of symbol names and sources used in the project.
 
 ```{r listsyms, echo=FALSE}
-string.colnames <- colnames(df.symbols);
-string.colnames[1] <- "string.symbol"
-string.colnames[2] <- "string.source"
-string.colnames[3] <- "Description"
-string.colnames[4] <- "Label"
-string.colnames[5] <- "Series Start"
-kable(df.symbols, col.names = string.colnames) %>%
- kable_styling(bootstrap_options = c("striped", "hover")) %>%
- column_spec(column = 1, width = "1.5in; display: inline-block;") %>%
- column_spec(2, width = "10em")
+# string.colnames <- colnames(df.symbols);
+# string.colnames[1] <- "string.symbol"
+# string.colnames[2] <- "string.source"
+# string.colnames[3] <- "Description"
+# string.colnames[4] <- "Label"
+# string.colnames[5] <- "Series Start"
+# kable(df.symbols, col.names = string.colnames) %>%
+#  kable_styling(bootstrap_options = c("striped", "hover")) %>%
+#  column_spec(column = 1, width = "1.5in; display: inline-block;") %>%
+#  column_spec(2, width = "10em")
 
 ```
