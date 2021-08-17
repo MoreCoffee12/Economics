@@ -1287,7 +1287,7 @@ P/E ratio of `r sprintf("%3.2f", tail(df.data$MULTPLSP500PERATIOMONTH,1))` compa
 ```{r bullet1, echo = FALSE}
 datay <- "MULTPLSP500PERATIOMONTH"
 datay.aux <- "MULTPLSP500PERATIOMONTH_Mean"
-ylim <- c(10, 40)
+ylim <- c(10, 50)
 dt.start <- as.Date('2010-01-01')
 b.legend <- TRUE
 my.plot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
@@ -2400,7 +2400,7 @@ This is an interesting series, they should perform better through the recessions
 
 ```{r DivStocks }
 datay <- "NOBL.Open"
-ylim <- c(40, 90)
+ylim <- c(40, 110)
 dt.start <- as.Date('2014-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 

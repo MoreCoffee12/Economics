@@ -1176,6 +1176,10 @@ plotSimilarPeriods <-
 
     d.data.segment <- (as.matrix(df.data[(df.data$date >= dt.start.similar) &
                                            (df.data$date <= dt.end.similar), datay]))
+    # I was getting different lengths of vectors, this is a patch until I
+    # get to the weekend to fix it.
+    d.data.segment <- d.data.segment[1:length(d.data.origin)]
+    
     d.data.origin.pkpk <- max(d.data.origin) - min(d.data.origin)
     d.data.segment.pkpk <- max(d.data.segment) - min(d.data.segment)
     if(d.data.segment.pkpk < 1e-10){
