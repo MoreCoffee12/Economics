@@ -3581,7 +3581,7 @@ This is an advanced estimate of the retail sales value.
 
 ```{r rsafs, echo=FALSE}
 datay <- "RSAFS"
-ylim <- c(150000, 600000)
+ylim <- c(150000, 700000)
 dtStart = as.Date('1992-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
@@ -3591,7 +3591,7 @@ Also take a look at year over year
 
 ```{r rsafs.yoy, echo=FALSE}
 datay <- "RSAFS_YoY"
-ylim <- c(-22.5, 10.5)
+ylim <- c(-22.5, 12.5)
 dtStart = as.Date('1992-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
