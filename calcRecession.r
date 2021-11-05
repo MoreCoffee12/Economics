@@ -24,7 +24,7 @@ if (dt.end.prediction[1] < dtStart[1]){
 
 # These lines are needed when running the code in the middle of a recession
 i.obs <- length(dtInitEnd)
-if (length(dt.end.prediction) <= i.obs) {
+if (length(dt.end.prediction) < i.obs) {
   dt.end.prediction[i.obs] <- Sys.Date()
 }
 rm(i.obs)

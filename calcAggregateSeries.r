@@ -1416,7 +1416,7 @@ df.symbols <-
     data.frame(
       string.symbol = "GSG.Close.by.GDPDEF",
       string.source = "Calc",
-      string.description = "GSCI Commodity-Indexed Trust, Normalized by GDP def",
+      string.description = "GSCI Commodity-Indexed Trust,\nNormalized by GDP def",
       string.label.y = "(-)",
       float.expense.ratio = -1.00,
       date.series.start =  as.Date(max(c(
@@ -1437,7 +1437,7 @@ df.symbols <-
     data.frame(
       string.symbol = "GSG.Close.by.GSPC.Close",
       string.source = "Calc",
-      string.description = "GSCI Commodity-Indexed Trust, Normalized by S&P 500",
+      string.description = "GSCI Commodity-Indexed Trust,\nNormalized by S&P 500",
       string.label.y = "(-)",
       float.expense.ratio = -1.00,
       date.series.start =  as.Date(max(c(

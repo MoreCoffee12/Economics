@@ -74,7 +74,7 @@ ylimBackTest <- c(0, 60)
 dt.start.prediction <- as.Date("01/02/1962", "%d/%m/%Y")
 
 # Define trend limits
-d.GSPC.max = 4500
+d.GSPC.max = 5000
 d.Russell.max = 3000
 
 ```
@@ -2185,7 +2185,7 @@ Evaluate year over year dividend growth.
 
 datay <- "MULTPLSP500DIVMONTH_YoY"
 ylim <- c(-50, 50)
-dtStart = as.Date('1910-01-01')
+dtStart = as.Date('1960-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = FALSE)
 
 ```
@@ -3036,6 +3036,24 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile)
 
 ```
 
+### Initial Claims
+
+A good measure of how much unemployment is growing. 
+
+An initial claim is a claim filed by an unemployed individual after a separation from an employer. The claim requests a determination of basic eligibility for the Unemployment Insurance program.
+
+https://fred.stlouisfed.org/series/ICSA
+
+```{r ICSA, echo=FALSE}
+
+datay <- "ICSA"
+ylim <- c(0, 2800000)
+b.percentile <- TRUE
+dt.start <- as.Date('1967-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile)
+
+```
+
 
 ### Unemployment rates, year-over-year
 
@@ -3764,14 +3782,18 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 ```
 
 
-```{r comm.basket.sp, echo=FALSE}
 
-datay <- "GSG.Close.by.GSPC.Close"
+This plot examines commodity performance relative to the GDP deflator
+
+```{r comm.basket.gdp, echo=FALSE}
+
+datay <- "GSG.Close.by.GDPDEF"
 ylim <- c(0, 0.10)
 dtStart = as.Date('2005-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
 ```
+
 
 ### Crude oil
 
