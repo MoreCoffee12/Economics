@@ -3712,8 +3712,8 @@ datay.aux <- "PPIACO_YoY"
 datay.aux.scale <- 0.5
 datay.aux.1 <- "PCEPI_YoY"
 
-ylim <- c(-10, 10)
-dtStart = as.Date('2007-01-01')
+ylim <- c(-10, 20)
+dtStart = as.Date('1960-01-01')
 myPlot <-
   plotSingle(
     dfRecession,
