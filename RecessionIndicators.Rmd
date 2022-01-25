@@ -75,7 +75,7 @@ dt.start.prediction <- as.Date("01/02/1962", "%d/%m/%Y")
 
 # Define trend limits
 d.GSPC.max = 5000
-d.Russell.max = 3000
+d.Russell.max = 3500
 
 ```
 
@@ -1363,7 +1363,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.legend, b.percent
 ```{r bullet6, echo=FALSE}
 
 datay <- "W875RX1_YoY"
-ylim <- c(-7.5, 7.5)
+ylim <- c(-7.5, 9.5)
 dt.start <- as.Date('2010-01-01')
 b.legend <- FALSE
 b.percentile <- TRUE
@@ -3514,11 +3514,26 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = TRUE
 
 Take a look at year-over-year changes
 
-```{r rsalesderplot.yoy, echo=FALSE}
+```{r rsalesderplot.yoy, echo=FALSE, fig.width = 5, fig.asp = .42}
 datay <- "RSALESAGG_YoY" 
-ylim <- c(-17.5, 7.5)
+ylim <- c(-12.5, 12.5)
 dt.start <- as.Date('1968-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = TRUE)
+myPlot <-
+  plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay,
+    "Real retail sales",
+    "Date",
+    getPlotYLabel(df.symbols, datay),
+    c(dt.start, Sys.Date()),
+    ylim,
+    b.legend = TRUE,
+    b.percentile = TRUE,
+    b.long.legend = TRUE
+  )
+myPlot
 
 ```
 
@@ -3631,15 +3646,31 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```{r realperinc, echo=FALSE}
 datay <- "RPI"
-ylim <- c(0, 20000)
+ylim <- c(0, 22000)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
 
-```{r realperincYoY, echo=FALSE}
+```{r realperincYoY, echo=FALSE, fig.width = 5, fig.asp = .42}
 datay <- "RPI_YoY"
 ylim <- c(-10, 15)
-plotSingleQuickModern(datay, ylim)
+dt.start <- as.Date('1970-01-02')
+myPlot <-
+  plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay,
+    "Real personal income, year over year",
+    "Date",
+    getPlotYLabel(df.symbols, datay),
+    c(dt.start, Sys.Date()),
+    ylim,
+    b.legend = TRUE,
+    b.percentile = TRUE,
+    b.long.legend = TRUE
+  )
+myPlot
 
 ```
 
@@ -7865,7 +7896,7 @@ This included a consumer loans, credit cards and other revolving plans change of
 ```{r consumer.loans, echo=FALSE}
 
 datay <- "CONSUMERNSA"
-ylim <- c(0, 1600)
+ylim <- c(0, 1800)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
@@ -8073,7 +8104,7 @@ string.source ID: FL152090006.Q. Household networth tends to fall as a recession
 ```{r HNONWPDPI, echo=FALSE}
 
 datay <- "HNONWPDPI"
-ylim <- c(450, 750)
+ylim <- c(450, 850)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
