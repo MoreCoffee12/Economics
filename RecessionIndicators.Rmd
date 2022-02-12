@@ -40,6 +40,11 @@ library(readr)
 library(RollingWindow)
 #install.packages("EIAdata")
 library(EIAdata)
+
+#library(devtools)
+#install_github("MoreCoffee12/EIAdata")
+#library(EIAdata)
+
 library(gtable)
 library(data.table)
 library(readxl)
@@ -387,19 +392,6 @@ if(bRefresh) {
   
   # Gold prices. site: https://data.nasdaq.com/data/LBMA/GOLD
   str.symbol.raw = "LBMA/GOLD"
-  df.symbols <-
-    rbind(
-      df.symbols,
-      data.frame(
-        string.symbol = str.symbol.raw,
-        string.source = "QUANDL",
-        string.description =  "Gold Price: London Fixings, London Bullion Market Association (LBMA). ",
-        string.label.y = "USD/ounce (PM)",
-        float.expense.ratio = -1.00,
-        date.series.start = as.Date("1871-01-01")  ,
-        date.series.end = as.Date("1900-01-01")
-      )
-    )
   df.temp <- Quandl(
     str.symbol.raw,
     type = "raw",
@@ -407,18 +399,43 @@ if(bRefresh) {
     start_date = "1871-01-01",
     end_date = Sys.Date()
   )
-
-  # Make the names safe
-  str.name <- str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
   
-  # Create a new xts object with the selected column
+  # Update the symbol table
+  df.symbols <-
+    rbind(
+      df.symbols,
+      data.frame(
+        string.symbol = str.symbol.raw,
+        string.source = "QUANDL",
+        string.description = "Gold Price: London Fixings,\nLondon Bullion Market Association (LBMA).\n",
+        string.label.y = "USD/ounce (PM)",
+        float.expense.ratio = -1.00,
+        date.series.start = as.Date("1871-01-01")  ,
+        date.series.end = as.Date("1900-01-01")
+      )
+    )
+  
+  # Make the name safe
+  str.name <- str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+
+  # Update the column names to include the ticker symbol. This triggers 
+  # unique handling later.
+  lst_cols <- colnames(df.temp)
+  lst_cols <- str_replace_all(lst_cols, " ", "")
+  lst_cols <- str_replace_all(lst_cols, "\\(", "_")
+  lst_cols <- str_replace_all(lst_cols, "\\)", "")
+  colnames(df.temp) <-
+    paste(str.name, ".", lst_cols , sep = "")
+  
+  # Create the xts object from the dataframe
   assign(str.name, xts(df.temp[, -1], order.by = df.temp[, 1]))
 
 }
 
 ```
 
-<!-- ## Load up the EIA data -->
+
+## Load up the EIA data
 
 <!-- ```{r EIA data, echo=FALSE} -->
 
@@ -4004,7 +4021,7 @@ As risks increase investors often flock to safe haven assets like gold. An up-ti
 
 ```{r gold.nominal.price, echo=FALSE}
 
-datay <- "GOLDAMGBD228NLBM"
+datay <- "LBMAGOLD.USD_PM"
 ylim <- c(0, 2500)
 dtStart = as.Date('1970-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
@@ -4015,10 +4032,10 @@ This plots out the real price of gold by two different deflators. PPI corrected 
 
 ```{r gold.by.index, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
-datay <- "GOLDAMGBD228NLBM.by.CPIAUCSL"
+datay <- "LBMAGOLD.USD_PM.by.CPIAUCSL"
 ylim <- c(0, 12)
 dt.start = as.Date('1970-01-01')
-datay.aux <- "GOLDAMGBD228NLBM.by.PPIACO"
+datay.aux <- "LBMAGOLD.USD_PM.by.PPIACO"
 my.plot <- plotSingle(
   dfRecession,
   df.data,
@@ -4049,11 +4066,11 @@ See how nominal and real prices look year over year. From the long-term view see
 
 ```{r gold.YoY, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
-datay <- "GOLDAMGBD228NLBM_YoY"
+datay <- "LBMAGOLD.USD_PM_YoY"
 ylim <- c(-75, 75)
 dtStart = as.Date('1970-01-01')
-datay.aux <- "GOLDAMGBD228NLBM.by.CPIAUCSL_YoY"
-datay.aux.1 <- "GOLDAMGBD228NLBM.by.PPIACO_YoY"
+datay.aux <- "LBMAGOLD.USD_PM.by.CPIAUCSL_YoY"
+datay.aux.1 <- "LBMAGOLD.USD_PM.by.PPIACO_YoY"
 my.plot <- plotSingle(
   dfRecession,
   df.data,
@@ -4095,7 +4112,7 @@ See how gold correlates with the VIX. Both gold and VIX should respond to invest
 
 ```{r corrGoldYoYVix, echo=FALSE}
 
-datax = "GOLDAMGBD228NLBM_YoY"
+datax = "LBMAGOLD.USD_PM_YoY"
 datay = "VIXCLS"
 titlelabel <- paste(datay, " | ", datax)
 ylim <- c(0, 45)
@@ -4577,7 +4594,7 @@ The federal reserve has an impact on the economy, here are some data series rela
 ```{r WALCL, echo=FALSE}
 
 datay <- "WALCL"
-ylim <- c(0, 9000)
+ylim <- c(0, 10000)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
@@ -4587,7 +4604,7 @@ Little bit closer
 ```{r WALCL_Near}
 
 datay <- "WALCL"
-ylim <- c(0, 8500)
+ylim <- c(0, 10000)
 dtStart = as.Date('2003-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
@@ -4600,8 +4617,19 @@ Compare liabilities to reverse repo trends
 ```{r WLRRAL, echo=FALSE}
 
 datay <- "WLRRAL"
-ylim <- c(0, 1500)
+ylim <- c(0, 2000)
 dtStart = as.Date('2003-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+
+```
+Take a look at more recent trends
+
+
+```{r WLRRAL.close, echo=FALSE}
+
+datay <- "WLRRAL"
+ylim <- c(0, 2000)
+dtStart = as.Date('2020-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
 ```
@@ -4756,7 +4784,7 @@ datay.aux <- "EXCSRESNW"
 datay.title <- getPlotTitle(df.symbols, datay.aux, str.sep = "\n")
 datay.aux.1 <- "WALCL"
 datay.title.1 <- getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n")
-ylim <- c(0, 9000)
+ylim <- c(0, 10000)
 myPlot <-
   plotSingle(
     dfRecession,
@@ -4807,7 +4835,7 @@ datay.title <- getPlotTitle(df.symbols, datay.aux, str.sep = "\n")
 datay.aux.1 <- "WALCL.by.GDP"
 datay.title.1 <-
   getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n")
-ylim <- c(0, 26)
+ylim <- c(0, 40)
 myPlot <-
   plotSingle(
     dfRecession,
@@ -4963,7 +4991,7 @@ Did the reserve balances increase after the 2016 and 2018 drops? Not in the same
 
 
 datay <- "WRESBAL_YoY"
-ylim <- c(-40, 50)
+ylim <- c(-40, 150)
 dtStart = as.Date('2015-01-01')
 p1 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 p1 <-
@@ -5136,7 +5164,7 @@ p1 <-
     size = 1.0
   )
 
-datay <- "GOLDAMGBD228NLBM"
+datay <- "LBMAGOLD.USD_PM"
 ylim <- c(0, 2500)
 p2 <-
   plotSingle(
@@ -5297,7 +5325,7 @@ The European central band (ECB) has taken a different path compared to the US Fe
 datay <- "ECBASSETS"
 datay.aux <- "WALCL"
 datay.title <- getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n")
-ylim <- c(0, 7000)
+ylim <- c(0, 9000)
 myPlot <-
   plotSingle(
     dfRecession,
@@ -5378,7 +5406,7 @@ The government is a big driver of the economy, let's see what it is doing in the
 ```{r GFDEBTN}
 
 datay <- "GFDEBTN"
-ylim <- c(0, 28000000)
+ylim <- c(0, 35000000)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
@@ -5521,7 +5549,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 ```{r totloanssnooth, echo=FALSE}
 
 datay <- "TOTLNNSA_SmoothDer"
-ylim <- c(-2.5, 2.5)
+ylim <- c(-3.0, 3.0)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
@@ -6119,22 +6147,22 @@ p1 <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, d
 p1 + geom_line(data=df.data, aes_string(x="date", y=datay.aux, colour=shQuote(datay.aux)), na.rm = TRUE)
 
 ```
-
+# ```{r bond3monthlibor, echo=FALSE }
+# 
+# datay <- "TB3MS"
+# datay_aux <- "USD1MTD156N"
+# ylim <- c(0, 12)
+# dtStart = as.Date('1985-01-01')
+# myPlot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
+#             getPlotYLabel(df.symbols, datay), c(dtStart, Sys.Date()), ylim, TRUE)
+# myPlot <- myPlot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuote(datay_aux)), na.rm = TRUE)
+# 
+# myPlot
+# 
+# ```
 Check out LIBOR and fed funds rate
 
-```{r bond3monthlibor, echo=FALSE }
 
-datay <- "TB3MS"
-datay_aux <- "USD1MTD156N"
-ylim <- c(0, 12)
-dtStart = as.Date('1985-01-01')
-myPlot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
-            getPlotYLabel(df.symbols, datay), c(dtStart, Sys.Date()), ylim, TRUE)
-myPlot <- myPlot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuote(datay_aux)), na.rm = TRUE)
-
-myPlot
-
-```
 
 The 1-year is plotted below. The yield flattens before a recession as investors go long on bonds and short on equities.
 
@@ -6412,7 +6440,7 @@ GS5Yr <- period.apply(GS5, endpoints(GS5,"years", 1), mean)
 ```{r AAA}
 
 datay <- "AAA"
-ylim <- c(2.5, 10)
+ylim <- c(1.5, 10)
 dtStart = as.Date('1997-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
@@ -7063,7 +7091,7 @@ Same idea as above, but applied the 3-month treasury.This one has fewer false tr
 ```{r GDPFundRate3MonthDiff, echo=FALSE}
 
 datay <- "GDP_YoYTOTB3MS"
-ylim <- c(-10.0, 10.0)
+ylim <- c(-10.0, 15.0)
 plotSingleQuickModern(datay, ylim)
 
 
@@ -7113,7 +7141,7 @@ Data is Line 1 of Table 6.16D
 ```{r CPROFIT, echo=FALSE}
 
 datay <- "CPROFIT"
-ylim <- c(0, 2400)
+ylim <- c(0, 3000)
 plotSingleQuickModern(datay, ylim)
 
 
@@ -7126,7 +7154,7 @@ Profits look a bit flat over the last several years in this series.
 ```{r A053RC1Q027SBEA, echo=FALSE}
 
 datay <- "A053RC1Q027SBEA"
-ylim <- c(0, 2500)
+ylim <- c(0, 3500)
 plotSingleQuickModern(datay, ylim)
 
 
@@ -7177,7 +7205,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 ```{r PCE.recent, echo=FALSE}
 
 datay <- "PCE"
-ylim <- c(6000, 16000)
+ylim <- c(6000, 18000)
 dtStart = as.Date('2000-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
@@ -7229,7 +7257,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 ```{r PCEPI.YoY, echo=FALSE}
 
 datay <- "PCEPI_YoY"
-ylim <- c(-5, 5)
+ylim <- c(-2, 8)
 dtStart = as.Date('2000-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
@@ -7599,7 +7627,7 @@ U.S. Census Bureau and U.S. Department of Housing and Urban Development, Median 
 ```{r MSPUS.plot, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
 datay <- "MSPUS"
-ylim <- c(0, 400000)
+ylim <- c(0, 450000)
 dt.start <- as.Date("1jan1963","%d%b%Y")
 my.plot <- plotSingle(
   dfRecession,
@@ -7940,7 +7968,7 @@ Board of Governors of the Federal Reserve System (US), Deposits, All Commercial 
 ```{r DPSACBW027SBOG.plots, echo=FALSE}
 
 datay <- "DPSACBW027SBOG"
-ylim <- c(1000, 18000)
+ylim <- c(1000, 25000)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
@@ -7988,7 +8016,7 @@ plotSingleQuick(dfRecession,
 ```{r SRPSABSNNCB.YoY.z.1, echo=FALSE}
 
 datay <- "SRPSABSNNCB_YoY"
-ylim <- c(-250, 100)
+ylim <- c(-250, 250)
 plotSingleQuick(dfRecession,
                 df.data,
                 datay,
@@ -8007,7 +8035,7 @@ Sum of domestic financial sectors, all sectors, total mortgages, and households/
 ```{r ASTLL.z.1, echo=FALSE}
 
 datay <- "ASTLL"
-ylim <- c(0, 28000)
+ylim <- c(0, 35000)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
@@ -8033,7 +8061,7 @@ Sum of finance, government, and chartered institutions asset levels. https://www
 ```{r ASOLAL.z.1, echo=FALSE}
 
 datay <- "ASOLAL"
-ylim <- c(0, 5000)
+ylim <- c(0, 7000)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
@@ -8057,7 +8085,7 @@ https://www.federalreserve.gov/apps/fof/DisplayTable.aspx?t=L.214
 ```{r ASHMA.z.1, echo=FALSE}
 
 datay <- "ASHMA"
-ylim <- c(0, 12000)
+ylim <- c(0, 15000)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
@@ -8093,7 +8121,7 @@ https://www.federalreserve.gov/apps/fof/SeriesAnalyzer.aspx?s=FL893065603&t=L.21
 ```{r ASFMA.z.1, echo=FALSE}
 
 datay <- "ASFMA"
-ylim <- c(0, 280)
+ylim <- c(0, 300)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
@@ -8120,7 +8148,7 @@ string.source ID: FL152000005.Q.
 ```{r TABSHNO, echo=FALSE}
 
 datay <- "TABSHNO"
-ylim <- c(0, 140000)
+ylim <- c(0, 180000)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 
@@ -8244,7 +8272,7 @@ Spending most certainly tips down prior to a recession. The gross private domest
 ```{r GPDI.by.GDP, echo=FALSE}
 
 datay <- "GPDI.by.GDP"
-ylim <- c(-5, 5)
+ylim <- c(0.0, 0.3)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 
@@ -8513,7 +8541,7 @@ As mentioned above, copper, year over year, has some correlation with the recess
 
 ```{r corplot.commodities, echo=FALSE, fig.width=10,fig.height=10}
 # Correlation for the entire data set
-  training.cor <- df.data[,c("RecInit", "RecInit_Smooth", "CHRISCMEHG1", "CHRISCMEHG1_YoY","GOLDAMGBD228NLBM_YoY")]
+  training.cor <- df.data[,c("RecInit", "RecInit_Smooth", "CHRISCMEHG1", "CHRISCMEHG1_YoY","LBMAGOLD.USD_PM_YoY")]
   rcorr.data <- rcorr(as.matrix(training.cor), type = "pearson")
   #print(rcorr.data)
 

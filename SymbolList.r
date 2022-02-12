@@ -1945,7 +1945,7 @@ df.symbols <-
     data.frame(
       string.symbol = "GFDEGDQ188S",
       string.source = "FRED",
-      string.description = "Federal Debt: Total Public Debt as Percent of Gross Domestic Product",
+      string.description = "Federal Debt: Total Public Debt as\nPercent of Gross Domestic Product",
       string.label.y = "Percent of GDP",
       float.expense.ratio = -1.00,
       date.series.start = as.Date("1900-01-01") ,

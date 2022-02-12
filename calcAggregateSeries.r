@@ -1345,64 +1345,64 @@ df.symbols <-
 
 
 # Normalize gold by commodities producer price index (PPIACO)
-df.data$GOLDAMGBD228NLBM.by.PPIACO <-
-  (df.data$GOLDAMGBD228NLBM / df.data$PPIACO)
+df.data$LBMAGOLD.USD_PM.by.PPIACO <-
+  (df.data$LBMAGOLD.USD_PM / df.data$PPIACO)
 df.symbols <-
   rbind(
     df.symbols,
     data.frame(
-      string.symbol = "GOLDAMGBD228NLBM.by.PPIACO",
+      string.symbol = "LBMAGOLD.USD_PM.by.PPIACO",
       string.source = "Calc",
-      string.description = "Gold, USD/Troy OUnce, Normalized by\ncommodities producer price index",
+      string.description = "Gold, USD PM/Troy Ounce, Normalized by\ncommodities producer price index",
       string.label.y = "$/t oz/Index",
       float.expense.ratio = -1.00,
       date.series.start =  as.Date(max(c(
-        index(GOLDAMGBD228NLBM[1]), index(PPIACO[1])
+        index(LBMAGOLD[1]), index(PPIACO[1])
       ))) ,
       date.series.end = as.Date(min(c(
-        index(tail(GOLDAMGBD228NLBM, 1)), index(tail(PPIACO, 1))
+        index(tail(LBMAGOLD, 1)), index(tail(PPIACO, 1))
       )))
     )
   )
 
 # Normalize gold by consumer price index (CPI)
-df.data$GOLDAMGBD228NLBM.by.CPIAUCSL <-
-  (df.data$GOLDAMGBD228NLBM / df.data$CPIAUCSL)
+df.data$LBMAGOLD.USD_PM.by.CPIAUCSL <-
+  (df.data$LBMAGOLD.USD_PM / df.data$CPIAUCSL)
 df.symbols <-
   rbind(
     df.symbols,
     data.frame(
-      string.symbol = "GOLDAMGBD228NLBM.by.CPIAUCSL",
+      string.symbol = "LBMAGOLD.USD_PM.by.CPIAUCSL",
       string.source = "Calc",
       string.description = "Gold, USD/Troy OUnce, Normalized by\nconsumer price index",
       string.label.y = "$/t oz/Index",
       float.expense.ratio = -1.00,
       date.series.start =  as.Date(max(c(
-        index(GOLDAMGBD228NLBM[1]), index(CPIAUCSL[1])
+        index(LBMAGOLD[1]), index(CPIAUCSL[1])
       ))) ,
       date.series.end = as.Date(min(c(
-        index(tail(GOLDAMGBD228NLBM, 1)), index(tail(CPIAUCSL, 1))
+        index(tail(LBMAGOLD, 1)), index(tail(CPIAUCSL, 1))
       )))
     )
   )
 
 # Normalize gold by GDP
-df.data$GOLDAMGBD228NLBM.by.GDP <-
-  (df.data$GOLDAMGBD228NLBM / df.data$GDP)
+df.data$LBMAGOLD.USD_PM.by.GDP <-
+  (df.data$LBMAGOLD.USD_PM / df.data$GDP)
 df.symbols <-
   rbind(
     df.symbols,
     data.frame(
-      string.symbol = "GOLDAMGBD228NLBM.by.GDP",
+      string.symbol = "LBMAGOLD.USD_PM.by.GDP",
       string.source = "Calc",
       string.description = "Gold, USD/Troy OUnce, Normalized by GDP",
       string.label.y = "$/t oz/Index",
       float.expense.ratio = -1.00,
       date.series.start =  as.Date(max(c(
-        index(GOLDAMGBD228NLBM[1]), index(GDP[1])
+        index(LBMAGOLD[1]), index(GDP[1])
       ))) ,
       date.series.end = as.Date(min(c(
-        index(tail(GOLDAMGBD228NLBM, 1)), index(tail(GDP, 1))
+        index(tail(LBMAGOLD, 1)), index(tail(GDP, 1))
       )))
     )
   )
