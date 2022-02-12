@@ -192,10 +192,10 @@ if(bRefresh) {
       start_date = "1910-01-01",
       end_date = Sys.Date()
     )
-  strName <-
+  str.name <-
     str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-  assign(strName, xts(dfPMIComp[,-1], order.by = dfPMIComp[, 1]))
-  colnames(ISMMANPMI) <- c(strName)
+  assign(str.name, xts(dfPMIComp[,-1], order.by = dfPMIComp[, 1]))
+  colnames(ISMMANPMI) <- c(str.name)
   df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(dfPMIComp$Date, 1)
   df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = dfPMIComp$Date[[1]]
   
@@ -214,7 +214,7 @@ if(bRefresh) {
         date.series.end = as.Date("1900-01-01")
       )
     )
-  dfTemp <- Quandl(
+  df.temp <- Quandl(
     str.symbol.raw,
     type = "raw",
     collapse = "daily",
@@ -222,12 +222,12 @@ if(bRefresh) {
     end_date = Sys.Date()
   )
   
-  strName <-
+  str.name <-
     str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-  assign(strName, xts(dfTemp[, -1], order.by = dfTemp[, 1]))
-  colnames(MULTPLSP500PERATIOMONTH) <- c(strName)
-  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(dfTemp$Date, 1)
-  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = dfTemp$Date[[1]]
+  assign(str.name, xts(df.temp[, -1], order.by = df.temp[, 1]))
+  colnames(MULTPLSP500PERATIOMONTH) <- c(str.name)
+  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(df.temp$Date, 1)
+  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = df.temp$Date[[1]]
   
   
   # S&P 500 sales multiple
@@ -245,7 +245,7 @@ if(bRefresh) {
         date.series.end = as.Date("1900-01-01")
       )
     )
-  dfTemp <-
+  df.temp <-
     oil_daily <- Quandl(
       str.symbol.raw,
       type = "raw",
@@ -254,12 +254,12 @@ if(bRefresh) {
       end_date = Sys.Date()
     )
   
-  strName <-
+  str.name <-
     str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-  assign(strName, xts(dfTemp[, -1], order.by = dfTemp[, 1]))
-  colnames(MULTPLSP500SALESQUARTER) <- c(strName)
-  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(dfTemp$Date, 1)
-  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = dfTemp$Date[[1]]
+  assign(str.name, xts(df.temp[, -1], order.by = df.temp[, 1]))
+  colnames(MULTPLSP500SALESQUARTER) <- c(str.name)
+  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(df.temp$Date, 1)
+  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = df.temp$Date[[1]]
   
   
   # S&P 500 Dividend ratio
@@ -277,7 +277,7 @@ if(bRefresh) {
         date.series.end = as.Date("1900-01-01")
       )
     )
-  dfTemp <-
+  df.temp <-
     oil_daily <- Quandl(
       str.symbol.raw,
       type = "raw",
@@ -286,12 +286,12 @@ if(bRefresh) {
       end_date = Sys.Date()
     )
   
-  strName <-
+  str.name <-
     str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-  assign(strName, xts(dfTemp[, -1], order.by = dfTemp[, 1]))
-  colnames(MULTPLSP500DIVYIELDMONTH) <- c(strName)
-  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(dfTemp$Date, 1)
-  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = dfTemp$Date[[1]]
+  assign(str.name, xts(df.temp[, -1], order.by = df.temp[, 1]))
+  colnames(MULTPLSP500DIVYIELDMONTH) <- c(str.name)
+  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(df.temp$Date, 1)
+  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = df.temp$Date[[1]]
   
   # S&P 500 dividend yield
   str.symbol.raw = "MULTPL/SP500_DIV_MONTH"
@@ -308,7 +308,7 @@ if(bRefresh) {
         date.series.end = as.Date("1900-01-01")
       )
     )
-  dfTemp <-
+  df.temp <-
     Quandl(
       str.symbol.raw,
       type = "raw",
@@ -317,12 +317,12 @@ if(bRefresh) {
       end_date = Sys.Date()
     )
   
-  strName <-
+  str.name <-
     str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-  assign(strName, xts(dfTemp[,-1], order.by = dfTemp[, 1]))
-  colnames(MULTPLSP500DIVMONTH) <- c(strName)
-  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw,]$date.series.start = tail(dfTemp$Date, 1)
-  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw,]$date.series.end = dfTemp$Date[[1]]
+  assign(str.name, xts(df.temp[,-1], order.by = df.temp[, 1]))
+  colnames(MULTPLSP500DIVMONTH) <- c(str.name)
+  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw,]$date.series.start = tail(df.temp$Date, 1)
+  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw,]$date.series.end = df.temp$Date[[1]]
   
   # Copper prices
   str.symbol.raw = "CHRIS/CME_HG1"
@@ -339,7 +339,7 @@ if(bRefresh) {
         date.series.end = as.Date("1900-01-01")
       )
     )
-  dfTemp <- Quandl(
+  df.temp <- Quandl(
     str.symbol.raw,
     type = "raw",
     collapse = "daily",
@@ -347,15 +347,15 @@ if(bRefresh) {
     end_date = Sys.Date()
   )
   # Needed because this series include open, close, high, low, etc.
-  dfTemp <-
-    dfTemp[, (colnames(dfTemp) == 'Open') |
-             (colnames(dfTemp) == 'Date')]
+  df.temp <-
+    df.temp[, (colnames(df.temp) == 'Open') |
+             (colnames(df.temp) == 'Date')]
   # This series also has zero values. Not sure why, tho.
-  dfTemp[dfTemp == 0] = NA
-  strName <-
+  df.temp[df.temp == 0] = NA
+  str.name <-
     str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-  assign(strName, xts(dfTemp[, -1], order.by = dfTemp[, 1]))
-  colnames(CHRISCMEHG1) <- c(strName)
+  assign(str.name, xts(df.temp[, -1], order.by = df.temp[, 1]))
+  colnames(CHRISCMEHG1) <- c(str.name)
   
   # Air freight data
   str.symbol.raw = "WWDI/WLD_IS_AIR_GOOD_MT_K1"
@@ -372,7 +372,7 @@ if(bRefresh) {
         date.series.end = as.Date("1900-01-01")
       )
     )
-  dfTemp <- Quandl(
+  df.temp <- Quandl(
     str.symbol.raw,
     type = "raw",
     collapse = "daily",
@@ -380,11 +380,40 @@ if(bRefresh) {
     end_date = Sys.Date()
   )
   
-  strName <-
+  str.name <-
     str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-  assign(strName, xts(dfTemp[, -1], order.by = dfTemp[, 1]))
-  colnames(WWDIWLDISAIRGOODMTK1) <- c(strName)
+  assign(str.name, xts(df.temp[, -1], order.by = df.temp[, 1]))
+  colnames(WWDIWLDISAIRGOODMTK1) <- c(str.name)
   
+  # Gold prices. site: https://data.nasdaq.com/data/LBMA/GOLD
+  str.symbol.raw = "LBMA/GOLD"
+  df.symbols <-
+    rbind(
+      df.symbols,
+      data.frame(
+        string.symbol = str.symbol.raw,
+        string.source = "QUANDL",
+        string.description =  "Gold Price: London Fixings, London Bullion Market Association (LBMA). ",
+        string.label.y = "USD/ounce (PM)",
+        float.expense.ratio = -1.00,
+        date.series.start = as.Date("1871-01-01")  ,
+        date.series.end = as.Date("1900-01-01")
+      )
+    )
+  df.temp <- Quandl(
+    str.symbol.raw,
+    type = "raw",
+    collapse = "daily",
+    start_date = "1871-01-01",
+    end_date = Sys.Date()
+  )
+
+  # Make the names safe
+  str.name <- str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+  
+  # Create a new xts object with the selected column
+  assign(str.name, xts(df.temp[, -1], order.by = df.temp[, 1]))
+
 }
 
 ```
@@ -415,12 +444,12 @@ if(bRefresh) {
 <!--         ) -->
 <!--       ) -->
 
-<!--     strName <- -->
+<!--     str.name <- -->
 <!--       str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "") -->
 <!--     PETA103600001M <- getEIA(key=key, ID=str.symbol.raw ) -->
-<!--     colnames(PETA103600001M) <- c(strName) -->
-<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(dfTemp$Date, 1) -->
-<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = dfTemp$Date[[1]] -->
+<!--     colnames(PETA103600001M) <- c(str.name) -->
+<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(df.temp$Date, 1) -->
+<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = df.temp$Date[[1]] -->
 
 <!--   # U.S. Regular Gasoline Retail Sales by Refiners, Monthly -->
 <!--     str.symbol.raw = "PET.A123600001.M" -->
@@ -438,12 +467,12 @@ if(bRefresh) {
 <!--         ) -->
 <!--       ) -->
 
-<!--     strName <- -->
+<!--     str.name <- -->
 <!--       str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "") -->
 <!--     PETA123600001M <- getEIA(key=key, ID=str.symbol.raw ) -->
-<!--     colnames(PETA123600001M) <- c(strName) -->
-<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(dfTemp$Date, 1) -->
-<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = dfTemp$Date[[1]] -->
+<!--     colnames(PETA123600001M) <- c(str.name) -->
+<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(df.temp$Date, 1) -->
+<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = df.temp$Date[[1]] -->
 
 <!--   # U.S. Gasoline Midgrade Bulk Sales (Volume) by Refiners, Monthly -->
 <!--     str.symbol.raw = "PET.A143B00001.M" -->
@@ -461,12 +490,12 @@ if(bRefresh) {
 <!--         ) -->
 <!--       ) -->
 
-<!--     strName <- -->
+<!--     str.name <- -->
 <!--       str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "") -->
 <!--     PETA143B00001M <- getEIA(key=key, ID=str.symbol.raw ) -->
-<!--     colnames(PETA143B00001M) <- c(strName) -->
-<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(dfTemp$Date, 1) -->
-<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = dfTemp$Date[[1]] -->
+<!--     colnames(PETA143B00001M) <- c(str.name) -->
+<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(df.temp$Date, 1) -->
+<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = df.temp$Date[[1]] -->
 
 <!--   # U.S. Premium Gasoline Bulk Sales (Volume) by Refiners, Monthly -->
 <!--     str.symbol.raw = "PET.A133B00001.M" -->
@@ -484,12 +513,12 @@ if(bRefresh) {
 <!--         ) -->
 <!--       ) -->
 
-<!--     strName <- -->
+<!--     str.name <- -->
 <!--       str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "") -->
 <!--     PETA133B00001M <- getEIA(key=key, ID=str.symbol.raw ) -->
-<!--     colnames(PETA133B00001M) <- c(strName) -->
-<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(dfTemp$Date, 1) -->
-<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = dfTemp$Date[[1]] -->
+<!--     colnames(PETA133B00001M) <- c(str.name) -->
+<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(df.temp$Date, 1) -->
+<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = df.temp$Date[[1]] -->
 
 <!--     # Crude Oil and Natural Gas Rotary Rigs in Operation, Total, Monthly -->
 <!--     str.symbol.raw = "TOTAL.OGNRPUS.M" -->
@@ -507,12 +536,12 @@ if(bRefresh) {
 <!--         ) -->
 <!--       ) -->
 
-<!--     strName <- -->
+<!--     str.name <- -->
 <!--       str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "") -->
 <!--     TOTALOGNRPUSM <- getEIA(key=key, ID=str.symbol.raw ) -->
-<!--     colnames(TOTALOGNRPUSM) <- c(strName) -->
-<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(dfTemp$Date, 1) -->
-<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = dfTemp$Date[[1]] -->
+<!--     colnames(TOTALOGNRPUSM) <- c(str.name) -->
+<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(df.temp$Date, 1) -->
+<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = df.temp$Date[[1]] -->
 
 <!--     # Crude Oil Rotary Rigs in Operation, Monthly -->
 <!--     str.symbol.raw = "TOTAL.PANRPUS.M" -->
@@ -530,12 +559,12 @@ if(bRefresh) {
 <!--         ) -->
 <!--       ) -->
 
-<!--     strName <- -->
+<!--     str.name <- -->
 <!--       str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "") -->
 <!--     TOTALPANRPUSM <- getEIA(key=key, ID=str.symbol.raw ) -->
-<!--     colnames(TOTALPANRPUSM) <- c(strName) -->
-<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(dfTemp$Date, 1) -->
-<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = dfTemp$Date[[1]] -->
+<!--     colnames(TOTALPANRPUSM) <- c(str.name) -->
+<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(df.temp$Date, 1) -->
+<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = df.temp$Date[[1]] -->
 
 <!--     # Natural Gas Rotary Rigs in Operation, Monthly -->
 <!--     str.symbol.raw = "TOTAL.NGNRPUS.M" -->
@@ -553,12 +582,12 @@ if(bRefresh) {
 <!--         ) -->
 <!--       ) -->
 
-<!--     strName <- -->
+<!--     str.name <- -->
 <!--       str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "") -->
 <!--     TOTALNGNRPUSM <- getEIA(key=key, ID=str.symbol.raw ) -->
-<!--     colnames(TOTALNGNRPUSM) <- c(strName) -->
-<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(dfTemp$Date, 1) -->
-<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = dfTemp$Date[[1]] -->
+<!--     colnames(TOTALNGNRPUSM) <- c(str.name) -->
+<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(df.temp$Date, 1) -->
+<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = df.temp$Date[[1]] -->
 
 <!-- } -->
 

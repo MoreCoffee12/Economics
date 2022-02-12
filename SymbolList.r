@@ -1985,21 +1985,6 @@ df.symbols <-
   rbind(
     df.symbols,
     data.frame(
-      string.symbol = "GOLDAMGBD228NLBM",
-      string.source = "FRED",
-      string.description = "Gold Fixing Price 10:30 A.M. (London time) \n in London Bullion Market",
-      string.label.y = "USD/Troy Ounce",
-      float.expense.ratio = -1.00,
-      date.series.start = as.Date("1900-01-01"),
-      date.series.end = as.Date("1900-01-01")
-    )
-  )
-
-
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
       string.symbol = "GDX",
       string.source = "yahoo",
       string.description = "VanEck Vectors Gold Miners ETF",
@@ -2381,20 +2366,20 @@ df.symbols <-
     )
   )
 
-
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
-      string.symbol = "USD1MTD156N",
-      string.source = "FRED",
-      string.description = "1-Month London Interbank Offered Rate (LIBOR), based on U.S. Dollar",
-      string.label.y = "Percent",
-      float.expense.ratio = -1.00,
-      date.series.start = as.Date("1900-01-01"),
-      date.series.end = as.Date("1900-01-01")
-    )
-  )
+# TODO - replace this data
+# df.symbols <-
+#   rbind(
+#     df.symbols,
+#     data.frame(
+#       string.symbol = "USD1MTD156N",
+#       string.source = "FRED",
+#       string.description = "1-Month London Interbank Offered Rate (LIBOR), based on U.S. Dollar",
+#       string.label.y = "Percent",
+#       float.expense.ratio = -1.00,
+#       date.series.start = as.Date("1900-01-01"),
+#       date.series.end = as.Date("1900-01-01")
+#     )
+#   )
 
 df.symbols <-
   rbind(
