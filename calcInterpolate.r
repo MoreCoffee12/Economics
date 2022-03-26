@@ -11,12 +11,12 @@
 #' @export
 #'
 #' @examples
-calcInterpolate <- function(df.data, df.symbols) {
+calcInterpolate <- function(df.symbols) {
 
   xtsData <- get(df.symbols$string.symbol[1])
   for (idx in 2:nrow(df.symbols)) {
     xtsData <- merge(xtsData,  get(df.symbols$string.symbol[idx]))
-    #print(df.symbols$string.symbol[idx])
+    print(df.symbols$string.symbol[idx])
   }
   
   df.data <- data.frame(xtsData)

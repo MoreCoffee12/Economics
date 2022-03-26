@@ -129,6 +129,7 @@ if(bRefresh) {
         to = Sys.Date()
       )
       colnames(CLF) = c("CLF.Open","CLF.High","CLF.Low","CLF.Close","CLF.Volume","CLF.Adjusted")
+      str.symbol.list <- df.symbols[idx, "string.symbol"]
       
     } else{
       str.symbol.list <- df.symbols[idx, "string.symbol"]
@@ -141,13 +142,13 @@ if(bRefresh) {
         to = Sys.Date()
       )
       
-      # Projected GDP 
-      # if (str.symbol.list == "GDP"){
-      #   GDP <- rbind(GDP, xts(x = 19384.15, as.Date("2020-03-31") ))
-      # }
-
-      
     }
+    
+    # Revision - 26 Mar 22
+    # Remove duplicate date values (believed to be a data source error)
+    # Details in "Revision X in date.docx"
+    assign(str.symbol.list, 
+           get(str.symbol.list)[!duplicated (index(get(str.symbol.list))),])
     
     # Grab the series for some additional extractions
     xts.temp <-
@@ -437,178 +438,178 @@ if(bRefresh) {
 
 ## Load up the EIA data
 
-<!-- ```{r EIA data, echo=FALSE} -->
+```{r EIA data, echo=FALSE}
 
-<!-- if (bRefresh){ -->
+if (bRefresh){
 
-<!--   key <- "7a2672468131c5a95dffc487d741edf6" -->
+  key <- "7a2672468131c5a95dffc487d741edf6"
 
 
 
-<!--   # Refiner Motor Gasoline Sales Volumes -->
-<!--     str.symbol.raw = "PET.A103600001.M" -->
-<!--     df.symbols <- -->
-<!--       rbind( -->
-<!--         df.symbols, -->
-<!--         data.frame( -->
-<!--           string.symbol = str.symbol.raw, -->
-<!--           string.source = "EIA", -->
-<!--           string.description =  "U.S. Total Gasoline Retail Sales by Refiners, Monthly", -->
-<!--           string.label.y = "Thousand Gallons per Day", -->
-<!--           float.expense.ratio = -1.00, -->
-<!--           date.series.start = as.Date("1900-01-01") , -->
-<!--           date.series.end = as.Date("1900-01-01") -->
-<!--         ) -->
-<!--       ) -->
+  # Refiner Motor Gasoline Sales Volumes
+    str.symbol.raw = "PET.A103600001.M"
+    df.symbols <-
+      rbind(
+        df.symbols,
+        data.frame(
+          string.symbol = str.symbol.raw,
+          string.source = "EIA",
+          string.description =  "U.S. Total Gasoline Retail Sales by Refiners, Monthly",
+          string.label.y = "Thousand Gallons per Day",
+          float.expense.ratio = -1.00,
+          date.series.start = as.Date("1900-01-01") ,
+          date.series.end = as.Date("1900-01-01")
+        )
+      )
 
-<!--     str.name <- -->
-<!--       str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "") -->
-<!--     PETA103600001M <- getEIA(key=key, ID=str.symbol.raw ) -->
-<!--     colnames(PETA103600001M) <- c(str.name) -->
-<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(df.temp$Date, 1) -->
-<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = df.temp$Date[[1]] -->
+    str.name <-
+      str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+    PETA103600001M <- getEIA(key=key, ID=str.symbol.raw )
+    colnames(PETA103600001M) <- c(str.name)
+    df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(df.temp$Date, 1)
+    df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = df.temp$Date[[1]]
 
-<!--   # U.S. Regular Gasoline Retail Sales by Refiners, Monthly -->
-<!--     str.symbol.raw = "PET.A123600001.M" -->
-<!--     df.symbols <- -->
-<!--       rbind( -->
-<!--         df.symbols, -->
-<!--         data.frame( -->
-<!--           string.symbol = str.symbol.raw, -->
-<!--           string.source = "EIA", -->
-<!--           string.description =  "U.S. Regular Gasoline Retail Sales\nby Refiners, Monthly", -->
-<!--           string.label.y = "Thousand Gallons per Day", -->
-<!--           float.expense.ratio = -1.00, -->
-<!--           date.series.start = as.Date("1900-01-01") , -->
-<!--           date.series.end = as.Date("1900-01-01") -->
-<!--         ) -->
-<!--       ) -->
+  # U.S. Regular Gasoline Retail Sales by Refiners, Monthly
+    str.symbol.raw = "PET.A123600001.M"
+    df.symbols <-
+      rbind(
+        df.symbols,
+        data.frame(
+          string.symbol = str.symbol.raw,
+          string.source = "EIA",
+          string.description =  "U.S. Regular Gasoline Retail Sales\nby Refiners, Monthly",
+          string.label.y = "Thousand Gallons per Day",
+          float.expense.ratio = -1.00,
+          date.series.start = as.Date("1900-01-01") ,
+          date.series.end = as.Date("1900-01-01")
+        )
+      )
 
-<!--     str.name <- -->
-<!--       str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "") -->
-<!--     PETA123600001M <- getEIA(key=key, ID=str.symbol.raw ) -->
-<!--     colnames(PETA123600001M) <- c(str.name) -->
-<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(df.temp$Date, 1) -->
-<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = df.temp$Date[[1]] -->
+    str.name <-
+      str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+    PETA123600001M <- getEIA(key=key, ID=str.symbol.raw )
+    colnames(PETA123600001M) <- c(str.name)
+    df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(df.temp$Date, 1)
+    df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = df.temp$Date[[1]]
 
-<!--   # U.S. Gasoline Midgrade Bulk Sales (Volume) by Refiners, Monthly -->
-<!--     str.symbol.raw = "PET.A143B00001.M" -->
-<!--     df.symbols <- -->
-<!--       rbind( -->
-<!--         df.symbols, -->
-<!--         data.frame( -->
-<!--           string.symbol = str.symbol.raw, -->
-<!--           string.source = "EIA", -->
-<!--           string.description =  "U.S. Midgrade Gasoline Retail Sales\nby Refiners, Monthly", -->
-<!--           string.label.y = "Thousand Gallons per Day", -->
-<!--           float.expense.ratio = -1.00, -->
-<!--           date.series.start = as.Date("1900-01-01") , -->
-<!--           date.series.end = as.Date("1900-01-01") -->
-<!--         ) -->
-<!--       ) -->
+  # U.S. Gasoline Midgrade Bulk Sales (Volume) by Refiners, Monthly
+    str.symbol.raw = "PET.A143B00001.M"
+    df.symbols <-
+      rbind(
+        df.symbols,
+        data.frame(
+          string.symbol = str.symbol.raw,
+          string.source = "EIA",
+          string.description =  "U.S. Midgrade Gasoline Retail Sales\nby Refiners, Monthly",
+          string.label.y = "Thousand Gallons per Day",
+          float.expense.ratio = -1.00,
+          date.series.start = as.Date("1900-01-01") ,
+          date.series.end = as.Date("1900-01-01")
+        )
+      )
 
-<!--     str.name <- -->
-<!--       str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "") -->
-<!--     PETA143B00001M <- getEIA(key=key, ID=str.symbol.raw ) -->
-<!--     colnames(PETA143B00001M) <- c(str.name) -->
-<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(df.temp$Date, 1) -->
-<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = df.temp$Date[[1]] -->
+    str.name <-
+      str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+    PETA143B00001M <- getEIA(key=key, ID=str.symbol.raw )
+    colnames(PETA143B00001M) <- c(str.name)
+    df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(df.temp$Date, 1)
+    df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = df.temp$Date[[1]]
 
-<!--   # U.S. Premium Gasoline Bulk Sales (Volume) by Refiners, Monthly -->
-<!--     str.symbol.raw = "PET.A133B00001.M" -->
-<!--     df.symbols <- -->
-<!--       rbind( -->
-<!--         df.symbols, -->
-<!--         data.frame( -->
-<!--           string.symbol = str.symbol.raw, -->
-<!--           string.source = "EIA", -->
-<!--           string.description =  "U.S. Premium Gasoline Bulk Sales\n(Volume) by Refiners, Monthly", -->
-<!--           string.label.y = "Thousand Gallons per Day", -->
-<!--           float.expense.ratio = -1.00, -->
-<!--           date.series.start = as.Date("1900-01-01") , -->
-<!--           date.series.end = as.Date("1900-01-01") -->
-<!--         ) -->
-<!--       ) -->
+  # U.S. Premium Gasoline Bulk Sales (Volume) by Refiners, Monthly
+    str.symbol.raw = "PET.A133B00001.M"
+    df.symbols <-
+      rbind(
+        df.symbols,
+        data.frame(
+          string.symbol = str.symbol.raw,
+          string.source = "EIA",
+          string.description =  "U.S. Premium Gasoline Bulk Sales\n(Volume) by Refiners, Monthly",
+          string.label.y = "Thousand Gallons per Day",
+          float.expense.ratio = -1.00,
+          date.series.start = as.Date("1900-01-01") ,
+          date.series.end = as.Date("1900-01-01")
+        )
+      )
 
-<!--     str.name <- -->
-<!--       str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "") -->
-<!--     PETA133B00001M <- getEIA(key=key, ID=str.symbol.raw ) -->
-<!--     colnames(PETA133B00001M) <- c(str.name) -->
-<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(df.temp$Date, 1) -->
-<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = df.temp$Date[[1]] -->
+    str.name <-
+      str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+    PETA133B00001M <- getEIA(key=key, ID=str.symbol.raw )
+    colnames(PETA133B00001M) <- c(str.name)
+    df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(df.temp$Date, 1)
+    df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = df.temp$Date[[1]]
 
-<!--     # Crude Oil and Natural Gas Rotary Rigs in Operation, Total, Monthly -->
-<!--     str.symbol.raw = "TOTAL.OGNRPUS.M" -->
-<!--     df.symbols <- -->
-<!--       rbind( -->
-<!--         df.symbols, -->
-<!--         data.frame( -->
-<!--           string.symbol = str.symbol.raw, -->
-<!--           string.source = "EIA", -->
-<!--           string.description =  "Crude Oil and Natural Gas Rotary Rigs in Operation, Total, Monthly", -->
-<!--           string.label.y = "Number of rigs", -->
-<!--           float.expense.ratio = -1.00, -->
-<!--           date.series.start = as.Date("1900-01-01") , -->
-<!--           date.series.end = as.Date("1900-01-01") -->
-<!--         ) -->
-<!--       ) -->
+    # Crude Oil and Natural Gas Rotary Rigs in Operation, Total, Monthly
+    str.symbol.raw = "TOTAL.OGNRPUS.M"
+    df.symbols <-
+      rbind(
+        df.symbols,
+        data.frame(
+          string.symbol = str.symbol.raw,
+          string.source = "EIA",
+          string.description =  "Crude Oil and Natural Gas Rotary Rigs in Operation, Total, Monthly",
+          string.label.y = "Number of rigs",
+          float.expense.ratio = -1.00,
+          date.series.start = as.Date("1900-01-01") ,
+          date.series.end = as.Date("1900-01-01")
+        )
+      )
 
-<!--     str.name <- -->
-<!--       str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "") -->
-<!--     TOTALOGNRPUSM <- getEIA(key=key, ID=str.symbol.raw ) -->
-<!--     colnames(TOTALOGNRPUSM) <- c(str.name) -->
-<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(df.temp$Date, 1) -->
-<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = df.temp$Date[[1]] -->
+    str.name <-
+      str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+    TOTALOGNRPUSM <- getEIA(key=key, ID=str.symbol.raw )
+    colnames(TOTALOGNRPUSM) <- c(str.name)
+    df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(df.temp$Date, 1)
+    df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = df.temp$Date[[1]]
 
-<!--     # Crude Oil Rotary Rigs in Operation, Monthly -->
-<!--     str.symbol.raw = "TOTAL.PANRPUS.M" -->
-<!--     df.symbols <- -->
-<!--       rbind( -->
-<!--         df.symbols, -->
-<!--         data.frame( -->
-<!--           string.symbol = str.symbol.raw, -->
-<!--           string.source = "EIA", -->
-<!--           string.description =  "Crude Oil Rotary Rigs in Operation, Monthly", -->
-<!--           string.label.y = "Number of rigs", -->
-<!--           float.expense.ratio = -1.00, -->
-<!--           date.series.start = as.Date("1900-01-01") , -->
-<!--           date.series.end = as.Date("1900-01-01") -->
-<!--         ) -->
-<!--       ) -->
+    # Crude Oil Rotary Rigs in Operation, Monthly
+    str.symbol.raw = "TOTAL.PANRPUS.M"
+    df.symbols <-
+      rbind(
+        df.symbols,
+        data.frame(
+          string.symbol = str.symbol.raw,
+          string.source = "EIA",
+          string.description =  "Crude Oil Rotary Rigs in Operation, Monthly",
+          string.label.y = "Number of rigs",
+          float.expense.ratio = -1.00,
+          date.series.start = as.Date("1900-01-01") ,
+          date.series.end = as.Date("1900-01-01")
+        )
+      )
 
-<!--     str.name <- -->
-<!--       str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "") -->
-<!--     TOTALPANRPUSM <- getEIA(key=key, ID=str.symbol.raw ) -->
-<!--     colnames(TOTALPANRPUSM) <- c(str.name) -->
-<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(df.temp$Date, 1) -->
-<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = df.temp$Date[[1]] -->
+    str.name <-
+      str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+    TOTALPANRPUSM <- getEIA(key=key, ID=str.symbol.raw )
+    colnames(TOTALPANRPUSM) <- c(str.name)
+    df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(df.temp$Date, 1)
+    df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = df.temp$Date[[1]]
 
-<!--     # Natural Gas Rotary Rigs in Operation, Monthly -->
-<!--     str.symbol.raw = "TOTAL.NGNRPUS.M" -->
-<!--     df.symbols <- -->
-<!--       rbind( -->
-<!--         df.symbols, -->
-<!--         data.frame( -->
-<!--           string.symbol = str.symbol.raw, -->
-<!--           string.source = "EIA", -->
-<!--           string.description =  "Natural Gas Rotary Rigs in Operation, Monthly", -->
-<!--           string.label.y = "Number of rigs", -->
-<!--           float.expense.ratio = -1.00, -->
-<!--           date.series.start = as.Date("1900-01-01") , -->
-<!--           date.series.end = as.Date("1900-01-01") -->
-<!--         ) -->
-<!--       ) -->
+    # Natural Gas Rotary Rigs in Operation, Monthly
+    str.symbol.raw = "TOTAL.NGNRPUS.M"
+    df.symbols <-
+      rbind(
+        df.symbols,
+        data.frame(
+          string.symbol = str.symbol.raw,
+          string.source = "EIA",
+          string.description =  "Natural Gas Rotary Rigs in Operation, Monthly",
+          string.label.y = "Number of rigs",
+          float.expense.ratio = -1.00,
+          date.series.start = as.Date("1900-01-01") ,
+          date.series.end = as.Date("1900-01-01")
+        )
+      )
 
-<!--     str.name <- -->
-<!--       str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "") -->
-<!--     TOTALNGNRPUSM <- getEIA(key=key, ID=str.symbol.raw ) -->
-<!--     colnames(TOTALNGNRPUSM) <- c(str.name) -->
-<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(df.temp$Date, 1) -->
-<!--     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = df.temp$Date[[1]] -->
+    str.name <-
+      str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+    TOTALNGNRPUSM <- getEIA(key=key, ID=str.symbol.raw )
+    colnames(TOTALNGNRPUSM) <- c(str.name)
+    df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(df.temp$Date, 1)
+    df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = df.temp$Date[[1]]
 
-<!-- } -->
+}
 
-<!-- ``` -->
+```
 
 ## Load rig count data
 
@@ -1253,7 +1254,7 @@ The code performs interpolation for continuous data or carries it forward for bi
 ```{r aggsyms}
 
 source("calcInterpolate.r")
-df.data <- calcInterpolate(df.data, df.symbols)
+df.data <- calcInterpolate(df.symbols)
 
 ```
 
@@ -3697,7 +3698,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
 
-```{r realperincYoY, echo=FALSE, fig.width = 5, fig.asp = .42}
+```{r realperincYoY, echo=FALSE, fig.width = 10, fig.asp = .42}
 datay <- "RPI_YoY"
 ylim <- c(-10, 15)
 dt.start <- as.Date('1970-01-02')
@@ -3837,7 +3838,7 @@ myPlot + scale_y_continuous(sec.axis = sec_axis(
 
 ```{r plot.ppi, echo=FALSE}
 datay <- "PPIACO"
-ylim <- c(0, 250)
+ylim <- c(0, 350)
 dtStart = as.Date('1965-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
@@ -3865,12 +3866,21 @@ This plot examines commodity performance relative to the GDP deflator
 ```{r comm.basket.gdp, echo=FALSE}
 
 datay <- "GSG.Close.by.GDPDEF"
-ylim <- c(0, 0.10)
+ylim <- c(0, 1.0)
 dtStart = as.Date('2005-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
 ```
 
+
+```{r comm.basket.GSPC, echo=FALSE}
+
+datay <- "GSG.Close.by.GSPC.Close"
+ylim <- c(0, 0.1)
+dtStart = as.Date('2005-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+
+```
 
 ### Crude oil
 

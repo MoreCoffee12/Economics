@@ -608,6 +608,20 @@ df.symbols <-
     )
   )
 
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "PRVIX",
+      string.source = "yahoo",
+      string.description = "T. Rowe Price Small-Cap Value Fund I Class",
+      string.label.y = "Dollars",
+      float.expense.ratio = 0.30,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
 
 df.symbols <-
   rbind(
@@ -1469,6 +1483,63 @@ df.symbols <-
       date.series.end = as.Date("1900-01-01")
     )
   )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "FXAIX",
+      string.source = "yahoo",
+      string.description = "Fidelity 500 Index Fund",
+      string.label.y = "Dollars",
+      float.expense.ratio = 0.01,
+      date.series.start = as.Date("1900-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "FTIHX",
+      string.source = "yahoo",
+      string.description = "Fidelity Total\nInternational Index Fund",
+      string.label.y = "Dollars",
+      float.expense.ratio = 0.06,
+      date.series.start = as.Date("1900-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "MDIZX",
+      string.source = "yahoo",
+      string.description = "MFS International Diversification Fund Class R6",
+      string.label.y = "Dollars",
+      float.expense.ratio = 0.70,
+      date.series.start = as.Date("1900-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "DODIX",
+      string.source = "yahoo",
+      string.description = "Dodge & Cox Income Fund",
+      string.label.y = "Dollars",
+      float.expense.ratio = 0.42,
+      date.series.start = as.Date("1900-01-01") ,
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
 
 # df.symbols <-
 #   rbind(
@@ -2835,6 +2906,34 @@ df.symbols <-
   rbind(
     df.symbols,
     data.frame(
+      string.symbol = "FSMAX",
+      string.source = "yahoo",
+      string.description = "Fidelity Extended Market Index Fund ",
+      string.label.y = "Dollars",
+      float.expense.ratio = 0.03,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "FXNAX",
+      string.source = "yahoo",
+      string.description = "Fidelity U.S. Bond Index Fund",
+      string.label.y = "Dollars",
+      float.expense.ratio = 0.03,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
       string.symbol = "HAINX",
       string.source = "yahoo",
       string.description = "Harbor International Institutional",
@@ -2849,11 +2948,39 @@ df.symbols <-
   rbind(
     df.symbols,
     data.frame(
+      string.symbol = "HNACX",
+      string.source = "yahoo",
+      string.description = "Harbor Capital Appreciation\nFund Retirement Class",
+      string.label.y = "Dollars",
+      float.expense.ratio = 0.59,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
       string.symbol = "VEU",
       string.source = "yahoo",
       string.description = "Vanguard FTSE All-Wld ex-US ETF",
       string.label.y = "Dollars",
       float.expense.ratio = 0.11,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "VEIRX",
+      string.source = "yahoo",
+      string.description = "Vanguard Equity-Income\nFund Admiral Shares",
+      string.label.y = "Dollars",
+      float.expense.ratio = 0.19,
       date.series.start = as.Date("1900-01-01"),
       date.series.end = as.Date("1900-01-01")
     )
