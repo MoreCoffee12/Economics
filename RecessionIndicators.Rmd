@@ -5787,7 +5787,7 @@ datay <- "REALLNNSA"
 datay.aux <- "REALLN"
 datay.aux.1 <- "RELACBW027NBOG"
 datay.aux.2 <- "RELACBW027SBOG"
-ylim <- c(0, 4500)
+ylim <- c(0, 5000)
 dt.start <- as.Date("1jan1945","%d%b%Y")
 my.plot <- plotSingle(
   dfRecession,
@@ -5844,7 +5844,8 @@ datay <- "RREACBM027NBOG"
 datay.aux <- "RREACBM027SBOG"
 datay.aux.1 <- "RREACBW027SBOG"
 datay.aux.2 <- "RREACBW027NBOG"
-ylim <- c(1000, 2500)
+datay.aux.3 <- "MSPUS.times.HSN1FNSA.plusEXHOSLUSM495S"
+ylim <- c(1000, 3000)
 dt.start <- as.Date("1jun2004","%d%b%Y")
 my.plot <- plotSingle(
   dfRecession,
@@ -5887,12 +5888,21 @@ my.plot <- my.plot + geom_line(
   ),
   na.rm = TRUE
 )
+my.plot <- my.plot + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux.3,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux.3, str.sep = "\n"))
+  ),
+  na.rm = TRUE
+)
 my.plot
 
 ```
 
 
-Normalized by GDP it is easier to see the peak in 2008 and that loan levels appear reasonable at the commercial banks.
+Normalized by GDP it is easier to see the peak in 2008 and that loan levels appear reasonable at the commercial banks. I updated this plot to include the estimated single-family home sales volume to give a sense of percentage of home sales that are cash.
 
 ```{r realestate.by.gdp, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
@@ -5900,7 +5910,8 @@ datay <- "RREACBM027NBOG.by.GDP"
 datay.aux <- "RREACBM027SBOG.by.GDP"
 datay.aux.1 <- "RREACBW027SBOG.by.GDP"
 datay.aux.2 <- "RREACBW027NBOG.by.GDP"
-ylim <- c(10, 16)
+datay.aux.3 <- "MSPUS.times.HSN1FNSA.plusEXHOSLUSM495S.by.GDP"
+ylim <- c(9, 16)
 dt.start <- as.Date("1jun2004","%d%b%Y")
 my.plot <- plotSingle(
   dfRecession,
@@ -5943,6 +5954,17 @@ my.plot <- my.plot + geom_line(
   ),
   na.rm = TRUE
 )
+
+my.plot <- my.plot + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux.3,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux.3, str.sep = "\n"))
+  ),
+  na.rm = TRUE
+)
+
 my.plot
 
 ```
@@ -5992,7 +6014,7 @@ p2 <-
 
 datay <- "A065RC1A027NBEA.by.GDP"
 datay.aux <- "PI.by.GDP"
-ylim <- c(75, 125)
+ylim <- c(75, 105)
 b.legend <- TRUE
 b.percentile <- TRUE
 p3 <-
@@ -6949,15 +6971,15 @@ p1 <-
     b.percentile = FALSE,
     b.long.legend = TRUE
   )
-# p1 <- p1 + geom_line(
-#   data = df.data,
-#   aes_string(
-#     x = "date",
-#     y = datay.aux.1,
-#     colour = shQuote(getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n"))
-#   ),
-#   na.rm = TRUE
-# )
+p1 <- p1 + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux.1,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n"))
+  ),
+  na.rm = TRUE
+)
 p1 <- p1 + geom_line(
   data = df.data,
   aes_string(

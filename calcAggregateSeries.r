@@ -535,7 +535,7 @@ df.symbols <-
   rbind(
     df.symbols,
     data.frame(
-      string.symbol = "317491-948457.by.GDP",
+      string.symbol = "ASHMA.INTEREST.by.GDP",
       string.source = "Calc",
       string.description = "Home Mortgages (Quarterly, NSA)\n 30-Year Fixed Interest Burdens\nDivided by GDP",
       string.label.y = "PERCENT",
@@ -1679,6 +1679,50 @@ df.symbols <-
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'MSPUS'], index(tail(HOUST, 1))
+      )))
+    )
+  )
+
+# What is the total home sold times median price? HSN1FNSA is in units of
+# 'thousands' each month.
+df.data$MSPUS.times.HSN1FNSA.plusEXHOSLUSM495S <-
+  (df.data$MSPUS * (df.data$HSN1FNSA*1000 + df.data$EXHOSLUSM495S))/1e9
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "MSPUS.times.HSN1FNSA.plusEXHOSLUSM495S",
+      string.source = "Calc",
+      string.description = "Median home price\ntimes new and existing houses sold",
+      string.label.y = "Billions of dollars",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(
+        c(df.symbols$date.series.start[df.symbols$Symbol == 'MSPUS'], index(HSN1FNSA[1]))
+      ))  ,
+      date.series.end = as.Date(min(c(
+        df.symbols$date.series.end[df.symbols$Symbol == 'MSPUS'], index(tail(HSN1FNSA, 1))
+      )))
+    )
+  )
+
+# Normalize single-family home sales volume (billions) by GDP
+# (which is in billions)
+df.data$MSPUS.times.HSN1FNSA.plusEXHOSLUSM495S.by.GDP <-
+  (df.data$MSPUS.times.HSN1FNSA.plusEXHOSLUSM495S / df.data$GDP) * 100
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "MSPUS.times.HSN1FNSA.plusEXHOSLUSM495S.by.GDP",
+      string.source = "Calc",
+      string.description = "New and existing home sales volume ",
+      string.label.y = "Percent",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(c(
+        index(BUSLOANS[1]), index(GDP[1])
+      )))  ,
+      date.series.end = as.Date(min(c(
+        index(tail(BUSLOANS, 1)), index(tail(GDP, 1))
       )))
     )
   )

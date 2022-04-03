@@ -462,14 +462,14 @@ plotReturnVolatility <-
     # Plot limits
     x.max <- round(max(dfRR$Volatility), digits = -1)+5
     x.min <- round(min(dfRR$Volatility), digits = -1)-5
-    print( paste('Volatility: ',
+    print( paste('Volatility limits: ',
                  toString(x.min),
                  ' | ', 
                  toString(x.max)))
     
     y.max <- round(max(dfRR$ExpReturn), digits = -1)+5
     y.min <- round(min(dfRR$ExpReturn), digits = -1)-5
-    print( paste('Returns: ',
+    print( paste('Returns limits: ',
                  toString(y.min),
                  ' | ', 
                  toString(y.max)))
@@ -486,12 +486,17 @@ plotReturnVolatility <-
                  size = 3,
                  shape=15) +
       labs(color = "Symbol") +
+      
       # Plot the efficiency frontier
-      geom_line(data = plot_dt[efficient == F],
+      # Revision - 27 Mar 2022 Spelled out FALSE, see 
+      # "Revision plotReturnVolatility error.docx" for details.
+      geom_line(data = plot_dt[efficient == FALSE],
                 aes(x = sd, y = er),
                 size = 0.5,
                 color = "blue") +
-      geom_line(data = plot_dt[efficient == T],
+      # Revision - 27 Mar 2022 Spelled out TRUE, see 
+      # "Revision plotReturnVolatility error.docx" for details.
+      geom_line(data = plot_dt[efficient == TRUE],
                 aes(x = sd, y = er),
                 size = 0.5,
                 color = "red") +
@@ -604,6 +609,7 @@ getRootTickerSymbol <-function(datay){
 #'
 #' @examples
 getPlotTitle <- function(df.symbols, datay, str.sep = " | "){
+
   # Default ticker description
   str.desc <- df.symbols[grep(paste("^", datay, "$", sep=""), df.symbols$string.symbol),]$string.description
 

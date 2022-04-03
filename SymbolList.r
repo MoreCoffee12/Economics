@@ -1953,6 +1953,19 @@ df.symbols <-
     )
   )
 
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "EXHOSLUSM495S",
+      string.source = "FRED",
+      string.description = "Existing Home Sales",
+      string.label.y = "Number of Units",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
 
 df.symbols <-
   rbind(
@@ -1960,7 +1973,7 @@ df.symbols <-
     data.frame(
       string.symbol = "MSPUS",
       string.source = "FRED",
-      string.description = "Median Sales Price of\nHouses Sold for the United States",
+      string.description = "Median Sales Price of\nHouses Sold for the United States (NSA)",
       string.label.y = "Dollars",
       float.expense.ratio = -1.00,
       date.series.start = as.Date("1900-01-01"),
