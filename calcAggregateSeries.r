@@ -1407,6 +1407,27 @@ df.symbols <-
     )
   )
 
+# Normalize nominal GDP commodities by GDP deflator
+df.data$GDP.by.GDPDEF <-
+  (df.data$GDP / df.data$GDPDEF)
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "GDP.by.GDPDEF",
+      string.source = "Calc",
+      string.description = "Nominal GDP \nNormalized by GDP def",
+      string.label.y = "(-)",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(c(
+        index(GDP[1]), index(GDPDEF[1])
+      ))) ,
+      date.series.end = as.Date(min(c(
+        index(tail(GDP, 1)), index(tail(GDPDEF, 1))
+      )))
+    )
+  )
+
 # Normalize GSG (close) commodities by GDP deflator
 df.data$GSG.Close.by.GDPDEF <-
   (df.data$GSG.Close / df.data$GDPDEF)

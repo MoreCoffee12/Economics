@@ -114,13 +114,13 @@ if (bRefresh == TRUE) {
 
 ```{r getsyms, echo=FALSE}
 
-if(bRefresh) {
+
+if (bRefresh) {
   # This pulls in data using quantmod
   for (idx in 1:nrow(df.symbols)) {
-    
     # This ticker symbol is an odd one. R must allow '=' as variable names, but
     # most safe names I found removed it. Manually changed here.
-    if ( grepl("=", df.symbols[idx, "string.symbol"], fixed = TRUE) ) {
+    if (grepl("=", df.symbols[idx, "string.symbol"], fixed = TRUE)) {
       CLF <- getSymbols(
         as.character(df.symbols[idx, "string.symbol"]),
         src = as.character(df.symbols[idx, "string.source"]),
@@ -128,11 +128,19 @@ if(bRefresh) {
         from = as.Date("1900-01-01"),
         to = Sys.Date()
       )
-      colnames(CLF) = c("CLF.Open","CLF.High","CLF.Low","CLF.Close","CLF.Volume","CLF.Adjusted")
-
+      colnames(CLF) = c("CLF.Open",
+                        "CLF.High",
+                        "CLF.Low",
+                        "CLF.Close",
+                        "CLF.Volume",
+                        "CLF.Adjusted")
+      
     } else{
       str.symbol.list <- df.symbols[idx, "string.symbol"]
-
+      
+      print(str.symbol.list)
+      
+      
       getSymbols(
         as.character(str.symbol.list),
         src = as.character(df.symbols[idx, "string.source"]),
@@ -146,9 +154,9 @@ if(bRefresh) {
     # Revision - 26 Mar 22
     # Remove duplicate date values (believed to be a data source error)
     # Details in "Revision X in date.docx"
-    str.safe <- str_replace_all(df.symbols[idx, "string.symbol"], "[^[:alnum:]]", "")
-    print(str.safe)
-    assign(str.safe, get(str.safe)[!duplicated (index(get(str.safe))),])
+    str.safe <-
+      str_replace_all(df.symbols[idx, "string.symbol"], "[^[:alnum:]]", "")
+    assign(str.safe, get(str.safe)[!duplicated (index(get(str.safe))), ])
     
     # Grab the series for some additional extractions
     xts.temp <- get(str.safe)
@@ -7278,7 +7286,7 @@ U.S. Bureau of Economic Analysis, Personal Consumption Expenditures: Chain-type 
 ```{r PCEPI, echo=FALSE}
 
 datay <- "PCEPI"
-ylim <- c(0, 120)
+ylim <- c(0, 130)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
@@ -7286,7 +7294,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 ```{r PCEPI.recent, echo=FALSE}
 
 datay <- "PCEPI"
-ylim <- c(60, 120)
+ylim <- c(60, 140)
 dtStart = as.Date('2000-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
