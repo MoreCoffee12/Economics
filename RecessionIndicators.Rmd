@@ -4167,6 +4167,17 @@ myPlot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuot
 
 ```
 
+```{r plot.CHRISCMEHG1.close, echo=FALSE}
+datay <- "CHRISCMEHG1"
+datay_aux <- "CHRISCMEHG1_Smooth"
+ylim <- c(0, 5)
+dtStart = as.Date('2008-01-01')
+myPlot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
+            getPlotYLabel(df.symbols, datay), c(dtStart, Sys.Date()), ylim, TRUE)
+myPlot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuote(datay_aux)), na.rm = TRUE)
+
+```
+
 Copper is one of the commodities in the PPI so it is a bit of a proxy for how copper is doing relative to the basket of commodities.
 
 ```{r coppyer.by.index, echo=FALSE, fig.width = 9, fig.asp = 0.4}
