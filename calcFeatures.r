@@ -222,6 +222,31 @@ calcFeatures <- function(df.data, df.symbols){
         )
       )
     
+    # Add the 365 day moving average
+    mav <- function(x, n = 365) {
+      stats::filter(x, rep(1 / n, n), sides = 1)
+    }
+    strNewYLabel <-
+      df.symbols[grep(paste("^", str.symbol.root, "$", sep = ""), df.symbols$string.symbol), ]$tring.label.y 
+    str.symbolMVA365 <- paste(str.symbol, "_mva365", sep = "")
+    df.data[str.symbolMVA365] <- mav(df.data[, str.symbol])
+    df.data[, str.symbolMVA365] <-
+      na.approx(df.data[, str.symbolMVA365], rule = 2)
+    df.symbols <-
+      rbind(
+        df.symbols,
+        data.frame(
+          string.symbol = str.symbolMVA365,
+          string.source = "Calc",
+          string.description = paste(str.description, " 365 Day MA", sep =
+                                       ""),
+          string.label.y = paste(strNewYLabel, " 365 Day MA", sep =
+                                   ""),
+          float.expense.ratio = -1.00,
+          date.series.start = date.temp,
+          date.series.end = date.temp.end
+        )
+      )
     
     # Add the 200 day moving average
     mav <- function(x, n = 200) {
@@ -248,7 +273,8 @@ calcFeatures <- function(df.data, df.symbols){
           date.series.end = date.temp.end
         )
       )
-    
+
+        
     # Add the 50 day moving average
     strNewYLabel <-
       df.symbols[grep(paste("^", str.symbol.root, "$", sep = ""), df.symbols$string.symbol), ]$tring.label.y 

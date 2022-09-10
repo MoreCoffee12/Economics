@@ -3052,6 +3052,41 @@ myPlot + geom_line(
 
 ```
 
+Suggested by Charlie and a Wealthian video the 12 month-MA might be helpful to look at.
+
+```{r unrate.ma, echo=FALSE, fig.width = 9, fig.asp = 0.4}
+datay <- "UNRATE"
+datay_aux <- "UNRATE_mva365"
+ylim <- c(2, 15)
+b.legend <- TRUE
+b.percentile <- TRUE
+myPlot <-
+  plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay,
+    getPlotTitle(df.symbols, datay),
+    "Date",
+    getPlotYLabel(df.symbols, datay),
+    c(as.Date("1jan1950", "%d%b%Y"), Sys.Date()),
+    ylim,
+    b.legend,
+    b.percentile,
+    b.long.legend = TRUE
+  )
+myPlot + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay_aux,
+    colour = shQuote(getPlotTitle(df.symbols, datay_aux))
+  ),
+  na.rm = TRUE
+)
+
+```
+
 Looking at the unemployment rate, the eye is drawn to the rise and fall of the data, this suggests that the derivative might be helpful as well. The figure below shows the results, using a Savitzky-Golay FIR filter. It looks like the unemployment rate peaks in the middel of the recession. That peak might be a good buy signal.
 
 ```{r UnrateDer, echo=FALSE}
@@ -4652,11 +4687,12 @@ Compare liabilities to reverse repo trends
 ```{r WLRRAL, echo=FALSE}
 
 datay <- "WLRRAL"
-ylim <- c(0, 2000)
+ylim <- c(0, 3000)
 dtStart = as.Date('2003-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
 ```
+
 Take a look at more recent trends
 
 
