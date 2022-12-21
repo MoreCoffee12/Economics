@@ -3610,7 +3610,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = TRUE
 
 Take a look at year-over-year changes
 
-```{r rsalesderplot.yoy, echo=FALSE, fig.width = 5, fig.asp = .42}
+```{r rsalesderplot.yoy, echo=FALSE, fig.width = 9, fig.asp = .42}
 datay <- "RSALESAGG_YoY" 
 ylim <- c(-12.5, 12.5)
 dt.start <- as.Date('1968-01-01')
@@ -3641,7 +3641,7 @@ Let's see how that looks on year over year basis. Interesting to compare to unem
 datay <- "RSALESAGG_YoY" 
 datay.aux <- "UNRATE_YoY" 
 datay.aux.scale <- 0.25;
-ylim <- c(-10, 70)
+ylim <- c(-15, 70)
 dtStart = as.Date('1998-01-01')
 myPlot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
             getPlotYLabel(df.symbols, datay), c(dtStart, Sys.Date()), ylim, TRUE)
@@ -6190,10 +6190,10 @@ This market went through some stress in 2008, it is happening again so setup som
 ### Nonfincial corporate business security repo asset level
 
 
-```{r nonfin.corp.securty.repo.asset.by.GDP, echo=FALSE, fig.width = 7, fig.asp = 1.3}
+```{r nonfin.corp.securty.repo.asset.by.GDP, echo=FALSE, fig.width = 7, fig.asp = 1.0}
 
 datay <- "SRPSABSNNCB.by.GDP"
-ylim <- c(0, 2)
+ylim <- c(0, 1)
 dt.start <- as.Date("1jan1955", "%d%b%Y")
 p1 <-
   plotSingle(
@@ -6233,7 +6233,7 @@ p1 + geom_line(data=df.data, aes_string(x="date", y=datay.aux, colour=shQuote(da
 
 datay <- "TB3MS"
 datay.aux <- "DTB3"
-ylim <- c(0, 2.5)
+ylim <- c(0, 5.0)
 dtStart = as.Date('2017-01-01')
 p1 <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
             getPlotYLabel(df.symbols, datay), c(dtStart, Sys.Date()), ylim, TRUE)
@@ -6286,7 +6286,7 @@ datay <- "DGS10"
 datay.aux <- "TNX.Open"
 datay.aux1 <- "DTB3"
 datay.aux2 <- "IRX.Open"
-ylim <- c(0.5, 3.0)
+ylim <- c(0.5, 5.0)
 dtStart = as.Date('2018-01-01')
 p1 <-
   plotSingle(
@@ -8190,7 +8190,7 @@ https://www.federalreserve.gov/apps/fof/SeriesAnalyzer.aspx?s=FL893065405&t=L.21
 ```{r ASMRMA.z.1, echo=FALSE}
 
 datay <- "ASMRMA"
-ylim <- c(0, 2000)
+ylim <- c(0, 3000)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
@@ -8214,7 +8214,7 @@ https://www.federalreserve.gov/apps/fof/SeriesAnalyzer.aspx?s=FL893065603&t=L.21
 ```{r ASFMA.z.1, echo=FALSE}
 
 datay <- "ASFMA"
-ylim <- c(0, 300)
+ylim <- c(0, 400)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
