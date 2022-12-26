@@ -5966,7 +5966,7 @@ datay.aux <- "RREACBM027SBOG.by.GDP"
 datay.aux.1 <- "RREACBW027SBOG.by.GDP"
 datay.aux.2 <- "RREACBW027NBOG.by.GDP"
 datay.aux.3 <- "MSPUS.times.HSN1FNSA.plusEXHOSLUSM495S.by.GDP"
-ylim <- c(9, 16)
+ylim <- c(5, 16)
 dt.start <- as.Date("1jun2004","%d%b%Y")
 my.plot <- plotSingle(
   dfRecession,
@@ -6098,6 +6098,32 @@ p3 <-
   )
 
 grid.arrange(p1, p2, p3, ncol = 1, top = "Residential Morgtage and Interest Burdens")
+
+```
+
+How do the number of starts compare to population?
+
+```{r realestate.start.div.pop, echo=FALSE, fig.width = 9, fig.asp = 0.4}
+
+datay <- "HOUST.div.POPTHM"
+ylim <- c(0, 0.01)
+dt.start <- as.Date("1jun2004","%d%b%Y")
+my.plot <- plotSingle(
+  dfRecession,
+  df.data,
+  "date",
+  datay,
+  titlelabel = "Housing starts divided by US population",
+  xlabel = "Date",
+  ylabel = getPlotYLabel(df.symbols, datay),
+  c(dt.start, Sys.Date()),
+  ylim,
+  b.legend = TRUE,
+  b.percentile = FALSE,
+  b.long.legend = TRUE
+)
+
+my.plot
 
 ```
 
@@ -8419,6 +8445,19 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ## Productivity
 
+Frequency:  Quarterly
+The Productivity and Costs release on August 7, 2003, will reflect the June 2003
+benchmark revision to payroll employment. Since employment is now reported on a
+North American Industry Classification System (NAICS) basis, all of the
+historical data will be revised. Changes as a consequence of the move to NAICS
+should not be significant since this release carries data at high levels of
+aggregation.
+
+Suggested Citation: U.S. Bureau of Labor Statistics, Nonfarm Business Sector:
+Labor Productivity (Output per Hour) for All Employed Persons [OPHNFB],
+retrieved from FRED, Federal Reserve Bank of St. Louis;
+https://fred.stlouisfed.org/series/OPHNFB, December 24, 2022.
+
 ```{r OPHNFB, echo=FALSE}
 
 datay <- "OPHNFB"
@@ -8434,7 +8473,7 @@ plotSingleQuick(
   dfRecession,
   df.data,
   datay = "OPHNFB_YoY",
-  ylim = c(-2, 8),
+  ylim = c(-3, 8),
   b.percentile = TRUE
 )
 
@@ -8448,7 +8487,7 @@ plotSingleQuick(
   dfRecession,
   df.data,
   datay = "OPHNFB_YoY",
-  ylim = c(-2, 6),
+  ylim = c(-3, 6),
   dt.start = as.Date('1977-01-01'),
   b.percentile = TRUE
 )
@@ -8497,6 +8536,20 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile)
 
 Take a look at housing starts. These can drop as rates rise.
 
+Frequency:  Monthly
+
+As provided by the Census, start occurs when excavation begins for the footings
+or foundation of a building. All housing units in a multifamily building are
+defined as being started when this excavation begins. Beginning with data for
+September 1992, estimates of housing starts include units in structures being
+totally rebuilt on an existing foundation.
+
+Suggested Citation:
+U.S. Census Bureau and U.S. Department of Housing and Urban Development, New
+Privately-Owned Housing Units Started: Total Units [HOUST], retrieved from FRED,
+Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/HOUST,
+December 24, 2022.
+
 ```{r Houst, echo=FALSE}
 
 datay <- "HOUST"
@@ -8505,15 +8558,40 @@ dtStart = as.Date('1960-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
 ```
+Housing starts, NSA
+
+HOUST reports at annual rate, but HOUSTNSA just reports the monthly numbers. I
+scale up the NSA to the annual rate.
+
+Units:  Thousands of Units, Not Seasonally Adjusted
+
+Frequency:  Monthly
+
+Suggested Citation:
+U.S. Census Bureau and U.S. Department of Housing and Urban Development, New
+Privately-Owned Housing Units Started: Total Units [HOUSTNSA], retrieved from
+FRED, Federal Reserve Bank of St. Louis;
+https://fred.stlouisfed.org/series/HOUSTNSA, December 24, 2022.
+
+```{r Houst.NSA, echo=FALSE}
+
+datay <- "HOUSTNSA"
+ylim <- c(0, 2700)
+dtStart = as.Date('1960-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+
+```
 
 ```{r Houst_YoY, echo=FALSE}
 
 datay <- "HOUST_YoY"
+datay_aux <- "HOUSTNSA_YoY"
 ylim <- c(-50, 100)
 dtStart = as.Date('1960-01-01')
 b.percentile <- TRUE
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile)
+my.plot <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile)
 
+my.plot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuote(datay_aux)), na.rm = TRUE)
 
 ```
 

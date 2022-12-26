@@ -1819,7 +1819,7 @@ df.symbols <-
     data.frame(
       string.symbol = "OPHNFB",
       string.source = "FRED",
-      string.description = "Nonfarm Business Sector: Real Output Per Hour of All Persons",
+      string.description = "Nonfarm Business Sector: Real Output Per Hour of All Persons, SA",
       string.label.y = "Index 2009 = 100",
       float.expense.ratio = -1.00,
       date.series.start = as.Date("1900-01-01") ,
@@ -1945,8 +1945,22 @@ df.symbols <-
     data.frame(
       string.symbol = "HOUST",
       string.source = "FRED",
-      string.description = "Housing Starts: Total: New Privately\nOwned Housing Units Started",
-      string.label.y = "Billions of Dollars",
+      string.description = "Housing Starts: Total: New Privately\nOwned Housing Units Started, SA",
+      string.label.y = "Thousands of Units",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "HOUSTNSA",
+      string.source = "FRED",
+      string.description = "Housing Starts: Total: New Privately\nOwned Housing Units Started, NSA",
+      string.label.y = "Thousands of Units",
       float.expense.ratio = -1.00,
       date.series.start = as.Date("1900-01-01"),
       date.series.end = as.Date("1900-01-01")

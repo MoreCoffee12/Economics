@@ -437,7 +437,7 @@ df.symbols <-
     )
   )
 
-# All durable goods as percet of GDP. Have to convert from millions to
+# All durable goods as percent of GDP. Have to convert from millions to
 # billions to be consistent with H.8 and GDP series
 df.data$UMDMNO <- df.data$UMDMNO / 1000
 df.data$UMDMNO.by.GDP <-
@@ -1677,6 +1677,31 @@ df.symbols <-
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'MSPUS'], index(tail(HOUST, 1))
+      )))
+    )
+  )
+
+# HOUST reports at annual rate, but HOUSTNSA just reports the monthly numbers. I
+# scale up the NSA to the annual rate.
+df.data$HOUSTNSA <- df.data$HOUSTNSA * 12
+
+
+# Housing starts divided by population
+df.data$HOUST.div.POPTHM <- (df.data$HOUST / df.data$POPTHM)
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "HOUST.div.POPTHM",
+      string.source = "Calc",
+      string.description = "Housing starts divided\nby U.S. population",
+      string.label.y = "Starts per person",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(
+        c(df.symbols$date.series.start[df.symbols$Symbol == 'POPTHM'], index(HOUST[1]))
+      ))  ,
+      date.series.end = as.Date(min(c(
+        df.symbols$date.series.end[df.symbols$Symbol == 'POPTHM'], index(tail(HOUST, 1))
       )))
     )
   )
