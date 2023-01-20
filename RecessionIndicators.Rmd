@@ -5591,7 +5591,7 @@ One business cycle theory describes recessions as a market adjustment to mis-all
 ```{r realloans, echo=FALSE}
 
 datay <- "TOTLNNSA"
-ylim <- c(-25, 10000)
+ylim <- c(-25, 12500)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
@@ -5842,7 +5842,7 @@ datay <- "REALLNNSA"
 datay.aux <- "REALLN"
 datay.aux.1 <- "RELACBW027NBOG"
 datay.aux.2 <- "RELACBW027SBOG"
-ylim <- c(0, 5000)
+ylim <- c(0, 6000)
 dt.start <- as.Date("1jan1945","%d%b%Y")
 my.plot <- plotSingle(
   dfRecession,
