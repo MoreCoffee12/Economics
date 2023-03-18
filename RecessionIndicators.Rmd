@@ -38,12 +38,11 @@ library(readr)
 #library(devtools)
 #install_github("andrewuhl/RollingWindow")
 library(RollingWindow)
-#install.packages("EIAdata")
-library(EIAdata)
 
 #library(devtools)
-#install_github("MoreCoffee12/EIAdata")
-#library(EIAdata)
+#devtools::install_github("jameelalsalam/eia2")
+library(eia2)
+#key <- "7a2672468131c5a95dffc487d741edf6"
 
 library(gtable)
 library(data.table)
@@ -469,9 +468,15 @@ if (bRefresh){
         )
       )
 
+    
+    # Define the table name and pull the data series from the EIA website
     str.name <-
       str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-    PETA103600001M <- getEIA(key=key, ID=str.symbol.raw )
+    tlb.eia <- eia1_series( str.symbol.raw )
+    
+    # Convert the table to an xts object an and select the column we are interested in
+    PETA103600001M <- xts( tlb.eia [,-1], order.by=as.Date(as.yearmon(tlb.eia[['period']])))
+    PETA103600001M <- PETA103600001M[,9]
     colnames(PETA103600001M) <- c(str.name)
     # Revision - 26 Mar 2022, reference "Revision EIA Data Unambig.docx"
     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw,]$date.series.start = tail(index(get(str.name)), 1)
@@ -493,15 +498,21 @@ if (bRefresh){
         )
       )
 
+    # Define the table name and pull the data series from the EIA website
     str.name <-
       str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-    PETA123600001M <- getEIA(key=key, ID=str.symbol.raw )
+    tlb.eia <- eia1_series( str.symbol.raw )
+    
+    # Convert the table to an xts object an and select the column we are interested in
+    PETA123600001M <- xts( tlb.eia [,-1], order.by=as.Date(as.yearmon(tlb.eia[['period']])))
+    PETA123600001M <- PETA123600001M[,9]
     colnames(PETA123600001M) <- c(str.name)
+
     # Revision - 26 Mar 2022, reference "Revision EIA Data Unambig.docx"
     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw,]$date.series.start = tail(index(get(str.name)), 1)
     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw,]$date.series.end = index(get(str.name))[[1]]
 
-  # U.S. Gasoline Midgrade Bulk Sales (Volume) by Refiners, Monthly
+    # U.S. Gasoline Midgrade Bulk Sales (Volume) by Refiners, Monthly
     str.symbol.raw = "PET.A143B00001.M"
     df.symbols <-
       rbind(
@@ -517,15 +528,21 @@ if (bRefresh){
         )
       )
 
+    # Define the table name and pull the data series from the EIA website
     str.name <-
       str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-    PETA143B00001M <- getEIA(key=key, ID=str.symbol.raw )
+    tlb.eia <- eia1_series( str.symbol.raw )
+    
+    # Convert the table to an xts object an and select the column we are interested in
+    PETA143B00001M <- xts( tlb.eia [,-1], order.by=as.Date(as.yearmon(tlb.eia[['period']])))
+    PETA143B00001M <- PETA143B00001M[,9]
     colnames(PETA143B00001M) <- c(str.name)
+
     # Revision - 26 Mar 2022, reference "Revision EIA Data Unambig.docx"
     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw,]$date.series.start = tail(index(get(str.name)), 1)
     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw,]$date.series.end = index(get(str.name))[[1]]
 
-  # U.S. Premium Gasoline Bulk Sales (Volume) by Refiners, Monthly
+    # U.S. Premium Gasoline Bulk Sales (Volume) by Refiners, Monthly
     str.symbol.raw = "PET.A133B00001.M"
     df.symbols <-
       rbind(
@@ -541,10 +558,16 @@ if (bRefresh){
         )
       )
 
+    # Define the table name and pull the data series from the EIA website
     str.name <-
       str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-    PETA133B00001M <- getEIA(key=key, ID=str.symbol.raw )
-    colnames(PETA133B00001M) <- c(str.name)
+    tlb.eia <- eia1_series( str.symbol.raw )
+    
+    # Convert the table to an xts object an and select the column we are interested in
+    PETA133B00001M <- xts( tlb.eia [,-1], order.by=as.Date(as.yearmon(tlb.eia[['period']])))
+    PETA133B00001M <- PETA133B00001M[,9]
+    colnames(PETA133B00001M) <- c(str.name)    
+    
     # Revision - 26 Mar 2022, reference "Revision EIA Data Unambig.docx"
     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw,]$date.series.start = tail(index(get(str.name)), 1)
     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw,]$date.series.end = index(get(str.name))[[1]]
@@ -565,10 +588,16 @@ if (bRefresh){
         )
       )
 
+    # Define the table name and pull the data series from the EIA website
     str.name <-
       str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-    TOTALOGNRPUSM <- getEIA(key=key, ID=str.symbol.raw )
-    colnames(TOTALOGNRPUSM) <- c(str.name)
+    tlb.eia <- eia1_series( str.symbol.raw )
+    
+    # Convert the table to an xts object an and select the column we are interested in
+    TOTALOGNRPUSM <- xts( tlb.eia [,-1], order.by=as.Date(as.yearmon(tlb.eia[['period']])))
+    TOTALOGNRPUSM <- TOTALOGNRPUSM[,3]
+    colnames(TOTALOGNRPUSM) <- c(str.name)    
+
     # Revision - 26 Mar 2022, reference "Revision EIA Data Unambig.docx"
     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw,]$date.series.start = tail(index(get(str.name)), 1)
     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw,]$date.series.end = index(get(str.name))[[1]]
@@ -589,10 +618,16 @@ if (bRefresh){
         )
       )
 
+    # Define the table name and pull the data series from the EIA website
     str.name <-
       str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-    TOTALPANRPUSM <- getEIA(key=key, ID=str.symbol.raw )
-    colnames(TOTALPANRPUSM) <- c(str.name)
+    tlb.eia <- eia1_series( str.symbol.raw )
+    
+    # Convert the table to an xts object an and select the column we are interested in
+    TOTALPANRPUSM <- xts( tlb.eia [,-1], order.by=as.Date(as.yearmon(tlb.eia[['period']])))
+    TOTALPANRPUSM <- TOTALPANRPUSM[,3]
+    colnames(TOTALPANRPUSM) <- c(str.name)    
+
     # Revision - 26 Mar 2022, reference "Revision EIA Data Unambig.docx"
     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw,]$date.series.start = tail(index(get(str.name)), 1)
     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw,]$date.series.end = index(get(str.name))[[1]]
@@ -613,10 +648,16 @@ if (bRefresh){
         )
       )
 
+    # Define the table name and pull the data series from the EIA website
     str.name <-
       str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-    TOTALNGNRPUSM <- getEIA(key=key, ID=str.symbol.raw )
-    colnames(TOTALNGNRPUSM) <- c(str.name)
+    tlb.eia <- eia1_series( str.symbol.raw )
+    
+    # Convert the table to an xts object an and select the column we are interested in
+    TOTALNGNRPUSM <- xts( tlb.eia [,-1], order.by=as.Date(as.yearmon(tlb.eia[['period']])))
+    TOTALNGNRPUSM <- TOTALNGNRPUSM[,3]
+    colnames(TOTALNGNRPUSM) <- c(str.name)    
+
     # Revision - 26 Mar 2022, reference "Revision EIA Data Unambig.docx"
     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw,]$date.series.start = tail(index(get(str.name)), 1)
     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw,]$date.series.end = index(get(str.name))[[1]]
