@@ -7787,7 +7787,7 @@ U.S. Census Bureau and U.S. Department of Housing and Urban Development, Median 
 ```{r MSPUS.plot, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
 datay <- "MSPUS"
-ylim <- c(0, 450000)
+ylim <- c(0, 500000)
 dt.start <- as.Date("1jan1963","%d%b%Y")
 my.plot <- plotSingle(
   dfRecession,
