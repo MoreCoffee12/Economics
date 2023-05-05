@@ -3110,7 +3110,7 @@ myPlot <-
     getPlotTitle(df.symbols, datay),
     "Date",
     getPlotYLabel(df.symbols, datay),
-    c(as.Date("1jan1950", "%d%b%Y"), Sys.Date()),
+    c(as.Date("1jan2000", "%d%b%Y"), Sys.Date()),
     ylim,
     b.legend,
     b.percentile,
@@ -3127,6 +3127,8 @@ myPlot + geom_line(
 )
 
 ```
+
+
 
 Looking at the unemployment rate, the eye is drawn to the rise and fall of the data, this suggests that the derivative might be helpful as well. The figure below shows the results, using a Savitzky-Golay FIR filter. It looks like the unemployment rate peaks in the middel of the recession. That peak might be a good buy signal.
 
