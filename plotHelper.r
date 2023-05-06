@@ -623,7 +623,7 @@ getPlotTitle <- function(df.symbols, datay, str.sep = " | "){
   }
   
   strTitle <-  paste(datay, str.sep, str.desc, sep="" )
-  strTitle <- gsub("|", "\n", strTitle)
+  strTitle <- gsub("\\| ", "\n", strTitle)
   
   return(strTitle)
 }
