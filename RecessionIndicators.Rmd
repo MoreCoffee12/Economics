@@ -4366,7 +4366,7 @@ p1 <-
     dfRecession,
     df.data,
     datay,
-    ylim = c(-10, 80),
+    ylim = c(-10, 150),
     dtStart,
     b.legend = TRUE,
     b.long.legend = FALSE
@@ -4438,7 +4438,7 @@ p2 <-
     dfRecession,
     df.data,
     datay,
-    ylim = c(5, 30),
+    ylim = c(5, 60),
     dtStart,
     b.legend = TRUE,
     b.long.legend = FALSE
@@ -4492,7 +4492,7 @@ p3 <-
     dfRecession,
     df.data,
     datay,
-    ylim = c(0, 35),
+    ylim = c(0, 60),
     dtStart,
     b.legend = TRUE,
     b.long.legend = FALSE
@@ -4528,7 +4528,7 @@ p4 <-
     dfRecession,
     df.data,
     datay,
-    ylim = c(0, 50),
+    ylim = c(0, 60),
     dtStart,
     b.legend = TRUE,
     b.long.legend = FALSE
