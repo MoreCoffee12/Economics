@@ -8643,7 +8643,7 @@ Case-schiller price index
 ```{r CSUSHPINSA, echo=FALSE}
 
 datay <- "CSUSHPINSA"
-ylim <- c(60, 220)
+ylim <- c(60, 300)
 dtStart = as.Date('1987-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
