@@ -6302,7 +6302,7 @@ p1 + geom_line(data=df.data, aes_string(x="date", y=datay.aux, colour=shQuote(da
 
 datay <- "TB3MS"
 datay.aux <- "DTB3"
-ylim <- c(0, 5.0)
+ylim <- c(0, 6.0)
 dtStart = as.Date('2017-01-01')
 p1 <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
             getPlotYLabel(df.symbols, datay), c(dtStart, Sys.Date()), ylim, TRUE)
@@ -6493,7 +6493,7 @@ Just the last 24 months or so.
 
 datay <- "DGS10TOTB3MS"
 datay_aux <- "DGS10TO1"
-ylim <- c(-1.00, 2.00)
+ylim <- c(-2.00, 2.00)
 datay_aux2 <- "DGS10TO2"
 datay_aux3 <- "DGS30TO10"
 dtStart = as.Date('2018-01-01')
@@ -6510,7 +6510,7 @@ Plot the 10 Year to 3 month over a few decades to see what the outling cases loo
 ```{r YieldcurveRecent.twoyears.stats, echo=FALSE}
 
 datay <- "DGS10TOTB3MS"
-ylim <- c(-1, 4)
+ylim <- c(-2, 4)
 dtStart = as.Date('1989-01-01')
 b.legend <- FALSE
 b.percentile <- TRUE
