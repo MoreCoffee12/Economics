@@ -806,8 +806,8 @@ if(bRefresh){
   # Get S&P 500 Silverblatt data. From USDA website:
   # https://us.spindices.com/documents/additional-material/sp-500-eps-est.xlsx
   
-  # Read in th Excel file, starting with the quaterly data
-  df.silverblatt <- data.frame(read_excel('sp-500-eps-est.xlsx', range='QUARTERLY DATA!A7:I143'))
+  # Read in th Excel file, starting with the quarterly data
+  df.silverblatt <- data.frame(read_excel('sp-500-eps-est.xlsx', range='QUARTERLY DATA!A7:I147'))
   
   # Human readable column names
   colnames(df.silverblatt) <-
@@ -974,7 +974,7 @@ if(bRefresh){
   df.silverblatt.act <-
     data.frame(read_excel(
       'sp-500-eps-est.xlsx',
-      range = 'ESTIMATES&PEs!A134:J270',
+      range = 'ESTIMATES&PEs!A133:J273',
       col_types = c(
         "date",
         "numeric",
