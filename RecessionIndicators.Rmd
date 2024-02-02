@@ -7279,7 +7279,7 @@ U.S. Bureau of Economic Analysis, Federal Government: Nondefense Consumption Exp
 ```{r FNDEFX, echo=FALSE}
 
 datay <- "FNDEFX"
-ylim <- c(0.0, 700.0)
+ylim <- c(0.0, 800.0)
 plotSingleQuickModern(datay, ylim)
 
 ```

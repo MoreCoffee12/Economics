@@ -96,6 +96,21 @@ df.symbols <-
     )
   )
 
+# NPPTTL has ben discontinued...this one looks like a reasonable alternative
+df.symbols <-
+  rbind(
+    df.symbols,
+    data.frame(
+      string.symbol = "CEU0500000001",
+      string.source = "FRED",
+      string.description = "All Employees, Total Private (NSA)",
+      string.label.y = "Thousands",
+      float.expense.ratio = -1.00,
+      date.series.start = as.Date("1900-01-01"),
+      date.series.end = as.Date("1900-01-01")
+    )
+  )
+
 df.symbols <-
   rbind(
     df.symbols,
