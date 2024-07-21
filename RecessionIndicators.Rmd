@@ -1481,7 +1481,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.legend, b.percent
 ```{r bullet7, echo=FALSE}
 
 datay <- "DGS10TODTB3"
-ylim <- c(-0.5, 2)
+ylim <- c(-1.0, 2)
 dt.start <- as.Date('2017-01-01')
 b.legend <- FALSE
 b.percentile <- TRUE
@@ -7227,7 +7227,7 @@ Normalize GDP by CPI
 ```{r GDPBYCPIAUCSL, echo=FALSE}
 
 datay <- "GDPBYCPIAUCSL"
-ylim <- c(1000, 9000)
+ylim <- c(1000, 10000)
 dtStart = as.Date('1959-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
