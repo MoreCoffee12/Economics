@@ -168,23 +168,23 @@ df.symbols <-
     )
   )
 
-# Mean value of the P/E series, excluding highs that occured during the great recession
-df.data$MULTPLSP500PERATIOMONTH_Mean <-
-  mean(df.data$MULTPLSP500PERATIOMONTH[as.Date(index(df.data)) > as.Date("1990-01-01") &
-                                         df.data$MULTPLSP500PERATIOMONTH < 50])
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
-      string.symbol = "MULTPLSP500PERATIOMONTH_Mean",
-      string.source = "Calc",
-      string.description = "S&P 500 TTM P/E Average \n (Excludes Values Greater Than 50)",
-      string.label.y = "Index",
-      float.expense.ratio = -1.00,
-      date.series.start = as.Date(df.symbols$date.series.start[df.symbols$string.symbol == 'MULTPLSP500PERATIOMONTH']) ,
-      date.series.end = as.Date(df.symbols$date.series.end[df.symbols$string.symbol == 'MULTPLSP500PERATIOMONTH'])
-    )
-  )
+# # Mean value of the P/E series, excluding highs that occured during the great recession
+# df.data$MULTPLSP500PERATIOMONTH_Mean <-
+#   mean(df.data$MULTPLSP500PERATIOMONTH[as.Date(index(df.data)) > as.Date("1990-01-01") &
+#                                          df.data$MULTPLSP500PERATIOMONTH < 50])
+# df.symbols <-
+#   rbind(
+#     df.symbols,
+#     data.frame(
+#       string.symbol = "MULTPLSP500PERATIOMONTH_Mean",
+#       string.source = "Calc",
+#       string.description = "S&P 500 TTM P/E Average \n (Excludes Values Greater Than 50)",
+#       string.label.y = "Index",
+#       float.expense.ratio = -1.00,
+#       date.series.start = as.Date(df.symbols$date.series.start[df.symbols$string.symbol == 'MULTPLSP500PERATIOMONTH']) ,
+#       date.series.end = as.Date(df.symbols$date.series.end[df.symbols$string.symbol == 'MULTPLSP500PERATIOMONTH'])
+#     )
+#   )
 
 
 

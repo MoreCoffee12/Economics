@@ -174,270 +174,270 @@ if (bRefresh) {
 
 ```{r getQuandl, echo = FALSE}
 
-# This adds the Quandl symbols and pulls those in.
-
-if(bRefresh) {
-  # There are a few symbols I wasn't able to include with quantmod so this section uses Quandl to get those data pieces.
-  
-  # Get the PMI composite index
-  str.symbol.raw <- "ISM/MAN_PMI"
-  df.symbols <-
-    rbind(
-      df.symbols,
-      data.frame(
-        string.symbol = str.symbol.raw,
-        string.source = "QUANDL",
-        string.description = "Institute of Supply Managment PMI Composite Index",
-        string.label.y = "Index",
-        float.expense.ratio = -1.00,
-        date.series.start = as.Date("1900-01-01")  ,
-        date.series.end = as.Date("1900-01-01")
-      )
-    )
-  # Set the API key
-  Quandl.api_key('d9LUhcBVPa_8MFdtiFda')
-  dfPMIComp <-
-    Quandl(
-      "ISM/MAN_PMI",
-      type = "raw",
-      collapse = "daily",
-      start_date = "1910-01-01",
-      end_date = Sys.Date()
-    )
-  str.name <-
-    str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-  assign(str.name, xts(dfPMIComp[,-1], order.by = dfPMIComp[, 1]))
-  colnames(ISMMANPMI) <- c(str.name)
-  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(dfPMIComp$Date, 1)
-  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = dfPMIComp$Date[[1]]
-  
-  # PE Ratio for the S&P 500
-  str.symbol.raw = "MULTPL/SP500_PE_RATIO_MONTH"
-  df.symbols <-
-    rbind(
-      df.symbols,
-      data.frame(
-        string.symbol = str.symbol.raw,
-        string.source = "QUANDL",
-        string.description =  "S&P 500 TTM P/E",
-        string.label.y = "Index",
-        float.expense.ratio = -1.00,
-        date.series.start = as.Date("1900-01-01")  ,
-        date.series.end = as.Date("1900-01-01")
-      )
-    )
-  df.temp <- Quandl(
-    str.symbol.raw,
-    type = "raw",
-    collapse = "daily",
-    start_date = "1910-01-01",
-    end_date = Sys.Date()
-  )
-  
-  str.name <-
-    str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-  assign(str.name, xts(df.temp[, -1], order.by = df.temp[, 1]))
-  colnames(MULTPLSP500PERATIOMONTH) <- c(str.name)
-  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(df.temp$Date, 1)
-  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = df.temp$Date[[1]]
-  
-  
-  # S&P 500 sales multiple
-  str.symbol.raw = "MULTPL/SP500_SALES_QUARTER"
-  df.symbols <-
-    rbind(
-      df.symbols,
-      data.frame(
-        string.symbol = str.symbol.raw,
-        string.source = "QUANDL",
-        string.description =  "S&P 500 TTM Sales\n(Not Inflation Adjusted)",
-        string.label.y = "Index",
-        float.expense.ratio = -1.00,
-        date.series.start = as.Date("1900-01-01")  ,
-        date.series.end = as.Date("1900-01-01")
-      )
-    )
-  df.temp <-
-    oil_daily <- Quandl(
-      str.symbol.raw,
-      type = "raw",
-      collapse = "daily",
-      start_date = "1910-01-01",
-      end_date = Sys.Date()
-    )
-  
-  str.name <-
-    str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-  assign(str.name, xts(df.temp[, -1], order.by = df.temp[, 1]))
-  colnames(MULTPLSP500SALESQUARTER) <- c(str.name)
-  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(df.temp$Date, 1)
-  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = df.temp$Date[[1]]
-  
-  
-  # S&P 500 Dividend ratio
-  str.symbol.raw = "MULTPL/SP500_DIV_YIELD_MONTH"
-  df.symbols <-
-    rbind(
-      df.symbols,
-      data.frame(
-        string.symbol = str.symbol.raw,
-        string.source = "QUANDL",
-        string.description =  "S&P 500 Dividend Yield by Month",
-        string.label.y = "Percentage",
-        float.expense.ratio = -1.00,
-        date.series.start = as.Date("1900-01-01") ,
-        date.series.end = as.Date("1900-01-01")
-      )
-    )
-  df.temp <-
-    oil_daily <- Quandl(
-      str.symbol.raw,
-      type = "raw",
-      collapse = "daily",
-      start_date = "1910-01-01",
-      end_date = Sys.Date()
-    )
-  
-  str.name <-
-    str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-  assign(str.name, xts(df.temp[, -1], order.by = df.temp[, 1]))
-  colnames(MULTPLSP500DIVYIELDMONTH) <- c(str.name)
-  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(df.temp$Date, 1)
-  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = df.temp$Date[[1]]
-  
-  # S&P 500 dividend yield
-  str.symbol.raw = "MULTPL/SP500_DIV_MONTH"
-  df.symbols <-
-    rbind(
-      df.symbols,
-      data.frame(
-        string.symbol = str.symbol.raw,
-        string.source = "QUANDL",
-        string.description =  "S&P 500 Dividend by Month \n (Inflation Adjusted)",
-        string.label.y = "2018 Dollars",
-        float.expense.ratio = -1.00,
-        date.series.start = as.Date("1871-01-01")  ,
-        date.series.end = as.Date("1900-01-01")
-      )
-    )
-  df.temp <-
-    Quandl(
-      str.symbol.raw,
-      type = "raw",
-      collapse = "daily",
-      start_date = "1871-01-01",
-      end_date = Sys.Date()
-    )
-  
-  str.name <-
-    str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-  assign(str.name, xts(df.temp[,-1], order.by = df.temp[, 1]))
-  colnames(MULTPLSP500DIVMONTH) <- c(str.name)
-  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw,]$date.series.start = tail(df.temp$Date, 1)
-  df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw,]$date.series.end = df.temp$Date[[1]]
-  
-  # Copper prices
-  str.symbol.raw = "CHRIS/CME_HG1"
-  df.symbols <-
-    rbind(
-      df.symbols,
-      data.frame(
-        string.symbol = str.symbol.raw,
-        string.source = "QUANDL",
-        string.description =  "Copper Futures, Continuous Contract #1 (HG1) \n(Front Month)",
-        string.label.y = "Dollars/pound",
-        float.expense.ratio = -1.00,
-        date.series.start = as.Date("1871-01-01")  ,
-        date.series.end = as.Date("1900-01-01")
-      )
-    )
-  df.temp <- Quandl(
-    str.symbol.raw,
-    type = "raw",
-    collapse = "daily",
-    start_date = "1871-01-01",
-    end_date = Sys.Date()
-  )
-  # Needed because this series include open, close, high, low, etc.
-  df.temp <-
-    df.temp[, (colnames(df.temp) == 'Open') |
-             (colnames(df.temp) == 'Date')]
-  # This series also has zero values. Not sure why, tho.
-  df.temp[df.temp == 0] = NA
-  str.name <-
-    str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-  assign(str.name, xts(df.temp[, -1], order.by = df.temp[, 1]))
-  colnames(CHRISCMEHG1) <- c(str.name)
-  
-  # Air freight data
-  str.symbol.raw = "WWDI/WLD_IS_AIR_GOOD_MT_K1"
-  df.symbols <-
-    rbind(
-      df.symbols,
-      data.frame(
-        string.symbol = str.symbol.raw,
-        string.source = "QUANDL",
-        string.description =  "Air transport, freight",
-        string.label.y = "million ton-km",
-        float.expense.ratio = -1.00,
-        date.series.start = as.Date("1871-01-01") ,
-        date.series.end = as.Date("1900-01-01")
-      )
-    )
-  df.temp <- Quandl(
-    str.symbol.raw,
-    type = "raw",
-    collapse = "daily",
-    start_date = "1973-12-31",
-    end_date = Sys.Date()
-  )
-  
-  str.name <-
-    str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-  assign(str.name, xts(df.temp[, -1], order.by = df.temp[, 1]))
-  colnames(WWDIWLDISAIRGOODMTK1) <- c(str.name)
-  
-  # Gold prices. site: https://data.nasdaq.com/data/LBMA/GOLD
-  str.symbol.raw = "LBMA/GOLD"
-  df.temp <- Quandl(
-    str.symbol.raw,
-    type = "raw",
-    collapse = "daily",
-    start_date = "1871-01-01",
-    end_date = Sys.Date()
-  )
-  
-  # Update the symbol table
-  df.symbols <-
-    rbind(
-      df.symbols,
-      data.frame(
-        string.symbol = str.symbol.raw,
-        string.source = "QUANDL",
-        string.description = "Gold Price: London Fixings,\nLondon Bullion Market Association (LBMA).\n",
-        string.label.y = "USD/ounce (PM)",
-        float.expense.ratio = -1.00,
-        date.series.start = as.Date("1871-01-01")  ,
-        date.series.end = as.Date("1900-01-01")
-      )
-    )
-  
-  # Make the name safe
-  str.name <- str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-
-  # Update the column names to include the ticker symbol. This triggers 
-  # unique handling later.
-  lst_cols <- colnames(df.temp)
-  lst_cols <- str_replace_all(lst_cols, " ", "")
-  lst_cols <- str_replace_all(lst_cols, "\\(", "_")
-  lst_cols <- str_replace_all(lst_cols, "\\)", "")
-  colnames(df.temp) <-
-    paste(str.name, ".", lst_cols , sep = "")
-  
-  # Create the xts object from the dataframe
-  assign(str.name, xts(df.temp[, -1], order.by = df.temp[, 1]))
-
-}
+# # This adds the Quandl symbols and pulls those in.
+# 
+# if(bRefresh) {
+#   # There are a few symbols I wasn't able to include with quantmod so this section uses Quandl to get those data pieces.
+#   
+#   # Get the PMI composite index
+#   str.symbol.raw <- "ISM/MAN_PMI"
+#   df.symbols <-
+#     rbind(
+#       df.symbols,
+#       data.frame(
+#         string.symbol = str.symbol.raw,
+#         string.source = "QUANDL",
+#         string.description = "Institute of Supply Managment PMI Composite Index",
+#         string.label.y = "Index",
+#         float.expense.ratio = -1.00,
+#         date.series.start = as.Date("1900-01-01")  ,
+#         date.series.end = as.Date("1900-01-01")
+#       )
+#     )
+#   # Set the API key
+#   Quandl.api_key('d9LUhcBVPa_8MFdtiFda')
+#   dfPMIComp <-
+#     Quandl(
+#       "ISM/MAN_PMI",
+#       type = "raw",
+#       collapse = "daily",
+#       start_date = "1910-01-01",
+#       end_date = Sys.Date()
+#     )
+#   str.name <-
+#     str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+#   assign(str.name, xts(dfPMIComp[,-1], order.by = dfPMIComp[, 1]))
+#   colnames(ISMMANPMI) <- c(str.name)
+#   df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(dfPMIComp$Date, 1)
+#   df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = dfPMIComp$Date[[1]]
+#   
+#   # PE Ratio for the S&P 500
+#   str.symbol.raw = "MULTPL/SP500_PE_RATIO_MONTH"
+#   df.symbols <-
+#     rbind(
+#       df.symbols,
+#       data.frame(
+#         string.symbol = str.symbol.raw,
+#         string.source = "QUANDL",
+#         string.description =  "S&P 500 TTM P/E",
+#         string.label.y = "Index",
+#         float.expense.ratio = -1.00,
+#         date.series.start = as.Date("1900-01-01")  ,
+#         date.series.end = as.Date("1900-01-01")
+#       )
+#     )
+#   df.temp <- Quandl(
+#     str.symbol.raw,
+#     type = "raw",
+#     collapse = "daily",
+#     start_date = "1910-01-01",
+#     end_date = Sys.Date()
+#   )
+#   
+#   str.name <-
+#     str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+#   assign(str.name, xts(df.temp[, -1], order.by = df.temp[, 1]))
+#   colnames(MULTPLSP500PERATIOMONTH) <- c(str.name)
+#   df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(df.temp$Date, 1)
+#   df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = df.temp$Date[[1]]
+#   
+#   
+#   # S&P 500 sales multiple
+#   str.symbol.raw = "MULTPL/SP500_SALES_QUARTER"
+#   df.symbols <-
+#     rbind(
+#       df.symbols,
+#       data.frame(
+#         string.symbol = str.symbol.raw,
+#         string.source = "QUANDL",
+#         string.description =  "S&P 500 TTM Sales\n(Not Inflation Adjusted)",
+#         string.label.y = "Index",
+#         float.expense.ratio = -1.00,
+#         date.series.start = as.Date("1900-01-01")  ,
+#         date.series.end = as.Date("1900-01-01")
+#       )
+#     )
+#   df.temp <-
+#     oil_daily <- Quandl(
+#       str.symbol.raw,
+#       type = "raw",
+#       collapse = "daily",
+#       start_date = "1910-01-01",
+#       end_date = Sys.Date()
+#     )
+#   
+#   str.name <-
+#     str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+#   assign(str.name, xts(df.temp[, -1], order.by = df.temp[, 1]))
+#   colnames(MULTPLSP500SALESQUARTER) <- c(str.name)
+#   df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(df.temp$Date, 1)
+#   df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = df.temp$Date[[1]]
+#   
+#   
+#   # S&P 500 Dividend ratio
+#   str.symbol.raw = "MULTPL/SP500_DIV_YIELD_MONTH"
+#   df.symbols <-
+#     rbind(
+#       df.symbols,
+#       data.frame(
+#         string.symbol = str.symbol.raw,
+#         string.source = "QUANDL",
+#         string.description =  "S&P 500 Dividend Yield by Month",
+#         string.label.y = "Percentage",
+#         float.expense.ratio = -1.00,
+#         date.series.start = as.Date("1900-01-01") ,
+#         date.series.end = as.Date("1900-01-01")
+#       )
+#     )
+#   df.temp <-
+#     oil_daily <- Quandl(
+#       str.symbol.raw,
+#       type = "raw",
+#       collapse = "daily",
+#       start_date = "1910-01-01",
+#       end_date = Sys.Date()
+#     )
+#   
+#   str.name <-
+#     str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+#   assign(str.name, xts(df.temp[, -1], order.by = df.temp[, 1]))
+#   colnames(MULTPLSP500DIVYIELDMONTH) <- c(str.name)
+#   df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(df.temp$Date, 1)
+#   df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = df.temp$Date[[1]]
+#   
+#   # S&P 500 dividend yield
+#   str.symbol.raw = "MULTPL/SP500_DIV_MONTH"
+#   df.symbols <-
+#     rbind(
+#       df.symbols,
+#       data.frame(
+#         string.symbol = str.symbol.raw,
+#         string.source = "QUANDL",
+#         string.description =  "S&P 500 Dividend by Month \n (Inflation Adjusted)",
+#         string.label.y = "2018 Dollars",
+#         float.expense.ratio = -1.00,
+#         date.series.start = as.Date("1871-01-01")  ,
+#         date.series.end = as.Date("1900-01-01")
+#       )
+#     )
+#   df.temp <-
+#     Quandl(
+#       str.symbol.raw,
+#       type = "raw",
+#       collapse = "daily",
+#       start_date = "1871-01-01",
+#       end_date = Sys.Date()
+#     )
+#   
+#   str.name <-
+#     str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+#   assign(str.name, xts(df.temp[,-1], order.by = df.temp[, 1]))
+#   colnames(MULTPLSP500DIVMONTH) <- c(str.name)
+#   df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw,]$date.series.start = tail(df.temp$Date, 1)
+#   df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw,]$date.series.end = df.temp$Date[[1]]
+#   
+#   # Copper prices
+#   str.symbol.raw = "CHRIS/CME_HG1"
+#   df.symbols <-
+#     rbind(
+#       df.symbols,
+#       data.frame(
+#         string.symbol = str.symbol.raw,
+#         string.source = "QUANDL",
+#         string.description =  "Copper Futures, Continuous Contract #1 (HG1) \n(Front Month)",
+#         string.label.y = "Dollars/pound",
+#         float.expense.ratio = -1.00,
+#         date.series.start = as.Date("1871-01-01")  ,
+#         date.series.end = as.Date("1900-01-01")
+#       )
+#     )
+#   df.temp <- Quandl(
+#     str.symbol.raw,
+#     type = "raw",
+#     collapse = "daily",
+#     start_date = "1871-01-01",
+#     end_date = Sys.Date()
+#   )
+#   # Needed because this series include open, close, high, low, etc.
+#   df.temp <-
+#     df.temp[, (colnames(df.temp) == 'Open') |
+#              (colnames(df.temp) == 'Date')]
+#   # This series also has zero values. Not sure why, tho.
+#   df.temp[df.temp == 0] = NA
+#   str.name <-
+#     str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+#   assign(str.name, xts(df.temp[, -1], order.by = df.temp[, 1]))
+#   colnames(CHRISCMEHG1) <- c(str.name)
+#   
+#   # Air freight data
+#   str.symbol.raw = "WWDI/WLD_IS_AIR_GOOD_MT_K1"
+#   df.symbols <-
+#     rbind(
+#       df.symbols,
+#       data.frame(
+#         string.symbol = str.symbol.raw,
+#         string.source = "QUANDL",
+#         string.description =  "Air transport, freight",
+#         string.label.y = "million ton-km",
+#         float.expense.ratio = -1.00,
+#         date.series.start = as.Date("1871-01-01") ,
+#         date.series.end = as.Date("1900-01-01")
+#       )
+#     )
+#   df.temp <- Quandl(
+#     str.symbol.raw,
+#     type = "raw",
+#     collapse = "daily",
+#     start_date = "1973-12-31",
+#     end_date = Sys.Date()
+#   )
+#   
+#   str.name <-
+#     str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+#   assign(str.name, xts(df.temp[, -1], order.by = df.temp[, 1]))
+#   colnames(WWDIWLDISAIRGOODMTK1) <- c(str.name)
+#   
+#   # Gold prices. site: https://data.nasdaq.com/data/LBMA/GOLD
+#   str.symbol.raw = "LBMA/GOLD"
+#   df.temp <- Quandl(
+#     str.symbol.raw,
+#     type = "raw",
+#     collapse = "daily",
+#     start_date = "1871-01-01",
+#     end_date = Sys.Date()
+#   )
+#   
+#   # Update the symbol table
+#   df.symbols <-
+#     rbind(
+#       df.symbols,
+#       data.frame(
+#         string.symbol = str.symbol.raw,
+#         string.source = "QUANDL",
+#         string.description = "Gold Price: London Fixings,\nLondon Bullion Market Association (LBMA).\n",
+#         string.label.y = "USD/ounce (PM)",
+#         float.expense.ratio = -1.00,
+#         date.series.start = as.Date("1871-01-01")  ,
+#         date.series.end = as.Date("1900-01-01")
+#       )
+#     )
+#   
+#   # Make the name safe
+#   str.name <- str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+# 
+#   # Update the column names to include the ticker symbol. This triggers 
+#   # unique handling later.
+#   lst_cols <- colnames(df.temp)
+#   lst_cols <- str_replace_all(lst_cols, " ", "")
+#   lst_cols <- str_replace_all(lst_cols, "\\(", "_")
+#   lst_cols <- str_replace_all(lst_cols, "\\)", "")
+#   colnames(df.temp) <-
+#     paste(str.name, ".", lst_cols , sep = "")
+#   
+#   # Create the xts object from the dataframe
+#   assign(str.name, xts(df.temp[, -1], order.by = df.temp[, 1]))
+# 
+# }
 
 ```
 
@@ -1381,20 +1381,20 @@ In this worksheet a model predicting the onset of recession was built. From the 
 
 ```
 
-As of Feb 2020 we have entered a recession as defined by the NBER yet the market continues to rise.
+<!-- As of Feb 2020 we have entered a recession as defined by the NBER yet the market continues to rise. -->
 
-P/E ratio of `r sprintf("%3.2f", tail(df.data$MULTPLSP500PERATIOMONTH,1))` compares to a historical mean value over the last decade of `r sprintf("%3.2f", df.data$MULTPLSP500PERATIOMONTH_Mean[1])`. Since 2008 recession P/E has only fallen below historical norm a few times. The current value is high, but well off the peaks. If earnings are +2-4% year-over-year then it is not unrealistic.
+<!-- P/E ratio of `r sprintf("%3.2f", tail(df.data$MULTPLSP500PERATIOMONTH,1))` compares to a historical mean value over the last decade of `r sprintf("%3.2f", df.data$MULTPLSP500PERATIOMONTH_Mean[1])`. Since 2008 recession P/E has only fallen below historical norm a few times. The current value is high, but well off the peaks. If earnings are +2-4% year-over-year then it is not unrealistic. -->
 
 
 ```{r bullet1, echo = FALSE}
-datay <- "MULTPLSP500PERATIOMONTH"
-datay.aux <- "MULTPLSP500PERATIOMONTH_Mean"
-ylim <- c(10, 50)
-dt.start <- as.Date('2010-01-01')
-b.legend <- TRUE
-my.plot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
-            getPlotYLabel(df.symbols, datay), c(dt.start, Sys.Date()), ylim, b.legend)
-my.plot + geom_line(data=df.data, aes_string(x="date", y=datay.aux, colour=shQuote(datay.aux)), na.rm = TRUE)
+# datay <- "MULTPLSP500PERATIOMONTH"
+# datay.aux <- "MULTPLSP500PERATIOMONTH_Mean"
+# ylim <- c(10, 50)
+# dt.start <- as.Date('2010-01-01')
+# b.legend <- TRUE
+# my.plot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
+#             getPlotYLabel(df.symbols, datay), c(dt.start, Sys.Date()), ylim, b.legend)
+# my.plot + geom_line(data=df.data, aes_string(x="date", y=datay.aux, colour=shQuote(datay.aux)), na.rm = TRUE)
 ```
 
 - S&P 500 Volume, last updated on `r index(tail(GSPC,1))`, is `r getTrendString(df.data, 'GSPC.Volume', 365)` over the last year and `r getTrendString(df.data, 'GSPC.Volume', 30)` over the last month. 
@@ -2139,47 +2139,47 @@ Market prices can out-run earnings so take a look at price to earnings.
 
 ```{r SP500TTMPE,  echo=FALSE, fig.width = 9, fig.asp = 0.4 }
 
-datay <- "MULTPLSP500PERATIOMONTH"
-datay.aux <- "MULTPLSP500PERATIOMONTH_Mean"
-datay.aux.1 <- "AREARNINGSTTM"
-ylim <- c(0, 150)
-dt.start <- as.Date('1950-01-01')
-my.plot <-
-  plotSingle(
-    dfRecession,
-    df.data,
-    "date",
-    datay,
-    getPlotTitle(df.symbols, datay),
-    "Date",
-    getPlotYLabel(df.symbols, datay),
-    c(dt.start, Sys.Date()),
-    ylim,
-    b.legend = TRUE,
-    b.percentile = FALSE,
-    b.long.legend = TRUE
-  )
-my.plot <- my.plot + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay.aux,
-    colour = shQuote(datay.aux)
-  ),
-  na.rm = TRUE
-)
+# datay <- "MULTPLSP500PERATIOMONTH"
+# datay.aux <- "MULTPLSP500PERATIOMONTH_Mean"
+# datay.aux.1 <- "AREARNINGSTTM"
+# ylim <- c(0, 150)
+# dt.start <- as.Date('1950-01-01')
 # my.plot <-
-#   my.plot + geom_line(
-#     data = df.data,
-#     aes_string(
-#       x = "date",
-#       y = datay.aux.1,
-#       colour = shQuote(datay.aux.1)
-#     ),
-#     na.rm = TRUE
+#   plotSingle(
+#     dfRecession,
+#     df.data,
+#     "date",
+#     datay,
+#     getPlotTitle(df.symbols, datay),
+#     "Date",
+#     getPlotYLabel(df.symbols, datay),
+#     c(dt.start, Sys.Date()),
+#     ylim,
+#     b.legend = TRUE,
+#     b.percentile = FALSE,
+#     b.long.legend = TRUE
 #   )
-
-my.plot
+# my.plot <- my.plot + geom_line(
+#   data = df.data,
+#   aes_string(
+#     x = "date",
+#     y = datay.aux,
+#     colour = shQuote(datay.aux)
+#   ),
+#   na.rm = TRUE
+# )
+# # my.plot <-
+# #   my.plot + geom_line(
+# #     data = df.data,
+# #     aes_string(
+# #       x = "date",
+# #       y = datay.aux.1,
+# #       colour = shQuote(datay.aux.1)
+# #     ),
+# #     na.rm = TRUE
+# #   )
+# 
+# my.plot
 
 ```
 
@@ -2188,55 +2188,55 @@ Focus on some of the more recent activity
 
 ```{r SP500TTMPE.recent, echo=FALSE }
 
-datay <- "MULTPLSP500PERATIOMONTH"
-datay.aux <- "MULTPLSP500PERATIOMONTH_Mean"
-ylim <- c(10, 45)
-dt.start <- as.Date('2010-01-01')
-b.legend <- TRUE
-my.plot <-
-  plotSingle(
-    dfRecession,
-    df.data,
-    "date",
-    datay,
-    getPlotTitle(df.symbols, datay),
-    "Date",
-    getPlotYLabel(df.symbols, datay),
-    c(dt.start, Sys.Date()),
-    ylim,
-    b.legend
-  )
-my.plot + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay.aux,
-    colour = shQuote(datay.aux)
-  ),
-  na.rm = TRUE
-)
+# datay <- "MULTPLSP500PERATIOMONTH"
+# datay.aux <- "MULTPLSP500PERATIOMONTH_Mean"
+# ylim <- c(10, 45)
+# dt.start <- as.Date('2010-01-01')
+# b.legend <- TRUE
+# my.plot <-
+#   plotSingle(
+#     dfRecession,
+#     df.data,
+#     "date",
+#     datay,
+#     getPlotTitle(df.symbols, datay),
+#     "Date",
+#     getPlotYLabel(df.symbols, datay),
+#     c(dt.start, Sys.Date()),
+#     ylim,
+#     b.legend
+#   )
+# my.plot + geom_line(
+#   data = df.data,
+#   aes_string(
+#     x = "date",
+#     y = datay.aux,
+#     colour = shQuote(datay.aux)
+#   ),
+#   na.rm = TRUE
+# )
 
 ```
 
 ### S&P 500 Sales
 
-```{r SP500Sales }
+# ```{r SP500Sales }
+# 
+# datay <- "MULTPLSP500SALESQUARTER"
+# ylim <- c(500, 2000)
+# dt.start <- as.Date('1999-01-01')
+# plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
+# 
+# ```
 
-datay <- "MULTPLSP500SALESQUARTER"
-ylim <- c(500, 2000)
-dt.start <- as.Date('1999-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
-
-```
-
-```{r SP500SalesShort }
-
-datay <- "MULTPLSP500SALESQUARTER"
-ylim <- c(500, 2000)
-dt.start = as.Date('2001-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
-
-```
+# ```{r SP500SalesShort }
+# 
+# datay <- "MULTPLSP500SALESQUARTER"
+# ylim <- c(500, 2000)
+# dt.start = as.Date('2001-01-01')
+# plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
+# 
+# ```
 
 
 ### Unit Profits
@@ -2262,56 +2262,56 @@ https://www.quandl.com/data/MULTPL/SP500_DIV_MONTH-S-P-500-Dividend-by-Month
 
 ```{r SP500Dividend.dollar, echo=FALSE, fig.width = 7, fig.asp = 1.1 }
 
-datay <- "MULTPLSP500DIVMONTH"
-ylim <- c(0, 70)
-dtStart = as.Date('1990-01-01')
-p1 <-
-  plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = FALSE)
-
-
-datay.1 <- "CASHDIVIDENDSPERSHR"
-ylim.1 <- c(0, 20)
-p2 <-
-  plotSingleQuick(dfRecession, df.data, datay.1, ylim.1, dtStart, b.percentile = FALSE)
-
-grid.arrange(p1,
-             p2,
-             ncol = 1,
-             top = "S&P 500 Dividends by source")
+# datay <- "MULTPLSP500DIVMONTH"
+# ylim <- c(0, 70)
+# dtStart = as.Date('1990-01-01')
+# p1 <-
+#   plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = FALSE)
+# 
+# 
+# datay.1 <- "CASHDIVIDENDSPERSHR"
+# ylim.1 <- c(0, 20)
+# p2 <-
+#   plotSingleQuick(dfRecession, df.data, datay.1, ylim.1, dtStart, b.percentile = FALSE)
+# 
+# grid.arrange(p1,
+#              p2,
+#              ncol = 1,
+#              top = "S&P 500 Dividends by source")
 
 ```
 
 Evaluate year over year dividend growth.
 
 ```{r SP500Dividend.dollar.yoy, echo=FALSE}
-
-datay <- "MULTPLSP500DIVMONTH_YoY"
-ylim <- c(-50, 50)
-dtStart = as.Date('1960-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = FALSE)
-
+ 
+# datay <- "MULTPLSP500DIVMONTH_YoY"
+# ylim <- c(-50, 50)
+# dtStart = as.Date('1960-01-01')
+# plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = FALSE)
+ 
 ```
 
 Real value dividend growth.
 
 ```{r SP500Dividend.dollar.near, echo=FALSE}
-
-datay <- "MULTPLSP500DIVMONTH"
-ylim <- c(20, 70)
-dtStart = as.Date('2001-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = FALSE)
-
+ 
+# datay <- "MULTPLSP500DIVMONTH"
+# ylim <- c(20, 70)
+# dtStart = as.Date('2001-01-01')
+# plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = FALSE)
+ 
 ```
 
 
-```{r SP500Dividend.dollar.yoy.recent}
+<!-- ```{r SP500Dividend.dollar.yoy.recent} -->
 
-datay <- "MULTPLSP500DIVMONTH_YoY"
-ylim <- c(-40, 20)
-dtStart = as.Date('2001-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = FALSE)
+<!-- datay <- "MULTPLSP500DIVMONTH_YoY" -->
+<!-- ylim <- c(-40, 20) -->
+<!-- dtStart = as.Date('2001-01-01') -->
+<!-- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = FALSE) -->
 
-```
+<!-- ``` -->
 
 S&P 500 dividend yield (12 month dividend per share)/price. Yields following September 2018 (including the current yield) are estimated based on 12 month dividends through September 2018, as reported by S&P. Sources: Standard & Poor's for current S&P 500 Dividend Yield. Robert Shiller and his book Irrational Exuberance for historic S&P 500 Dividend Yields.
 
@@ -2319,20 +2319,20 @@ https://www.quandl.com/data/MULTPL/SP500_DIV_YIELD_MONTH-S-P-500-Dividend-Yield-
 
 ```{r SP500Dividend.yied}
 
-datay <- "MULTPLSP500DIVYIELDMONTH"
-ylim <- c(0, 12)
-dtStart = as.Date('1950-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = FALSE)
+# datay <- "MULTPLSP500DIVYIELDMONTH"
+# ylim <- c(0, 12)
+# dtStart = as.Date('1950-01-01')
+# plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = FALSE)
 
 
 ```
 
 ```{r SP500Dividend.recent}
 
-datay <- "MULTPLSP500DIVYIELDMONTH"
-ylim <- c(1, 4)
-dtStart = as.Date('2001-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = FALSE)
+# datay <- "MULTPLSP500DIVYIELDMONTH"
+# ylim <- c(1, 4)
+# dtStart = as.Date('2001-01-01')
+# plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = FALSE)
 
 ```
 
@@ -4123,10 +4123,10 @@ As risks increase investors often flock to safe haven assets like gold. An up-ti
 
 ```{r gold.nominal.price, echo=FALSE}
 
-datay <- "LBMAGOLD.USD_PM"
-ylim <- c(0, 2500)
-dtStart = as.Date('1970-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+# datay <- "LBMAGOLD.USD_PM"
+# ylim <- c(0, 2500)
+# dtStart = as.Date('1970-01-01')
+# plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
 ```
 
@@ -4134,33 +4134,33 @@ This plots out the real price of gold by two different deflators. PPI corrected 
 
 ```{r gold.by.index, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
-datay <- "LBMAGOLD.USD_PM.by.CPIAUCSL"
-ylim <- c(0, 12)
-dt.start = as.Date('1970-01-01')
-datay.aux <- "LBMAGOLD.USD_PM.by.PPIACO"
-my.plot <- plotSingle(
-  dfRecession,
-  df.data,
-  datax = "date",
-  datay,
-  titlelabel = "Real Price of Gold",
-  xlabel = "Date",
-  ylabel = getPlotYLabel(df.symbols, datay),
-  ylim,
-  xlim = c(dt.start, Sys.Date()),
-  b.legend = TRUE,
-  b.long.legend = TRUE
-)
-
-my.plot + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay.aux,
-    colour = shQuote(getPlotTitle(df.symbols, datay.aux, str.sep = "\n"))
-  ),
-  na.rm = TRUE
-)
+# datay <- "LBMAGOLD.USD_PM.by.CPIAUCSL"
+# ylim <- c(0, 12)
+# dt.start = as.Date('1970-01-01')
+# datay.aux <- "LBMAGOLD.USD_PM.by.PPIACO"
+# my.plot <- plotSingle(
+#   dfRecession,
+#   df.data,
+#   datax = "date",
+#   datay,
+#   titlelabel = "Real Price of Gold",
+#   xlabel = "Date",
+#   ylabel = getPlotYLabel(df.symbols, datay),
+#   ylim,
+#   xlim = c(dt.start, Sys.Date()),
+#   b.legend = TRUE,
+#   b.long.legend = TRUE
+# )
+# 
+# my.plot + geom_line(
+#   data = df.data,
+#   aes_string(
+#     x = "date",
+#     y = datay.aux,
+#     colour = shQuote(getPlotTitle(df.symbols, datay.aux, str.sep = "\n"))
+#   ),
+#   na.rm = TRUE
+# )
 
 ```
 
@@ -4168,44 +4168,44 @@ See how nominal and real prices look year over year. From the long-term view see
 
 ```{r gold.YoY, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
-datay <- "LBMAGOLD.USD_PM_YoY"
-ylim <- c(-75, 75)
-dtStart = as.Date('1970-01-01')
-datay.aux <- "LBMAGOLD.USD_PM.by.CPIAUCSL_YoY"
-datay.aux.1 <- "LBMAGOLD.USD_PM.by.PPIACO_YoY"
-my.plot <- plotSingle(
-  dfRecession,
-  df.data,
-  datax = "date",
-  datay,
-  titlelabel = "Price of Gold Year-Over-Year change",
-  xlabel = "Date",
-  ylabel = getPlotYLabel(df.symbols, datay),
-  ylim,
-  xlim = c(dt.start, Sys.Date()),
-  b.legend = TRUE,
-  b.long.legend = TRUE
-)
-
-my.plot <- my.plot + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay.aux,
-    colour = shQuote(getPlotTitle(df.symbols, datay.aux, str.sep = "\n"))
-  ),
-  na.rm = TRUE
-)
-
-my.plot + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay.aux.1,
-    colour = shQuote(getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n"))
-  ),
-  na.rm = TRUE
-)
+# datay <- "LBMAGOLD.USD_PM_YoY"
+# ylim <- c(-75, 75)
+# dtStart = as.Date('1970-01-01')
+# datay.aux <- "LBMAGOLD.USD_PM.by.CPIAUCSL_YoY"
+# datay.aux.1 <- "LBMAGOLD.USD_PM.by.PPIACO_YoY"
+# my.plot <- plotSingle(
+#   dfRecession,
+#   df.data,
+#   datax = "date",
+#   datay,
+#   titlelabel = "Price of Gold Year-Over-Year change",
+#   xlabel = "Date",
+#   ylabel = getPlotYLabel(df.symbols, datay),
+#   ylim,
+#   xlim = c(dt.start, Sys.Date()),
+#   b.legend = TRUE,
+#   b.long.legend = TRUE
+# )
+# 
+# my.plot <- my.plot + geom_line(
+#   data = df.data,
+#   aes_string(
+#     x = "date",
+#     y = datay.aux,
+#     colour = shQuote(getPlotTitle(df.symbols, datay.aux, str.sep = "\n"))
+#   ),
+#   na.rm = TRUE
+# )
+# 
+# my.plot + geom_line(
+#   data = df.data,
+#   aes_string(
+#     x = "date",
+#     y = datay.aux.1,
+#     colour = shQuote(getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n"))
+#   ),
+#   na.rm = TRUE
+# )
 
 
 ```
@@ -4214,18 +4214,18 @@ See how gold correlates with the VIX. Both gold and VIX should respond to invest
 
 ```{r corrGoldYoYVix, echo=FALSE}
 
-datax = "LBMAGOLD.USD_PM_YoY"
-datay = "VIXCLS"
-titlelabel <- paste(datay, " | ", datax)
-ylim <- c(0, 45)
-ylabel <- paste(datay, ", ", df.symbols[grep(datay, df.symbols$string.symbol),]$yLabel, sep="")
-xlim <- c(-50, 50)
-xlabel <- paste(datax, ", ", df.symbols[grep(datax, df.symbols$string.symbol),]$yLabel, sep="")
-bLegend <- FALSE
-bFitLinear <- TRUE
-dtStart = as.Date('2000-01-01')
-b.reverse.y = FALSE
-plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, ylim, bLegend, bFitLinear, dtStart, b.reverse.y)
+# datax = "LBMAGOLD.USD_PM_YoY"
+# datay = "VIXCLS"
+# titlelabel <- paste(datay, " | ", datax)
+# ylim <- c(0, 45)
+# ylabel <- paste(datay, ", ", df.symbols[grep(datay, df.symbols$string.symbol),]$yLabel, sep="")
+# xlim <- c(-50, 50)
+# xlabel <- paste(datax, ", ", df.symbols[grep(datax, df.symbols$string.symbol),]$yLabel, sep="")
+# bLegend <- FALSE
+# bFitLinear <- TRUE
+# dtStart = as.Date('2000-01-01')
+# b.reverse.y = FALSE
+# plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, ylim, bLegend, bFitLinear, dtStart, b.reverse.y)
 
 ```
 
@@ -4235,24 +4235,24 @@ plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, yl
 Dr. Copper has a reputation as an indicator of economic malaise, but it does not seem to have much of a correlation with the recessions. The series below is from CME via Quandl. It has a lot of data so I am also looking at the smoothed version.
 
 ```{r plot.CHRISCMEHG1, echo=FALSE}
-datay <- "CHRISCMEHG1"
-datay_aux <- "CHRISCMEHG1_Smooth"
-ylim <- c(0, 5)
-dtStart = as.Date('1959-01-01')
-myPlot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
-            getPlotYLabel(df.symbols, datay), c(dtStart, Sys.Date()), ylim, TRUE)
-myPlot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuote(datay_aux)), na.rm = TRUE)
+# datay <- "CHRISCMEHG1"
+# datay_aux <- "CHRISCMEHG1_Smooth"
+# ylim <- c(0, 5)
+# dtStart = as.Date('1959-01-01')
+# myPlot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
+#             getPlotYLabel(df.symbols, datay), c(dtStart, Sys.Date()), ylim, TRUE)
+# myPlot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuote(datay_aux)), na.rm = TRUE)
 
 ```
 
 ```{r plot.CHRISCMEHG1.close, echo=FALSE}
-datay <- "CHRISCMEHG1"
-datay_aux <- "CHRISCMEHG1_Smooth"
-ylim <- c(0, 5)
-dtStart = as.Date('2008-01-01')
-myPlot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
-            getPlotYLabel(df.symbols, datay), c(dtStart, Sys.Date()), ylim, TRUE)
-myPlot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuote(datay_aux)), na.rm = TRUE)
+# datay <- "CHRISCMEHG1"
+# datay_aux <- "CHRISCMEHG1_Smooth"
+# ylim <- c(0, 5)
+# dtStart = as.Date('2008-01-01')
+# myPlot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
+#             getPlotYLabel(df.symbols, datay), c(dtStart, Sys.Date()), ylim, TRUE)
+# myPlot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuote(datay_aux)), na.rm = TRUE)
 
 ```
 
@@ -4260,60 +4260,60 @@ Copper is one of the commodities in the PPI so it is a bit of a proxy for how co
 
 ```{r coppyer.by.index, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
-datay <- "CHRISCMEHG1.by.CPIAUCSL"
-ylim <- c(0, 0.03)
-dt.start = as.Date('1970-01-01')
-datay.aux <- "CHRISCMEHG1.by.PPIACO"
-my.plot <- plotSingle(
-  dfRecession,
-  df.data,
-  datax = "date",
-  datay,
-  titlelabel = "Real Price of Copper",
-  xlabel = "Date",
-  ylabel = getPlotYLabel(df.symbols, datay),
-  ylim,
-  xlim = c(dt.start, Sys.Date()),
-  b.legend = TRUE,
-  b.long.legend = TRUE
-)
-
-my.plot + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay.aux,
-    colour = shQuote(getPlotTitle(df.symbols, datay.aux, str.sep = "\n"))
-  ),
-  na.rm = TRUE
-)
+# datay <- "CHRISCMEHG1.by.CPIAUCSL"
+# ylim <- c(0, 0.03)
+# dt.start = as.Date('1970-01-01')
+# datay.aux <- "CHRISCMEHG1.by.PPIACO"
+# my.plot <- plotSingle(
+#   dfRecession,
+#   df.data,
+#   datax = "date",
+#   datay,
+#   titlelabel = "Real Price of Copper",
+#   xlabel = "Date",
+#   ylabel = getPlotYLabel(df.symbols, datay),
+#   ylim,
+#   xlim = c(dt.start, Sys.Date()),
+#   b.legend = TRUE,
+#   b.long.legend = TRUE
+# )
+# 
+# my.plot + geom_line(
+#   data = df.data,
+#   aes_string(
+#     x = "date",
+#     y = datay.aux,
+#     colour = shQuote(getPlotTitle(df.symbols, datay.aux, str.sep = "\n"))
+#   ),
+#   na.rm = TRUE
+# )
 
 ```
 
 The change in prices, year over year, do generally peak prior to a recession. The time and shape of this peak varies, but it still might be helpful. A couple of the large troughs do seem to correlate with the end of the recession. Likely this is because industrial production has also fallen.
 
 ```{r plot.CHRISCMEHG1.yoy, echo=FALSE}
-datay <- "CHRISCMEHG1_YoY"
-ylim <- c(-100, 100)
-dtStart = as.Date('1960-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = TRUE)
+# datay <- "CHRISCMEHG1_YoY"
+# ylim <- c(-100, 100)
+# dtStart = as.Date('1960-01-01')
+# plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = TRUE)
 
 ```
 
 There is some correlation between copper and the smooth recession initiator, especially at the end of the recession.
 
 ```{r rollingcor.indpro.copper.yoy, echo=FALSE, fig.width = 10, fig.asp = .62}
-
-datay1 <- "INDPRO_YoY"
-ylim1 <- c(-25, 25)
-
-datay2 <- "CHRISCMEHG1_YoY"
-ylim2 <- c(-100, 100)
-
-dtStart = as.Date('1960-01-01')
-
-w <- 360
-corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, datay2, ylim2, w, dtStart)
+# 
+# datay1 <- "INDPRO_YoY"
+# ylim1 <- c(-25, 25)
+# 
+# datay2 <- "CHRISCMEHG1_YoY"
+# ylim2 <- c(-100, 100)
+# 
+# dtStart = as.Date('1960-01-01')
+# 
+# w <- 360
+# corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, datay2, ylim2, w, dtStart)
 
 ```
 
@@ -4321,21 +4321,21 @@ Might be easier to see correlation in a dot plot format.
 
 ```{r corrscatter.indpro.copper.yoy, echo=FALSE}
 
-datay = "INDPRO_YoY"
-ylim <- c(-25, 25)
-ylabel <- paste(datay, ", ", df.symbols[grep(datay, df.symbols$string.symbol),]$yLabel, sep="")
-
-datax = "CHRISCMEHG1_YoY"
-xlim <- c(-100, 100)
-xlabel <- paste(datax, ", ", df.symbols[grep(datax, df.symbols$string.symbol),]$yLabel, sep="")
-
-titlelabel <- paste(datay, " | ", datax)
-bLegend <- FALSE
-bFitLinear <- TRUE
-dtStart = as.Date('1950-01-01')
-b.reverse.y = FALSE
-plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, ylim, bLegend, bFitLinear, 
-        dtStart, b.reverse.y)
+# datay = "INDPRO_YoY"
+# ylim <- c(-25, 25)
+# ylabel <- paste(datay, ", ", df.symbols[grep(datay, df.symbols$string.symbol),]$yLabel, sep="")
+# 
+# datax = "CHRISCMEHG1_YoY"
+# xlim <- c(-100, 100)
+# xlabel <- paste(datax, ", ", df.symbols[grep(datax, df.symbols$string.symbol),]$yLabel, sep="")
+# 
+# titlelabel <- paste(datay, " | ", datax)
+# bLegend <- FALSE
+# bFitLinear <- TRUE
+# dtStart = as.Date('1950-01-01')
+# b.reverse.y = FALSE
+# plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, ylim, bLegend, bFitLinear, 
+#         dtStart, b.reverse.y)
 
 ```
 
@@ -5245,91 +5245,91 @@ my.plot
 ```{r MB.to.Gold, echo=FALSE, fig.width = 7, fig.asp = 1.1 }
 
 
-datay <- "BOGMBASE"
-dtStart = as.Date('1959-01-01')
-ylim <- c(0, 7000)
-p1 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
-p1 <-
-  p1 + geom_vline(
-    xintercept = as.Date("2015-08-24"),
-    linetype = "dashed",
-    color = "grey",
-    size = 1.0
-  )
-p1 <-
-  p1 + geom_vline(
-    xintercept = as.Date("2016-01-08"),
-    linetype = "dashed",
-    color = "grey",
-    size = 1.0
-  )
-p1 <-
-  p1 + geom_vline(
-    xintercept = as.Date("2018-02-05"),
-    linetype = "dashed",
-    color = "grey",
-    size = 1.0
-  )
-p1 <-
-  p1 + geom_vline(
-    xintercept = as.Date("2018-10-11"),
-    linetype = "dashed",
-    color = "grey",
-    size = 1.0
-  )
-
-datay <- "LBMAGOLD.USD_PM"
-ylim <- c(0, 2500)
-p2 <-
-  plotSingle(
-    dfRecession,
-    df.data,
-    "date",
-    datay,
-    getPlotTitle(df.symbols, datay),
-    "Date",
-    getPlotYLabel(df.symbols, datay),
-    c(dtStart, Sys.Date()),
-    ylim,
-    b.legend = FALSE,
-    b.percentile = FALSE,
-    b.long.legend = FALSE
-  )
-
-p2 <-
-  p2 + geom_vline(
-    xintercept = as.Date("2015-08-24"),
-    linetype = "dashed",
-    color = "grey",
-    size = 1.0
-  )
-p2 <-
-  p2 + geom_vline(
-    xintercept = as.Date("2016-01-08"),
-    linetype = "dashed",
-    color = "grey",
-    size = 1.0
-  )
-p2 <-
-  p2 + geom_vline(
-    xintercept = as.Date("2018-02-05"),
-    linetype = "dashed",
-    color = "grey",
-    size = 1.0
-  )
-p2 <-
-  p2 + geom_vline(
-    xintercept = as.Date("2018-10-11"),
-    linetype = "dashed",
-    color = "grey",
-    size = 1.0
-  )
-
-
-grid.arrange(p1,
-             p2,
-             ncol = 1,
-             top = "Monetary base and gold")
+# datay <- "BOGMBASE"
+# dtStart = as.Date('1959-01-01')
+# ylim <- c(0, 7000)
+# p1 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+# p1 <-
+#   p1 + geom_vline(
+#     xintercept = as.Date("2015-08-24"),
+#     linetype = "dashed",
+#     color = "grey",
+#     size = 1.0
+#   )
+# p1 <-
+#   p1 + geom_vline(
+#     xintercept = as.Date("2016-01-08"),
+#     linetype = "dashed",
+#     color = "grey",
+#     size = 1.0
+#   )
+# p1 <-
+#   p1 + geom_vline(
+#     xintercept = as.Date("2018-02-05"),
+#     linetype = "dashed",
+#     color = "grey",
+#     size = 1.0
+#   )
+# p1 <-
+#   p1 + geom_vline(
+#     xintercept = as.Date("2018-10-11"),
+#     linetype = "dashed",
+#     color = "grey",
+#     size = 1.0
+#   )
+# 
+# datay <- "LBMAGOLD.USD_PM"
+# ylim <- c(0, 2500)
+# p2 <-
+#   plotSingle(
+#     dfRecession,
+#     df.data,
+#     "date",
+#     datay,
+#     getPlotTitle(df.symbols, datay),
+#     "Date",
+#     getPlotYLabel(df.symbols, datay),
+#     c(dtStart, Sys.Date()),
+#     ylim,
+#     b.legend = FALSE,
+#     b.percentile = FALSE,
+#     b.long.legend = FALSE
+#   )
+# 
+# p2 <-
+#   p2 + geom_vline(
+#     xintercept = as.Date("2015-08-24"),
+#     linetype = "dashed",
+#     color = "grey",
+#     size = 1.0
+#   )
+# p2 <-
+#   p2 + geom_vline(
+#     xintercept = as.Date("2016-01-08"),
+#     linetype = "dashed",
+#     color = "grey",
+#     size = 1.0
+#   )
+# p2 <-
+#   p2 + geom_vline(
+#     xintercept = as.Date("2018-02-05"),
+#     linetype = "dashed",
+#     color = "grey",
+#     size = 1.0
+#   )
+# p2 <-
+#   p2 + geom_vline(
+#     xintercept = as.Date("2018-10-11"),
+#     linetype = "dashed",
+#     color = "grey",
+#     size = 1.0
+#   )
+# 
+# 
+# grid.arrange(p1,
+#              p2,
+#              ncol = 1,
+#              top = "Monetary base and gold")
 
 ```
 
@@ -8421,10 +8421,10 @@ World bank air transportation. Only updated annually so less usefull, but intere
 
 ```{r WWDIWLDISAIRGOODMTK1}
 
-datay <- "WWDIWLDISAIRGOODMTK1"
-ylim <- c(0, 250000)
-dtStart = as.Date('1999-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+# datay <- "WWDIWLDISAIRGOODMTK1"
+# ylim <- c(0, 250000)
+# dtStart = as.Date('1999-01-01')
+# plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
 ```
 

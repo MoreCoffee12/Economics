@@ -1260,47 +1260,47 @@ df.symbols <-
     )
   )
 
-# Normalize copper by commodities producer price index (PPIACO)
-df.data$CHRISCMEHG1.by.PPIACO <-
-  (df.data$CHRISCMEHG1 / df.data$PPIACO)
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
-      string.symbol = "CHRISCMEHG1.by.PPIACO",
-      string.source = "Calc",
-      string.description = "Copper, $/lb, Normalized by\ncommodities producer price index",
-      string.label.y = "$/lb/Index",
-      float.expense.ratio = -1.00,
-      date.series.start =  as.Date(max(c(
-        index(CHRISCMEHG1[1]), index(PPIACO[1])
-      ))) ,
-      date.series.end = as.Date(min(c(
-        index(tail(CHRISCMEHG1, 1)), index(tail(PPIACO, 1))
-      )))
-    )
-  )
+# # Normalize copper by commodities producer price index (PPIACO)
+# df.data$CHRISCMEHG1.by.PPIACO <-
+#   (df.data$CHRISCMEHG1 / df.data$PPIACO)
+# df.symbols <-
+#   rbind(
+#     df.symbols,
+#     data.frame(
+#       string.symbol = "CHRISCMEHG1.by.PPIACO",
+#       string.source = "Calc",
+#       string.description = "Copper, $/lb, Normalized by\ncommodities producer price index",
+#       string.label.y = "$/lb/Index",
+#       float.expense.ratio = -1.00,
+#       date.series.start =  as.Date(max(c(
+#         index(CHRISCMEHG1[1]), index(PPIACO[1])
+#       ))) ,
+#       date.series.end = as.Date(min(c(
+#         index(tail(CHRISCMEHG1, 1)), index(tail(PPIACO, 1))
+#       )))
+#     )
+#   )
 
-# Normalize copper by consumer price index (CPI)
-df.data$CHRISCMEHG1.by.CPIAUCSL <-
-  (df.data$CHRISCMEHG1 / df.data$CPIAUCSL)
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
-      string.symbol = "CHRISCMEHG1.by.CPIAUCSL",
-      string.source = "Calc",
-      string.description = "Copper, $/lb, Normalized by\nconsumer price index",
-      string.label.y = "$/lb/Index",
-      float.expense.ratio = -1.00,
-      date.series.start =  as.Date(max(c(
-        index(CHRISCMEHG1[1]), index(CPIAUCSL[1])
-      ))) ,
-      date.series.end = as.Date(min(c(
-        index(tail(CHRISCMEHG1, 1)), index(tail(CPIAUCSL, 1))
-      )))
-    )
-  )
+# # Normalize copper by consumer price index (CPI)
+# df.data$CHRISCMEHG1.by.CPIAUCSL <-
+#   (df.data$CHRISCMEHG1 / df.data$CPIAUCSL)
+# df.symbols <-
+#   rbind(
+#     df.symbols,
+#     data.frame(
+#       string.symbol = "CHRISCMEHG1.by.CPIAUCSL",
+#       string.source = "Calc",
+#       string.description = "Copper, $/lb, Normalized by\nconsumer price index",
+#       string.label.y = "$/lb/Index",
+#       float.expense.ratio = -1.00,
+#       date.series.start =  as.Date(max(c(
+#         index(CHRISCMEHG1[1]), index(CPIAUCSL[1])
+#       ))) ,
+#       date.series.end = as.Date(min(c(
+#         index(tail(CHRISCMEHG1, 1)), index(tail(CPIAUCSL, 1))
+#       )))
+#     )
+#   )
 
 # Normalize crude by producer price index, commodities (PPICO)
 df.data$DCOILBRENTEU.by.PPIACO <-
@@ -1344,68 +1344,68 @@ df.symbols <-
   )
 
 
-# Normalize gold by commodities producer price index (PPIACO)
-df.data$LBMAGOLD.USD_PM.by.PPIACO <-
-  (df.data$LBMAGOLD.USD_PM / df.data$PPIACO)
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
-      string.symbol = "LBMAGOLD.USD_PM.by.PPIACO",
-      string.source = "Calc",
-      string.description = "Gold, USD PM/Troy Ounce, Normalized by\ncommodities producer price index",
-      string.label.y = "$/t oz/Index",
-      float.expense.ratio = -1.00,
-      date.series.start =  as.Date(max(c(
-        index(LBMAGOLD[1]), index(PPIACO[1])
-      ))) ,
-      date.series.end = as.Date(min(c(
-        index(tail(LBMAGOLD, 1)), index(tail(PPIACO, 1))
-      )))
-    )
-  )
+# # Normalize gold by commodities producer price index (PPIACO)
+# df.data$LBMAGOLD.USD_PM.by.PPIACO <-
+#   (df.data$LBMAGOLD.USD_PM / df.data$PPIACO)
+# df.symbols <-
+#   rbind(
+#     df.symbols,
+#     data.frame(
+#       string.symbol = "LBMAGOLD.USD_PM.by.PPIACO",
+#       string.source = "Calc",
+#       string.description = "Gold, USD PM/Troy Ounce, Normalized by\ncommodities producer price index",
+#       string.label.y = "$/t oz/Index",
+#       float.expense.ratio = -1.00,
+#       date.series.start =  as.Date(max(c(
+#         index(LBMAGOLD[1]), index(PPIACO[1])
+#       ))) ,
+#       date.series.end = as.Date(min(c(
+#         index(tail(LBMAGOLD, 1)), index(tail(PPIACO, 1))
+#       )))
+#     )
+#   )
 
-# Normalize gold by consumer price index (CPI)
-df.data$LBMAGOLD.USD_PM.by.CPIAUCSL <-
-  (df.data$LBMAGOLD.USD_PM / df.data$CPIAUCSL)
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
-      string.symbol = "LBMAGOLD.USD_PM.by.CPIAUCSL",
-      string.source = "Calc",
-      string.description = "Gold, USD/Troy OUnce, Normalized by\nconsumer price index",
-      string.label.y = "$/t oz/Index",
-      float.expense.ratio = -1.00,
-      date.series.start =  as.Date(max(c(
-        index(LBMAGOLD[1]), index(CPIAUCSL[1])
-      ))) ,
-      date.series.end = as.Date(min(c(
-        index(tail(LBMAGOLD, 1)), index(tail(CPIAUCSL, 1))
-      )))
-    )
-  )
+# # Normalize gold by consumer price index (CPI)
+# df.data$LBMAGOLD.USD_PM.by.CPIAUCSL <-
+#   (df.data$LBMAGOLD.USD_PM / df.data$CPIAUCSL)
+# df.symbols <-
+#   rbind(
+#     df.symbols,
+#     data.frame(
+#       string.symbol = "LBMAGOLD.USD_PM.by.CPIAUCSL",
+#       string.source = "Calc",
+#       string.description = "Gold, USD/Troy OUnce, Normalized by\nconsumer price index",
+#       string.label.y = "$/t oz/Index",
+#       float.expense.ratio = -1.00,
+#       date.series.start =  as.Date(max(c(
+#         index(LBMAGOLD[1]), index(CPIAUCSL[1])
+#       ))) ,
+#       date.series.end = as.Date(min(c(
+#         index(tail(LBMAGOLD, 1)), index(tail(CPIAUCSL, 1))
+#       )))
+#     )
+#   )
 
-# Normalize gold by GDP
-df.data$LBMAGOLD.USD_PM.by.GDP <-
-  (df.data$LBMAGOLD.USD_PM / df.data$GDP)
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
-      string.symbol = "LBMAGOLD.USD_PM.by.GDP",
-      string.source = "Calc",
-      string.description = "Gold, USD/Troy OUnce, Normalized by GDP",
-      string.label.y = "$/t oz/Index",
-      float.expense.ratio = -1.00,
-      date.series.start =  as.Date(max(c(
-        index(LBMAGOLD[1]), index(GDP[1])
-      ))) ,
-      date.series.end = as.Date(min(c(
-        index(tail(LBMAGOLD, 1)), index(tail(GDP, 1))
-      )))
-    )
-  )
+# # Normalize gold by GDP
+# df.data$LBMAGOLD.USD_PM.by.GDP <-
+#   (df.data$LBMAGOLD.USD_PM / df.data$GDP)
+# df.symbols <-
+#   rbind(
+#     df.symbols,
+#     data.frame(
+#       string.symbol = "LBMAGOLD.USD_PM.by.GDP",
+#       string.source = "Calc",
+#       string.description = "Gold, USD/Troy OUnce, Normalized by GDP",
+#       string.label.y = "$/t oz/Index",
+#       float.expense.ratio = -1.00,
+#       date.series.start =  as.Date(max(c(
+#         index(LBMAGOLD[1]), index(GDP[1])
+#       ))) ,
+#       date.series.end = as.Date(min(c(
+#         index(tail(LBMAGOLD, 1)), index(tail(GDP, 1))
+#       )))
+#     )
+#   )
 
 # Normalize nominal GDP commodities by GDP deflator
 df.data$GDP.by.GDPDEF <-
