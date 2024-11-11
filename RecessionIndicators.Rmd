@@ -8541,13 +8541,13 @@ plotSingleQuick(
 
 ```{r PMIComp, echo=FALSE}
 
-plotSingleQuick(
-  dfRecession,
-  df.data,
-  datay = "ISMMANPMI",
-  ylim = c(30, 80),
-  b.percentile = TRUE
-)
+# plotSingleQuick(
+#   dfRecession,
+#   df.data,
+#   datay = "ISMMANPMI",
+#   ylim = c(30, 80),
+#   b.percentile = TRUE
+# )
 
 ```
 
@@ -8755,6 +8755,7 @@ As mentioned above, copper, year over year, has some correlation with the recess
 
 ```{r corplot.commodities, echo=FALSE, fig.width=10,fig.height=10}
 # Correlation for the entire data set
+  #training.cor <- df.data[,c("RecInit", "RecInit_Smooth", "CHRISCMEHG1", "CHRISCMEHG1_YoY","LBMAGOLD.USD_PM_YoY")]
   training.cor <- df.data[,c("RecInit", "RecInit_Smooth", "CHRISCMEHG1", "CHRISCMEHG1_YoY","LBMAGOLD.USD_PM_YoY")]
   rcorr.data <- rcorr(as.matrix(training.cor), type = "pearson")
   #print(rcorr.data)
