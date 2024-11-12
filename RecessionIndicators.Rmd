@@ -8754,14 +8754,14 @@ Detailed correlations are explored above. Before concluding, let's take a look a
 As mentioned above, copper, year over year, has some correlation with the recession initiation. It could be useful.
 
 ```{r corplot.commodities, echo=FALSE, fig.width=10,fig.height=10}
-# Correlation for the entire data set
-  #training.cor <- df.data[,c("RecInit", "RecInit_Smooth", "CHRISCMEHG1", "CHRISCMEHG1_YoY","LBMAGOLD.USD_PM_YoY")]
-  training.cor <- df.data[,c("RecInit", "RecInit_Smooth", "CHRISCMEHG1", "CHRISCMEHG1_YoY","LBMAGOLD.USD_PM_YoY")]
-  rcorr.data <- rcorr(as.matrix(training.cor), type = "pearson")
-  #print(rcorr.data)
-
-  corrplot::corrplot(cor(training.cor), type="upper", order="original", 
-           tl.col="black", tl.srt=45, title ="Commodities data")
+# # Correlation for the entire data set
+#   #training.cor <- df.data[,c("RecInit", "RecInit_Smooth", "CHRISCMEHG1", "CHRISCMEHG1_YoY","LBMAGOLD.USD_PM_YoY")]
+#   training.cor <- df.data[,c("RecInit", "RecInit_Smooth")]
+#   rcorr.data <- rcorr(as.matrix(training.cor), type = "pearson")
+#   #print(rcorr.data)
+# 
+#   corrplot::corrplot(cor(training.cor), type="upper", order="original", 
+#            tl.col="black", tl.srt=45, title ="Commodities data")
 ```
 
 ## GDP Series
