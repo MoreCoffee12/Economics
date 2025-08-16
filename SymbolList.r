@@ -3164,9 +3164,9 @@ df.symbols <-
   rbind(
     df.symbols,
     data.frame(
-      string.symbol = "GOLD",
+      string.symbol = "GC=F",
       string.source = "yahoo",
-      string.description = "Barrick Gold Corporation",
+      string.description = "COMEX - Delayed Quote",
       string.label.y = "Dollars",
       float.expense.ratio = 0.00,
       date.series.start = as.Date("1900-01-01"),

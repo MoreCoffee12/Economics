@@ -8,6 +8,17 @@ output:
     toc_depth: 4
     smart: false
 ---
+```{r}
+```
+
+
+```{r}
+```
+
+
+
+```{r}
+```
 
 ```{r setup, echo=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -113,52 +124,148 @@ if (bRefresh == TRUE) {
 
 ```{r getsyms, echo=FALSE}
 
+library(quantmod)
+
+# ---- Utilities -------------------------------------------------------------
+
+safe_symbol_name <- function(sym) {
+  s <- gsub("[^[:alnum:]_]", "_", sym)  # replace non [A-Za-z0-9_] with "_"
+  s <- gsub("_+", "_", s)               # collapse multiple underscores
+  sub("^([0-9])", "_\\1", s)            # don't start with a digit
+}
+
+escape_regex <- function(x) {
+  gsub("([][{}()+*^$|\\\\?.])", "\\\\\\1", x)
+}
+
+# Fetch and standardize column names. Returns an xts.
+fetch_symbol <- function(symbol,
+                         src  = "yahoo",
+                         from = as.Date("1900-01-01"),
+                         to   = Sys.Date()) {
+  x <- getSymbols(Symbols = symbol,
+                  src = src,
+                  auto.assign = FALSE,
+                  from = from,
+                  to   = to)
+
+  cols <- colnames(x)
+  safe <- safe_symbol_name(symbol)
+
+  # Many sources (esp. Yahoo) return "<rawsym>.<Field>" column names.
+  # Strip that raw prefix, safely escaped.
+  prefix_pattern <- paste0("^", escape_regex(symbol), "\\.")
+  core <- sub(prefix_pattern, "", cols, perl = TRUE)
+
+  # Single-column series (e.g., FRED) -> SAFE.Value
+  if (length(cols) == 1L) core <- "Value"
+
+  colnames(x) <- paste0(safe, ".", core)
+  x
+}
+
+# Ensure df.symbols has useful columns to update
+ensure_df_symbols_cols <- function(df) {
+  needed <- c("string.symbol_safe", "string.object_name",
+              "status", "error", "nrows", "first_date", "last_date")
+  for (nm in needed) if (!nm %in% names(df)) df[[nm]] <- NA_character_
+
+  # Set expected types
+  suppressWarnings({
+    df$nrows <- as.integer(df$nrows)
+    df$first_date <- as.Date(df$first_date)
+    df$last_date  <- as.Date(df$last_date)
+  })
+  df
+}
+
+# ---- Main driver -----------------------------------------------------------
+
+# Iterates rows of df.symbols, fetches each symbol, assigns to env with a safe name,
+# and UPDATES the row with the safe name and fetch status.
+update_symbols <- function(df.symbols,
+                           target_env = .GlobalEnv,
+                           from = as.Date("1900-01-01"),
+                           to   = Sys.Date(),
+                           replace_symbol_column = FALSE) {
+  df <- ensure_df_symbols_cols(df.symbols)
+
+  for (idx in seq_len(nrow(df))) {
+    raw_sym <- as.character(df[idx, "string.symbol"])
+    src     <- as.character(df[idx, "string.source"])
+    safe    <- safe_symbol_name(raw_sym)
+    obj     <- safe
+
+    res <- tryCatch({
+      x <- fetch_symbol(raw_sym, src = src, from = from, to = to)
+
+      assign(obj, x, envir = target_env)
+
+      nr <- nrow(x)
+      # first/last non-all-NA dates
+      non_empty_rows <- which(rowSums(!is.na(x)) > 0L)
+      fdate <- if (length(non_empty_rows)) index(x)[non_empty_rows[1L]] else as.Date(NA)
+      ldate <- if (length(non_empty_rows)) index(x)[non_empty_rows[length(non_empty_rows)]] else as.Date(NA)
+
+      list(ok = TRUE, nr = nr, fdate = as.Date(fdate), ldate = as.Date(ldate), err = NA_character_)
+    }, error = function(e) {
+      list(ok = FALSE, nr = NA_integer_, fdate = as.Date(NA), ldate = as.Date(NA),
+           err = conditionMessage(e))
+    })
+
+    # Update THIS ROW in df.symbols
+    df[idx, "string.symbol_safe"] <- safe
+    df[idx, "string.object_name"] <- obj
+    df[idx, "status"]             <- if (res$ok) "ok" else "error"
+    df[idx, "error"]              <- res$err
+    df[idx, "nrows"]              <- res$nr
+    df[idx, "first_date"]         <- res$fdate
+    df[idx, "last_date"]          <- res$ldate
+  }
+  
+  # Return the modified table, single exit so end with the value
+  df
+}
+
+# ---- Main function ----------------------------------------------------------
+
+# df.symbols is expected to have columns: string.symbol, string.source
+# This assigns each fetched xts to a *safe* object name in the chosen environment.
+ingest_symbols <- function(df.symbols, target_env = .GlobalEnv,
+                           from = as.Date("1900-01-01"), to = Sys.Date()) {
+  for (idx in seq_len(nrow(df.symbols))) {
+    sym <- as.character(df.symbols[idx, "string.symbol"])
+    src <- as.character(df.symbols[idx, "string.source"])
+    print(sym)
+    
+    x <- fetch_symbol(sym, src, from = from, to = to)
+
+    safe <- safe_symbol_name(sym)
+    assign(safe, x, envir = target_env)
+  }
+  invisible(NULL)
+}
+
 
 if (bRefresh) {
-  # This pulls in data using quantmod
+  
+  # Bring the data from the internet into this environment
+  ingest_symbols(df.symbols)
+  
+  # Update the symbols table to include the safe names
+  df.symbols <- update_symbols(df.symbols)
+  
+  # Correct errors in the data series
   for (idx in 1:nrow(df.symbols)) {
-    # This ticker symbol is an odd one. R must allow '=' as variable names, but
-    # most safe names I found removed it. Manually changed here.
-    if (grepl("=", df.symbols[idx, "string.symbol"], fixed = TRUE)) {
-      CLF <- getSymbols(
-        as.character(df.symbols[idx, "string.symbol"]),
-        src = as.character(df.symbols[idx, "string.source"]),
-        auto.assign = FALSE,
-        from = as.Date("1900-01-01"),
-        to = Sys.Date()
-      )
-      colnames(CLF) = c("CLF.Open",
-                        "CLF.High",
-                        "CLF.Low",
-                        "CLF.Close",
-                        "CLF.Volume",
-                        "CLF.Adjusted")
-      
-    } else{
-      str.symbol.list <- df.symbols[idx, "string.symbol"]
-      
-      print(str.symbol.list)
-      
-      
-      getSymbols(
-        as.character(str.symbol.list),
-        src = as.character(df.symbols[idx, "string.source"]),
-        auto.assign = TRUE,
-        from = as.Date("1900-01-01"),
-        to = Sys.Date()
-      )
-      
-    }
-    
+
     # Revision - 26 Mar 22
     # Remove duplicate date values (believed to be a data source error)
     # Details in "Revision X in date.docx"
-    str.safe <-
-      str_replace_all(df.symbols[idx, "string.symbol"], "[^[:alnum:]]", "")
-    assign(str.safe, get(str.safe)[!duplicated (index(get(str.safe))), ])
+    assign(df.symbols[idx, "string.symbol_safe"], 
+           get(df.symbols[idx, "string.symbol_safe"])[!duplicated (index(get(df.symbols[idx, "string.symbol_safe"]))), ])
     
     # Grab the series for some additional extractions
-    xts.temp <- get(str.safe)
+    xts.temp <- get(df.symbols[idx, "string.symbol_safe"])
     
     # Update the series start date
     df.symbols[idx, "date.series.start"] <- index(xts.temp[1])
