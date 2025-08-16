@@ -555,7 +555,8 @@ if (bRefresh) {
 
 if (bRefresh){
 
-  key <- "7a2672468131c5a95dffc487d741edf6"
+  # key <- "7a2672468131c5a95dffc487d741edf6"
+  Sys.setenv(EIA_KEY = "7a2672468131c5a95dffc487d741edf6")
 
 
 
@@ -570,21 +571,28 @@ if (bRefresh){
           string.description =  "U.S. Total Gasoline Retail Sales by Refiners, Monthly",
           string.label.y = "Thousand Gallons per Day",
           float.expense.ratio = -1.00,
-          date.series.start = as.Date("1900-01-01") ,
-          date.series.end = as.Date("1900-01-01")
+          date.series.start = as.Date("1900-01-01"),
+          date.series.end = as.Date("1900-01-01"),
+          string.symbol_safe = safe_symbol_name(str.symbol.raw),
+          string.object_name = safe_symbol_name(str.symbol.raw),
+          status = "ok",
+          error = NA,
+          nrows = 0,
+          first_date = as.Date("1900-01-01"),
+          last_date = as.Date("1900-01-01")
+          
         )
       )
 
     
     # Define the table name and pull the data series from the EIA website
-    str.name <-
-      str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+    str.name <- tail(df.symbols,1)[["string.symbol_safe"]]
     tlb.eia <- eia1_series( str.symbol.raw )
     
     # Convert the table to an xts object an and select the column we are interested in
-    PETA103600001M <- xts( tlb.eia [,-1], order.by=as.Date(as.yearmon(tlb.eia[['period']])))
-    PETA103600001M <- PETA103600001M[,9]
-    colnames(PETA103600001M) <- c(str.name)
+    PET_A103600001_M <- xts( tlb.eia [,-1], order.by=as.Date(as.yearmon(tlb.eia[['period']])))
+    PET_A103600001_M <- PET_A103600001_M[,9]
+    colnames(PET_A103600001_M) <- c(str.name)
     # Revision - 26 Mar 2022, reference "Revision EIA Data Unambig.docx"
     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw,]$date.series.start = tail(index(get(str.name)), 1)
     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw,]$date.series.end = index(get(str.name))[[1]]
