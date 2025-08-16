@@ -609,19 +609,25 @@ if (bRefresh){
           string.label.y = "Thousand Gallons per Day",
           float.expense.ratio = -1.00,
           date.series.start = as.Date("1900-01-01") ,
-          date.series.end = as.Date("1900-01-01")
+          date.series.end = as.Date("1900-01-01"),
+          string.symbol_safe = safe_symbol_name(str.symbol.raw),
+          string.object_name = safe_symbol_name(str.symbol.raw),
+          status = "ok",
+          error = NA,
+          nrows = 0,
+          first_date = as.Date("1900-01-01"),
+          last_date = as.Date("1900-01-01")
         )
       )
 
     # Define the table name and pull the data series from the EIA website
-    str.name <-
-      str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+    str.name <- tail(df.symbols,1)[["string.symbol_safe"]]
     tlb.eia <- eia1_series( str.symbol.raw )
     
     # Convert the table to an xts object an and select the column we are interested in
-    PETA123600001M <- xts( tlb.eia [,-1], order.by=as.Date(as.yearmon(tlb.eia[['period']])))
-    PETA123600001M <- PETA123600001M[,9]
-    colnames(PETA123600001M) <- c(str.name)
+    PET_A123600001_M <- xts( tlb.eia [,-1], order.by=as.Date(as.yearmon(tlb.eia[['period']])))
+    PET_A123600001_M <- PET_A123600001_M[,9]
+    colnames(PET_A123600001_M) <- c(str.name)
 
     # Revision - 26 Mar 2022, reference "Revision EIA Data Unambig.docx"
     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw,]$date.series.start = tail(index(get(str.name)), 1)
@@ -638,20 +644,26 @@ if (bRefresh){
           string.description =  "U.S. Midgrade Gasoline Retail Sales\nby Refiners, Monthly",
           string.label.y = "Thousand Gallons per Day",
           float.expense.ratio = -1.00,
-          date.series.start = as.Date("1900-01-01") ,
-          date.series.end = as.Date("1900-01-01")
-        )
+          date.series.start = as.Date("1900-01-01"),
+          date.series.end = as.Date("1900-01-01"),
+          string.symbol_safe = safe_symbol_name(str.symbol.raw),
+          string.object_name = safe_symbol_name(str.symbol.raw),
+          status = "ok",
+          error = NA,
+          nrows = 0,
+          first_date = as.Date("1900-01-01"),
+          last_date = as.Date("1900-01-01")
+          )
       )
 
     # Define the table name and pull the data series from the EIA website
-    str.name <-
-      str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+    str.name <- tail(df.symbols,1)[["string.symbol_safe"]]
     tlb.eia <- eia1_series( str.symbol.raw )
     
     # Convert the table to an xts object an and select the column we are interested in
-    PETA143B00001M <- xts( tlb.eia [,-1], order.by=as.Date(as.yearmon(tlb.eia[['period']])))
-    PETA143B00001M <- PETA143B00001M[,9]
-    colnames(PETA143B00001M) <- c(str.name)
+    PET_A143B00001_M <- xts( tlb.eia [,-1], order.by=as.Date(as.yearmon(tlb.eia[['period']])))
+    PET_A143B00001_M <- PET_A143B00001_M[,9]
+    colnames(PET_A143B00001_M) <- c(str.name)
 
     # Revision - 26 Mar 2022, reference "Revision EIA Data Unambig.docx"
     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw,]$date.series.start = tail(index(get(str.name)), 1)
@@ -668,20 +680,26 @@ if (bRefresh){
           string.description =  "U.S. Premium Gasoline Bulk Sales\n(Volume) by Refiners, Monthly",
           string.label.y = "Thousand Gallons per Day",
           float.expense.ratio = -1.00,
-          date.series.start = as.Date("1900-01-01") ,
-          date.series.end = as.Date("1900-01-01")
-        )
+          date.series.start = as.Date("1900-01-01"),
+          date.series.end = as.Date("1900-01-01"),
+          string.symbol_safe = safe_symbol_name(str.symbol.raw),
+          string.object_name = safe_symbol_name(str.symbol.raw),
+          status = "ok",
+          error = NA,
+          nrows = 0,
+          first_date = as.Date("1900-01-01"),
+          last_date = as.Date("1900-01-01")
+          )
       )
 
     # Define the table name and pull the data series from the EIA website
-    str.name <-
-      str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+    str.name <- tail(df.symbols,1)[["string.symbol_safe"]]
     tlb.eia <- eia1_series( str.symbol.raw )
     
     # Convert the table to an xts object an and select the column we are interested in
-    PETA133B00001M <- xts( tlb.eia [,-1], order.by=as.Date(as.yearmon(tlb.eia[['period']])))
-    PETA133B00001M <- PETA133B00001M[,9]
-    colnames(PETA133B00001M) <- c(str.name)    
+    PET_A133B00001_M <- xts( tlb.eia [,-1], order.by=as.Date(as.yearmon(tlb.eia[['period']])))
+    PET_A133B00001_M <- PET_A133B00001_M[,9]
+    colnames(PET_A133B00001_M) <- c(str.name)    
     
     # Revision - 26 Mar 2022, reference "Revision EIA Data Unambig.docx"
     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw,]$date.series.start = tail(index(get(str.name)), 1)
@@ -699,19 +717,25 @@ if (bRefresh){
           string.label.y = "Number of rigs",
           float.expense.ratio = -1.00,
           date.series.start = as.Date("1900-01-01") ,
-          date.series.end = as.Date("1900-01-01")
-        )
+          date.series.end = as.Date("1900-01-01"),
+          string.symbol_safe = safe_symbol_name(str.symbol.raw),
+          string.object_name = safe_symbol_name(str.symbol.raw),
+          status = "ok",
+          error = NA,
+          nrows = 0,
+          first_date = as.Date("1900-01-01"),
+          last_date = as.Date("1900-01-01")
+          )
       )
 
     # Define the table name and pull the data series from the EIA website
-    str.name <-
-      str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+    str.name <- tail(df.symbols,1)[["string.symbol_safe"]]
     tlb.eia <- eia1_series( str.symbol.raw )
     
     # Convert the table to an xts object an and select the column we are interested in
-    TOTALOGNRPUSM <- xts( tlb.eia [,-1], order.by=as.Date(as.yearmon(tlb.eia[['period']])))
-    TOTALOGNRPUSM <- TOTALOGNRPUSM[,3]
-    colnames(TOTALOGNRPUSM) <- c(str.name)    
+    TOTAL_OGNRPUS_M <- xts( tlb.eia [,-1], order.by=as.Date(as.yearmon(tlb.eia[['period']])))
+    TOTAL_OGNRPUS_M <- TOTAL_OGNRPUS_M[,3]
+    colnames(TOTAL_OGNRPUS_M) <- c(str.name)    
 
     # Revision - 26 Mar 2022, reference "Revision EIA Data Unambig.docx"
     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw,]$date.series.start = tail(index(get(str.name)), 1)
@@ -728,20 +752,26 @@ if (bRefresh){
           string.description =  "Crude Oil Rotary Rigs in Operation, Monthly",
           string.label.y = "Number of rigs",
           float.expense.ratio = -1.00,
-          date.series.start = as.Date("1900-01-01") ,
-          date.series.end = as.Date("1900-01-01")
-        )
+          date.series.start = as.Date("1900-01-01"),
+          date.series.end = as.Date("1900-01-01"),
+          string.symbol_safe = safe_symbol_name(str.symbol.raw),
+          string.object_name = safe_symbol_name(str.symbol.raw),
+          status = "ok",
+          error = NA,
+          nrows = 0,
+          first_date = as.Date("1900-01-01"),
+          last_date = as.Date("1900-01-01")
+          )
       )
 
     # Define the table name and pull the data series from the EIA website
-    str.name <-
-      str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+    str.name <- tail(df.symbols,1)[["string.symbol_safe"]]
     tlb.eia <- eia1_series( str.symbol.raw )
     
     # Convert the table to an xts object an and select the column we are interested in
-    TOTALPANRPUSM <- xts( tlb.eia [,-1], order.by=as.Date(as.yearmon(tlb.eia[['period']])))
-    TOTALPANRPUSM <- TOTALPANRPUSM[,3]
-    colnames(TOTALPANRPUSM) <- c(str.name)    
+    TOTAL_PANRPUS_M <- xts( tlb.eia [,-1], order.by=as.Date(as.yearmon(tlb.eia[['period']])))
+    TOTAL_PANRPUS_M <- TOTAL_PANRPUS_M[,3]
+    colnames(TOTAL_PANRPUS_M) <- c(str.name)    
 
     # Revision - 26 Mar 2022, reference "Revision EIA Data Unambig.docx"
     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw,]$date.series.start = tail(index(get(str.name)), 1)
@@ -759,19 +789,25 @@ if (bRefresh){
           string.label.y = "Number of rigs",
           float.expense.ratio = -1.00,
           date.series.start = as.Date("1900-01-01") ,
-          date.series.end = as.Date("1900-01-01")
-        )
+          date.series.end = as.Date("1900-01-01"),
+          string.symbol_safe = safe_symbol_name(str.symbol.raw),
+          string.object_name = safe_symbol_name(str.symbol.raw),
+          status = "ok",
+          error = NA,
+          nrows = 0,
+          first_date = as.Date("1900-01-01"),
+          last_date = as.Date("1900-01-01")
+          )
       )
 
     # Define the table name and pull the data series from the EIA website
-    str.name <-
-      str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+    str.name <- tail(df.symbols,1)[["string.symbol_safe"]]
     tlb.eia <- eia1_series( str.symbol.raw )
     
     # Convert the table to an xts object an and select the column we are interested in
-    TOTALNGNRPUSM <- xts( tlb.eia [,-1], order.by=as.Date(as.yearmon(tlb.eia[['period']])))
-    TOTALNGNRPUSM <- TOTALNGNRPUSM[,3]
-    colnames(TOTALNGNRPUSM) <- c(str.name)    
+    TOTAL_NGNRPUS_M <- xts( tlb.eia [,-1], order.by=as.Date(as.yearmon(tlb.eia[['period']])))
+    TOTAL_NGNRPUS_M <- TOTAL_NGNRPUS_M[,3]
+    colnames(TOTAL_NGNRPUS_M) <- c(str.name)    
 
     # Revision - 26 Mar 2022, reference "Revision EIA Data Unambig.docx"
     df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw,]$date.series.start = tail(index(get(str.name)), 1)
@@ -808,15 +844,21 @@ if(bRefresh){
         string.label.y = "Number of rigs",
         float.expense.ratio = -1.00,
         date.series.start = df.rig.raw$Date[[1]] ,
-        date.series.end = tail(df.rig.raw$Date, 1)
-      )
+        date.series.end = tail(df.rig.raw$Date, 1),
+        string.symbol_safe = safe_symbol_name(str.symbol),
+        string.object_name = safe_symbol_name(str.symbol),
+        status = "ok",
+        error = NA,
+        nrows = 0,
+        first_date = as.Date("1900-01-01"),
+        last_date = as.Date("1900-01-01")
+        )
     )
   
   # Process the total rig count
-  str.safe.name <-
-    str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+  str.safe.name <- tail(df.symbols,1)[["string.symbol_safe"]]
   assign(str.safe.name, xts(df.rig.raw$Total, order.by = df.rig.raw$Date))
-  colnames(BKRTotal)[[1]] <- c(str.safe.name)
+  colnames(BKR_Total)[[1]] <- c(str.safe.name)
   
   # Create the zoo object for gas rig count
   str.symbol <- 'BKR/Gas'
@@ -830,15 +872,21 @@ if(bRefresh){
         string.label.y = "Number of rigs",
         float.expense.ratio = -1.00,
         date.series.start = tail(df.rig.raw$Date, 1) ,
-        date.series.end = df.rig.raw$Date[[1]]
-      )
+        date.series.end = df.rig.raw$Date[[1]],
+        string.symbol_safe = safe_symbol_name(str.symbol),
+        string.object_name = safe_symbol_name(str.symbol),
+        status = "ok",
+        error = NA,
+        nrows = 0,
+        first_date = as.Date("1900-01-01"),
+        last_date = as.Date("1900-01-01")
+        )
     )
   
   # Process the total gas rig count
-  str.safe.name <-
-    str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+  str.safe.name <- tail(df.symbols,1)[["string.symbol_safe"]]
   assign(str.safe.name, xts(df.rig.raw$Gas, order.by = df.rig.raw$Date))
-  colnames(BKRGas)[[1]] <- c(str.safe.name)
+  colnames(BKR_Gas)[[1]] <- c(str.safe.name)
   
   # Create the zoo object for oil rig count
   str.symbol <- 'BKR/Oil'
@@ -852,15 +900,21 @@ if(bRefresh){
         string.label.y = "Number of rigs",
         float.expense.ratio = -1.00,
         date.series.start = tail(df.rig.raw$Date, 1) ,
-        date.series.end = df.rig.raw$Date[[1]]
-      )
+        date.series.end = df.rig.raw$Date[[1]],
+        string.symbol_safe = safe_symbol_name(str.symbol),
+        string.object_name = safe_symbol_name(str.symbol),
+        status = "ok",
+        error = NA,
+        nrows = 0,
+        first_date = as.Date("1900-01-01"),
+        last_date = as.Date("1900-01-01")
+        )
     )
   
   # Process the total gas rig count
-  str.safe.name <-
-    str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+  str.safe.name <-tail(df.symbols,1)[["string.symbol_safe"]]
   assign(str.safe.name, xts(df.rig.raw$Oil, order.by = df.rig.raw$Date))
-  colnames(BKROil)[[1]] <- c(str.safe.name)
+  colnames(BKR_Oil)[[1]] <- c(str.safe.name)
 
 }
 
@@ -905,7 +959,14 @@ if(bRefresh){
         string.label.y = "Billions of Dollars",
         float.expense.ratio = -1.00,
         date.series.start = dt.date[1],
-        date.series.end = tail(dt.date,1)
+        date.series.end = tail(dt.date,1),
+        string.symbol_safe = safe_symbol_name(str.symbol),
+        string.object_name = safe_symbol_name(str.symbol),
+        status = "ok",
+        error = NA,
+        nrows = 0,
+        first_date = as.Date("1900-01-01"),
+        last_date = as.Date("1900-01-01")
       )
     )
 }
@@ -957,7 +1018,14 @@ if(bRefresh){
         string.label.y = "Dollars",
         float.expense.ratio = -1.00,
         date.series.start = tail(df.silverblatt$QUARTER.END,1),
-        date.series.end = df.silverblatt$QUARTER.END[1]
+        date.series.end = df.silverblatt$QUARTER.END[1],
+        string.symbol_safe = safe_symbol_name(str.symbol),
+        string.object_name = safe_symbol_name(str.symbol),
+        status = "ok",
+        error = NA,
+        nrows = 0,
+        first_date = as.Date("1900-01-01"),
+        last_date = as.Date("1900-01-01")
       )
     )
   
@@ -976,7 +1044,14 @@ if(bRefresh){
         string.label.y = "Dollars",
         float.expense.ratio = -1.00,
         date.series.start = tail(df.silverblatt$QUARTER.END,1),
-        date.series.end = df.silverblatt$QUARTER.END[1]
+        date.series.end = df.silverblatt$QUARTER.END[1],
+        string.symbol_safe = safe_symbol_name(str.symbol),
+        string.object_name = safe_symbol_name(str.symbol),
+        status = "ok",
+        error = NA,
+        nrows = 0,
+        first_date = as.Date("1900-01-01"),
+        last_date = as.Date("1900-01-01")
       )
     )
   
@@ -995,7 +1070,14 @@ if(bRefresh){
         string.label.y = "Dollars",
         float.expense.ratio = -1.00,
         date.series.start = tail(df.silverblatt$QUARTER.END,1),
-        date.series.end = df.silverblatt$QUARTER.END[1]
+        date.series.end = df.silverblatt$QUARTER.END[1],
+        string.symbol_safe = safe_symbol_name(str.symbol),
+        string.object_name = safe_symbol_name(str.symbol),
+        status = "ok",
+        error = NA,
+        nrows = 0,
+        first_date = as.Date("1900-01-01"),
+        last_date = as.Date("1900-01-01")
       )
     )
   
@@ -1014,7 +1096,14 @@ if(bRefresh){
         string.label.y = "Dollars",
         float.expense.ratio = -1.00,
         date.series.start = tail(df.silverblatt$QUARTER.END,1),
-        date.series.end = df.silverblatt$QUARTER.END[1]
+        date.series.end = df.silverblatt$QUARTER.END[1],
+        string.symbol_safe = safe_symbol_name(str.symbol),
+        string.object_name = safe_symbol_name(str.symbol),
+        status = "ok",
+        error = NA,
+        nrows = 0,
+        first_date = as.Date("1900-01-01"),
+        last_date = as.Date("1900-01-01")
       )
     )
   
@@ -1033,7 +1122,14 @@ if(bRefresh){
         string.label.y = "Dollars",
         float.expense.ratio = -1.00,
         date.series.start = tail(df.silverblatt$QUARTER.END,1),
-        date.series.end = df.silverblatt$QUARTER.END[1]
+        date.series.end = df.silverblatt$QUARTER.END[1],
+        string.symbol_safe = safe_symbol_name(str.symbol),
+        string.object_name = safe_symbol_name(str.symbol),
+        status = "ok",
+        error = NA,
+        nrows = 0,
+        first_date = as.Date("1900-01-01"),
+        last_date = as.Date("1900-01-01")
       )
     )
   
@@ -1053,7 +1149,14 @@ if(bRefresh){
         string.label.y = "Dollars",
         float.expense.ratio = -1.00,
         date.series.start = tail(df.silverblatt$QUARTER.END,1),
-        date.series.end = df.silverblatt$QUARTER.END[1]
+        date.series.end = df.silverblatt$QUARTER.END[1],
+        string.symbol_safe = safe_symbol_name(str.symbol),
+        string.object_name = safe_symbol_name(str.symbol),
+        status = "ok",
+        error = NA,
+        nrows = 0,
+        first_date = as.Date("1900-01-01"),
+        last_date = as.Date("1900-01-01")
       )
     )
   
@@ -1072,7 +1175,14 @@ if(bRefresh){
         string.label.y = "Dollars",
         float.expense.ratio = -1.00,
         date.series.start = tail(df.silverblatt$QUARTER.END,1),
-        date.series.end = df.silverblatt$QUARTER.END[1]
+        date.series.end = df.silverblatt$QUARTER.END[1],
+        string.symbol_safe = safe_symbol_name(str.symbol),
+        string.object_name = safe_symbol_name(str.symbol),
+        status = "ok",
+        error = NA,
+        nrows = 0,
+        first_date = as.Date("1900-01-01"),
+        last_date = as.Date("1900-01-01")
       )
     )
 
@@ -1139,7 +1249,14 @@ if(bRefresh){
         string.label.y = "Dollars",
         float.expense.ratio = -1.00,
         date.series.start = tail(df.silverblatt.act$QUARTER.END,1),
-        date.series.end = df.silverblatt.act$QUARTER.END[1]
+        date.series.end = df.silverblatt.act$QUARTER.END[1],
+        string.symbol_safe = safe_symbol_name(str.symbol),
+        string.object_name = safe_symbol_name(str.symbol),
+        status = "ok",
+        error = NA,
+        nrows = 0,
+        first_date = as.Date("1900-01-01"),
+        last_date = as.Date("1900-01-01")
       )
     )
   
@@ -1157,7 +1274,14 @@ if(bRefresh){
         string.label.y = "Dollars",
         float.expense.ratio = -1.00,
         date.series.start = tail(df.silverblatt.act$QUARTER.END,1),
-        date.series.end = df.silverblatt.act$QUARTER.END[1]
+        date.series.end = df.silverblatt.act$QUARTER.END[1],
+        string.symbol_safe = safe_symbol_name(str.symbol),
+        string.object_name = safe_symbol_name(str.symbol),
+        status = "ok",
+        error = NA,
+        nrows = 0,
+        first_date = as.Date("1900-01-01"),
+        last_date = as.Date("1900-01-01")
       )
     )
 }
