@@ -1,4 +1,61 @@
 
+#' Get y-axis label for a safe symbol
+#'
+#' Return the value of `string.label.y` for an exact match on
+#' `string.symbol_safe` in `df.symbols`. Errors if there is no match
+#' or more than one match.
+#'
+#' @param df.symbols A data.frame containing at least the columns
+#'   `string.symbol_safe` and `string.label.y`.
+#' @param str.symbol.root Character scalar; the safe symbol to look up.
+#'
+#' @returns Character scalar: the y-axis label for the matched symbol.
+#' @export
+#'
+#' @examples
+#' df.symbols <- data.frame(
+#'   string.symbol_safe = c("CL_F", "GSPC"),
+#'   string.label.y     = c("Price (USD)", "Index Level"),
+#'   stringsAsFactors   = FALSE
+#' )
+#' get_y_label_for_symbol(df.symbols, "GSPC")
+#' # [1] "Index Level"
+get_y_label_for_symbol <- function(df.symbols, str.symbol.root) {
+  
+  # Validate inputs
+  if (!is.data.frame(df.symbols)) {
+    stop("df.symbols must be a data.frame.")
+  }
+  req <- c("string.symbol_safe", "string.label.y")
+  miss <- setdiff(req, names(df.symbols))
+  if (length(miss)) {
+    stop("df.symbols is missing required columns: ",
+         paste(miss, collapse = ", "))
+  }
+  if (!is.character(str.symbol.root) || length(str.symbol.root) != 1L ||
+      is.na(str.symbol.root) || !nzchar(str.symbol.root)) {
+    stop("str.symbol.root must be a non-empty character scalar.")
+  }
+  
+  # Exact-match lookup and assertions
+  hits <- which(df.symbols$string.symbol_safe == str.symbol.root)
+  if (length(hits) == 0L) {
+    stop("No exact match for '", str.symbol.root,
+         "' in df.symbols$string.symbol_safe.")
+  }
+  if (length(hits) > 1L) {
+    stop("Expected exactly 1 match for '", str.symbol.root,
+         "', got ", length(hits), ".")
+  }
+  
+  # Return scalar label
+  lbl <- df.symbols$string.label.y[[hits]]
+  if (!is.character(lbl)) lbl <- as.character(lbl)
+  lbl
+}
+
+
+
 
 #' Calculate data features
 #'
@@ -13,7 +70,7 @@ calcFeatures <- function(df.data, df.symbols){
 
   # Loop through each of the columns
   for (str.symbol in names(df.data)) {
-    
+
     # Define series description, dates, and deal with root series symbols.
 
     # This section looks up the description using the safe string name. These 
@@ -73,9 +130,12 @@ calcFeatures <- function(df.data, df.symbols){
                 ' date.temp.start: ', date.temp.start))
     
     # Start with the YoY calculation
+    print(nrow(df.symbols))
     str.symbolYoY <- paste(str.symbol, "_YoY", sep = "")
     print(paste(str.symbol,'-',str.symbolYoY, '-', str.description))
+    print( paste ("str.symbolYoY 1: ", str.symbolYoY))
     df.data[str.symbolYoY] <- CalcYoY(df.data, str.symbol, 365)
+    print( paste ("str.symbolYoY 2: ", str.symbolYoY))
     df.symbols <-
       rbind(
         df.symbols,
@@ -87,8 +147,8 @@ calcFeatures <- function(df.data, df.symbols){
           float.expense.ratio = -1.00,
           date.series.start = date.temp.start,
           date.series.end = date.temp.end,
-          string.symbol_safe = safe_symbol_name(string.symbol),
-          string.object_name = safe_symbol_name(string.symbol),
+          string.symbol_safe = safe_symbol_name(str.symbolYoY),
+          string.object_name = safe_symbol_name(str.symbolYoY),
           status = "ok",
           error = NA,
           nrows = 0,
@@ -96,8 +156,7 @@ calcFeatures <- function(df.data, df.symbols){
           last_date = date.series.end
         )
       )
-    
-    
+
     # These series were added to help evaluate structured products and
     # answer the question, what is the probability of a decline over a period of
     # 4 and 5 years.
@@ -116,8 +175,8 @@ calcFeatures <- function(df.data, df.symbols){
           float.expense.ratio = -1.00,
           date.series.start = date.temp.start,
           date.series.end = date.temp.end,
-          string.symbol_safe = safe_symbol_name(string.symbol),
-          string.object_name = safe_symbol_name(string.symbol),
+          string.symbol_safe = safe_symbol_name(str.symbolYoY4),
+          string.object_name = safe_symbol_name(str.symbolYoY4),
           status = "ok",
           error = NA,
           nrows = 0,
@@ -142,8 +201,8 @@ calcFeatures <- function(df.data, df.symbols){
           float.expense.ratio = -1.00,
           date.series.start = date.temp.start,
           date.series.end = date.temp.end,
-          string.symbol_safe = safe_symbol_name(string.symbol),
-          string.object_name = safe_symbol_name(string.symbol),
+          string.symbol_safe = safe_symbol_name(str.symbolYoY5),
+          string.object_name = safe_symbol_name(str.symbolYoY5),
           status = "ok",
           error = NA,
           nrows = 0,
@@ -153,8 +212,7 @@ calcFeatures <- function(df.data, df.symbols){
       )
     
     # Smooth the series, kernel of 1-year
-    strNewYLabel <-
-      df.symbols[grep(paste("^", str.symbol.root, "$", sep = ""), df.symbols$string.symbol), ]$tring.label.y 
+    strNewYLabel <- get_y_label_for_symbol(df.symbols, str.symbol.root)
     str.symbolSmooth <- paste(str.symbol, "_Smooth", sep = "")
     df.data[str.symbolSmooth] <-
       sgolayfilt(
@@ -180,8 +238,8 @@ calcFeatures <- function(df.data, df.symbols){
           float.expense.ratio = -1.00,
           date.series.start = date.temp.start,
           date.series.end = date.temp.end,
-          string.symbol_safe = safe_symbol_name(string.symbol),
-          string.object_name = safe_symbol_name(string.symbol),
+          string.symbol_safe = safe_symbol_name(str.symbolSmooth),
+          string.object_name = safe_symbol_name(str.symbolSmooth),
           status = "ok",
           error = NA,
           nrows = 0,
@@ -191,8 +249,7 @@ calcFeatures <- function(df.data, df.symbols){
       )
     
     # Smooth the series, kernel of 15 days (inspired by RSI length)
-    strNewYLabel <-
-      df.symbols[grep(paste("^", str.symbol.root, "$", sep = ""), df.symbols$string.symbol), ]$tring.label.y 
+    strNewYLabel <- get_y_label_for_symbol(df.symbols, str.symbol.root)
     str.symbolSmooth <- paste(str.symbol, "_Smooth.short", sep = "")
     df.data[str.symbolSmooth] <-
       sgolayfilt(
@@ -218,8 +275,8 @@ calcFeatures <- function(df.data, df.symbols){
           float.expense.ratio = -1.00,
           date.series.start = date.temp.start,
           date.series.end = date.temp.end,
-          string.symbol_safe = safe_symbol_name(string.symbol),
-          string.object_name = safe_symbol_name(string.symbol),
+          string.symbol_safe = safe_symbol_name(str.symbolSmooth),
+          string.object_name = safe_symbol_name(str.symbolSmooth),
           status = "ok",
           error = NA,
           nrows = 0,
@@ -229,8 +286,7 @@ calcFeatures <- function(df.data, df.symbols){
       )
     
     # Smooth and derivative in one step
-    strNewYLabel <-
-      df.symbols[grep(paste("^", str.symbol.root, "$", sep = ""), df.symbols$string.symbol), ]$tring.label.y 
+    strNewYLabel <- get_y_label_for_symbol(df.symbols, str.symbol.root)
     str.symbolSmoothDer <- paste(str.symbol, "_SmoothDer", sep = "")
     df.data[str.symbolSmoothDer] <-
       sgolayfilt(
@@ -253,8 +309,8 @@ calcFeatures <- function(df.data, df.symbols){
           float.expense.ratio = -1.00,
           date.series.start = date.temp.start,
           date.series.end = date.temp.end,
-          string.symbol_safe = safe_symbol_name(string.symbol),
-          string.object_name = safe_symbol_name(string.symbol),
+          string.symbol_safe = safe_symbol_name(str.symbolSmoothDer),
+          string.object_name = safe_symbol_name(str.symbolSmoothDer),
           status = "ok",
           error = NA,
           nrows = 0,
@@ -264,10 +320,7 @@ calcFeatures <- function(df.data, df.symbols){
       )
     
     # Take the log
-    #print('Taking log......')
-    #print(str.symbol)
-    strNewYLabel <-
-      df.symbols[grep(paste("^", str.symbol.root, "$", sep = ""), df.symbols$string.symbol), ]$tring.label.y 
+    strNewYLabel <- get_y_label_for_symbol(df.symbols, str.symbol.root)
     str.symbolLog <- paste(str.symbol, "_Log", sep = "")
     if (any(df.data[,str.symbol] <=0)){
       df.data[str.symbolLog] <- 0*(df.data[, str.symbol])
@@ -290,8 +343,8 @@ calcFeatures <- function(df.data, df.symbols){
           float.expense.ratio = -1.00,
           date.series.start = date.temp.start,
           date.series.end = date.temp.end,
-          string.symbol_safe = safe_symbol_name(string.symbol),
-          string.object_name = safe_symbol_name(string.symbol),
+          string.symbol_safe = safe_symbol_name(str.symbolLog),
+          string.object_name = safe_symbol_name(str.symbolLog),
           status = "ok",
           error = NA,
           nrows = 0,
@@ -304,8 +357,7 @@ calcFeatures <- function(df.data, df.symbols){
     mav <- function(x, n = 365) {
       stats::filter(x, rep(1 / n, n), sides = 1)
     }
-    strNewYLabel <-
-      df.symbols[grep(paste("^", str.symbol.root, "$", sep = ""), df.symbols$string.symbol), ]$tring.label.y 
+    strNewYLabel <- get_y_label_for_symbol(df.symbols, str.symbol.root)
     str.symbolMVA365 <- paste(str.symbol, "_mva365", sep = "")
     df.data[str.symbolMVA365] <- mav(df.data[, str.symbol])
     df.data[, str.symbolMVA365] <-
@@ -323,8 +375,8 @@ calcFeatures <- function(df.data, df.symbols){
           float.expense.ratio = -1.00,
           date.series.start = date.temp.start,
           date.series.end = date.temp.end,
-          string.symbol_safe = safe_symbol_name(string.symbol),
-          string.object_name = safe_symbol_name(string.symbol),
+          string.symbol_safe = safe_symbol_name(str.symbolMVA365),
+          string.object_name = safe_symbol_name(str.symbolMVA365),
           status = "ok",
           error = NA,
           nrows = 0,
@@ -337,8 +389,7 @@ calcFeatures <- function(df.data, df.symbols){
     mav <- function(x, n = 200) {
       stats::filter(x, rep(1 / n, n), sides = 1)
     }
-    strNewYLabel <-
-      df.symbols[grep(paste("^", str.symbol.root, "$", sep = ""), df.symbols$string.symbol), ]$tring.label.y 
+    strNewYLabel <- get_y_label_for_symbol(df.symbols, str.symbol.root)
     str.symbolMVA200 <- paste(str.symbol, "_mva200", sep = "")
     df.data[str.symbolMVA200] <- mav(df.data[, str.symbol])
     df.data[, str.symbolMVA200] <-
@@ -356,8 +407,8 @@ calcFeatures <- function(df.data, df.symbols){
           float.expense.ratio = -1.00,
           date.series.start = date.temp.start,
           date.series.end = date.temp.end,
-          string.symbol_safe = safe_symbol_name(string.symbol),
-          string.object_name = safe_symbol_name(string.symbol),
+          string.symbol_safe = safe_symbol_name(str.symbolMVA200),
+          string.object_name = safe_symbol_name(str.symbolMVA200),
           status = "ok",
           error = NA,
           nrows = 0,
@@ -368,8 +419,7 @@ calcFeatures <- function(df.data, df.symbols){
 
         
     # Add the 50 day moving average
-    strNewYLabel <-
-      df.symbols[grep(paste("^", str.symbol.root, "$", sep = ""), df.symbols$string.symbol), ]$tring.label.y 
+    strNewYLabel <- get_y_label_for_symbol(df.symbols, str.symbol.root)
     str.symbolMVA050 <- paste(str.symbol, "_mva050", sep = "")
     df.data[str.symbolMVA050] <- mav(df.data[, str.symbol], n = 50)
     df.data[, str.symbolMVA050] <-
@@ -387,8 +437,8 @@ calcFeatures <- function(df.data, df.symbols){
           float.expense.ratio = -1.00,
           date.series.start = date.temp.start,
           date.series.end = date.temp.end,
-          string.symbol_safe = safe_symbol_name(string.symbol),
-          string.object_name = safe_symbol_name(string.symbol),
+          string.symbol_safe = safe_symbol_name(str.symbolMVA050),
+          string.object_name = safe_symbol_name(str.symbolMVA050),
           status = "ok",
           error = NA,
           nrows = 0,
@@ -396,7 +446,7 @@ calcFeatures <- function(df.data, df.symbols){
           last_date = date.series.end
         )
       )
-    
+
   }  
   
   return(list(df.data, df.symbols))
