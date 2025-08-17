@@ -128,11 +128,25 @@ library(quantmod)
 
 # ---- Utilities -------------------------------------------------------------
 
-safe_symbol_name <- function(sym) {
-  s <- gsub("[^[:alnum:]_]", "_", sym)  # replace non [A-Za-z0-9_] with "_"
-  s <- gsub("_+", "_", s)               # collapse multiple underscores
-  sub("^([0-9])", "_\\1", s)            # don't start with a digit
+safe_symbol_name <- function(sym, prefer_underscore = TRUE, unique = TRUE) {
+  
+  stopifnot(is.character(sym))
+  # 1) make syntactic and (optionally) unique
+  s <- make.names(sym, unique = unique)
+  
+  # 2) prefer underscores over dots
+  if (prefer_underscore) s <- gsub("\\.", "_", s)
+  
+  # 3) collapse multiple underscores (cosmetic)
+  s <- gsub("_+", "_", s)
+  
+  # 4) extra safety: if a name *starts* with a digit, prefix an underscore
+  # (make.names() would already prefix with 'X', but keep this in case prefer_underscore=FALSE is used)
+  s <- sub("^([0-9])", "_\\1", s)
+  
+  s
 }
+
 
 escape_regex <- function(x) {
   gsub("([][{}()+*^$|\\\\?.])", "\\\\\\1", x)
@@ -1312,15 +1326,21 @@ if(bRefresh){
         string.label.y = "Dollars",
         float.expense.ratio = -1.00,
         date.series.start = tail(df.margin$Date, 1) ,
-        date.series.end = df.margin$Date[[1]]
+        date.series.end = df.margin$Date[[1]],
+        string.symbol_safe = safe_symbol_name(str.symbol),
+        string.object_name = safe_symbol_name(str.symbol),
+        status = "ok",
+        error = NA,
+        nrows = 0,
+        first_date = as.Date("1900-01-01"),
+        last_date = as.Date("1900-01-01")
       )
     )
   
   # Process the margin debt
-  str.safe.name <-
-    str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+  str.safe.name <-tail(df.symbols,1)[["string.symbol_safe"]]
   assign(str.safe.name, xts(df.margin[, 8], order.by = df.margin[, 1]))
-  colnames(FINRAMarginDebt)[[1]] <- c(str.safe.name)
+  colnames(FINRA_MarginDebt)[[1]] <- c(str.safe.name)
   
   
   # Create the zoo object for free credit in margin
@@ -1335,63 +1355,23 @@ if(bRefresh){
         string.label.y = "Dollars",
         float.expense.ratio = -1.00,
         date.series.start = tail(df.margin$Date, 1)  ,
-        date.series.end = as.Date("1900-01-01")
+        date.series.end = as.Date("1900-01-01"),
+        string.symbol_safe = safe_symbol_name(str.symbol),
+        string.object_name = safe_symbol_name(str.symbol),
+        status = "ok",
+        error = NA,
+        nrows = 0,
+        first_date = as.Date("1900-01-01"),
+        last_date = as.Date("1900-01-01")
       )
     )
   
   # Process the free credit in margin
-  str.safe.name <-
-    str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+  str.safe.name <- tail(df.symbols,1)[["string.symbol_safe"]]
   assign(str.safe.name, xts(df.margin[, 10], order.by = df.margin[, 1]))
-  colnames(FINRAFreeCreditMargin)[[1]] <- c(str.safe.name)
+  colnames(FINRA_FreeCreditMargin)[[1]] <- c(str.safe.name)
 
 }
-
-```
-
-## Covid 19 Data
-
-Get the Covid-19 data from JHU
-
-```{r covid.hell, echo=FALSE}
-if(bRefresh){
-  
-data("coronavirus")
-coronavirus::update_dataset(silence = TRUE)
-}
-
-```
-
-```{r covid.hell.tidy, echo=FALSE}
-if(bRefresh){
-  
-  df.corona.region <- coronavirus %>%
-  filter(type == "confirmed") %>%
-  group_by(country) %>%
-  summarise(total = sum(cases)) %>%
-  arrange(-total) %>%
-  head(20)
-  
-  df.corona.date <- coronavirus %>%
-  filter(type == "confirmed") %>%
-  group_by(country, date) %>%
-  summarise(total = sum(cases)) %>%
-  arrange(country) 
-  
-  df.corona.date.us <- df.corona.date[df.corona.date$country=='US',]
-  df.corona.date.us$day <- as.factor(weekdays(df.corona.date.us$date))
-  df.corona.date.us$day_number <- recode(df.corona.date.us$day, 
-         "Sunday" = "0",
-         "Monday" = "1",
-         "Tuesday" = "2",
-         "Wednesday" = "3",
-         "Thursday" = "4",
-         "Friday" = "5",
-         "Saturday"= "6")
-  df.corona.date.us$day_number <- as.numeric(as.character((df.corona.date.us$day_number)))
-}
-
-
 
 ```
 
@@ -1424,15 +1404,21 @@ df.symbols <-
       string.label.y = "Millions of Options/Day",
       float.expense.ratio = -1.00,
       date.series.start = tail(df.options$Date, 1) ,
-      date.series.end = df.options$Date[[1]]
+      date.series.end = df.options$Date[[1]],
+      string.symbol_safe = safe_symbol_name(str.symbol),
+      string.object_name = safe_symbol_name(str.symbol),
+      status = "ok",
+      error = NA,
+      nrows = 0,
+      first_date = as.Date("1900-01-01"),
+      last_date = as.Date("1900-01-01")
     )
   )
 
 # Process the options equity volume, create the zoo object
-str.safe.name <-
-  str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+str.safe.name <- tail(df.symbols,1)[["string.symbol_safe"]]
 assign(str.safe.name, xts(df.options[, 2], order.by = df.options[, 1]))
-colnames(OCCEquityVolume)[[1]] <- c(str.safe.name)
+colnames(OCC_EquityVolume)[[1]] <- c(str.safe.name)
 
 
 # Create symbols table for non-equity margin
@@ -1447,15 +1433,21 @@ df.symbols <-
       string.label.y = "Millions of Options/Day",
       date.series.start = tail(df.options$Date, 1) ,
       float.expense.ratio = -1.00,
-      date.series.end = df.options$Date[[1]]
+      date.series.end = df.options$Date[[1]],
+      string.symbol_safe = safe_symbol_name(str.symbol),
+      string.object_name = safe_symbol_name(str.symbol),
+      status = "ok",
+      error = NA,
+      nrows = 0,
+      first_date = as.Date("1900-01-01"),
+      last_date = as.Date("1900-01-01")
     )
   )
 
 # Process the options equity volume, create the zoo object
-str.safe.name <-
-  str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
+str.safe.name <- tail(df.symbols,1)[["string.symbol_safe"]] 
 assign(str.safe.name, xts(df.options[, 3], order.by = df.options[, 1]))
-colnames(OCCNonEquityVolume)[[1]] <- c(str.safe.name)
+colnames(OCC_NonEquityVolume)[[1]] <- c(str.safe.name)
 
 }
 
@@ -1475,67 +1467,6 @@ if( bRefresh ){
 #  load("C:/Users/Brian/OneDrive//RecessionIndicator_Buffer.RData")
   load("C:/Users/Rainy/OneDrive//RecessionIndicator_Buffer.RData")
 }
-
-```
-
-```{r covid.hell.plot, echo=FALSE}
-qplot(df.corona.date.us$date, df.corona.date.us$total)
-
-
-
-my.plot <-
-  qplot(day_number,
-        total,
-        data = df.corona.date.us[1:4, ],
-        geom = c("point", "line"))
-i.lines <- floor(nrow(df.corona.date.us) / 7) - 3
-idx.start <- 5
-for (idx in 1:i.lines) {
-  idx.end = idx.start + 6
-  my.plot <-
-    my.plot + geom_line(data = df.corona.date.us[idx.start:idx.end, ], aes(x = day_number, y = total))
-  idx.start = idx.end + 1
-}
-idx.end = idx.start + 6
-my.plot <-
-  my.plot + geom_line(
-    data = df.corona.date.us[idx.start:idx.end,],
-    aes(x = day_number, y = total),
-    color = "green",
-    size = 2
-  )
-idx.start <- idx.end + 1
-idx.end = idx.start + 6
-my.plot <-
-  my.plot + geom_line(
-    data = df.corona.date.us[idx.start:idx.end,],
-    aes(x = day_number, y = total),
-    color = "blue",
-    size = 2
-  )
-idx.start <- idx.end + 1
-idx.end = idx.start + 6
-my.plot <-
-  my.plot + geom_line(
-    data = df.corona.date.us[idx.start:idx.end,],
-    aes(x = day_number, y = total),
-    color = "red",
-    size = 2
-  )
-my.plot <-
-  my.plot + ggtitle("US Daily Cases, JHU Data (Red is most recent, Blue is last week,\nGreen the week before that )")
-my.plot <- my.plot + xlab("Day Number, 0=Sunday, 6 = Saturday")
-my.plot <- my.plot + ylab("Daily Total")
-my.plot
-
-```
-
-```{r symTidy, echo=FALSE}
-
-#This snippet is needed because some of the ticker symbols include are invalid variable names so re-cast those variable names.
-
-df.symbols$string.symbol <-
-  str_replace_all(df.symbols$string.symbol, "[^[:alnum:]]", "")
 
 ```
 
@@ -1578,6 +1509,7 @@ Year over year, smoothed derivative, and log trends tend to smooth out seasonal 
 ```{r calcsYoYSmoothLog}
 
 source("calcFeatures.r")
+source("plotHelper.r")
 lst.df <- calcFeatures(df.data, df.symbols)
 df.data <- lst.df[[1]]
 df.symbols <- lst.df[[2]]
@@ -1598,6 +1530,32 @@ source("calcFeaturesAggregate.r")
 source("calcRecession.r")
 
 ```
+
+# Document the final data frame
+
+```{r create.data.dictionary, echo=FALSE}
+
+df.dict <- data.frame(
+  column = names(df.data),
+  type   = sapply(df.data, function(x) paste(class(x), collapse = ",")),
+  n_missing = sapply(df.data, function(x) sum(is.na(x))),
+  example   = sapply(df.data, function(x) paste(head(na.omit(unique(x)), 3), collapse = ", ")),
+  stringsAsFactors = FALSE
+)
+
+# TODO - this needs to be moved to the front of the file so it can be used for 
+# all the external data sources.
+str.data.dir <- "C:/Users/Rainy/OneDrive/Documents/IssaquahDynamical/Datasets/2529RS0082_HistEconData"
+out.file <- file.path(str.data.dir, "data_dictionary.csv")
+
+write.csv(df.dict, out.file, row.names = TRUE)
+
+rm(df.dict)
+rm(str.data.dir)
+rm(out.file)
+
+```
+
 
 # Summary calculations
 

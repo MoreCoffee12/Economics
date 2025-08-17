@@ -13,9 +13,9 @@
 #' @examples
 calcInterpolate <- function(df.symbols) {
 
-  xtsData <- get(df.symbols$string.symbol[1])
+  xtsData <- get(df.symbols$string.symbol_safe[1])
   for (idx in 2:nrow(df.symbols)) {
-    xtsData <- merge(xtsData,  get(df.symbols$string.symbol[idx]))
+    xtsData <- merge(xtsData,  get(df.symbols$string.symbol_safe[idx]))
     #print(df.symbols$string.symbol[idx])
   }
   

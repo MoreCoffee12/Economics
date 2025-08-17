@@ -14,37 +14,67 @@ calcFeatures <- function(df.data, df.symbols){
   # Loop through each of the columns
   for (str.symbol in names(df.data)) {
     
-    # Define series description, dates and deal with root series symbols.
+    # Define series description, dates, and deal with root series symbols.
 
-    # This section looks up the description. The "." extension on trading data series
-    # from Yahoo requires some additional look up.
-    str.description <-
-      df.symbols[grep(paste("^", str.symbol, "$", sep = ""), df.symbols$string.symbol), ]$string.description
+    # This section looks up the description using the safe string name. These 
+    # ticker symbols usually have a suffix like '.Value' or '.Open'. To start 
+    # with, the code attempts to look up the description directly.
+    str.description <-df.symbols$string.description[
+      df.symbols$string.symbol_safe == str.symbol
+    ]
     str.symbol.root <- str.symbol
     
-    # Descriptions must be associated with the root data series name. If the
-    # symbol table is empty and there is a "." in the name, look up the root
-    # symbol and use that.
+    # Maybe we didn't find anything. Descriptions must be associated with the
+    # root data series name. If the symbol table is empty and there is a "." in
+    # the name, look up the root symbol and use that.
     if (length(str.description) <= 0) {
+      
+      # Initialize the string
       str.suffix <- ""
+      
       if (grepl("\\.", str.symbol)) {
         str.symbol.root <- substr(str.symbol, 1, regexpr("\\.", str.symbol) - 1)
         str.suffix <-
           substr(str.symbol, regexpr("\\.", str.symbol) + 1, nchar(str.symbol))
         str.suffix <- paste(" (", str.suffix, ")", sep = "")
       }
-    }
-    # The new series will have the same start date as the original series
-    # root symbol
-    date.temp <-
-      df.symbols[grep(paste("^", str.symbol.root, "$", sep = ""), df.symbols$string.symbol), ]$date.series.start
-    date.temp.end <-
-      df.symbols[grep(paste("^", str.symbol.root, "$", sep = ""), df.symbols$string.symbol), ]$date.series.end
+      
+        # Debug line, this can be commented out
+        print(paste('str.symbol.root: ', str.symbol.root,
+                    ' | str.suffix: ',str.suffix))
+        
+        # Retrieve the description for the root ticker symbol, enforcing 1 to 1
+        # relationship
+        hits <- which(df.symbols$string.symbol_safe == str.symbol.root)
+
+        if (length(hits) == 0L) {
+          stop(sprintf("No exact match for '%s' in df.symbols$string.symbol_safe.", str.symbol.root))
+        }
+        if (length(hits) > 1L) {
+          stop(sprintf("Expected exactly 1 match for '%s', got %d.", str.symbol.root, length(hits)))
+        }
+        
+        str.description <- df.symbols$string.description[[hits]]
+      
+      }
     
+    # The new series will have the same start date as the root ticker symbol
+    date.temp.start <-
+      df.symbols$date.series.start[
+        df.symbols$string.symbol_safe == str.symbol.root
+      ]
+    date.temp.end <-
+      df.symbols$date.series.end[
+        df.symbols$string.symbol_safe == str.symbol.root
+      ]
+    
+    # Debug line, this can be commented out or deleted
+    print(paste('str.symbol.root: ', str.symbol.root, 
+                ' date.temp.start: ', date.temp.start))
     
     # Start with the YoY calculation
     str.symbolYoY <- paste(str.symbol, "_YoY", sep = "")
-    # print(paste(str.symbol,'-',str.symbolYoY, '-', str.description))
+    print(paste(str.symbol,'-',str.symbolYoY, '-', str.description))
     df.data[str.symbolYoY] <- CalcYoY(df.data, str.symbol, 365)
     df.symbols <-
       rbind(
@@ -52,12 +82,18 @@ calcFeatures <- function(df.data, df.symbols){
         data.frame(
           string.symbol = str.symbolYoY,
           string.source = "Calc",
-          string.description = paste(str.description, "\nYear over Year", sep =
-                                       ""),
+          string.description = paste(str.description, "\nYear over Year", sep = ""),
           string.label.y = "Percent",
           float.expense.ratio = -1.00,
-          date.series.start = date.temp,
-          date.series.end = date.temp.end
+          date.series.start = date.temp.start,
+          date.series.end = date.temp.end,
+          string.symbol_safe = safe_symbol_name(string.symbol),
+          string.object_name = safe_symbol_name(string.symbol),
+          status = "ok",
+          error = NA,
+          nrows = 0,
+          first_date = date.series.start,
+          last_date = date.series.end
         )
       )
     
@@ -78,8 +114,15 @@ calcFeatures <- function(df.data, df.symbols){
                                        ""),
           string.label.y = "Percent",
           float.expense.ratio = -1.00,
-          date.series.start = date.temp,
-          date.series.end = date.temp.end
+          date.series.start = date.temp.start,
+          date.series.end = date.temp.end,
+          string.symbol_safe = safe_symbol_name(string.symbol),
+          string.object_name = safe_symbol_name(string.symbol),
+          status = "ok",
+          error = NA,
+          nrows = 0,
+          first_date = date.series.start,
+          last_date = date.series.end
         )
       )
     
@@ -97,8 +140,15 @@ calcFeatures <- function(df.data, df.symbols){
                                        ""),
           string.label.y = "Percent",
           float.expense.ratio = -1.00,
-          date.series.start = date.temp,
-          date.series.end = date.temp.end
+          date.series.start = date.temp.start,
+          date.series.end = date.temp.end,
+          string.symbol_safe = safe_symbol_name(string.symbol),
+          string.object_name = safe_symbol_name(string.symbol),
+          status = "ok",
+          error = NA,
+          nrows = 0,
+          first_date = date.series.start,
+          last_date = date.series.end
         )
       )
     
@@ -128,8 +178,15 @@ calcFeatures <- function(df.data, df.symbols){
           string.label.y = paste(strNewYLabel, "/period", sep =
                            ""),
           float.expense.ratio = -1.00,
-          date.series.start = date.temp,
-          date.series.end = date.temp.end
+          date.series.start = date.temp.start,
+          date.series.end = date.temp.end,
+          string.symbol_safe = safe_symbol_name(string.symbol),
+          string.object_name = safe_symbol_name(string.symbol),
+          status = "ok",
+          error = NA,
+          nrows = 0,
+          first_date = date.series.start,
+          last_date = date.series.end
         )
       )
     
@@ -159,8 +216,15 @@ calcFeatures <- function(df.data, df.symbols){
           string.label.y = paste(strNewYLabel, "/period", sep =
                            ""),
           float.expense.ratio = -1.00,
-          date.series.start = date.temp,
-          date.series.end = date.temp.end
+          date.series.start = date.temp.start,
+          date.series.end = date.temp.end,
+          string.symbol_safe = safe_symbol_name(string.symbol),
+          string.object_name = safe_symbol_name(string.symbol),
+          status = "ok",
+          error = NA,
+          nrows = 0,
+          first_date = date.series.start,
+          last_date = date.series.end
         )
       )
     
@@ -187,8 +251,15 @@ calcFeatures <- function(df.data, df.symbols){
           string.label.y = paste(strNewYLabel, "/period", sep =
                            ""),
           float.expense.ratio = -1.00,
-          date.series.start = date.temp,
-          date.series.end = date.temp.end
+          date.series.start = date.temp.start,
+          date.series.end = date.temp.end,
+          string.symbol_safe = safe_symbol_name(string.symbol),
+          string.object_name = safe_symbol_name(string.symbol),
+          status = "ok",
+          error = NA,
+          nrows = 0,
+          first_date = date.series.start,
+          last_date = date.series.end
         )
       )
     
@@ -217,8 +288,15 @@ calcFeatures <- function(df.data, df.symbols){
           string.label.y = paste("log(", strNewYLabel, ")", sep =
                            ""),
           float.expense.ratio = -1.00,
-          date.series.start = date.temp,
-          date.series.end = date.temp.end
+          date.series.start = date.temp.start,
+          date.series.end = date.temp.end,
+          string.symbol_safe = safe_symbol_name(string.symbol),
+          string.object_name = safe_symbol_name(string.symbol),
+          status = "ok",
+          error = NA,
+          nrows = 0,
+          first_date = date.series.start,
+          last_date = date.series.end
         )
       )
     
@@ -243,8 +321,15 @@ calcFeatures <- function(df.data, df.symbols){
           string.label.y = paste(strNewYLabel, " 365 Day MA", sep =
                                    ""),
           float.expense.ratio = -1.00,
-          date.series.start = date.temp,
-          date.series.end = date.temp.end
+          date.series.start = date.temp.start,
+          date.series.end = date.temp.end,
+          string.symbol_safe = safe_symbol_name(string.symbol),
+          string.object_name = safe_symbol_name(string.symbol),
+          status = "ok",
+          error = NA,
+          nrows = 0,
+          first_date = date.series.start,
+          last_date = date.series.end
         )
       )
     
@@ -269,8 +354,15 @@ calcFeatures <- function(df.data, df.symbols){
           string.label.y = paste(strNewYLabel, " 200 Day MA", sep =
                            ""),
           float.expense.ratio = -1.00,
-          date.series.start = date.temp,
-          date.series.end = date.temp.end
+          date.series.start = date.temp.start,
+          date.series.end = date.temp.end,
+          string.symbol_safe = safe_symbol_name(string.symbol),
+          string.object_name = safe_symbol_name(string.symbol),
+          status = "ok",
+          error = NA,
+          nrows = 0,
+          first_date = date.series.start,
+          last_date = date.series.end
         )
       )
 
@@ -293,8 +385,15 @@ calcFeatures <- function(df.data, df.symbols){
           string.label.y = paste(strNewYLabel, " 50 Day MA", sep =
                            ""),
           float.expense.ratio = -1.00,
-          date.series.start = date.temp,
-          date.series.end = date.temp.end
+          date.series.start = date.temp.start,
+          date.series.end = date.temp.end,
+          string.symbol_safe = safe_symbol_name(string.symbol),
+          string.object_name = safe_symbol_name(string.symbol),
+          status = "ok",
+          error = NA,
+          nrows = 0,
+          first_date = date.series.start,
+          last_date = date.series.end
         )
       )
     
