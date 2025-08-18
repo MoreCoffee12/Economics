@@ -71,6 +71,8 @@ calcFeatures <- function(df.data, df.symbols){
   # Loop through each of the columns
   for (str.symbol in names(df.data)) {
 
+    print("----------Start loop----------------")
+    
     # Define series description, dates, and deal with root series symbols.
 
     # This section looks up the description using the safe string name. These 

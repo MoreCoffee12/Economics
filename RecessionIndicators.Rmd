@@ -69,6 +69,7 @@ library(lubridate)
 
 # Call helper functions
 source("plotHelper.r")
+source("utilSyms.r")
 
 ```
 
@@ -1496,7 +1497,7 @@ df.data <- df.data[as.Date(rownames(df.data)) > as.Date("1950-01-01"),]
 
 ## Create aggregate series
 
-Some analysis requires that two or more series be combined. For example, normallizing debt by GDP to get a sense of the proportion of debt to the total economy helps understand the debt cycle.
+Some analysis requires that two or more series be combined. For example, normalizing debt by GDP to get a sense of the proportion of debt to the total economy helps understand the debt cycle.
 
 ```{r create aggregate, echo=FALSE}
 
@@ -1509,7 +1510,6 @@ Year over year, smoothed derivative, and log trends tend to smooth out seasonal 
 ```{r calcsYoYSmoothLog}
 
 source("calcFeatures.r")
-source("plotHelper.r")
 lst.df <- calcFeatures(df.data, df.symbols)
 df.data <- lst.df[[1]]
 df.symbols <- lst.df[[2]]
