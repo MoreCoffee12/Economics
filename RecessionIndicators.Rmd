@@ -1437,7 +1437,7 @@ df.symbols <- symbols_append_row(
     float.expense.ratio = -1.00,
     date.series.end = df.options$Date[[1]],
     string.symbol_safe = safe_symbol_name(str.symbol),
-    string.object_name = safe_symbol_name(str.symbol),
+    string.object_name = safe_symbol_name(str.symbol)
   )
 )
 

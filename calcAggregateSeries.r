@@ -28,7 +28,9 @@ if ( require_columns(df.data, c("RRSFS.Value", "RSALES.Value") ) ){
       string.label.y = "Millions of Dollars",
       float.expense.ratio = -1.00,
       date.series.start =  as.Date(index(RSALES[1])) ,
-      date.series.end = as.Date(index(tail(RRSFS, 1)))
+      date.series.end = as.Date(index(tail(RRSFS, 1))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
 
@@ -37,14 +39,16 @@ if ( require_columns(df.data, c("RRSFS.Value", "RSALES.Value") ) ){
 # Difference between monthly SA and NSA series
 if ( require_columns(df.data, c("BUSLOANS.Value", "BUSLOANSNSA.Value") ) ){
   
-  df.data$BUSLOANS.minus.BUSLOANSNSA <-
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "BUSLOANS.minus.BUSLOANSNSA"
+  df.data[[str.symbol.new]] <-
     (df.data$BUSLOANS.Value - df.data$BUSLOANSNSA.Value)
 
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "BUSLOANS.minus.BUSLOANSNSA",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Business Loans (Montlhy) SA - NSA",
       string.label.y = "Percent",
@@ -54,7 +58,9 @@ if ( require_columns(df.data, c("BUSLOANS.Value", "BUSLOANSNSA.Value") ) ){
       )))  ,
       date.series.end = as.Date(min(c(
         index(tail(BUSLOANS, 1)), index(tail(BUSLOANSNSA, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
 
@@ -1747,14 +1753,15 @@ if ( require_columns(df.data, c("GDP.Value", "GDPDEF.Value") ) ){
 # Normalize GSG (close) commodities by GDP deflator
 if ( require_columns(df.data, c("GSG.Close", "GDPDEF.Value") ) ){
   
-  df.data$GSG.Close.by.GDPDEF <-
+  str.symbol.new <- "GSG.Close.by.GDPDEF"
+  df.data[[str.symbol.new]] <-
     (df.data$GSG.Close / df.data$GDPDEF.Value)
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "GSG.Close.by.GDPDEF",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "GSCI Commodity-Indexed Trust,\nNormalized by GDP def",
       string.label.y = "(-)",
@@ -1765,6 +1772,8 @@ if ( require_columns(df.data, c("GSG.Close", "GDPDEF.Value") ) ){
       date.series.end = as.Date(min(c(
         index(tail(GSG, 1)), index(tail(GDPDEF, 1))
       ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
 }
