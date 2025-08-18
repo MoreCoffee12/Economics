@@ -1422,28 +1422,24 @@ assign(str.safe.name, xts(df.options[, 2], order.by = df.options[, 1]))
 colnames(OCC_EquityVolume)[[1]] <- c(str.safe.name)
 
 
-# Create symbols table for non-equity margin
+#-------------- Create symbols table for non-equity margin ---------------------
 str.symbol <- 'OCC/NonEquityVolume'
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
-      string.symbol = str.symbol,
-      string.source = "OCC",
-      string.description =  "Non-Equity Options Volume",
-      string.label.y = "Millions of Options/Day",
-      date.series.start = tail(df.options$Date, 1) ,
-      float.expense.ratio = -1.00,
-      date.series.end = df.options$Date[[1]],
-      string.symbol_safe = safe_symbol_name(str.symbol),
-      string.object_name = safe_symbol_name(str.symbol),
-      status = "ok",
-      error = NA,
-      nrows = 0,
-      first_date = as.Date("1900-01-01"),
-      last_date = as.Date("1900-01-01")
-    )
+
+# Update the symbols table    
+df.symbols <- symbols_append_row(
+  df.symbols,
+  list(
+    string.symbol = str.symbol,
+    string.source = "OCC",
+    string.description =  "Non-Equity Options Volume",
+    string.label.y = "Millions of Options/Day",
+    date.series.start = tail(df.options$Date, 1) ,
+    float.expense.ratio = -1.00,
+    date.series.end = df.options$Date[[1]],
+    string.symbol_safe = safe_symbol_name(str.symbol),
+    string.object_name = safe_symbol_name(str.symbol),
   )
+)
 
 # Process the options equity volume, create the zoo object
 str.safe.name <- tail(df.symbols,1)[["string.symbol_safe"]] 

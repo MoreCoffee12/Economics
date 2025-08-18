@@ -1572,7 +1572,7 @@ if ( require_columns(df.data, c("NPPTTL.Value", "POPTHM.Value") ) ){
       ))) ,
       date.series.end = as.Date(min(c(
         index(tail(NPPTTL, 1)), index(tail(POPTHM, 1))
-      ))),
+      )))
     )
   )
 
