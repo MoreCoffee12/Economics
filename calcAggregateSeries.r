@@ -784,7 +784,7 @@ if ( require_columns(df.data, c("TOTLNNSA", "GDP.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'TOTLNNSA'], index(tail(GDP, 1))
-      ))),
+      )))
     )
   )
   
@@ -810,7 +810,7 @@ if ( require_columns(df.data, c("TOTLNNSA", "DGS10.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'TOTLNNSA'], index(tail(DGS10, 1))
-      ))),
+      )))
     )
   )
 }
