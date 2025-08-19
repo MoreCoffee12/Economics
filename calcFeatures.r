@@ -91,6 +91,8 @@ calcFeatures <- function(df.data, df.symbols){
       # Initialize the string
       str.suffix <- ""
       
+      # This line separates out suffixes like 'value' or 'Close' from the
+      # primary symbol
       if (grepl("\\.", str.symbol)) {
         str.symbol.root <- substr(str.symbol, 1, regexpr("\\.", str.symbol) - 1)
         str.suffix <-
@@ -104,7 +106,8 @@ calcFeatures <- function(df.data, df.symbols){
         
         # Retrieve the description for the root ticker symbol, enforcing 1 to 1
         # relationship
-        hits <- which(df.symbols$string.symbol_safe == str.symbol.root)
+        hits <- which(df.symbols$string.symbol_safe ==
+                        safe_symbol_name ( str.symbol.root ) )
 
         if (length(hits) == 0L) {
           stop(sprintf("No exact match for '%s' in df.symbols$string.symbol_safe.", str.symbol.root))
@@ -128,16 +131,17 @@ calcFeatures <- function(df.data, df.symbols){
       ]
     
     # Debug line, this can be commented out or deleted
-    print(paste('str.symbol.root: ', str.symbol.root, 
-                ' date.temp.start: ', date.temp.start))
+    #print(paste('str.symbol.root: ', str.symbol.root, 
+    #            ' date.temp.start: ', date.temp.start))
     
-    # Start with the YoY calculation
-    print(nrow(df.symbols))
+    # Start with the year-over-year calculation
+    # Debug, comment this line out
+    #print(nrow(df.symbols))
     str.symbolYoY <- paste(str.symbol, "_YoY", sep = "")
     print(paste(str.symbol,'-',str.symbolYoY, '-', str.description))
-    print( paste ("str.symbolYoY 1: ", str.symbolYoY))
+    #print( paste ("str.symbolYoY 1: ", str.symbolYoY))
     df.data[str.symbolYoY] <- CalcYoY(df.data, str.symbol, 365)
-    print( paste ("str.symbolYoY 2: ", str.symbolYoY))
+    #print( paste ("str.symbolYoY 2: ", str.symbolYoY))
     df.symbols <-
       rbind(
         df.symbols,

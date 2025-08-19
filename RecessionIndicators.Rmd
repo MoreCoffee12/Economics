@@ -18,6 +18,28 @@ output:
 
 
 ```{r}
+
+# ------------- Naming conventions ---------------------------------------------
+# Minimal change (keep . for field, use __ for operations)
+#
+# Reserve exactly one . to separate symbol vs. field (e.g., GSPC.Close,
+# GDP.Value).
+#
+# Use double underscore __ to separate higher-level tokens (operations,
+# transforms, right-hand series).
+#
+# Use single underscore _ inside tokens when you need internal separators.
+#
+# Examples:
+#
+# Binary op: GSPC.Close__SUB__SPY.Close
+# Unary transform: GDP.Value__YOY
+# Multi-step: GSPC.Close__SMA_20__SUB__SPY.Close__SMA_20
+#
+# Pros: minimal refactor; your existing SYMBOL.FIELD parsing still works. 
+#
+# Cons: still uses dots in names (tidyverse style generally prefers
+# underscores).
 ```
 
 ```{r setup, echo=FALSE}

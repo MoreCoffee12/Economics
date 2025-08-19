@@ -1,4 +1,5 @@
 
+
 #-------- Check that the columns exist in the data frame-----------------------
 require_columns <- function(df, cols ) {
   miss <- setdiff(cols, names(df))
@@ -10,37 +11,41 @@ require_columns <- function(df, cols ) {
 }
 
 
-# Create an aggregate for retail sales
-if ( require_columns(df.data, c("RRSFS.Value", "RSALES.Value") ) ){
+# Create an aggregate column for retail sales (mean of RRSFS.Value and RSALES.Value)
+if (require_columns(df.data, c("RRSFS.Value", "RSALES.Value"))) {
   
-  # Add the aggregate to the main data frame
+  # Compute the row-wise mean and write it to a new column
   str.symbol.new <- "RSALESAGG"
-  df.data[[str.symbol.new]] <- 
-    rowMeans(df.data[, c("RRSFS.Value", "RSALES.Value")], na.rm = TRUE)
-
-  # Update the symbols table    
+  src_cols <- c("RRSFS.Value", "RSALES.Value")
+  df.data[[str.symbol.new]] <- rowMeans(df.data[src_cols], na.rm = TRUE)
+  
+  # Append a metadata row for the derived series to df.symbols
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = str.symbol.new,
-      string.source = "Calc",
-      string.description = "Real Retail and Food Services Sales\n(RRSFS and RSALES)",
-      string.label.y = "Millions of Dollars",
+      string.symbol       = str.symbol.new,
+      string.source       = "Calc",
+      string.description  = "Real Retail and Food Services Sales\n(RRSFS and RSALES)",
+      string.label.y      = "Millions of Dollars",
       float.expense.ratio = -1.00,
-      date.series.start =  as.Date(index(RSALES[1])) ,
-      date.series.end = as.Date(index(tail(RRSFS, 1))),
-      string.symbol_safe = safe_symbol_name(str.symbol.new),
-      string.object_name = safe_symbol_name(str.symbol.new)
+      # Derive start/end from source series (xts): first and last timestamps
+      date.series.start   = as.Date(index(RSALES)[1]),
+      date.series.end     = as.Date(tail(index(RRSFS), 1)),
+      # Safe, syntactic object names for the derived series
+      string.symbol_safe  = safe_symbol_name(str.symbol.new),
+      string.object_name  = safe_symbol_name(str.symbol.new)
     )
   )
-
+  
+  # Cleanup: remove temporary name
+  rm(str.symbol.new)
 }
 
 # Difference between monthly SA and NSA series
 if ( require_columns(df.data, c("BUSLOANS.Value", "BUSLOANSNSA.Value") ) ){
   
   # Add the aggregate to the main data frame
-  str.symbol.new <- "BUSLOANS.minus.BUSLOANSNSA"
+  str.symbol.new <- "BUSLOANS__minus__BUSLOANSNSA"
   df.data[[str.symbol.new]] <-
     (df.data$BUSLOANS.Value - df.data$BUSLOANSNSA.Value)
 
@@ -63,20 +68,25 @@ if ( require_columns(df.data, c("BUSLOANS.Value", "BUSLOANSNSA.Value") ) ){
       string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
 
 }
 
 # Difference between monthly SA and NSA series / GDP
 if ( require_columns(df.data, c("BUSLOANS.minus.BUSLOANSNSA", "GDP.Value") ) ){
   
-  df.data$BUSLOANS.minus.BUSLOANSNSA.by.GDP <-
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "BUSLOANS__minus__BUSLOANSNSA__by__GDP"
+  df.data[[str.symbol.new]] <-
     (df.data$BUSLOANS.minus.BUSLOANSNSA / df.data$GDP.Value) * 100
  
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "BUSLOANS.minus.BUSLOANSNSA.by.GDP",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Business Loans (Montlhy) SA - NSA divided by GDP",
       string.label.y = "Percent",
@@ -86,23 +96,30 @@ if ( require_columns(df.data, c("BUSLOANS.minus.BUSLOANSNSA", "GDP.Value") ) ){
       )))  ,
       date.series.end = as.Date(min(c(
         index(tail(BUSLOANS, 1)), index(tail(GDP, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
 
 }
 
 # Normalize business loans (monthly, SA) by GDP
 if ( require_columns(df.data, c("BUSLOANS.Value", "GDP.Value") ) ){
-  
-  df.data$BUSLOANS.by.GDP <- (df.data$BUSLOANS.Value / df.data$GDP.Value) * 100
 
-  
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "BUSLOANS__by__GDP"
+  df.data[[str.symbol.new]] <-
+    ( (df.data$BUSLOANS.Value / df.data$GDP.Value) * 100.0 )
+
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "BUSLOANS.by.GDP",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Business Loans Normalized by GDP",
       string.label.y = "Percent",
@@ -112,23 +129,30 @@ if ( require_columns(df.data, c("BUSLOANS.Value", "GDP.Value") ) ){
       )))  ,
       date.series.end = as.Date(min(c(
         index(tail(BUSLOANS, 1)), index(tail(GDP, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
-
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
 }
 
 # Business loans (monthly, SA) interest
 if ( require_columns(df.data, c("BUSLOANS.Value", "DGS10.Value") ) ){
-  
-  df.data$BUSLOANS.INTEREST <-
+
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "BUSLOANS__INTEREST"
+  df.data[[str.symbol.new]] <-
     (df.data$BUSLOANS.Value * df.data$DGS10.Value) / 100
 
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "BUSLOANS.INTEREST",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Business Loans (Monthly, SA)\nAdjusted Interest Burdens",
       string.label.y = "Billions of U.S. Dollars",
@@ -138,22 +162,30 @@ if ( require_columns(df.data, c("BUSLOANS.Value", "DGS10.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'BUSLOANS'], index(tail(DGS10, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
 }
 
 # Business loans interest divided by GDP
 if ( require_columns(df.data, c("BUSLOANS.INTEREST", "GDP.Value") ) ){
-    
-  df.data$BUSLOANS.INTEREST.by.GDP <-
-    (df.data$BUSLOANS.INTEREST / df.data$GDP.Value) * 100
+
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "BUSLOANS__INTEREST__by__GDP"
+  df.data[[str.symbol.new]] <-
+    (df.data$BUSLOANS__INTEREST / df.data$GDP.Value) * 100
 
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "BUSLOANS.INTEREST.by.GDP",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Business Loans (Monthly, SA)\nAdjusted Interest Burden Divided by GDP",
       string.label.y = "PERCENT",
@@ -163,23 +195,30 @@ if ( require_columns(df.data, c("BUSLOANS.INTEREST", "GDP.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'BUSLOANS.INTEREST'], index(tail(GDP, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
-
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
 }
 
 # Normalize business loans (monthly, NSA) by GDP
 if ( require_columns(df.data, c("BUSLOANSNSA.Value", "GDP.Value") ) ){
-  
-  df.data$BUSLOANSNSA.by.GDP <-
+
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "BUSLOANSNSA__by__GDP"
+  df.data[[str.symbol.new]] <-
     (df.data$BUSLOANSNSA.Value / df.data$GDP.Value) * 100
 
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "BUSLOANSNSA.by.GDP",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Business Loans Normalized by GDP",
       string.label.y = "Percent",
@@ -189,22 +228,30 @@ if ( require_columns(df.data, c("BUSLOANSNSA.Value", "GDP.Value") ) ){
       )))  ,
       date.series.end = as.Date(min(c(
         index(tail(BUSLOANSNSA, 1)), index(tail(GDP, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
-
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
 }
 
 # Normalize business loans (weekly, SA) by GDP
 if ( require_columns(df.data, c("TOTCI.Value", "GDP.Value") ) ){
-  
-  df.data$TOTCI.by.GDP <- (df.data$TOTCI.Value / df.data$GDP.Value) * 100
+
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "TOTCI__by__GDP"
+  df.data[[str.symbol.new]] <-
+    ( (df.data$TOTCI.Value / df.data$GDP.Value) * 100.0 )
 
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "TOTCI.by.GDP",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Business Loans (Weekly, SA) Normalized by GDP",
       string.label.y = "Percent",
@@ -214,22 +261,30 @@ if ( require_columns(df.data, c("TOTCI.Value", "GDP.Value") ) ){
       )))  ,
       date.series.end = as.Date(min(c(
         index(tail(TOTCI, 1)), index(tail(GDP, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
-
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
 }
 
 # Normalize (weekly, NSA) business loans by GDP
 if ( require_columns(df.data, c("TOTCINSA.Value", "GDP.Value") ) ){
-  
-  df.data$TOTCINSA.by.GDP <- (df.data$TOTCINSA.Value / df.data$GDP.Value) * 100
+
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "TOTCINSA__by__GDP"
+  df.data[[str.symbol.new]] <-
+    ( (df.data$TOTCINSA.Value / df.data$GDP.Value) * 100.0 )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "TOTCINSA.by.GDP",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Business Loans (Weekly, NSA) Normalized by GDP",
       string.label.y = "Percent",
@@ -239,23 +294,30 @@ if ( require_columns(df.data, c("TOTCINSA.Value", "GDP.Value") ) ){
       )))  ,
       date.series.end = as.Date(min(c(
         index(tail(TOTCINSA, 1)), index(tail(GDP, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
-
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
 }
 
 # Business loans (weekly, NSA) interest
 if ( require_columns(df.data, c("TOTCINSA.Value", "DGS10.Value") ) ){
-  
-  df.data$TOTCINSA.INTEREST <- 
-    (df.data$TOTCINSA.Value * df.data$DGS10.Value) / 100
+
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "TOTCINSA__INTEREST"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data$TOTCINSA.Value * df.data$DGS10.Value) / 100.0 )
 
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "TOTCINSA.INTEREST",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Business Loans (Weekly, NSA)\nAdjusted Interest Burdens",
       string.label.y = "Billions of U.S. Dollars",
@@ -265,23 +327,30 @@ if ( require_columns(df.data, c("TOTCINSA.Value", "DGS10.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'TOTCINSA'], index(tail(DGS10, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
-
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
 }
 
 # Business loans (weekly, NSA) interest divided by GDP
 if ( require_columns(df.data, c("TOTCINSA.INTEREST", "GDP.Value") ) ){
-  
-  df.data$TOTCINSA.INTEREST.by.GDP <-
-    (df.data$TOTCINSA.INTEREST / df.data$GDP.Value) * 100
+
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "TOTCINSA__INTEREST__by__GDP"
+  df.data[[str.symbol.new]] <-
+    (df.data$TOTCINSA__INTEREST / df.data$GDP.Value) * 100
 
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "TOTCINSA.INTEREST.by.GDP",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Business Loans (weekly, NSA)\nAdjusted Interest Burden Divided by GDP",
       string.label.y = "PERCENT",
@@ -291,22 +360,30 @@ if ( require_columns(df.data, c("TOTCINSA.INTEREST", "GDP.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'TOTCINSA.INTEREST.by.GDP'], index(tail(GDP, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
-
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
 }
 
 # Normalize real personal income by GDP
 if ( require_columns(df.data, c("W875RX1.Value", "GDP.Value") ) ){
 
-  df.data$W875RX1.by.GDP <- (df.data$W875RX1.Value / df.data$GDP.Value) * 100
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "W875RX1__by__GDP"
+  df.data[[str.symbol.new]] <-
+    ( (df.data$W875RX1.Value / df.data$GDP.Value) * 100.0 )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "W875RX1.by.GDP",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Real Personal Income Normalized by GDP",
       string.label.y = "Percent",
@@ -316,23 +393,30 @@ if ( require_columns(df.data, c("W875RX1.Value", "GDP.Value") ) ){
       )))  ,
       date.series.end = as.Date(min(c(
         index(tail(W875RX1, 1)), index(tail(GDP, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
   
 }
 
 # Normalize NSA personal income by GDP
 if ( require_columns(df.data, c("A065RC1A027NBEA.Value", "GDP.Value") ) ){
-  
-  df.data$A065RC1A027NBEA.by.GDP <-
+
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "A065RC1A027NBEA__by__GDP"
+  df.data[[str.symbol.new]] <-
     (df.data$A065RC1A027NBEA.Value / df.data$GDP.Value) * 100
 
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "A065RC1A027NBEA.by.GDP",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Personal Income (NSA) Normalized by GDP",
       string.label.y = "Percent",
@@ -342,22 +426,30 @@ if ( require_columns(df.data, c("A065RC1A027NBEA.Value", "GDP.Value") ) ){
       )))  ,
       date.series.end = as.Date(min(c(
         index(tail(A065RC1A027NBEA, 1)), index(tail(GDP, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )  
-
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
 }
 
 # Normalize SA personal income by GDP
 if ( require_columns(df.data, c("A065RC1A027NBEA.Value", "GDP.Value") ) ){
-  
-  df.data$PI.by.GDP <- (df.data$PI.Value / df.data$GDP.Value) * 100
+
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "PI__by__GDP"
+  df.data[[str.symbol.new]] <- 
+    ( ( df.data$PI.Value / df.data$GDP.Value ) * 100.0 )
 
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "PI.by.GDP",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Personal Income (SA) Normalized by GDP",
       string.label.y = "Percent",
@@ -367,23 +459,30 @@ if ( require_columns(df.data, c("A065RC1A027NBEA.Value", "GDP.Value") ) ){
       )))  ,
       date.series.end = as.Date(min(c(
         index(tail(PI, 1)), index(tail(GDP, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )  
+  
+  # Tidy memory
+  rm(str.symbol.new)
   
 }
 
 # Normalize pre-tax corporate profits by GDP
 if ( require_columns(df.data, c("A053RC1Q027SBEA.Value", "GDP.Value") ) ){
-  
-  df.data$A053RC1Q027SBEA.by.GDP <-
-    (df.data$A053RC1Q027SBEA.Value / df.data$GDP.Value) * 100
+
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "A053RC1Q027SBEA__by__GDP"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data$A053RC1Q027SBEA.Value / df.data$GDP.Value) * 100.0 )
 
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "A053RC1Q027SBEA.by.GDP",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "National income: Corporate profits\nbefore tax (without IVA and CCAdj)\nNormalized by GDP",
       string.label.y = "Percent",
@@ -393,23 +492,31 @@ if ( require_columns(df.data, c("A053RC1Q027SBEA.Value", "GDP.Value") ) ){
       )))  ,
       date.series.end = as.Date(min(c(
         index(tail(A053RC1Q027SBEA, 1)), index(tail(GDP, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
-
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
 }
 
 # Normalize pre-tax corporate profits (with inventory and capital adjustments)
 # by GDP
 if ( require_columns(df.data, c("CPROFIT.Value", "GDP.Value") ) ){
-  
-  df.data$CPROFIT.by.GDP <- (df.data$CPROFIT.Value / df.data$GDP.Value) * 100
+
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "CPROFIT__by__GDP"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data$CPROFIT.Value / df.data$GDP.Value) * 100.0 )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "CPROFIT.by.GDP",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "National income: Corporate profits\nbefore tax (with IVA and CCAdj)\nNormalized by GDP",
       string.label.y = "Percent",
@@ -419,23 +526,30 @@ if ( require_columns(df.data, c("CPROFIT.Value", "GDP.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'CPROFIT'], index(tail(GDP, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
   
 }
 
 # Consumer loans as a percent of GDP
 if ( require_columns(df.data, c("CONSUMERNSA.Value", "GDP.Value") ) ){
   
-  df.data$CONSUMERNSA.by.GDP <-
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "CONSUMERNSA__by__GDP"
+  df.data[[str.symbol.new]] <-
     (df.data$CONSUMERNSA.Value / df.data$GDP.Value) * 100
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "CONSUMERNSA.by.GDP",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Consumer Loans Not Seasonally\nAdjusted divided by GDP",
       string.label.y = "Percent",
@@ -445,23 +559,30 @@ if ( require_columns(df.data, c("CONSUMERNSA.Value", "GDP.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'CONSUMERNSA'], index(tail(GDP, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
   
 }
 
 # Residential real estate (monthly, NSA) loans as a percent of GDP
 if ( require_columns(df.data, c("RREACBM027NBOG.Value", "GDP.Value") ) ){
-  
-  df.data$RREACBM027NBOG.by.GDP <-
-    (df.data$RREACBM027NBOG.Value / df.data$GDP.Value) * 100
+
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "RREACBM027NBOG__by__GDP"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data$RREACBM027NBOG.Value / df.data$GDP.Value) * 100.0 )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "RREACBM027NBOG.by.GDP",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Residental Real Estate Loans (Monthly, NSA)\ndivided by GDP",
       string.label.y = "Percent",
@@ -471,23 +592,30 @@ if ( require_columns(df.data, c("RREACBM027NBOG.Value", "GDP.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'RREACBM027NBOG'], index(tail(GDP, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )  
-
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
 }
 
 # Residential real estate (monthly, SA) loans as a percent of GDP
 if ( require_columns(df.data, c("RREACBM027SBOG.Value", "GDP.Value") ) ){
-  
-  df.data$RREACBM027SBOG.by.GDP <-
+
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "RREACBM027SBOG__by__GDP"
+  df.data[[str.symbol.new]] <-
     (df.data$RREACBM027SBOG.Value / df.data$GDP.Value) * 100
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "RREACBM027SBOG.by.GDP",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Residental Real Estate Loans (Monthly, SA)\ndivided by GDP",
       string.label.y = "Percent",
@@ -497,23 +625,30 @@ if ( require_columns(df.data, c("RREACBM027SBOG.Value", "GDP.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'RREACBM027SBOG'], index(tail(GDP, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
   
 }
 
 # Residential real estate (weekly, SA) loans as a percent of GDP
 if ( require_columns(df.data, c("RREACBW027SBOG.Value", "GDP.Value") ) ){
-  
-  df.data$RREACBW027SBOG.by.GDP <-
+
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "RREACBW027SBOG__by__GDP"
+  df.data[[str.symbol.new]] <-
     (df.data$RREACBW027SBOG.Value / df.data$GDP.Value) * 100
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "RREACBW027SBOG.by.GDP",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Residental Real Estate Loans (Weekly, SA)\ndivided by GDP",
       string.label.y = "Percent",
@@ -523,22 +658,30 @@ if ( require_columns(df.data, c("RREACBW027SBOG.Value", "GDP.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'RREACBW027SBOG'], index(tail(GDP, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
 }
 
 # Residential real estate (weekly, NSA) loans as a percent of GDP
 if ( require_columns(df.data, c("RREACBW027NBOG.Value", "GDP.Value") ) ){
-  
-  df.data$RREACBW027NBOG.by.GDP <-
+
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "RREACBW027NBOG__by__GDP"
+  df.data[[str.symbol.new]] <-
     (df.data$RREACBW027NBOG.Value / df.data$GDP.Value) * 100
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "RREACBW027NBOG.by.GDP",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Residental Real Estate Loans (Weekly, NSA)\ndivided by GDP",
       string.label.y = "Percent",
@@ -548,25 +691,31 @@ if ( require_columns(df.data, c("RREACBW027NBOG.Value", "GDP.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'RREACBW027NBOG'], index(tail(GDP, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
   
 }
 
 # All durable goods as percent of GDP. Have to convert from millions to
 # billions to be consistent with H.8 and GDP series
 if ( require_columns(df.data, c("UMDMNO.Value", "GDP.Value") ) ){
-  
-  df.data$UMDMNO.Value <- df.data$UMDMNO.Value / 1000
-  df.data$UMDMNO.by.GDP <-
-    (df.data$UMDMNO.Value / df.data$GDP.Value) * 100
+
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "UMDMNO__by__GDP"
+  df.data[[str.symbol.new]] <-
+    ( ( ( df.data$UMDMNO.Value / 1000.0) / df.data$GDP.Value) * 100.0 )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "UMDMNO.by.GDP",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Durable Goods (Monthly, NSA)\ndivided by GDP",
       string.label.y = "Percent",
@@ -576,26 +725,32 @@ if ( require_columns(df.data, c("UMDMNO.Value", "GDP.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'UMDMNO'], index(tail(GDP, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
   
 }
 
 # All durable goods as percet of GDP. Have to convert from millions to
 # billions to be consistent with H.8 and GDP series
 if ( require_columns(df.data, c("DGORDER", "GDP.Value") ) ){
-  
-  df.data$DGORDER <- df.data$DGORDER / 1000
-  df.data$DGORDER.by.GDP <-
-    (df.data$DGORDER.Value / df.data$GDP.Value) * 100
+
+    # Add the aggregate to the main data frame
+  str.symbol.new <- "DGORDER__by__GDP"
+  df.data[[str.symbol.new]] <-
+    ( ( ( df.data$DGORDER.Value / 1000.0 ) / df.data$GDP.Value) * 100.0 )
   
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "DGORDER.by.GDP",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Durable Goods (Monthly, NSA)\ndivided by GDP",
       string.label.y = "Percent",
@@ -605,25 +760,31 @@ if ( require_columns(df.data, c("DGORDER", "GDP.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'UMDMNO'], index(tail(GDP, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
   
 }
 
 # All home mortgages as percet of GDP. Have to convert from millions to
 # billions to be consistent with H.8 and GDP series
 if ( require_columns(df.data, c("ASHMA", "GDP.Value") ) ){
-  
-  df.data$ASHMA <- df.data$ASHMA / 1000
-  df.data$ASHMA.by.GDP <-
-    (df.data$ASHMA.Value / df.data$GDP.Value) * 100
+
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "ASHMA__by__GDP"
+  df.data[[str.symbol.new]] <-
+    ( ( ( df.data$ASHMA.Value / 1000.0 ) / df.data$GDP.Value) * 100.0 )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "ASHMA.by.GDP",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Home Mortgages (Quarterly, NSA)\ndivided by GDP",
       string.label.y = "Percent",
@@ -633,23 +794,30 @@ if ( require_columns(df.data, c("ASHMA", "GDP.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'ASHMA'], index(tail(GDP, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
   
 }
 
 # All home mortgages interest burden
 if ( require_columns(df.data, c("ASHMA.Value", "MORTGAGE30US.Value") ) ){
-  
-  df.data$ASHMA.INTEREST <-
+
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "ASHMA__INTEREST"
+  df.data[[str.symbol.new]] <-
     (df.data$ASHMA.Value * df.data$MORTGAGE30US.Value) / 100
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "ASHMA.INTEREST",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Home Mortgages (Quarterly, NSA)\n 30-Year Fixed Interest Burdens",
       string.label.y = "Billions of U.S. Dollars",
@@ -659,23 +827,30 @@ if ( require_columns(df.data, c("ASHMA.Value", "MORTGAGE30US.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'ASHMA'], index(tail(MORTGAGE30US, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
   
 }
 
 # All home mortgages interest burden divided by GDP
-if ( require_columns(df.data, c("ASHMA.INTEREST", "GDP.Value") ) ){
-  
-  df.data$ASHMA.INTEREST.by.GDP <-
-    (df.data$ASHMA.INTEREST / df.data$GDP.Value) * 100
+if ( require_columns(df.data, c("ASHMA__INTEREST", "GDP.Value") ) ){
+
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "ASHMA__INTEREST__by__GDP"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data$ASHMA__INTEREST / df.data$GDP.Value) * 100.0 )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "ASHMA.INTEREST.by.GDP",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Home Mortgages (Quarterly, NSA)\n 30-Year Fixed Interest Burdens\nDivided by GDP",
       string.label.y = "PERCENT",
@@ -685,23 +860,30 @@ if ( require_columns(df.data, c("ASHMA.INTEREST", "GDP.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'ASHMA.INTEREST'], index(tail(GDP, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
   
 }
 
 # Consumer loans interest using the 24 month consumer series.
 if ( require_columns(df.data, c("CONSUMERNSA.Value", "TERMCBPER24NS.Value") ) ){
-  
-  df.data$CONSUMERNSA.INTEREST <-
-    (df.data$CONSUMERNSA.Value * df.data$TERMCBPER24NS.Value) / 100
+
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "CONSUMERNSA__INTEREST"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data$CONSUMERNSA.Value * df.data$TERMCBPER24NS.Value) / 100.0 )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "CONSUMERNSA.INTEREST",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Consumer Loans (Not Seasonally\nAdjusted) Interest Burdens",
       string.label.y = "Billions of U.S. Dollars",
@@ -711,24 +893,30 @@ if ( require_columns(df.data, c("CONSUMERNSA.Value", "TERMCBPER24NS.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'TERMCBPER24NS'], index(tail(DGS10, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
   
-
+  # Tidy memory
+  rm(str.symbol.new)
+  
 }
 
 # Total loans interest divided by GDP
-if ( require_columns(df.data, c("CONSUMERNSA.INTEREST", "GDP.Value") ) ){
+if ( require_columns(df.data, c("CONSUMERNSA__INTEREST", "GDP.Value") ) ){
   
-  df.data$CONSUMERNSA.INTEREST.by.GDP <-
-    (df.data$CONSUMERNSA.INTEREST / df.data$GDP.Value) * 100
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "CONSUMERNSA__INTEREST__by__GDP"
+  df.data[[str.symbol.new]] <-
+    (df.data$CONSUMERNSA__INTEREST / df.data$GDP.Value) * 100
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "CONSUMERNSA.INTEREST.by.GDP",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Consumer Loans (Not Seasonally\nAdjusted) Interest Burden Divided by GDP",
       string.label.y = "PERCENT",
@@ -738,23 +926,32 @@ if ( require_columns(df.data, c("CONSUMERNSA.INTEREST", "GDP.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'CONSUMERNSA.INTEREST'], index(tail(GDP, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
-
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
 }
 
 # Create aggregate of total loans
-if ( require_columns(df.data, c("BUSLOANS.Value", "REALLNNSA.Value", "CONSUMERNSA.Value") ) ){
+if ( require_columns(df.data, c("BUSLOANS.Value", "REALLNNSA.Value",
+                                "CONSUMERNSA.Value") ) ){
   
-  df.data$TOTLNNSA <-
-    (df.data$BUSLOANS.Value + df.data$REALLNNSA.Value + df.data$CONSUMERNSA.Value)
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "TOTLNNSA"
+  df.data[[str.symbol.new]] <-
+    ( df.data$BUSLOANS.Value + df.data$REALLNNSA.Value +
+        df.data$CONSUMERNSA.Value )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "TOTLNNSA",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Total Loans Not Seasonally\nAdjusted (BUSLOANS+REALLNSA+CONSUMERNSA)",
       string.label.y = "Billions of U.S. Dollars",
@@ -764,23 +961,30 @@ if ( require_columns(df.data, c("BUSLOANS.Value", "REALLNNSA.Value", "CONSUMERNS
       )))  ,
       date.series.end = as.Date(min(c(
         index(tail(REALLNNSA, 1)), index(tail(CONSUMERNSA, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
   
 }
 
 # Total loans as a percent of GDP
 if ( require_columns(df.data, c("TOTLNNSA", "GDP.Value") ) ){
   
-  df.data$TOTLNNSA.by.GDP <-
-    (df.data$TOTLNNSA / df.data$GDP.Value) * 100
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "TOTLNNSA__by__GDP"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data$TOTLNNSA / df.data$GDP.Value) * 100.0 )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "TOTLNNSA.by.GDP",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Total Loans Not Seasonally\nAdjusted divided by GDP",
       string.label.y = "Percent",
@@ -790,23 +994,30 @@ if ( require_columns(df.data, c("TOTLNNSA", "GDP.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'TOTLNNSA'], index(tail(GDP, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
   
 }
 
 # Total loans interest
 if ( require_columns(df.data, c("TOTLNNSA", "DGS10.Value") ) ){
   
-  df.data$TOTLNNSA.INTEREST <-
-    (df.data$TOTLNNSA * df.data$DGS10.Value) / 100
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "TOTLNNSA__INTEREST"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data$TOTLNNSA * df.data$DGS10.Value) / 100.0 )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "TOTLNNSA.INTEREST",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Total Loans Not Seasonally\nAdjusted Interest Burdens",
       string.label.y = "Billions of U.S. Dollars",
@@ -816,22 +1027,30 @@ if ( require_columns(df.data, c("TOTLNNSA", "DGS10.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'TOTLNNSA'], index(tail(DGS10, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
 }
 
 # Total loans interest divided by GDP
-if ( require_columns(df.data, c("TOTLNNSA.INTEREST", "GDP.Value") ) ){
+if ( require_columns(df.data, c("TOTLNNSA__INTEREST", "GDP.Value") ) ){
     
-  df.data$TOTLNNSA.INTEREST.by.GDP <-
-    (df.data$TOTLNNSA.INTEREST / df.data$GDP.Value) * 100
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "TOTLNNSA__INTEREST__by__GDP"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data$TOTLNNSA__INTEREST / df.data$GDP.Value ) * 100.0 )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "TOTLNNSA.INTEREST.by.GDP",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Total Loans Not Seasonally\nAdjusted Interest Burden Divided by GDP",
       string.label.y = "PERCENT",
@@ -841,9 +1060,14 @@ if ( require_columns(df.data, c("TOTLNNSA.INTEREST", "GDP.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'TOTLNNSA.INTEREST'], index(tail(GDP, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
   
 }
 
@@ -851,14 +1075,16 @@ if ( require_columns(df.data, c("TOTLNNSA.INTEREST", "GDP.Value") ) ){
 # Reserve balances (in billions) divided by GDP
 if ( require_columns(df.data, c("WRESBAL.Value", "GDP.Value") ) ){
   
-  df.data$WRESBAL.by.GDP <-
-    (df.data$WRESBAL.Value / df.data$GDP.Value) * 100
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "WRESBAL__by__GDP"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data$WRESBAL.Value / df.data$GDP.Value ) * 100.0 )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "WRESBAL.by.GDP",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Reserve Balances with Federal\nReserve Banks Divided by GDP",
       string.label.y = "PERCENT",
@@ -868,9 +1094,14 @@ if ( require_columns(df.data, c("WRESBAL.Value", "GDP.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'WRESBAL'], index(tail(GDP, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
   
 }
 
@@ -885,14 +1116,16 @@ if ( require_columns(df.data, c("EXCSRESNW.Value") ) ){
 # Excess reserve balances (in billions) divided by GDP
 if ( require_columns(df.data, c("EXCSRESNW.Value", "GDP.Value") ) ){
   
-  df.data$EXCSRESNW.by.GDP <-
-    (df.data$EXCSRESNW.Value / df.data$GDP.Value) * 100
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "EXCSRESNW__by__GDP"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data$EXCSRESNW.Value / df.data$GDP.Value ) * 100.0 )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "EXCSRESNW.by.GDP",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Excess Reserves of Depository Institutions\nDivided by GDP",
       string.label.y = "PERCENT",
@@ -902,9 +1135,15 @@ if ( require_columns(df.data, c("EXCSRESNW.Value", "GDP.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'WRESBAL'], index(tail(GDP, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
 }
 
 # Federal reserve repos, from millions to billions
@@ -918,14 +1157,16 @@ if ( require_columns(df.data, c("WLRRAL.Value") ) ){
 # Reverse repos (in billions) divided by GDP
 if ( require_columns(df.data, c("WLRRAL.Value", "GDP.Value") ) ){
   
-  df.data$WLRRAL.by.GDP <-
-    (df.data$WLRRAL.Value / df.data$GDP.Value) * 100
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "WLRRAL__by__GDP"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data$WLRRAL.Value / df.data$GDP.Value ) * 100.0 )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "WLRRAL.by.GDP",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Liabilities and Capital:\nLiabilities: Reverse Repurchase Agreements:\nWednesday Level (NSA)\nDivided by GDP",
       string.label.y = "PERCENT",
@@ -935,9 +1176,14 @@ if ( require_columns(df.data, c("WLRRAL.Value", "GDP.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'WLRRAL'], index(tail(GDP, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
   
 }
 
@@ -945,14 +1191,16 @@ if ( require_columns(df.data, c("WLRRAL.Value", "GDP.Value") ) ){
 # Secured overnight variation
 if ( require_columns(df.data, c("SOFR99.Value", "SOFR1.Value") ) ){
   
-  df.data$SOFR99.minus.SOFR1 <-
-    (df.data$SOFR99.Value - df.data$SOFR1.Value)
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "SOFR99__minus__SOFR1"
+  df.data[[str.symbol.new]] <-
+    ( df.data$SOFR99.Value - df.data$SOFR1.Value )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "SOFR99.minus.SOFR1",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Secured Overnight Financing Rate:\n99th Percentile - 1st Percentile",
       string.label.y = "PERCENT",
@@ -962,9 +1210,14 @@ if ( require_columns(df.data, c("SOFR99.Value", "SOFR1.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'SOFR99'], index(tail(SOFR1, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
   
 }
 
@@ -981,14 +1234,16 @@ if ( require_columns(df.data, c("IMPCH.Value", "EXPCH.Value") ) ){
 # China trade balance
 if ( require_columns(df.data, c("EXPCH.Value", "IMPCH.Value") ) ){
     
-  df.data$EXPCH.minus.IMPCH <-
-    (df.data$EXPCH.Value - df.data$IMPCH.Value)
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "EXPCH__minus__IMPCH"
+  df.data[[str.symbol.new]] <-
+    ( df.data$EXPCH.Value - df.data$IMPCH.Value )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "EXPCH.minus.IMPCH",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "U.S. Exports to China (FAS Basis) -\nU.S. Imports to China (Customs Basis)",
       string.label.y = "Billions of dollars",
@@ -998,10 +1253,15 @@ if ( require_columns(df.data, c("EXPCH.Value", "IMPCH.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'EXPCH'], index(tail(IMPCH, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
-
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
 }
 
 
@@ -1018,14 +1278,16 @@ if ( require_columns(df.data, c("EXPMX.Value", "IMPMX.Value") ) ){
 # Mexico trade balance
 if ( require_columns(df.data, c("EXPMX.Value", "IMPMX.Value") ) ){
   
-  df.data$EXPMX.minus.IMPMX <-
-    (df.data$EXPMX.Value - df.data$IMPMX.Value)
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "EXPMX__minus__IMPMX"
+  df.data[[str.symbol.new]] <-
+    ( df.data$EXPMX.Value - df.data$IMPMX.Value )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "EXPMX.minus.IMPCH",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "U.S. Exports to Mexico (FAS Basis) -\nU.S. Imports to Mexico (Customs Basis)",
       string.label.y = "Billions of dollars",
@@ -1035,9 +1297,14 @@ if ( require_columns(df.data, c("EXPMX.Value", "IMPMX.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'EXPMX'], index(tail(IMPMX, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
   
 }
 
@@ -1057,14 +1324,16 @@ if ( require_columns(df.data, c("ASTLL.Value", "FBDILNECA.Value") ) ){
 # divided by GDP
 if ( require_columns(df.data, c("SRPSABSNNCB.Value", "GDP.Value") ) ){
   
-  df.data$SRPSABSNNCB.by.GDP <-
-    (df.data$SRPSABSNNCB.Value / df.data$GDP.Value) * 100
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "SRPSABSNNCB__by__GDP"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data$SRPSABSNNCB.Value / df.data$GDP.Value ) * 100.0 )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "SRPSABSNNCB.by.GDP",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Nonfinancial corporate business;\nsecurity repurchase agreements;\nasset, Level (NSA)\nDivided by GDP",
       string.label.y = "PERCENT",
@@ -1074,9 +1343,14 @@ if ( require_columns(df.data, c("SRPSABSNNCB.Value", "GDP.Value") ) ){
       )),
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'SRPSABSNNCB'], index(tail(GDP, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
   
 }
 
@@ -1084,14 +1358,16 @@ if ( require_columns(df.data, c("SRPSABSNNCB.Value", "GDP.Value") ) ){
 # Total loans divided by GDP
 if ( require_columns(df.data, c("ASTLL.Value", "GDP.Value") ) ){
   
-  df.data$ASTLL.by.GDP <-
-    (df.data$ASTLL.Value / df.data$GDP.Value) * 100
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "ASTLL__by__GDP"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data$ASTLL.Value / df.data$GDP.Value) * 100.0 )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "ASTLL.by.GDP",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "All sectors; total loans;\nliability, Level (NSA)\nDivided by GDP",
       string.label.y = "PERCENT",
@@ -1101,9 +1377,14 @@ if ( require_columns(df.data, c("ASTLL.Value", "GDP.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'ASTLL'], index(tail(GDP, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
   
 }
 
@@ -1118,14 +1399,16 @@ if ( require_columns(df.data, c("ASFMA.Value") ) ){
 # Farm loans divided by GDP
 if ( require_columns(df.data, c("ASFMA.Value", "GDP.Value") ) ){
   
-  df.data$ASFMA.by.GDP <-
-    (df.data$ASFMA.Value / df.data$GDP.Value) * 100
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "ASFMA__by__GDP"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data$ASFMA.Value / df.data$GDP.Value ) * 100.0 )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "ASFMA.by.GDP",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "All sectors; farm\nmortgages; asset, Level (NSA)\nDivided by GDP",
       string.label.y = "PERCENT",
@@ -1135,22 +1418,30 @@ if ( require_columns(df.data, c("ASFMA.Value", "GDP.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'ASFMA'], index(tail(GDP, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
   
 }
 
 # Take a look at farm mortgages as a percentage of total loans.
 if ( require_columns(df.data, c("ASFMA.Value", "ASTLL.Value") ) ){
   
-  df.data$ASFMA.by.ASTLL <- (df.data$ASFMA.Value / df.data$ASTLL.Value) * 100
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "ASFMA__by__ASTLL"
+  df.data[[str.symbol.new]] <- 
+    ( ( df.data$ASFMA.Value / df.data$ASTLL.Value) * 100.0 )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "ASFMA.by.ASTLL",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "All sectors; total loans\nDivided by farm mortgages",
       string.label.y = "PERCENT",
@@ -1160,23 +1451,30 @@ if ( require_columns(df.data, c("ASFMA.Value", "ASTLL.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'ASFMA'], index(tail(ASTLL, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
-
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
 }
 
 # Farm mortgages interest burden
 if ( require_columns(df.data, c("ASFMA.Value", "MORTGAGE30US.Value") ) ){
   
-  df.data$ASFMA.INTEREST <-
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "ASFMA__INTEREST"
+  df.data[[str.symbol.new]] <-
     (df.data$ASFMA.Value * df.data$MORTGAGE30US.Value) / 100
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "ASFMA.INTEREST",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Farm Mortgages (Quarterly, NSA)\n 30-Year Fixed Interest Burdens",
       string.label.y = "Billions of U.S. Dollars",
@@ -1186,22 +1484,30 @@ if ( require_columns(df.data, c("ASFMA.Value", "MORTGAGE30US.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'ASFMA'], index(tail(MORTGAGE30US, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
 }
 
 # Farm mortgage interest divided by GDP
-if ( require_columns(df.data, c("ASFMA.INTEREST", "GDP.Value") ) ){
+if ( require_columns(df.data, c("ASFMA__INTEREST", "GDP.Value") ) ){
   
-  df.data$ASFMA.INTEREST.by.GDP <-
-    (df.data$ASFMA.INTEREST / df.data$GDP.Value) * 100
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "ASFMA__INTEREST__by_GDP"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data$ASFMA__INTEREST / df.data$GDP.Value) * 100.0 )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "ASFMA.INTEREST.by.GDP",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Farm Mortgages (Quarterly, NSA)\nInterest Burden Divided by GDP",
       string.label.y = "PERCENT",
@@ -1211,24 +1517,31 @@ if ( require_columns(df.data, c("ASFMA.INTEREST", "GDP.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'ASFMA.INTEREST'], index(tail(GDP, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
-
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
 }
 
 
 # Farm income divided by GDP
 if ( require_columns(df.data, c("FARMINCOME", "GDP.Value") ) ){
   
-  df.data$FARMINCOME.by.GDP <-
-    (df.data$FARMINCOME / df.data$GDP.Value) * 100
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "FARMINCOME__by__GDP"
+  df.data[[str.symbol.new]] <-
+    ( (df.data$FARMINCOME / df.data$GDP.Value ) * 100.0 )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "FARMINCOME.by.GDP",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Farm Income (Annual, NSA)\nDivided by GDP",
       string.label.y = "PERCENT",
@@ -1238,10 +1551,15 @@ if ( require_columns(df.data, c("FARMINCOME", "GDP.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'FARMINCOME'], index(tail(GDP, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
-
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
 }
 
 
@@ -1253,18 +1571,19 @@ if ( require_columns(df.data, c("BOGMBASE.Value") ) ){
 
 }
 
-
 # Monetary base (in billions) divided by GDP
 if ( require_columns(df.data, c("BOGMBASE.Value", "GDP.Value") ) ){
   
-  df.data$BOGMBASE.by.GDP <-
-    (df.data$BOGMBASE.Value / df.data$GDP.Value) * 100
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "BOGMBASE__by__GDP"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data$BOGMBASE.Value / df.data$GDP.Value) * 100.0 )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "BOGMBASE.by.GDP",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "BOGMBASE\nDivided by GDP",
       string.label.y = "PERCENT",
@@ -1274,9 +1593,14 @@ if ( require_columns(df.data, c("BOGMBASE.Value", "GDP.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'BOGMBASE'], index(tail(GDP, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
   
 }
 
@@ -1292,14 +1616,16 @@ if ( require_columns(df.data, c("WALCL.Value") ) ){
 # Excess reserve balances (in billions) divided by GDP
 if ( require_columns(df.data, c("WALCL.Value", "GDP.Value") ) ){
   
-  df.data$WALCL.by.GDP <-
-    (df.data$WALCL.Value / df.data$GDP.Value) * 100
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "WALCL__by__GDP"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data$WALCL.Value / df.data$GDP.Value) * 100.0 )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "WALCL.by.GDP",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "All Federal Reserve Banks: Total Assets\nDivided by GDP",
       string.label.y = "PERCENT",
@@ -1309,10 +1635,15 @@ if ( require_columns(df.data, c("WALCL.Value", "GDP.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'WRESBAL'], index(tail(GDP, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
-
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
 }
 
 # Don't know why, but not all reserve money data series are in billions, some
@@ -1327,14 +1658,16 @@ if ( require_columns(df.data, c("ECBASSETS.Value", "EUNNGDP.Value") ) ){
 # ECB assets (in billions) divided by European GDP
 if ( require_columns(df.data, c("ECBASSETS.Value", "EUNNGDP.Value") ) ){
   
-  df.data$ECBASSETS.by.EUNNGDP <-
-    (df.data$ECBASSETS.Value / df.data$EUNNGDP.Value) * 100
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "ECBASSETS__by__EUNNGDP"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data$ECBASSETS.Value / df.data$EUNNGDP.Value) * 100.0 )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "ECBASSETS.by.EUNNGDP",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Central Bank Assets for Euro Area (11-19 Countries)\nDivided by GDP",
       string.label.y = "PERCENT",
@@ -1344,22 +1677,29 @@ if ( require_columns(df.data, c("ECBASSETS.Value", "EUNNGDP.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'ECBASSETS'], index(tail(EUNNGDP, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
-
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
 }
 
 # Yield curve, 30-year to 10-year
 if ( require_columns(df.data, c("DGS30.Value", "DGS10.Value") ) ){
   
-  df.data$DGS30TO10 <- df.data$DGS30.Value - df.data$DGS10.Value
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "DGS30TO10"
+  df.data[[str.symbol.new]] <- ( df.data$DGS30.Value - df.data$DGS10.Value )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "DGS30TO10",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Yield Curve, 30 and 10 Year Treasury (DGS30-DGS10)",
       string.label.y = "Percent",
@@ -1369,23 +1709,30 @@ if ( require_columns(df.data, c("DGS30.Value", "DGS10.Value") ) ){
       )))  ,
       date.series.end = as.Date(min(c(
         index(tail(DGS30, 1)), index(tail(DGS10, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
-
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
 }
 
 
 # Yield curve, 10-year to 1-year
 if ( require_columns(df.data, c("DGS10.Value", "DGS1.Value") ) ){
   
-  df.data$DGS10TO1 <- df.data$DGS10.Value - df.data$DGS1.Value
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "DGS10TO1"
+  df.data[[str.symbol.new]] <- ( df.data$DGS10.Value - df.data$DGS1.Value )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "DGS10TO1",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Yield Curve, 10 and 1 Year Treasury (DGS10-DGS1)",
       string.label.y = "Percent",
@@ -1395,22 +1742,29 @@ if ( require_columns(df.data, c("DGS10.Value", "DGS1.Value") ) ){
       )))  ,
       date.series.end = as.Date(min(c(
         index(tail(DGS10, 1)), index(tail(DGS1, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
   
 }
 
 # Yield curve, 10-year to 2-year
 if ( require_columns(df.data, c("DGS10.Value", "DGS2.Value") ) ){
   
-  df.data$DGS10TO2 <- df.data$DGS10.Value - df.data$DGS2.Value
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "DGS10TO2"
+  df.data[[str.symbol.new]] <- ( df.data$DGS10.Value - df.data$DGS2.Value )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "DGS10TO2",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Yield Curve, 10 and 2 Year Treasury (DGS10-DGS2)",
       string.label.y = "Percent",
@@ -1420,9 +1774,14 @@ if ( require_columns(df.data, c("DGS10.Value", "DGS2.Value") ) ){
       ))) ,
       date.series.end = as.Date(min(c(
         index(tail(DGS10, 1)), index(tail(DGS2, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
   
 }
 
@@ -1430,13 +1789,15 @@ if ( require_columns(df.data, c("DGS10.Value", "DGS2.Value") ) ){
 # Yield curve, 10 year to 3-month (Monthly)
 if ( require_columns(df.data, c("DGS10.Value", "TB3MS.Value") ) ){
   
-  df.data$DGS10TOTB3MS <- df.data$DGS10.Value - df.data$TB3MS.Value
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "DGS10TOTB3MS"
+  df.data[[str.symbol.new]] <- ( df.data$DGS10.Value - df.data$TB3MS.Value )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "DGS10TOTB3MS",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Yield Curve, 10 and 3 Month Treasury (DGS10-TB3MS)",
       string.label.y = "Percent",
@@ -1446,9 +1807,14 @@ if ( require_columns(df.data, c("DGS10.Value", "TB3MS.Value") ) ){
       ))) ,
       date.series.end = as.Date(min(c(
         index(tail(DGS10, 1)), index(tail(TB3MS, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
   
 }
 
@@ -1456,13 +1822,15 @@ if ( require_columns(df.data, c("DGS10.Value", "TB3MS.Value") ) ){
 # Yield curve, 10 year to 3-month (Daily)
 if ( require_columns(df.data, c("DGS10.Value", "DTB3.Value") ) ){
   
-  df.data$DGS10TODTB3 <- df.data$DGS10.Value - df.data$DTB3.Value
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "DGS10TODTB3"
+  df.data[[str.symbol.new]] <- ( df.data$DGS10.Value - df.data$DTB3.Value )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "DGS10TODTB3",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Yield Curve, 10 and 3 Month Treasury (DGS10-DTB3)",
       string.label.y = "Percent",
@@ -1472,22 +1840,29 @@ if ( require_columns(df.data, c("DGS10.Value", "DTB3.Value") ) ){
       ))) ,
       date.series.end = as.Date(min(c(
         index(tail(DGS10, 1)), index(tail(DTB3, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
   
 }
 
 # AAA to 10-year treasury
 if ( require_columns(df.data, c("AAA.Value", "DGS10.Value") ) ){
   
-  df.data$DGS10ByAAA <- df.data$AAA.Value / df.data$DGS10.Value
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "DGS10ByAAA"
+  df.data[[str.symbol.new]] <- ( df.data$AAA.Value / df.data$DGS10.Value )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "DGS10ByAAA",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "AAA ratio to 10 year treasury (AAA/DGS10)",
       string.label.y = "-",
@@ -1497,9 +1872,14 @@ if ( require_columns(df.data, c("AAA.Value", "DGS10.Value") ) ){
       ))) ,
       date.series.end = as.Date(min(c(
         index(tail(AAA, 1)), index(tail(DGS10, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
   
 }
 
@@ -1507,14 +1887,16 @@ if ( require_columns(df.data, c("AAA.Value", "DGS10.Value") ) ){
 # of these in units of thousands of people.
 if ( require_columns(df.data, c("LNU03000000.Value", "POPTHM.Value") ) ){
   
-  df.data$LNU03000000BYPOPTHM <-
-    (df.data$LNU03000000.Value / df.data$POPTHM.Value) * 100
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "LNU03000000BYPOPTHM"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data$LNU03000000.Value / df.data$POPTHM.Value) * 100.0 )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "LNU03000000BYPOPTHM",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Unemployment level (NSA) / Population",
       string.label.y = "%" ,
@@ -1524,9 +1906,14 @@ if ( require_columns(df.data, c("LNU03000000.Value", "POPTHM.Value") ) ){
       ))) ,
       date.series.end = as.Date(min(c(
         index(tail(LNU03000000, 1)), index(tail(POPTHM, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
   
 }
 
@@ -1535,14 +1922,16 @@ if ( require_columns(df.data, c("LNU03000000.Value", "POPTHM.Value") ) ){
 # these in units of thousands of people.
 if ( require_columns(df.data, c("UNEMPLOY.Value", "POPTHM.Value") ) ){
   
-  df.data$UNEMPLOYBYPOPTHM <-
-    (df.data$UNEMPLOY.Value / df.data$POPTHM.Value) * 100
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "UNEMPLOYBYPOPTHM"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data$UNEMPLOY.Value / df.data$POPTHM.Value) * 100.0 )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "UNEMPLOYBYPOPTHM",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Unemployment level, seasonally adjusted / Population",
       string.label.y = "%" ,
@@ -1552,23 +1941,30 @@ if ( require_columns(df.data, c("UNEMPLOY.Value", "POPTHM.Value") ) ){
       ))) ,
       date.series.end = as.Date(min(c(
         index(tail(UNEMPLOY, 1)), index(tail(POPTHM, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
   
 }
 
 # ADP to populations. FRED keeps both of these in units of thousands of people
 if ( require_columns(df.data, c("NPPTTL.Value", "POPTHM.Value") ) ){
     
-  df.data$NPPTTLBYPOPTHM <-
-    (df.data$NPPTTL.Value / df.data$POPTHM.Value) * 100
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "NPPTTLBYPOPTHM"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data$NPPTTL.Value / df.data$POPTHM.Value) * 100.0 )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "NPPTTLBYPOPTHM",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "ADP Private Employment / Population",
       string.label.y = "%" ,
@@ -1578,22 +1974,29 @@ if ( require_columns(df.data, c("NPPTTL.Value", "POPTHM.Value") ) ){
       ))) ,
       date.series.end = as.Date(min(c(
         index(tail(NPPTTL, 1)), index(tail(POPTHM, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
-
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
 }
 
 # U6 to U4 unemployment
 if ( require_columns(df.data, c("U6RATE.Value", "UNRATE.Value") ) ){
   
-  df.data$U6toU3 <- df.data$U6RATE.Value - df.data$UNRATE.Value
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "U6toU3"
+  df.data[[str.symbol.new]] <- ( df.data$U6RATE.Value - df.data$UNRATE.Value )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "U6toU3",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "U6RATE minums UNRATE",
       string.label.y = "%" ,
@@ -1603,9 +2006,14 @@ if ( require_columns(df.data, c("U6RATE.Value", "UNRATE.Value") ) ){
       ))) ,
       date.series.end = as.Date(min(c(
         index(tail(U6RATE, 1)), index(tail(UNRATE, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
   
 }
 
@@ -1613,14 +2021,16 @@ if ( require_columns(df.data, c("U6RATE.Value", "UNRATE.Value") ) ){
 # Normalize crude by producer price index, commodities (PPICO)
 if ( require_columns(df.data, c("DCOILBRENTEU.Value", "PPIACO.Value") ) ){
   
-  df.data$DCOILBRENTEU.by.PPIACO <-
-    (df.data$DCOILBRENTEU.Value / df.data$PPIACO.Value)
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "DCOILBRENTEU__by__PPIACO"
+  df.data[[str.symbol.new]] <-
+    ( df.data$DCOILBRENTEU.Value / df.data$PPIACO.Value )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "DCOILBRENTEU.by.PPIACO",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Crude Oil - Brent, $/bbl, Normalized by\nproducer price index c.o.",
       string.label.y = "$/bbl/Index",
@@ -1630,22 +2040,29 @@ if ( require_columns(df.data, c("DCOILBRENTEU.Value", "PPIACO.Value") ) ){
       ))) ,
       date.series.end = as.Date(min(c(
         index(tail(DCOILBRENTEU, 1)), index(tail(PPIACO, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
 }
 
 # Normalize the oil price by the producer price index
 if ( require_columns(df.data, c("DCOILWTICO.Value", "PPIACO.Value") ) ){
   
-  df.data$DCOILWTICO.by.PPIACO <-
-    (df.data$DCOILWTICO.Value / df.data$PPIACO.Value)
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "DCOILWTICO__by__PPIACO"
+    ( df.data$DCOILWTICO.Value / df.data$PPIACO.Value )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "DCOILWTICO.by.PPIACO",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Crude Oil - WTI, $/bbl, Normalized by\nproducer price index c.o.",
       string.label.y = "$/bbl/Index",
@@ -1655,9 +2072,14 @@ if ( require_columns(df.data, c("DCOILWTICO.Value", "PPIACO.Value") ) ){
       ))) ,
       date.series.end = as.Date(min(c(
         index(tail(DCOILWTICO, 1)), index(tail(PPIACO, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
   
 }
 
@@ -1727,14 +2149,16 @@ if ( require_columns(df.data, c("DCOILWTICO.Value", "PPIACO.Value") ) ){
 # Normalize nominal GDP commodities by GDP deflator
 if ( require_columns(df.data, c("GDP.Value", "GDPDEF.Value") ) ){
   
-  df.data$GDP.by.GDPDEF <-
-    (df.data$GDP.Value / df.data$GDPDEF.Value)
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "GDP__by__GDPDEF"
+  df.data[[str.symbol.new]] <-
+    ( df.data$GDP.Value / df.data$GDPDEF.Value )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "GDP.by.GDPDEF",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Nominal GDP \nNormalized by GDP def",
       string.label.y = "(-)",
@@ -1744,16 +2168,21 @@ if ( require_columns(df.data, c("GDP.Value", "GDPDEF.Value") ) ){
       ))) ,
       date.series.end = as.Date(min(c(
         index(tail(GDP, 1)), index(tail(GDPDEF, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
   
 }
 
 # Normalize GSG (close) commodities by GDP deflator
 if ( require_columns(df.data, c("GSG.Close", "GDPDEF.Value") ) ){
   
-  str.symbol.new <- "GSG.Close.by.GDPDEF"
+  str.symbol.new <- "GSG__Close__by__GDPDEF"
   df.data[[str.symbol.new]] <-
     (df.data$GSG.Close / df.data$GDPDEF.Value)
   
@@ -1776,19 +2205,25 @@ if ( require_columns(df.data, c("GSG.Close", "GDPDEF.Value") ) ){
       string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
 }
 
 # Normalize GSG (close) commodities by S&P 500
 if ( require_columns(df.data, c("GSG.Close", "X_GSPC.GSPC.Close") ) ){
   
-  df.data$GSG.Close.by.GSPC.Close <-
-    (df.data$GSG.Close / df.data$X_GSPC.GSPC.Close)
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "GSG__Close__by__GSPC.Close"
+  df.data[[str.symbol.new]] <-
+    ( df.data$GSG.Close / df.data$X_GSPC.GSPC.Close )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "GSG.Close.by.GSPC.Close",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "GSCI Commodity-Indexed Trust,\nNormalized by S&P 500",
       string.label.y = "(-)",
@@ -1798,23 +2233,31 @@ if ( require_columns(df.data, c("GSG.Close", "X_GSPC.GSPC.Close") ) ){
       ))) ,
       date.series.end = as.Date(min(c(
         index(tail(GSG, 1)), index(tail(X_GSPC, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
 }
 
 
 # GDP divided by population
 if ( require_columns(df.data, c("GDP.Value", "POPTHM.Value") ) ){
   
-  df.data$GDPBYPOPTHM <-
-    ((df.data$GDP.Value * 1e9) / (df.data$POPTHM.Value * 1e3))
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "GDPBYPOPTHM"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data$GDP.Value * 1e9) / ( df.data$POPTHM.Value * 1e3 ) )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "GDPBYPOPTHM",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "GDP/Population",
       string.label.y = "$/person",
@@ -1824,22 +2267,30 @@ if ( require_columns(df.data, c("GDP.Value", "POPTHM.Value") ) ){
       ))) ,
       date.series.end = as.Date(min(c(
         index(tail(GDP, 1)), index(tail(POPTHM, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
   
 }
 
 # GDP Divided CPI
 if ( require_columns(df.data, c("GDP.Value", "CPIAUCSL.Value") ) ){
   
-  df.data$GDPBYCPIAUCSL <- (df.data$GDP.Value / (df.data$CPIAUCSL.Value / 100))
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "GDPBYCPIAUCSL"
+  df.data[[str.symbol.new]] <- 
+    ( df.data$GDP.Value / ( df.data$CPIAUCSL.Value / 100 ) )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "GDPBYCPIAUCSL",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "GDP divided by CPI",
       string.label.y = "GDP/CPIAUCSL, Billions of Dollars",
@@ -1849,23 +2300,30 @@ if ( require_columns(df.data, c("GDP.Value", "CPIAUCSL.Value") ) ){
       ))) ,
       date.series.end = as.Date(min(c(
         index(tail(GDP, 1)), index(tail(CPIAUCSL, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
-
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
 }
 
 # Normalize GDP by Population
 if ( require_columns(df.data, c("GDPBYCPIAUCSL", "POPTHM.Value") ) ){
-    
-  df.data$GDPBYCPIAUCSLBYPOPTHM <-
+
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "GDPBYCPIAUCSLBYPOPTHM"
+  df.data[[str.symbol.new]] <- 
     ((df.data$GDPBYCPIAUCSL * 1e9) / (df.data$POPTHM.Value* 1e3))
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "GDPBYCPIAUCSLBYPOPTHM",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "GDP divided by CPI/Population",
       string.label.y = "$/Person",
@@ -1875,22 +2333,29 @@ if ( require_columns(df.data, c("GDPBYCPIAUCSL", "POPTHM.Value") ) ){
       )) ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'GDPBYCPIAUCSL'], index(tail(POPTHM, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
 }
 
 # Normalize S&P 500 by mid-cap
 if ( require_columns(df.data, c("X_GSPC.GSPC.Close", "MDY.Close") ) ){
   
-  df.data$GSPC.CloseBYMDY.Close <-
-    ((df.data$X_GSPC.GSPC.Close) / (df.data$MDY.Close))
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "GSPC__CloseBYMDY__Close"
+    ( df.data$X_GSPC.GSPC.Close / df.data$MDY.Close )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "GSPC.CloseBYMDY.Close",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "GSPC by MDY",
       string.label.y = "-",
@@ -1900,23 +2365,30 @@ if ( require_columns(df.data, c("X_GSPC.GSPC.Close", "MDY.Close") ) ){
       ))) ,
       date.series.end = as.Date(min(c(
         index(tail(X_GSPC, 1)), index(tail(MDY, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
-
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
 }
 
 # Normalize NASDAQ by mid-cap
 if ( require_columns(df.data, c("QQQ.Close", "MDY.Close") ) ){
   
-  df.data$QQQ.CloseBYMDY.Close <-
-    ((df.data$QQQ.Close) / (df.data$MDY.Close))
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "QQQ__CloseBYMDY__Close"
+  df.data[[str.symbol.new]] <-
+    ( df.data$QQQ.Close / df.data$MDY.Close )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "QQQ.CloseBYMDY.Close",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "QQQ by MDY",
       string.label.y = "-",
@@ -1926,9 +2398,14 @@ if ( require_columns(df.data, c("QQQ.Close", "MDY.Close") ) ){
       ))) ,
       date.series.end = as.Date(min(c(
         index(tail(QQQ, 1)), index(tail(MDY, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
   
 }
 
@@ -1936,15 +2413,17 @@ if ( require_columns(df.data, c("QQQ.Close", "MDY.Close") ) ){
 if ( require_columns(df.data, c("X_GSPC.GSPC.High",
                                 "X_GSPC.GSPC.Low","X_GSPC.GSPC.Open") ) ){
   
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "GSPC__DailySwing"
   df.data$X_GSPC.GSPC.Open[df.data$X_GSPC.GSPC.Open <=0] <- 1
-  df.data$GSPC.DailySwing <-
+  df.data[[str.symbol.new]] <-
     ((df.data$X_GSPC.GSPC.High - df.data$X_GSPC.GSPC.Low) / df.data$X_GSPC.GSPC.Open)
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "GSPC.DailySwing",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "S&P 500 (^GSPC) Daily Swing: (High - Low) / Open",
       string.label.y = "-",
@@ -1954,23 +2433,30 @@ if ( require_columns(df.data, c("X_GSPC.GSPC.High",
       ))) ,
       date.series.end = as.Date(min(c(
         index(tail(X_GSPC, 1)), index(tail(X_GSPC, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
   
 }
 
 # Correct GSPC open with GDP deflator
 if ( require_columns(df.data, c("X_GSPC.GSPC.Open", "GDPDEF.Value") ) ){
   
-  df.data$GSPC.Open.by.GDPDEF <-
-    (df.data$X_GSPC.GSPC.Open / (df.data$GDPDEF.Value / 100))
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "GSPC__Open__by__GDPDEF"
+  df.data[[str.symbol.new]] <-
+    ( df.data$X_GSPC.GSPC.Open / ( df.data$GDPDEF.Value / 100.0 ) )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "GSPC.Open.by.GDPDEF",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "S&P 500 (^GSPC) Open\ndivided by GDP deflator",
       string.label.y = "Dollars",
@@ -1980,23 +2466,30 @@ if ( require_columns(df.data, c("X_GSPC.GSPC.Open", "GDPDEF.Value") ) ){
       ))) ,
       date.series.end = as.Date(min(c(
         index(tail(X_GSPC, 1)), index(tail(GDPDEF, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
-
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
 }
 
 # Correct GSPC Close with GDP deflator
 if ( require_columns(df.data, c("X_GSPC.GSPC.Close", "GDPDEF.Value") ) ){
   
-  df.data$GSPC.Close.by.GDPDEF <-
-    (df.data$X_GSPC.GSPC.Close / (df.data$GDPDEF.Value / 100))
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "GSPC__Close__by__GDPDEF"
+  df.data[[str.symbol.new]] <-
+    ( df.data$X_GSPC.GSPC.Close / ( df.data$GDPDEF.Value / 100.0 ) )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "GSPC.Close.by.GDPDEF",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "S&P 500 (^GSPC) Close\ndivided by GDP deflator",
       string.label.y = "Dollars",
@@ -2006,22 +2499,30 @@ if ( require_columns(df.data, c("X_GSPC.GSPC.Close", "GDPDEF.Value") ) ){
       ))) ,
       date.series.end = as.Date(min(c(
         index(tail(X_GSPC, 1)), index(tail(GDPDEF, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
 }
 
 # Census housing data
 if ( require_columns(df.data, c("HNFSUSNSA.Value", "HSN1FNSA.Value") ) ){
   
-  df.data$HNFSUSNSA.minus.HSN1FNSA <-
-    (df.data$HNFSUSNSA.Value - df.data$HSN1FNSA.Value)
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "HNFSUSNSA__minus__HSN1FNSA"
+  df.data[[str.symbol.new]] <-
+    ( df.data$HNFSUSNSA.Value - df.data$HSN1FNSA.Value )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "HNFSUSNSA.minus.HSN1FNSA",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Houses for sale -\n houses sold",
       string.label.y = "Thousands of Units",
@@ -2031,23 +2532,30 @@ if ( require_columns(df.data, c("HNFSUSNSA.Value", "HSN1FNSA.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'HSN1FNSA'], index(tail(HNFSUSNSA, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
   
 }
 
 # Estimate housing input to the economy by multiplying starts by median price
 if ( require_columns(df.data, c("MSPUS.Value", "HOUST.Value") ) ){
   
-  df.data$MSPUS.times.HOUST <-
-    (df.data$MSPUS.Value * df.data$HOUST.Value)/1000000
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "MSPUS__times__HOUST"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data$MSPUS.Value * df.data$HOUST.Value ) / 1000000.0 )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "MSPUS.times.HOUST",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "New privately owned units start\ntimes median price",
       string.label.y = "Millions of dollars",
@@ -2057,10 +2565,15 @@ if ( require_columns(df.data, c("MSPUS.Value", "HOUST.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'MSPUS'], index(tail(HOUST, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
-
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
 }
 
 # HOUST reports at annual rate, but HOUSTNSA just reports the monthly numbers. I
@@ -2074,13 +2587,15 @@ if ( require_columns(df.data, c("HOUSTNSA.Value") ) ){
 # Housing starts divided by population
 if ( require_columns(df.data, c("HOUST.Value", "POPTHM.Value") ) ){
   
-  df.data$HOUST.div.POPTHM <- (df.data$HOUST.Value / df.data$POPTHM.Value)
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "HOUST__div__POPTHM"
+  df.data[[str.symbol.new]] <- ( df.data$HOUST.Value / df.data$POPTHM.Value )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "HOUST.div.POPTHM",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Housing starts divided\nby U.S. population",
       string.label.y = "Starts per person",
@@ -2090,9 +2605,14 @@ if ( require_columns(df.data, c("HOUST.Value", "POPTHM.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'POPTHM'], index(tail(HOUST, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
   
 }
 
@@ -2100,14 +2620,16 @@ if ( require_columns(df.data, c("HOUST.Value", "POPTHM.Value") ) ){
 # private homes for sale times median price.
 if ( require_columns(df.data, c("MSPUS.Value", "HNFSUSNSA.Value") ) ){
   
-  df.data$MSPUS.times.HNFSUSNSA <-
-    (df.data$MSPUS.Value * df.data$HNFSUSNSA.Value)/1000000
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "MSPUS__times__HNFSUSNSA"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data$MSPUS.Value * df.data$HNFSUSNSA.Value ) / 1000000.0 )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "MSPUS.times.HNFSUSNSA",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "New privately owned 1-family units for sale\ntimes median price",
       string.label.y = "Millions of dollars",
@@ -2117,24 +2639,33 @@ if ( require_columns(df.data, c("MSPUS.Value", "HNFSUSNSA.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'MSPUS'], index(tail(HOUST, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
-
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
 }
 
 # What is the total home sold times median price? HSN1FNSA is in units of
 # 'thousands' each month.
-if ( require_columns(df.data, c("HSN1FNSA.Value", "EXHOSLUSM495S.Value") ) ){
+if ( require_columns(df.data, c("MSPUS.Value", "HSN1FNSA.Value",
+                                "EXHOSLUSM495S.Value") ) ){
   
-  df.data$MSPUS.times.HSN1FNSA.plusEXHOSLUSM495S <-
-    (df.data$MSPUS.Value * (df.data$HSN1FNSA.Value*1000 + df.data$EXHOSLUSM495S.Value))/1e9
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "MSPUS__times__HSN1FNSA__plus__EXHOSLUSM495S"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data$MSPUS.Value * ( df.data$HSN1FNSA.Value * 1000 +
+                                df.data$EXHOSLUSM495S.Value ) ) / 1e9 )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "MSPUS.times.HSN1FNSA.plusEXHOSLUSM495S",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "Median home price\ntimes new and existing houses sold",
       string.label.y = "Billions of dollars",
@@ -2144,10 +2675,15 @@ if ( require_columns(df.data, c("HSN1FNSA.Value", "EXHOSLUSM495S.Value") ) ){
       ))  ,
       date.series.end = as.Date(min(c(
         df.symbols$date.series.end[df.symbols$Symbol == 'MSPUS'], index(tail(HSN1FNSA, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
-
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
 }
 
 # Normalize single-family home sales volume (billions) by GDP
@@ -2155,14 +2691,18 @@ if ( require_columns(df.data, c("HSN1FNSA.Value", "EXHOSLUSM495S.Value") ) ){
 if ( require_columns(df.data, c("MSPUS.times.HSN1FNSA.plusEXHOSLUSM495S",
                                 "GDP.Value") ) ){
   
-  df.data$MSPUS.times.HSN1FNSA.plusEXHOSLUSM495S.by.GDP <-
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "BUSLOANS__minus__BUSLOANSNSA__by__GDP"
+  df.data[[str.symbol.new]] <-
+    
+    df.data$MSPUS.times.HSN1FNSA.plusEXHOSLUSM495S.by.GDP <-
     (df.data$MSPUS.times.HSN1FNSA.plusEXHOSLUSM495S / df.data$GDP.Value) * 100
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "MSPUS.times.HSN1FNSA.plusEXHOSLUSM495S.by.GDP",
+      string.symbol = str.symbol.new,
       string.source = "Calc",
       string.description = "New and existing home sales volume ",
       string.label.y = "Percent",
@@ -2172,9 +2712,14 @@ if ( require_columns(df.data, c("MSPUS.times.HSN1FNSA.plusEXHOSLUSM495S",
       )))  ,
       date.series.end = as.Date(min(c(
         index(tail(BUSLOANS, 1)), index(tail(GDP, 1))
-      )))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
     )
   )
+  
+  # Tidy memory
+  rm(str.symbol.new)
   
 }
 
