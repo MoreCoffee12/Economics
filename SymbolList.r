@@ -2596,20 +2596,6 @@ df.symbols <-
   rbind(
     df.symbols,
     data.frame(
-      string.symbol = "POPTHM",
-      string.source = "FRED",
-      string.description = "Population (U.S.)",
-      string.label.y = "Thousands",
-      float.expense.ratio = -1.00,
-      date.series.start = as.Date("1959-01-01"),
-      date.series.end = as.Date("1900-01-01")
-    )
-  )
-
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
       string.symbol = "CLF16OV",
       string.source = "FRED",
       string.description = "Civilian Labor Force Level, SA ",
