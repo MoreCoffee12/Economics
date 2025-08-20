@@ -2215,7 +2215,7 @@ if ( require_columns(df.data, c("GSG.Close", "GDPDEF.Value") ) ){
 if ( require_columns(df.data, c("GSG.Close", "X_GSPC.GSPC.Close") ) ){
   
   # Add the aggregate to the main data frame
-  str.symbol.new <- "GSG__Close__by__GSPC.Close"
+  str.symbol.new <- "GSG__Close__by__GSPC__Close"
   df.data[[str.symbol.new]] <-
     ( df.data$GSG.Close / df.data$X_GSPC.GSPC.Close )
   

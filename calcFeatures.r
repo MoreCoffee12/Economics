@@ -94,29 +94,36 @@ calcFeatures <- function(df.data, df.symbols){
       # This line separates out suffixes like 'value' or 'Close' from the
       # primary symbol
       if (grepl("\\.", str.symbol)) {
+        
+        # Extract the root
         str.symbol.root <- substr(str.symbol, 1, regexpr("\\.", str.symbol) - 1)
+
+        # Save off the suffix
         str.suffix <-
           substr(str.symbol, regexpr("\\.", str.symbol) + 1, nchar(str.symbol))
         str.suffix <- paste(" (", str.suffix, ")", sep = "")
+        
+      }
+
+      # Create the safe name
+      str.symbol.root <- safe_symbol_name ( str.symbol.root )
+      
+      # Debug line, this can be commented out
+      print(paste('str.symbol.root: ', str.symbol.root,
+                  ' | str.suffix: ',str.suffix))
+      
+      # Retrieve the description for the root ticker symbol, enforcing 1 to 1
+      # relationship
+      hits <- which(df.symbols$string.symbol_safe == str.symbol.root  )
+
+      if (length(hits) == 0L) {
+        stop(sprintf("No exact match for '%s' in df.symbols$string.symbol_safe.", str.symbol.root))
+      }
+      if (length(hits) > 1L) {
+        stop(sprintf("Expected exactly 1 match for '%s', got %d.", str.symbol.root, length(hits)))
       }
       
-        # Debug line, this can be commented out
-        print(paste('str.symbol.root: ', str.symbol.root,
-                    ' | str.suffix: ',str.suffix))
-        
-        # Retrieve the description for the root ticker symbol, enforcing 1 to 1
-        # relationship
-        hits <- which(df.symbols$string.symbol_safe ==
-                        safe_symbol_name ( str.symbol.root ) )
-
-        if (length(hits) == 0L) {
-          stop(sprintf("No exact match for '%s' in df.symbols$string.symbol_safe.", str.symbol.root))
-        }
-        if (length(hits) > 1L) {
-          stop(sprintf("Expected exactly 1 match for '%s', got %d.", str.symbol.root, length(hits)))
-        }
-        
-        str.description <- df.symbols$string.description[[hits]]
+      str.description <- df.symbols$string.description[[hits]]
       
       }
     
