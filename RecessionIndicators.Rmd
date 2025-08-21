@@ -22,7 +22,7 @@ output:
 # ------------- Naming conventions ---------------------------------------------
 # Minimal change (keep . for field, use __ for operations)
 #
-# Reserve exactly one . to separate symbol vs. field (e.g., GSPC.Close,
+# Reserve exactly one . to separate symbol vs. field (e.g., X_GSPC.GSPC.Close,
 # GDP.Value).
 #
 # Use double underscore __ to separate higher-level tokens (operations,
@@ -98,8 +98,9 @@ source("utilSyms.r")
 ```{r RefreshFlag, echo=FALSE}
 
 # Define the source of the data (local or web) and whether to update the models.
-bRefresh = FALSE
+bRefresh = TRUE
 b.refresh.models = FALSE
+str.data.dir <- "C:/Users/Rainy/OneDrive/Documents/IssaquahDynamical/Datasets/2529RS0082_HistEconData"
 
 ```
 
@@ -112,7 +113,7 @@ ylimBackTest <- c(0, 60)
 dt.start.prediction <- as.Date("01/02/1962", "%d/%m/%Y")
 
 # Define trend limits
-d.GSPC.max = 5000
+d.GSPC.max = 7000
 d.Russell.max = 3500
 
 ```
@@ -1417,10 +1418,11 @@ list.options.names <- names(df.options)
 
 # Create the symbols table for the equity volumes
 str.symbol <- 'OCC/EquityVolume'
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
+
+# Update the symbols table    
+df.symbols <- symbols_append_row(
+  df.symbols,
+  list(
       string.symbol = str.symbol,
       string.source = "OCC",
       string.description =  "Equity Options Volume",
@@ -1435,8 +1437,8 @@ df.symbols <-
       nrows = 0,
       first_date = as.Date("1900-01-01"),
       last_date = as.Date("1900-01-01")
-    )
   )
+)
 
 # Process the options equity volume, create the zoo object
 str.safe.name <- tail(df.symbols,1)[["string.symbol_safe"]]
@@ -1476,15 +1478,16 @@ colnames(OCC_NonEquityVolume)[[1]] <- c(str.safe.name)
 ```{r SaveData, echo=FALSE}
 
 # Either save or load data depending on the flag
+out.file <- file.path(str.data.dir, "RecessionIndicator_Buffer.RData")
 
 if( bRefresh ){
   
-#  save.image("C:/Users/Brian/OneDrive/RecessionIndicator_Buffer.RData")
-  save.image("C:/Users/Rainy/OneDrive/RecessionIndicator_Buffer.RData")
+  save.image(out.file)
   
 }else{
-#  load("C:/Users/Brian/OneDrive//RecessionIndicator_Buffer.RData")
-  load("C:/Users/Rainy/OneDrive//RecessionIndicator_Buffer.RData")
+
+  load(out.file)
+  
 }
 
 ```
@@ -1553,24 +1556,53 @@ source("calcRecession.r")
 
 ```{r create.data.dictionary, echo=FALSE}
 
+## ---- Build data dictionary with descriptions from the symbols table ----
+
+# 1) Base dictionary
 df.dict <- data.frame(
-  column = names(df.data),
-  type   = sapply(df.data, function(x) paste(class(x), collapse = ",")),
-  n_missing = sapply(df.data, function(x) sum(is.na(x))),
-  example   = sapply(df.data, function(x) paste(head(na.omit(unique(x)), 3), collapse = ", ")),
+  column     = names(df.data),
+  type       = sapply(df.data, function(x) paste(class(x), collapse = ",")),
+  n_missing  = sapply(df.data, function(x) sum(is.na(x))),
+  example    = sapply(df.data, function(x) paste(head(na.omit(unique(x)), 3), collapse = ", ")),
   stringsAsFactors = FALSE
 )
 
-# TODO - this needs to be moved to the front of the file so it can be used for 
-# all the external data sources.
-str.data.dir <- "C:/Users/Rainy/OneDrive/Documents/IssaquahDynamical/Datasets/2529RS0082_HistEconData"
+# 2) Derive the *root* symbol from each df.data column:
+#    drop only the final ".<Field>" so "BRK.B.Adjusted" -> "BRK.B"
+root_symbol <- sub("\\.[^.]*$", "", df.dict$column)
+df.dict$string.symbol_root <- root_symbol
+
+# 3) Pick the symbols table and validate required columns
+sym_tbl <- if (exists("dt.symbols")) dt.symbols else if (exists("df.symbols")) df.symbols else NULL
+
+if (!is.null(sym_tbl)) {
+  needed <- c("string.symbol", "string.description")
+  missing <- setdiff(needed, names(sym_tbl))
+  if (length(missing)) {
+    stop("Symbols table is missing columns: ", paste(missing, collapse = ", "))
+  }
+
+  # 4) Build a name -> description map and attach descriptions
+  desc_map <- setNames(
+    as.character(sym_tbl$string.description),
+    as.character(sym_tbl$string.symbol)
+  )
+  df.dict$string.description <- unname(desc_map[df.dict$string.symbol_root])
+} else {
+  # No symbols table available; leave descriptions as NA
+  df.dict$string.description <- NA_character_
+}
+
+# ---- Write dictionary ----
 out.file <- file.path(str.data.dir, "data_dictionary.csv")
 
 write.csv(df.dict, out.file, row.names = TRUE)
 
+# Cleanup
 rm(df.dict)
 rm(str.data.dir)
 rm(out.file)
+
 
 ```
 
@@ -1617,9 +1649,9 @@ In this worksheet a model predicting the onset of recession was built. From the 
 
 ```{r bullet2, echo=FALSE}
 
-datay <- "GSPC.Volume"
-datay_aux <- "GSPC.Volume_mva050"
-datay_aux2 <- "GSPC.Volume_mva200"
+datay <- "X_GSPC.GSPC.Volume"
+datay_aux <- "GSG__Close__by__GSPC__Close__mva050"
+datay_aux2 <- "GSG__Close__by__GSPC__Close__mva200"
 ylim <- c(1000000000, 8000000000)
 dt.start = as.Date('2017-01-01')
 my.plot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
@@ -1627,30 +1659,41 @@ my.plot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbo
 my.plot <- my.plot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuote(datay_aux)), na.rm = TRUE)
 my.plot + geom_line(data=df.data, aes_string(x="date", y=datay_aux2, colour=shQuote(datay_aux2)), na.rm = TRUE)
 
+# Tidy memory
+rm(datay)
+rm(datay_aux)
+rm(datay_aux2)
+rm(ylim)
+rm(dt.start)
+
 ```
 
 ## Unemployment 
 
-- Headline unemployment (U-3) stands at `r paste(sprintf("%3.2f", tail(df.data$UNRATE,1)),"%", sep="")` (last updated on `r index(tail(UNRATE,1))`) which is near the 1-year average of `r paste(sprintf("%3.2f",mean(tail(df.data$UNRATE, 365))),"%",sep="")` and rising with respect to the low in the last twelve months of `r paste(sprintf("%3.2f", min(tail(UNRATE,12))),"%",sep="")`. Unlikely the rate will drop again. 
+- Headline unemployment (U-3) stands at `r paste(sprintf("%3.2f", tail(df.data$UNRATE.Value,1)),"%", sep="")` (last updated on `r index(tail(UNRATE,1))`) which is near the 1-year average of `r paste(sprintf("%3.2f",mean(tail(df.data$UNRATE.Value, 365))),"%",sep="")` and rising with respect to the low in the last twelve months of `r paste(sprintf("%3.2f", min(tail(UNRATE.Value,12))),"%",sep="")`. Unlikely the rate will drop again. 
 
 ```{r bullet3, echo=FALSE}
 
-datay <- "UNRATE"
-datay_aux <- "U6RATE"
+datay <- "UNRATE.Value"
 ylim <- c(2.5, 15)
 dt.start <- as.Date('2010-01-01')
 plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
             getPlotYLabel(df.symbols, datay), c(dt.start, Sys.Date()), ylim, TRUE)
 
+# Tidy memory
+rm(datay)
+rm(ylim)
+rm(dt.start)
+
 ```
 
 
 
-- Payrolls (BLS data, NSA) year-over-year stands at `r paste(sprintf("%3.2f", tail(df.data$PAYNSA_YoY,1)),"%", sep="")` which is above the 1-year average of `r paste(sprintf("%3.2f",mean(tail(df.data$PAYNSA_YoY, 365))),"%",sep="")` and falling with respect to the peak, in the last twelve months, of `r paste(sprintf("%3.2f", max(tail(df.data$PAYNSA_YoY,365))),"%",sep="")`.  
+- Payrolls (BLS data, NSA) year-over-year stands at `r paste(sprintf("%3.2f", tail(df.data$PAYNSA.Value__YoY,1)),"%", sep="")` which is above the 1-year average of `r paste(sprintf("%3.2f",mean(tail(df.data$PAYNSA.Value__YoY, 365))),"%",sep="")` and falling with respect to the peak, in the last twelve months, of `r paste(sprintf("%3.2f", max(tail(df.data$PAYNSA.Value__YoY,365))),"%",sep="")`.  
 
 ```{r bullet4, echo=FALSE}
 
-datay <- "PAYNSA_YoY"
+datay <- "PAYNSA.Value__YoY"
 ylim <- c(-12.5, 12.5)
 b.legend <- TRUE
 b.percentile <- FALSE
@@ -1658,33 +1701,54 @@ dt.start <- as.Date('2010-01-01')
 plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
             getPlotYLabel(df.symbols, datay), c(dt.start, Sys.Date()), ylim, b.legend, b.percentile)
 
+# Tidy memory
+rm(datay)
+rm(ylim)
+rm(b.legend)
+rm(b.percentile)
+rm(dt.start)
+
 ```
 
-- Jobless claims (ICSA data) year-over-year stands at `r paste(sprintf("%3.2f", tail(df.data$ICSA_YoY,1)),"%", sep="")` (last updated on `r index(tail(ICSA,1))`) which is in-line with the 1-year average of `r paste(sprintf("%3.2f", mean(tail(df.data$ICSA_YoY, 365))),"%",sep="")` and below the peak, in the last twelve months, of `r paste(sprintf("%3.2f", max(tail(df.data$ICSA_YoY,365))),"%",sep="")`. 
+- Jobless claims (ICSA data) year-over-year stands at `r paste(sprintf("%3.2f", tail(df.data$ICSA.Value__YoY,1)),"%", sep="")` (last updated on `r index(tail(ICSA,1))`) which is in-line with the 1-year average of `r paste(sprintf("%3.2f", mean(tail(df.data$ICSA.Value__YoY, 365))),"%",sep="")` and below the peak, in the last twelve months, of `r paste(sprintf("%3.2f", max(tail(df.data$ICSA.Value__YoY,365))),"%",sep="")`. 
 
 ```{r bullet5, echo=FALSE}
 
-datay <- "ICSA_YoY"
+datay <- "ICSA.Value__YoY"
 ylim <- c(-150, 120)
 dt.start <- as.Date('2010-01-01')
 b.percentile <- TRUE
 b.legend <- FALSE
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.legend, b.percentile)
 
+# Tidy memory
+rm(datay)
+rm(ylim)
+rm(b.legend)
+rm(b.percentile)
+rm(dt.start)
+   
 ```
 
 ## Personal Income
 
-- Real personal income year over year growth stands at `r paste(sprintf("%3.2f", tail(df.data$W875RX1_YoY,1)),"%", sep="")` (last updated on `r df.symbols[df.symbols$string.symbol == 'W875RX1_YoY',]$date.series.end`). This is below the recent peak of `r paste(sprintf("%3.2f", max(tail(df.data$W875RX1_YoY,365))),"%",sep="")`.
+- Real personal income year over year growth stands at `r paste(sprintf("%3.2f", tail(df.data$W875RX1.Value__YoY,1)),"%", sep="")` (last updated on `r df.symbols[df.symbols$string.symbol == 'W875RX1.Value__YoY',]$date.series.end`). This is below the recent peak of `r paste(sprintf("%3.2f", max(tail(df.data$W875RX1.Value__YoY,365))),"%",sep="")`.
 
 ```{r bullet6, echo=FALSE}
 
-datay <- "W875RX1_YoY"
+datay <- "W875RX1.Value__YoY"
 ylim <- c(-7.5, 9.5)
 dt.start <- as.Date('2010-01-01')
 b.legend <- FALSE
 b.percentile <- TRUE
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.legend, b.percentile)
+
+# Tidy memory
+rm(datay)
+rm(ylim)
+rm(b.legend)
+rm(b.percentile)
+rm(dt.start)
 
 ```
 
@@ -1696,11 +1760,18 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.legend, b.percent
 ```{r bullet7, echo=FALSE}
 
 datay <- "DGS10TODTB3"
-ylim <- c(-1.0, 2)
+ylim <- c(-2.0, 2)
 dt.start <- as.Date('2017-01-01')
 b.legend <- FALSE
 b.percentile <- TRUE
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.legend, b.percentile)
+
+# Tidy memory
+rm(datay)
+rm(ylim)
+rm(b.legend)
+rm(b.percentile)
+rm(dt.start)
 
 ```
 
@@ -1739,9 +1810,9 @@ kable(df.symbolsTrue, caption = "6-Month High") %>%
 Take a look at recent activity in the equities market. This section looks at the S&P 500 close value to the 50 day and 200 day simple moving average (SMA).
 
 ```{r SP500pltNear, echo=FALSE }
-datay <- "GSPC.Close"
-datay_aux <- "GSPC.Close_mva200"
-datay_aux2 <- "GSPC.Close_mva050"
+datay <- "X_GSPC.GSPC.Close"
+datay_aux <- "X_GSPC.GSPC.Close__mva200"
+datay_aux2 <- "X_GSPC.GSPC.Close__mva050"
 ylim <- c(2000, d.GSPC.max)
 myPlot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
             getPlotYLabel(df.symbols, datay), c(dt.recent, Sys.Date()), ylim, TRUE)
@@ -1853,7 +1924,7 @@ my.data[[1]]
 ```
 
 ```{r SP500pltNear.similar}
-datay <- "GSPC.Close"
+datay <- "X_GSPC.GSPC.Close"
 ylim <- c(2000, d.GSPC.max)
 my.data <- plotSimilarPeriods(df.data, dfRecession, df.symbols, datay, ylim, i.window = 60)
 my.data[[1]]
@@ -2571,9 +2642,9 @@ That is one spiky data series. Not sure there is a lot to help us here.
 ```{r SP500Vol_Smoott, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
 datay <- "GSPC.Volume"
-datay.aux <- "GSPC.Volume_mva050"
+datay.aux <- "GSG__Close__by__GSPC__Close__mva050"
 datay.title <- getPlotTitle(df.symbols, datay.aux, str.sep = "\n")
-datay.aux.1 <- "GSPC.Volume_mva200"
+datay.aux.1 <- "GSG__Close__by__GSPC__Close__mva200"
 datay.title.1 <- getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n")
 ylim <- c(100000, 8000000000)
 dt.start = as.Date('2010-01-01')
@@ -2886,7 +2957,7 @@ p1 <-
   )
 
 datay <- "GSPC.Open"
-datay_aux <- "GSPC.Close"
+datay_aux <- "X_GSPC.GSPC.Close"
 ylim <- c(1500, d.GSPC.max)
 p2 <-
   plotSingle(
@@ -2992,7 +3063,7 @@ p1 <-
     size = 1.0
   )
 
-datay <- "GSPC.Close"
+datay <- "X_GSPC.GSPC.Close"
 ylim <- c(1500, d.GSPC.max)
 p2 <-
   plotSingle(
@@ -3216,7 +3287,7 @@ p1 <-
   )
 
 datay <- "GSPC.Open"
-datay_aux <- "GSPC.Close"
+datay_aux <- "X_GSPC.GSPC.Close"
 ylim <- c(1500, d.GSPC.max)
 p2 <-
   plotSingle(
@@ -3276,7 +3347,7 @@ grid.arrange(p1,
 Unemployment rates will probably be useful, let's take a look at the U-3. The data is a little noisy so there is also a smoothed version plotted. There seems to be a relationship between the unemployment rate and the recessions, but it could be a lagging indicator.  This will be explored a little bit more later.
 
 ```{r unrate, echo=FALSE, fig.width = 9, fig.asp = 0.4}
-datay <- "UNRATE"
+datay <- "UNRATE.Value"
 datay_aux <- "UNRATE_mva365"
 ylim <- c(2, 15)
 b.legend <- TRUE
@@ -3311,7 +3382,7 @@ myPlot + geom_line(
 Suggested by Charlie and a Wealthian video the 12 month-MA might be helpful to look at.
 
 ```{r unrate.ma, echo=FALSE, fig.width = 9, fig.asp = 0.4}
-datay <- "UNRATE"
+datay <- "UNRATE.Value"
 datay_aux <- "UNRATE_mva365"
 ylim <- c(2, 15)
 b.legend <- TRUE
@@ -3441,7 +3512,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile)
 Historically the last two years of record low unemployment appear most similar to the 1971-1973 time frame. Just before inflation took off.
 
 ```{r unrate.similar, echo=FALSE}
-datay <- "UNRATE"
+datay <- "UNRATE.Value"
 ylim <- c(3.3, 4.5)
 i.window = 730
 my.data <- plotSimilarPeriods(df.data, dfRecession, df.symbols, datay, ylim, i.window)
@@ -3456,7 +3527,7 @@ Let's also take a look at the total unemployed, U-6. It continues to fall as the
 
 ```{r unrateU6, echo=FALSE}
 
-datay <- "UNRATE"
+datay <- "UNRATE.Value"
 datay_aux <- "U6RATE"
 ylim <- c(0, 25)
 myPlot <-
@@ -3501,7 +3572,7 @@ myPlot
 
 ```{r U3.GSPC, echo=FALSE, fig.width = 11, fig.asp = 0.2}
 datay <- "GDPSP500" 
-datay.aux <- "UNRATE" 
+datay.aux <- "UNRATE.Value" 
 datay.aux.scale <- 0.01;
 ylim <- c(0, 0.2)
 dtStart = as.Date('1998-01-01')
@@ -3561,7 +3632,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = TRUE
 Jobless claims have a seasonal component to them. One way to reduce this effect is to calculate year over year growth. That helps some, the peaks seem to be more closely aligned with the middle to end of recessions.
 
 ```{r initialclaimsYoy, echo=FALSE}
-datay <- "ICSA_YoY"
+datay <- "ICSA.Value__YoY"
 ylim <- c(-75, 4000)
 dt.start <- as.Date('1968-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = TRUE)
@@ -3572,7 +3643,7 @@ Take a closer look at recent data
 
 ```{r initialclaimsYoy.twoyears, echo=FALSE}
 
-datay <- "ICSA_YoY"
+datay <- "ICSA.Value__YoY"
 ylim <- c(-50, 4000)
 dt.start <- as.Date('2005-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = TRUE)
@@ -3723,7 +3794,7 @@ myPlot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuot
 
 ```{r PAYNSA_YoY, echo=FALSE}
 
-datay <- "PAYNSA_YoY"
+datay <- "PAYNSA.Value__YoY"
 ylim <- c(-17.5, 7.5)
 b.legend <- TRUE
 b.percentile <- TRUE
@@ -3734,7 +3805,7 @@ plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay),
 
 ```{r PAYNSA_YoY.Recent, echo=FALSE}
 
-datay <- "PAYNSA_YoY"
+datay <- "PAYNSA.Value__YoY"
 ylim <- c(-17.5, 7.5)
 b.legend <- TRUE
 b.percentile <- FALSE
@@ -4051,7 +4122,7 @@ plotSingleQuickModern(datay, ylim)
 Real personal income might have some seasonal variance, but it seems the year over year change tells the same story.
 
 ```{r rperincYoYplotex, echo=FALSE}
-datay <- "W875RX1_YoY"
+datay <- "W875RX1.Value__YoY"
 ylim <- c(-7.5, 7.5)
 b.percentile <- TRUE
 plotSingleQuickModern(datay, ylim, b.percentile)
@@ -5353,7 +5424,7 @@ p1 <-
   )
 
 datay <- "GSPC.Open"
-datay_aux <- "GSPC.Close"
+datay_aux <- "X_GSPC.GSPC.Close"
 ylim <- c(1500, d.GSPC.max)
 p2 <-
   plotSingle(
@@ -6944,7 +7015,7 @@ p1.vol <-
 
 
 datay <- "GSPC.Open"
-datay_aux <- "GSPC.Close"
+datay_aux <- "X_GSPC.GSPC.Close"
 ylim <- c(1500, d.GSPC.max )
 p2 <-
   plotSingle(
@@ -7700,7 +7771,7 @@ The relationship between personal savings and unemployment (U-3) can be better v
 
 ```{r corrU6PSVT, echo=FALSE}
 
-datax = "UNRATE"
+datax = "UNRATE.Value"
 datay = "PSAVERT"
 titlelabel <- paste(datay, " | ", datax)
 ylim <- c(0, 17.5)
@@ -7720,7 +7791,7 @@ The fit does not explain most of what is in the plot. Lets take a look at the ro
 
 ```{r rollingcor.unrate.u3.psavert, fig.width = 10, fig.asp = .62}
 
-datay1 <- "UNRATE"
+datay1 <- "UNRATE.Value"
 ylim1 <- c(2, 12)
 
 datay2 <- "PSAVERT"
@@ -9005,15 +9076,15 @@ In this case, I want and indicator that rises prior to a recession. It looks lik
 ```{r corplot1, echo=FALSE, fig.width=12,fig.height=12}
 # Correlation for the entire data set
   training.cor <- df.data[,c("RecInit","GSPC.Open_YoY","GSPC.Open_Log_SmoothDer",
-                            "UNRATE","UNRATE_SmoothDer","UNRATE_SmoothDer2", 
+                            "UNRATE.Value","UNRATE_SmoothDer","UNRATE_SmoothDer2", 
                             "INDPRO_YoY","INDPRO_SmoothDer","INDPRO_YoY",
                             "RSALESAGG_YoY","RSALESAGG_SmoothDer",  
-                            "W875RX1_SmoothDer", "W875RX1_YoY",
+                            "W875RX1_SmoothDer", "W875RX1.Value__YoY",
                             "BUSLOANS","BUSLOANS_Log","BUSLOANS_Log_Der","BUSLOANS_YoY",
                             "NCBDBIQ027S", "NCBDBIQ027S_Log","NCBDBIQ027S_Log_Der",
                             "TOTLNNSA","TOTLNNSA_YoY","DGS10TO1", "DGS1", "DGS10",
                             "ALTSALES","ALTSALES_YoY",
-                            "ICSA","ICSA_YoY", "ICSA_SmoothDer","GPDI","DCOILWTICO", 
+                            "ICSA","ICSA.Value__YoY", "ICSA_SmoothDer","GPDI","DCOILWTICO", 
                             "GDPSP500","IPMAN","HOUST_YoY", "GFDEBTN_YoY",
                             "FINRAMarginDebt_YoY","GSPC.Open_mva200_Norm")]
   rcorr.data <- rcorr(as.matrix(training.cor), type = "pearson")

@@ -146,7 +146,7 @@ calcFeatures <- function(df.data, df.symbols){
     # Debug, comment this line out
     #print(nrow(df.symbols))
     str.symbolYoY <- paste(str.symbol, "__YoY", sep = "")
-    print(paste(str.symbol,'-',str.symbolYoY, '-', str.description))
+    #print(paste(str.symbol,'-',str.symbolYoY, '-', str.description))
     #print( paste ("str.symbolYoY 1: ", str.symbolYoY))
     df.data[str.symbolYoY] <- CalcYoY(df.data, str.symbol, 365)
     #print( paste ("str.symbolYoY 2: ", str.symbolYoY))
