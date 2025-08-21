@@ -70,8 +70,9 @@ calcFeatures <- function(df.data, df.symbols){
 
   # Loop through each of the columns
   for (str.symbol in names(df.data)) {
-
-    print("----------Start loop----------------")
+    
+    # Debug line
+    #print("----------Start loop----------------")
     
     # Define series description, dates, and deal with root series symbols.
 
@@ -109,8 +110,8 @@ calcFeatures <- function(df.data, df.symbols){
       str.symbol.root <- safe_symbol_name ( str.symbol.root )
       
       # Debug line, this can be commented out
-      print(paste('str.symbol.root: ', str.symbol.root,
-                  ' | str.suffix: ',str.suffix))
+      #print(paste('str.symbol.root: ', str.symbol.root,
+      #            ' | str.suffix: ',str.suffix))
       
       # Retrieve the description for the root ticker symbol, enforcing 1 to 1
       # relationship
@@ -144,7 +145,7 @@ calcFeatures <- function(df.data, df.symbols){
     # Start with the year-over-year calculation
     # Debug, comment this line out
     #print(nrow(df.symbols))
-    str.symbolYoY <- paste(str.symbol, "_YoY", sep = "")
+    str.symbolYoY <- paste(str.symbol, "__YoY", sep = "")
     print(paste(str.symbol,'-',str.symbolYoY, '-', str.description))
     #print( paste ("str.symbolYoY 1: ", str.symbolYoY))
     df.data[str.symbolYoY] <- CalcYoY(df.data, str.symbol, 365)
@@ -173,7 +174,7 @@ calcFeatures <- function(df.data, df.symbols){
     # These series were added to help evaluate structured products and
     # answer the question, what is the probability of a decline over a period of
     # 4 and 5 years.
-    str.symbolYoY4 <- paste(str.symbol, "_YoY4", sep = "")
+    str.symbolYoY4 <- paste(str.symbol, "__YoY4", sep = "")
     df.data[str.symbolYoY4] <- CalcYoY(df.data, str.symbol, (365*4))
     #print(paste(str.symbol,'-',str.symbolYoY4, '-', str.description))
     df.symbols <-
@@ -199,7 +200,7 @@ calcFeatures <- function(df.data, df.symbols){
       )
     
     # The 5-year series
-    str.symbolYoY5 <- paste(str.symbol, "_YoY5", sep = "")
+    str.symbolYoY5 <- paste(str.symbol, "__YoY5", sep = "")
     df.data[str.symbolYoY5] <- CalcYoY(df.data, str.symbol, (365*5))
     #print(paste(str.symbol,'-',str.symbolYoY5, '-', str.description))
     df.symbols <-
@@ -226,7 +227,7 @@ calcFeatures <- function(df.data, df.symbols){
     
     # Smooth the series, kernel of 1-year
     strNewYLabel <- get_y_label_for_symbol(df.symbols, str.symbol.root)
-    str.symbolSmooth <- paste(str.symbol, "_Smooth", sep = "")
+    str.symbolSmooth <- paste(str.symbol, "__Smooth", sep = "")
     df.data[str.symbolSmooth] <-
       sgolayfilt(
         df.data[, str.symbol],
@@ -263,7 +264,7 @@ calcFeatures <- function(df.data, df.symbols){
     
     # Smooth the series, kernel of 15 days (inspired by RSI length)
     strNewYLabel <- get_y_label_for_symbol(df.symbols, str.symbol.root)
-    str.symbolSmooth <- paste(str.symbol, "_Smooth.short", sep = "")
+    str.symbolSmooth <- paste(str.symbol, "__Smooth__short", sep = "")
     df.data[str.symbolSmooth] <-
       sgolayfilt(
         df.data[, str.symbol],
@@ -300,7 +301,7 @@ calcFeatures <- function(df.data, df.symbols){
     
     # Smooth and derivative in one step
     strNewYLabel <- get_y_label_for_symbol(df.symbols, str.symbol.root)
-    str.symbolSmoothDer <- paste(str.symbol, "_SmoothDer", sep = "")
+    str.symbolSmoothDer <- paste(str.symbol, "__SmoothDer", sep = "")
     df.data[str.symbolSmoothDer] <-
       sgolayfilt(
         df.data[, str.symbol],
@@ -334,7 +335,7 @@ calcFeatures <- function(df.data, df.symbols){
     
     # Take the log
     strNewYLabel <- get_y_label_for_symbol(df.symbols, str.symbol.root)
-    str.symbolLog <- paste(str.symbol, "_Log", sep = "")
+    str.symbolLog <- paste(str.symbol, "__Log", sep = "")
     if (any(df.data[,str.symbol] <=0)){
       df.data[str.symbolLog] <- 0*(df.data[, str.symbol])
       print(paste(str.symbol," has zero or negative values. Log series will be zero.", sep=""))
@@ -371,7 +372,7 @@ calcFeatures <- function(df.data, df.symbols){
       stats::filter(x, rep(1 / n, n), sides = 1)
     }
     strNewYLabel <- get_y_label_for_symbol(df.symbols, str.symbol.root)
-    str.symbolMVA365 <- paste(str.symbol, "_mva365", sep = "")
+    str.symbolMVA365 <- paste(str.symbol, "__mva365", sep = "")
     df.data[str.symbolMVA365] <- mav(df.data[, str.symbol])
     df.data[, str.symbolMVA365] <-
       na.approx(df.data[, str.symbolMVA365], rule = 2)
@@ -403,7 +404,7 @@ calcFeatures <- function(df.data, df.symbols){
       stats::filter(x, rep(1 / n, n), sides = 1)
     }
     strNewYLabel <- get_y_label_for_symbol(df.symbols, str.symbol.root)
-    str.symbolMVA200 <- paste(str.symbol, "_mva200", sep = "")
+    str.symbolMVA200 <- paste(str.symbol, "__mva200", sep = "")
     df.data[str.symbolMVA200] <- mav(df.data[, str.symbol])
     df.data[, str.symbolMVA200] <-
       na.approx(df.data[, str.symbolMVA200], rule = 2)
@@ -433,7 +434,7 @@ calcFeatures <- function(df.data, df.symbols){
         
     # Add the 50 day moving average
     strNewYLabel <- get_y_label_for_symbol(df.symbols, str.symbol.root)
-    str.symbolMVA050 <- paste(str.symbol, "_mva050", sep = "")
+    str.symbolMVA050 <- paste(str.symbol, "__mva050", sep = "")
     df.data[str.symbolMVA050] <- mav(df.data[, str.symbol], n = 50)
     df.data[, str.symbolMVA050] <-
       na.approx(df.data[, str.symbolMVA050], rule = 2)

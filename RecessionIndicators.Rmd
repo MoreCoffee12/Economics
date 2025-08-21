@@ -98,7 +98,7 @@ source("utilSyms.r")
 ```{r RefreshFlag, echo=FALSE}
 
 # Define the source of the data (local or web) and whether to update the models.
-bRefresh = TRUE
+bRefresh = FALSE
 b.refresh.models = FALSE
 
 ```
