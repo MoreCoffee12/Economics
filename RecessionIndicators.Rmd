@@ -1820,21 +1820,35 @@ myPlot <- myPlot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, col
 myPlot <- myPlot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuote(datay_aux)), na.rm = TRUE)
 myPlot + geom_line(data=df.data, aes_string(x="date", y=datay_aux2, colour=shQuote(datay_aux2)), na.rm = TRUE)
 
+# Tidy memory
+rm(datay)
+rm(datay_aux)
+rm(datay_aux2)
+rm(ylim)
+
 ```
 
 This is a longer view for the S&P 500 trend.
 
 ```{r SP500MA200, echo=FALSE}
 
-datay <- "GSPC.Open"
+datay <- "X_GSPC.GSPC.Open"
+datay_aux <- "X_GSPC.GSPC.Open__mva200"
+datay_aux2 <- "X_GSPC.GSPC.Open__mva050"
 ylim <- c(0, d.GSPC.max)
-datay_aux <- "GSPC.Open_mva200"
-datay_aux2 <- "GSPC.Open_mva050"
-dtStart = as.Date('1980-01-01')
+dt.start = as.Date('1980-01-01')
 myPlot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
-            getPlotYLabel(df.symbols, datay), c(dtStart, Sys.Date()), ylim, TRUE)
+            getPlotYLabel(df.symbols, datay), c(dt.start, Sys.Date()), ylim, TRUE)
 myPlot <- myPlot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuote(datay_aux)), na.rm = TRUE)
 myPlot + geom_line(data=df.data, aes_string(x="date", y=datay_aux2, colour=shQuote(datay_aux2)), na.rm = TRUE)
+
+# Tidy memory
+rm(datay)
+rm(datay_aux)
+rm(datay_aux2)
+rm(ylim)
+rm(dt.start)
+
 
 ```
 
@@ -2745,7 +2759,7 @@ myPlot + geom_line(
 datay1 <- "RLG.Open"
 ylim1 <- c(0, d.Russell.max )
 
-datay2 <- "GSPC.Open"
+datay2 <- "X_GSPC.GSPC.Open"
 ylim2 <- c(0, d.GSPC.max)
 
 dtStart <- as.Date("1jan2003","%d%b%Y")
@@ -2956,7 +2970,7 @@ p1 <-
     size = 1.0
   )
 
-datay <- "GSPC.Open"
+datay <- "X_GSPC.GSPC.Open"
 datay_aux <- "X_GSPC.GSPC.Close"
 ylim <- c(1500, d.GSPC.max)
 p2 <-
@@ -3214,7 +3228,7 @@ There
 datay1 <- "VIXCLS"
 ylim1 <- c(0, 80)
 
-datay2 <- "GSPC.Open"
+datay2 <- "X_GSPC.GSPC.Open"
 ylim2 <- c(1000, d.GSPC.max)
 
 dtStart <-  as.Date('2005-01-01')
@@ -3286,7 +3300,7 @@ p1 <-
     size = 1.0
   )
 
-datay <- "GSPC.Open"
+datay <- "X_GSPC.GSPC.Open"
 datay_aux <- "X_GSPC.GSPC.Close"
 ylim <- c(1500, d.GSPC.max)
 p2 <-
@@ -5423,7 +5437,7 @@ p1 <-
     size = 1.0
   )
 
-datay <- "GSPC.Open"
+datay <- "X_GSPC.GSPC.Open"
 datay_aux <- "X_GSPC.GSPC.Close"
 ylim <- c(1500, d.GSPC.max)
 p2 <-
@@ -7014,7 +7028,7 @@ p1.vol <-
   )
 
 
-datay <- "GSPC.Open"
+datay <- "X_GSPC.GSPC.Open"
 datay_aux <- "X_GSPC.GSPC.Close"
 ylim <- c(1500, d.GSPC.max )
 p2 <-
@@ -9068,7 +9082,7 @@ GDP, normalized first by CPI and then by population, looks like it migh correlat
 
 ## Financials
 
-Let's see where we are so far. The correlation plot confirms some of the speculation above. The S&P 500 (GSPC.Open) is well correlated with industrial production (INDPRO), business loans (BUSLOANS), total loans (TOTLNNSA) , and nonfinancial corporate business debt (NCBDBIQ027S). 
+Let's see where we are so far. The correlation plot confirms some of the speculation above. The S&P 500 (X_GSPC.GSPC.Open) is well correlated with industrial production (INDPRO), business loans (BUSLOANS), total loans (TOTLNNSA) , and nonfinancial corporate business debt (NCBDBIQ027S). 
 
 In this case, I want and indicator that rises prior to a recession. It looks like the unemployment rate (UNRATE), real personal income (W875RX1), and the yield curve (DGS10TO1) are all inversely correlated with the recession initiation indicator.
 

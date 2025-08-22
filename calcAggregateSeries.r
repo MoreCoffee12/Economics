@@ -2349,6 +2349,7 @@ if ( require_columns(df.data, c("X_GSPC.GSPC.Close", "MDY.Close") ) ){
   
   # Add the aggregate to the main data frame
   str.symbol.new <- "GSPC__CloseBYMDY__Close"
+  df.data[[str.symbol.new]] <- 
     ( df.data$X_GSPC.GSPC.Close / df.data$MDY.Close )
   
   # Update the symbols table    

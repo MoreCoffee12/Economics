@@ -695,11 +695,11 @@ if ( require_columns(df.data, c("GPDI_Log") ) ){
 
 
 # Create the ratio of S&P 500 close to GDP
-if ( require_columns(df.data, c("GSPC.Close", "GDP") ) ){
+if ( require_columns(df.data, c("X_GSPC.GSPC.Close", "GDP.Value") ) ){
 
   # Define the new symbol and make the calculation
   str.symbol.new <- "GDPSP500"
-  df.data[[str.symbol.new]] <- ( df.data$GSPC.Close / df.data$GDP )
+  df.data[[str.symbol.new]] <- ( df.data$X_GSPC.GSPC.Close / df.data$GDP.Value )
   df.data[[str.symbol.new]] <- na.approx(df.data[[str.symbol.new]], rule = 2)
   
   # Update the symbols table    
@@ -714,10 +714,10 @@ if ( require_columns(df.data, c("GSPC.Close", "GDP") ) ){
       Max030 = FALSE,
       Max180 = FALSE,
       date.series.start = as.Date(max(c(
-        index(GSPC[1]), index(GDP[1])
+        index(X_GSPC[1]), index(GDP[1])
       ))) ,
       date.series.end = as.Date(min(c(
-        index(tail(GSPC, 1)), index(tail(GDP, 1))
+        index(tail(X_GSPC, 1)), index(tail(GDP, 1))
       ))),
       string.symbol_safe = safe_symbol_name(str.symbol.new),
       string.object_name = safe_symbol_name(str.symbol.new)
@@ -731,11 +731,11 @@ if ( require_columns(df.data, c("GSPC.Close", "GDP") ) ){
 }
 
 # Create the ratio of Russell 2000 close to GDP
-if ( require_columns(df.data, c("RLG.Close", "GDP") ) ){
+if ( require_columns(df.data, c("X_RLG.RLG.Close", "GDP.Value") ) ){
 
   # Define the new symbol and make the calculation
-  str.symbol.new <- "GDPSP500"
-  df.data[[str.symbol.new]] <- ( df.data$RLG.Close / df.data$GDP )
+  str.symbol.new <- "RLGSP500"
+  df.data[[str.symbol.new]] <- ( df.data$X_RLG.RLG.Close / df.data$GDP.Value )
   df.data[[str.symbol.new]] <- na.approx(df.data[[str.symbol.new]], rule = 2)
   
   # Update the symbols table    
@@ -750,10 +750,10 @@ if ( require_columns(df.data, c("RLG.Close", "GDP") ) ){
       Max030 = FALSE,
       Max180 = FALSE,
       date.series.start = as.Date(max(c(
-        index(RLG[1]), index(GDP[1])
+        index(X_RLG[1]), index(GDP[1])
       ))) ,
       date.series.end = as.Date(min(c(
-        index(tail(RLG, 1)), index(tail(GDP, 1))
+        index(tail(X_RLG, 1)), index(tail(GDP, 1))
       ))),
       string.symbol_safe = safe_symbol_name(str.symbol.new),
       string.object_name = safe_symbol_name(str.symbol.new)
@@ -767,11 +767,12 @@ if ( require_columns(df.data, c("RLG.Close", "GDP") ) ){
 }
 
 # Create the ratio of Dow Jones industrial average close to GDP
-if ( require_columns(df.data, c("DJI.Close", "GDP") ) ){
+list.sym <- c("X_DJI.DJI.Close", "GDP.Value")
+if ( require_columns(df.data, list.sym  ) ){
   
   # Define the new symbol and make the calculation
   str.symbol.new <- "DJISP500"
-  df.data[[str.symbol.new]] <- df.data$DJI.Close / df.data$GDP
+  df.data[[str.symbol.new]] <- df.data[[list.sym[[1]]]] / df.data[[list.sym[[2]]]]
   df.data[[str.symbol.new]] <- na.approx(df.data[[str.symbol.new]], rule = 2)
 
   # Update the symbols table    
@@ -786,10 +787,10 @@ if ( require_columns(df.data, c("DJI.Close", "GDP") ) ){
       Max030 = FALSE,
       Max180 = FALSE,
       date.series.start = as.Date(max(c(
-        index(DJI[1]), index(GDP[1])
+        index(X_DJI[1]), index(GDP[1])
       ))) ,
       date.series.end = as.Date(min(c(
-        index(tail(DJI, 1)), index(tail(GDP, 1))
+        index(tail(X_DJI, 1)), index(tail(GDP, 1))
       ))),
       string.symbol_safe = safe_symbol_name(str.symbol.new),
       string.object_name = safe_symbol_name(str.symbol.new)
