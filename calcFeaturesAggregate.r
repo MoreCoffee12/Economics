@@ -132,12 +132,12 @@ if ( require_columns(df.data, c("OPHNFB_YoY", "DGS1") ) ){
 }
 
 # S&P 500 Open divided by the 200 day SMA
-if ( require_columns(df.data, c("GSPC.Open", "GSPC.Open_mva200") ) ){
+if ( require_columns(df.data, c("X_GSPC.GSPC.Open", "X_GSPC.GSPC.Open__mva200") ) ){
 
   # Define the new symbol and make the calculation
   str.symbol.new <- "GSPC__Open__mva200__Norm"
   df.data[[str.symbol.new]] <- 
-    ( 100.0  * ( df.data$GSPC.Open / df.data$GSPC.Open_mva200 ) )
+    ( 100.0  * ( df.data$X_GSPC.GSPC.Open / df.data$X_GSPC.GSPC.Open__mva200 ) )
 
   # Update the symbols table    
   df.symbols <- symbols_append_row(
@@ -170,12 +170,13 @@ if ( require_columns(df.data, c("GSPC.Open", "GSPC.Open_mva200") ) ){
 }
 
 # S&P 200 day SMA minus 50 day SMA
-if ( require_columns(df.data, c("GSPC.Open_mva050", "GSPC.Open_mva200") ) ){
+lst.syms <- c("X_GSPC.GSPC.Open__mva050", "X_GSPC.GSPC.Open__mva200")
+if ( require_columns(df.data, lst.syms ) ){
 
   # Define the new symbol and make the calculation
-  str.symbol.new <- "GSPC__Open__mva050__mva200"
+  str.symbol.new <- "GSPC__Open__mva050__minus__mva200"
   df.data[[str.symbol.new]] <- 
-    df.data$GSPC.Open_mva050 - df.data$GSPC.Open_mva200
+    df.data[[lst.syms[[1]]]] - df.data[[lst.syms[[2]]]]
 
   # Update the symbols table    
   df.symbols <- symbols_append_row(
@@ -188,13 +189,13 @@ if ( require_columns(df.data, c("GSPC.Open_mva050", "GSPC.Open_mva200") ) ){
       float.expense.ratio = -1.00,
       date.series.start = as.Date(max(
         c(
-          df.symbols$date.series.start[df.symbols$string.symbol == 'GSPC.Open_mva050'],
-          df.symbols$date.series.start[df.symbols$string.symbol == 'GSPC.Open_mva200']
+          df.symbols$date.series.start[df.symbols$string.symbol == lst.syms[[1]]],
+          df.symbols$date.series.start[df.symbols$string.symbol == lst.syms[[2]]]
         )
       )) ,
       date.series.end = as.Date(min(
-        c(df.symbols$date.series.end[df.symbols$string.symbol == 'GSPC.Open_mva050'],
-          df.symbols$date.series.end[df.symbols$string.symbol == 'GSPC.Open_mva200'])
+        c(df.symbols$date.series.end[df.symbols$string.symbol == lst.syms[[1]]],
+          df.symbols$date.series.end[df.symbols$string.symbol == lst.syms[[2]]])
       )),
       string.symbol_safe = safe_symbol_name(str.symbol.new),
       string.object_name = safe_symbol_name(str.symbol.new)
@@ -206,6 +207,9 @@ if ( require_columns(df.data, c("GSPC.Open_mva050", "GSPC.Open_mva200") ) ){
   rm(str.symbol.new)
   
 }
+
+# Tidy memory
+rm(lst.syms)
 
 # Trading signal based on S&P 50 day SMA minus 200 day SMA
 if ( require_columns(df.data, c("GSPC.Open_mva050_mva200") ) ){

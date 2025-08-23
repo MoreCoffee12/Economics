@@ -1949,7 +1949,7 @@ Look at how the different segments of the market move
 
 ```{r GSPCByMDY}
 
-datay <- "GSPC.CloseBYMDY.Close_YoY"
+datay <- "GSPC__CloseBYMDY__Close__YoY"
 ylim <- c(-50, 75)
 dtStart = as.Date('1980-01-01')
 plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
@@ -1959,7 +1959,7 @@ plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay),
 
 ```{r GSPCByMDY.yoy}
 
-datay <- "GSPC.CloseBYMDY.Close"
+datay <- "GSPC__CloseBYMDY__Close"
 ylim <- c(0, 20)
 dtStart = as.Date('1980-01-01')
 plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
@@ -1973,7 +1973,7 @@ Look at moving average relationship by dividing the S&P 500 open price by the 20
 
 ```{r SP500MA200Norm}
 
-datay <- "GSPC.Open_mva200_Norm"
+datay <- "GSPC__Open__mva200__Norm"
 ylim <- c(50, 125)
 dt.start = as.Date('2008-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
@@ -1986,7 +1986,7 @@ Look at the 50 DMA versus 200 DMA, often used as a technical indicator of market
 
 ```{r SP500MA050MinusMA200}
 
-datay <- "GSPC.Open_mva050_mva200"
+datay <- "GSPC__Open__mva050__minus__mva200"
 ylim <- c(-300, 300)
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStartBackTest)
 
