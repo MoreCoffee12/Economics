@@ -1058,23 +1058,25 @@ calcRollingCorr <-
     date.temp.2 <-
       df.symbols[grep(paste("^", datay2, "$", sep = ""), df.symbols$string.symbol),]$date.series.end
     date.temp.end <- min(date.temp.1, date.temp.2)
-    
-    # Update symboles meta data
-    df.symbols <-
-      rbind(
-        df.symbols,
-        data.frame(
-          string.symbol = corrName,
-          string.source = "calc",
-          string.description = paste("Rolling Correlation ", wIn, " Day Window"),
-          string.label.y = "-" ,
-          float.expense.ratio = -1.00,
-          Max030 = FALSE,
-          Max180 = FALSE,
-          date.series.start = date.temp,
-          date.series.end = date.temp.end
-        )
+
+    # Update the symbols table    
+    df.symbols <- symbols_append_row(
+      df.symbols,
+      list(
+        string.symbol = corrName,
+        string.source = "calc",
+        string.description = paste("Rolling Correlation ", wIn, " Day Window"),
+        string.label.y = "-" ,
+        float.expense.ratio = -1.00,
+        Max030 = FALSE,
+        Max180 = FALSE,
+        date.series.start = date.temp,
+        date.series.end = date.temp.end,
+        string.symbol_safe = safe_symbol_name(corrName),
+        string.object_name = safe_symbol_name(corrName)
+        
       )
+    ) 
     
     # Return the updated dataframes to the global enviro
     assign('df.data', datadf, envir = .GlobalEnv)

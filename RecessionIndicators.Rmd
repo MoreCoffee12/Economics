@@ -114,7 +114,7 @@ dt.start.prediction <- as.Date("01/02/1962", "%d/%m/%Y")
 
 # Define trend limits
 d.GSPC.max = 7000
-d.Russell.max = 3500
+d.Russell.max = 5000
 
 ```
 
@@ -1644,7 +1644,7 @@ In this worksheet a model predicting the onset of recession was built. From the 
 # my.plot + geom_line(data=df.data, aes_string(x="date", y=datay.aux, colour=shQuote(datay.aux)), na.rm = TRUE)
 ```
 
-- S&P 500 Volume, last updated on `r index(tail(GSPC,1))`, is `r getTrendString(df.data, 'GSPC.Volume', 365)` over the last year and `r getTrendString(df.data, 'GSPC.Volume', 30)` over the last month. 
+- S&P 500 Volume, last updated on `r index(tail(GSPC,1))`, is `r getTrendString(df.data, 'X_GSPC.GSPC.Volume', 365)` over the last year and `r getTrendString(df.data, 'X_GSPC.GSPC.Volume', 30)` over the last month. 
 
 
 ```{r bullet2, echo=FALSE}
@@ -2441,7 +2441,7 @@ Take a longer look back at as-reported and operating earnings
 
 datay <- "AREARNINGSTTM"
 datay.aux.1 <- "OPEARNINGSTTM"
-ylim <- c(0, 200)
+ylim <- c(0, 300)
 dt.start <- as.Date('1990-01-01')
 my.plot <-
   plotSingle(
@@ -2470,6 +2470,12 @@ my.plot <-
   )
 
 my.plot
+
+# Tidy up memory
+rm(datay)
+rm(datay.aux.1)
+rm(ylim)
+rm(dt.start )
 
 ```
 
@@ -2584,10 +2590,15 @@ The series peaks in the middle of a bull market.
 
 ```{r PRS88003193, echo=FALSE }
 
-datay <- "PRS88003193"
-ylim <- c(10, 120)
+datay <- "PRS88003193.Value"
+ylim <- c(10, 200)
 dt.start = as.Date('1948-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = FALSE)
+
+# Free up memory
+rm(datay)
+rm(ylim)
+rm(dt.start)
 
 ```
 
@@ -2681,7 +2692,7 @@ The log of the S&P volume has some interesting patterns, but nothing that seems 
 
 ```{r SP500Vol, echo=FALSE}
 
-datay <- "GSPC.Volume_Log"
+datay <- "X_GSPC.GSPC.Volume__Log"
 ylim <- c(12, 23)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 #myPlot + geom_rect(data=dfRecession,  aes(xmin=initStart, xmax=initEnd, ymin=-Inf, ymax=Inf),
@@ -2694,7 +2705,7 @@ That is one spiky data series. Not sure there is a lot to help us here.
 
 ```{r SP500Vol_Smoott, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
-datay <- "GSPC.Volume"
+datay <- "X_GSPC.GSPC.Volume"
 datay.aux <- "GSG__Close__by__GSPC__Close__mva050"
 datay.title <- getPlotTitle(df.symbols, datay.aux, str.sep = "\n")
 datay.aux.1 <- "GSG__Close__by__GSPC__Close__mva200"
@@ -2721,7 +2732,7 @@ my.plot <-
     data = df.data,
     aes_string(
       x = "date",
-      y = datay_aux,
+      y = datay.aux,
       colour = shQuote(datay.title)
     ),
     na.rm = TRUE
@@ -2736,6 +2747,15 @@ my.plot + geom_line(
   na.rm = TRUE
 )
 
+# Free up memory
+rm(datay)
+rm(datay.aux)
+rm(datay.title)
+rm(datay.aux.1)
+rm(datay.title.1)
+rm(ylim)
+rm(dt.start)
+
 ```
 
 ### Russell 2000
@@ -2743,10 +2763,10 @@ my.plot + geom_line(
 Take a look at recent activity in the small cap market.
 
 ```{r Russel, echo=FALSE, fig.width = 9, fig.asp = 0.4 }
-datay <- "RLG.Open"
-datay.aux <- "RLG.Open_mva200"
+datay <- "X_RLG.RLG.Open"
+datay.aux <- "X_RLG.RLG.Open__mva200"
 datay.title <- getPlotTitle(df.symbols, datay.aux, str.sep = "\n")
-datay.aux.1 <- "RLG.Open_mva050"
+datay.aux.1 <- "X_RLG.RLG.Open__mva050"
 datay.title.1 <- getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n")
 ylim <- c(1000, d.Russell.max)
 myPlot <-
@@ -2784,6 +2804,13 @@ myPlot + geom_line(
   na.rm = TRUE
 )
 
+# Free up memory
+rm(datay)
+rm(datay.aux)
+rm(datay.title)
+rm(datay.aux.1)
+rm(ylim)
+
 ```
 
 ### S&P 500 to Rusell 2000
@@ -2795,7 +2822,7 @@ myPlot + geom_line(
 
 ```{r rollingcorS&PtoRussell, echo=FALSE, fig.width = 10, fig.asp = .62}
 
-datay1 <- "RLG.Open"
+datay1 <- "X_RLG.RLG.Open"
 ylim1 <- c(0, d.Russell.max )
 
 datay2 <- "X_GSPC.GSPC.Open"
@@ -2806,17 +2833,24 @@ dtStart <- as.Date("1jan2003","%d%b%Y")
 w <- 30
 corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, datay2, ylim2, w, dtStart)
 
+# Tidy up memory
+rm(w)
+rm(datay1)
+rm(ylim1)
+rm(datay2)
+rm(ylim2)
+
 ```
 
 ### S&P 500 to MDY (Mid-cap) 2000 Correlation
 
 ```{r rollingcorS&PtoMDY, fig.width = 10, fig.asp = .62}
 
-datay1 <- "RLG.Open"
-ylim1 <- c(0, 2500)
+datay1 <- "X_RLG.RLG.Open"
+ylim1 <- c(0, d.Russell.max)
 
 datay2 <- "MDY.Open"
-ylim2 <- c(0, 500)
+ylim2 <- c(0, 1000)
 
 dtStart <- as.Date("1jan2003","%d%b%Y")
 
@@ -2831,6 +2865,13 @@ corrName <-
                   ylim2,
                   w,
                   dtStart)
+
+# Tidy up memory
+rm(w)
+rm(datay1)
+rm(ylim1)
+rm(datay2)
+rm(ylim2)
 
 ```
 
