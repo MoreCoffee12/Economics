@@ -2900,9 +2900,13 @@ It tends to creep up when there is a frenzy in the stock market.
 
 ```{r NYSEMargin }
 
-datay <- "FINRAMarginDebt_Log"
+datay <- "FINRA_MarginDebt__Log"
 ylim <- c(5, 15)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
+
+# Clean up memory
+rm(datay)
+rm(ylim)
 
 ```
 
@@ -2910,10 +2914,15 @@ Take a close look at recent activity
 
 ```{r FINRA.margin.debt.nearterm, echo=FALSE}
 
-datay <- "FINRAMarginDebt"
+datay <- "FINRA_MarginDebt"
 ylim <- c(100000, 1000000)
 dt.start <- as.Date('2000-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
+
+# Tidy up memory
+rm(datay)
+rm(ylim)
+rm(dt.start)
 
 ```
 
@@ -2921,10 +2930,15 @@ Sometimes it is more helpful to view year over year growth.
 
 ```{r NYSEMargin_Yoy, echo=FALSE }
 
-datay <- "FINRAMarginDebt_YoY"
+datay <- "FINRA_MarginDebt__YoY"
 ylim <- c(-50, 100)
 dt.start <- as.Date('1960-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = TRUE)
+
+# Tidy up memory
+rm(datay)
+rm(ylim)
+rm(dt.start)
 
 ```
 
@@ -2932,10 +2946,15 @@ More near-term trend.
 
 ```{r NYSEMargin_Yoy.nearterm, echo=FALSE }
 
-datay <- "FINRAMarginDebt_YoY"
+datay <- "FINRA_MarginDebt__YoY"
 ylim <- c(-100, 75)
 dt.start <- as.Date('2000-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
+
+# Tidy up memory
+rm(datay)
+rm(ylim)
+rm(dt.start)
 
 ```
 
@@ -2944,15 +2963,15 @@ Take a look at some of the correlations
 
 ```{r rollingcor.FINRAMarginDebt_YoY.by.GSPC.Close_YoY, fig.width = 10, fig.asp = .62}
 
-datay1 <- "FINRAMarginDebt_YoY"
+datay1 <- "FINRA_MarginDebt__YoY"
 ylim1 <- c(-100, 100)
 
-datay2 <- "GSPC.Close_YoY"
+datay2 <- "X_GSPC.GSPC.Close__YoY"
 ylim2 <- c(-100, 100)
 
 dtStart <- as.Date("1jan1995","%d%b%Y")
 
-w <- 90
+w <- 200
 corrName <-
   calcRollingCorr(dfRecession,
                   df.data,
@@ -2963,6 +2982,14 @@ corrName <-
                   ylim2,
                   w,
                   dtStart)
+
+# Tidy up memory
+rm(datay1)
+rm(ylim1)
+rm(datay2)
+rm(ylim2)
+rm(dtStart)
+rm(w)
 
 ```
 
@@ -2970,15 +2997,15 @@ Comparison to the Russell 2000
 
 ```{r rollingcor.FINRAMarginDebt_YoY.by.RLG.Close_YoY, fig.width = 10, fig.asp = .62}
 
-datay1 <- "FINRAMarginDebt_YoY"
+datay1 <- "FINRA_MarginDebt__YoY"
 ylim1 <- c(-100, 100)
 
-datay2 <- "RLG.Close_YoY"
+datay2 <- "X_RLG.RLG.Close__YoY"
 ylim2 <- c(-100, 100)
 
 dtStart <- as.Date("1jan1995","%d%b%Y")
 
-w <- 90
+w <- 200
 corrName <-
   calcRollingCorr(dfRecession,
                   df.data,
@@ -2989,6 +3016,14 @@ corrName <-
                   ylim2,
                   w,
                   dtStart)
+
+# Tidy up memory
+rm(datay1)
+rm(ylim1)
+rm(datay2)
+rm(ylim2)
+rm(dtStart)
+rm(w)
 
 ```
 
@@ -2998,17 +3033,27 @@ See what is happening with the options volumes for equities. (From: https://www.
 
 ```{r OCC.equity.volume, echo=FALSE, fig.width = 7, fig.asp = 1.1 }
 
-datay <- "OCCEquityVolume"
+datay <- "OCC_EquityVolume"
 ylim <- c(0, 35)
 dt.start <- as.Date('2016-01-01')
 b.percentile <- TRUE
 p1 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile)
 
-datay <- "OCCNonEquityVolume"
+datay <- "OCC_NonEquityVolume"
 ylim <- c(0, 7.5)
 p2 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile)
 
 grid.arrange(p1, p2, ncol = 1, top = "Options Volumes")
+
+
+# Tidy up memory
+rm(datay)
+rm(ylim)
+rm(dt.start)
+rm(b.percentile)
+rm(p1)
+rm(p2)
+
 
 ```
 
@@ -3017,7 +3062,7 @@ Looks like options on non-equity co-occurs with peaks/troughs?.
 ```{r OCC.equity.volume.to.market, echo=FALSE, fig.width = 7, fig.asp = 1.1 }
 
 
-datay <- "OCCNonEquityVolume"
+datay <- "OCC_NonEquityVolume"
 ylim <- c(0, 7.5)
 dtStart = as.Date('2015-01-01')
 p1 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
@@ -3112,7 +3157,7 @@ Take a look at some of the indications of market volatility
 
 ```{r VIX, echo=FALSE }
 
-datay <- "VIXCLS"
+datay <- "VIXCLS.Value"
 ylim <- c(10, 80)
 dt.start <- as.Date('1990-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
@@ -3124,7 +3169,7 @@ As markets become complacent (low VIX) and high values, peaks often occur.
 ```{r VIX_near, echo=FALSE, fig.width = 7, fig.asp = 1.1 }
 
 
-datay <- "VIXCLS"
+datay <- "VIXCLS.Value"
 ylim <- c(0, 80)
 dtStart = as.Date('2015-01-01')
 p1 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = TRUE)
@@ -3215,7 +3260,7 @@ Compare the VIX to some of the ETF's out there.
 ```{r VIX.VXX, echo=FALSE, fig.width = 7, fig.asp = 1.1 }
 
 
-datay <- "VIXCLS"
+datay <- "VIXCLS.Value"
 ylim <- c(0, 80)
 dtStart = as.Date('2015-01-01')
 p1 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = TRUE)
@@ -3305,7 +3350,7 @@ There
 
 ```{r VIXtoGSPCCorr, echo = FALSE, fig.width = 7, fig.asp = 1.1}
 
-datay1 <- "VIXCLS"
+datay1 <- "VIXCLS.Value"
 ylim1 <- c(0, 80)
 
 datay2 <- "X_GSPC.GSPC.Open"
@@ -3322,7 +3367,7 @@ Not much predictive in VIX, take a quick look at the smoothed derivative.
 
 ```{r VIX_SmoothDer, echo=FALSE }
 
-datay <- "VIXCLS_Log"
+datay <- "VIXCLS.Value__Log"
 ylim <- c(2, 5)
 dt.start <- as.Date('1990-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
@@ -3335,7 +3380,7 @@ Daily changes in the S&P should correlate well with the VIX.
 
 ```{r GSPC.DailySwing, echo=FALSE }
 
-datay <- "GSPC.DailySwing"
+datay <- "GSPC__DailySwing"
 ylim <- c(0, 0.12)
 dt.start <- as.Date('1990-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
@@ -3347,7 +3392,7 @@ More of a correlating series than a predictor.
 ```{r GSPC.DailySwing.near, echo=FALSE, fig.width = 7, fig.asp = 1.1 }
 
 
-datay <- "GSPC.DailySwing"
+datay <- "GSPC__DailySwing"
 ylim <- c(0, 0.10)
 dtStart = as.Date('2015-01-01')
 p1 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
@@ -3442,7 +3487,7 @@ Unemployment rates will probably be useful, let's take a look at the U-3. The da
 
 ```{r unrate, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 datay <- "UNRATE.Value"
-datay_aux <- "UNRATE_mva365"
+datay_aux <- "UNRATE.Value__mva365"
 ylim <- c(2, 15)
 b.legend <- TRUE
 b.percentile <- TRUE
@@ -3477,7 +3522,7 @@ Suggested by Charlie and a Wealthian video the 12 month-MA might be helpful to l
 
 ```{r unrate.ma, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 datay <- "UNRATE.Value"
-datay_aux <- "UNRATE_mva365"
+datay_aux <- "UNRATE.Value__mva365"
 ylim <- c(2, 15)
 b.legend <- TRUE
 b.percentile <- TRUE
@@ -3514,7 +3559,7 @@ Looking at the unemployment rate, the eye is drawn to the rise and fall of the d
 
 ```{r UnrateDer, echo=FALSE}
 
-datay = "UNRATE_SmoothDer"
+datay = "UNRATE.Value__SmoothDer"
 ylim <- c(-0.02, 0.02)
 b.percentile <- TRUE
 dt.start <- as.Date('1950-01-01')
@@ -3532,12 +3577,17 @@ https://fred.stlouisfed.org/series/CCNSA
 
 ```{r CCSA, echo=FALSE}
 
-datay <- "CCSA"
+datay <- "CCSA.Value"
 ylim <- c(0, 28000000)
-datay.aux <- "CCSA"
 b.percentile <- TRUE
 dt.start <- as.Date('1967-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile)
+
+# Tidy up
+rm(datay)
+rm(ylim)
+rm(b.percentile)
+rm(dt.start)
 
 ```
 
@@ -3546,12 +3596,17 @@ A good measure of how much unemployment is growing
 
 ```{r CCSA.close, echo=FALSE}
 
-datay <- "CCSA"
+datay <- "CCSA.Value"
 ylim <- c(0, 28000000)
-datay.aux <- "CCSA"
 b.percentile <- TRUE
 dt.start <- as.Date('2009-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile)
+
+# Tidy up
+rm(datay)
+rm(ylim)
+rm(b.percentile)
+rm(dt.start)
 
 ```
 
@@ -3565,11 +3620,17 @@ https://fred.stlouisfed.org/series/ICSA
 
 ```{r ICSA, echo=FALSE}
 
-datay <- "ICSA"
+datay <- "ICSA.Value"
 ylim <- c(0, 2800000)
 b.percentile <- TRUE
 dt.start <- as.Date('1967-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile)
+
+# Tidy up
+rm(datay)
+rm(ylim)
+rm(b.percentile)
+rm(dt.start)
 
 ```
 
@@ -3580,27 +3641,19 @@ Both the headline unemployment and U-6 number changes are similar. During the up
 
 ```{r UnrateDer.yoy, echo=FALSE}
 
-datay <- "UNRATE_YoY"
+datay <- "UNRATE.Value__YoY"
 ylim <- c(-50, 350)
-datay.aux <- "U6RATE_YoY"
 b.percentile <- TRUE
 dt.start <- as.Date('1950-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile)
 
-```
-
-The second derivative of the unemployment rate does have zero crossings near the middle point of a recession. This would make it a helpful buy signal for the trading strategy.
-
-```{r UnrateDer2, echo=FALSE}
-
-datay = "UNRATE_SmoothDer2"
-ylim <- c(-0.0001, 0.0001)
-b.percentile <- TRUE
-dt.start <- as.Date('1950-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile)
+# Tidy up
+rm(datay)
+rm(ylim)
+rm(b.percentile)
+rm(dt.start)
 
 ```
-
 ### Unemployment rates, similar periods
 
 Historically the last two years of record low unemployment appear most similar to the 1971-1973 time frame. Just before inflation took off.
@@ -3622,7 +3675,7 @@ Let's also take a look at the total unemployed, U-6. It continues to fall as the
 ```{r unrateU6, echo=FALSE}
 
 datay <- "UNRATE.Value"
-datay_aux <- "U6RATE"
+datay_aux <- "U6RATE.Value"
 ylim <- c(0, 25)
 myPlot <-
   plotSingle(
@@ -3706,7 +3759,7 @@ We will also take a look at initial jobless claims, this should start to rise ju
 
 ```{r initclaims, echo=FALSE}
 
-datay <- "ICSA"
+datay <- "ICSA.Value"
 ylim <- c(100000, 7000000)
 dt.start <- as.Date('1968-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
@@ -3716,7 +3769,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 It looks like the jobless claim tend to peak more towards the end of the recession. It does not seem to be as strong of a sell indicator as the U-3 rate.
 
 ```{r initclaimsDer, echo=FALSE}
-datay <- "ICSA_SmoothDer"
+datay <- "ICSA.Value__SmoothDer"
 ylim <- c(-3500, 3500)
 dt.start <- as.Date('1968-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = TRUE)
@@ -3776,7 +3829,7 @@ my.plot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuo
 ADP data here. comes out before the official numbers.
 
 ```{r NPPTTL, echo=FALSE}
-datay <- "NPPTTL"
+datay <- "NPPTTL.Value"
 ylim <- c(100000, 135000)
 dt.start <- as.Date('2000-01-01')
   plotSingle(
@@ -3798,7 +3851,7 @@ dt.start <- as.Date('2000-01-01')
 Look at the year-over-year change in ADP.
 
 ```{r NPPTTL.YoY, echo=FALSE}
-datay <- "NPPTTL_YoY"
+datay <- "NPPTTL.Value__YoY"
 ylim <- c(-20, 10)
 dt.start <- as.Date('2000-01-01')
   plotSingle(
@@ -3842,8 +3895,8 @@ dt.start <- as.Date('2000-01-01')
 
 
 ```{r UNEMPLOY, echo=FALSE}
-datay <- "UNEMPLOY"
-datay.aux <- "NPPTTL"
+datay <- "UNEMPLOY.Value"
+datay.aux <- "NPPTTL.Value"
 ylim <- c(-75, 25000)
 dt.start <- as.Date('1968-01-01')
   plotSingle(
@@ -3863,7 +3916,7 @@ dt.start <- as.Date('1968-01-01')
 ```
 
 ```{r UNEMPLOY.yoy, echo=FALSE}
-datay <- "UNEMPLOY_YoY"
+datay <- "UNEMPLOY.Value__YoY"
 ylim <- c(-25, 350)
 dt.start <- as.Date('1968-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
@@ -3875,9 +3928,9 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 Look at the BLS data on payrolls. Check the NSA series, then we will look at YoY data.
 
 ```{r PAYNSA, echo=FALSE}
-datay <- "PAYNSA"
-datay_aux <- "PAYNSA_Smooth"
-ylim <- c(20000, 160000)
+datay <- "PAYNSA.Value"
+datay_aux <- "PAYNSA.Value__Smooth"
+ylim <- c(20000, 200000)
 b.legend <- TRUE
 b.percentile <- FALSE
 myPlot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
@@ -3915,7 +3968,7 @@ Sparked by an article at Mises (https://mises.org/wire/how-alexandria-ocasio-cor
 
 ```{r avghours, echo=FALSE}
 
-datay <- "CEU0600000007"
+datay <- "CEU0600000007.Value"
 ylim <- c(36, 43)
 plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
             getPlotYLabel(df.symbols, datay), c(as.Date("1jan1945","%d%b%Y"), Sys.Date()), ylim, TRUE)
@@ -3926,7 +3979,7 @@ The time series is pretty lumpy, plot the YoY change
 
 ```{r avghours_yoy, echo=FALSE}
 
-datay <- "CEU0600000007_YoY"
+datay <- "CEU0600000007.Value__YoY"
 ylim <- c(-7.5, 7.5)
 b.percentile <- TRUE
 dt.start <- as.Date('1968-01-01')
@@ -3938,7 +3991,7 @@ A more recent look at average weekly hours of production
 
 ```{r avghours_yoy.recent, echo=FALSE}
 
-datay <- "CEU0600000007_YoY"
+datay <- "CEU0600000007.Value__YoY"
 ylim <- c(-7.5, 7.5)
 b.percentile <- FALSE
 dt.start <- as.Date('2010-01-01')
@@ -3949,10 +4002,10 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile)
 
 ## Industrial Production
 
-Industrial production is also known to fall during an economic downturm, let's take a look at some of the data from the FRED on industrial production. It does seem to peak prior to a recession so let's smooth and look at the derivative as it might be a good indicator as well.
+Industrial production is also known to fall during an economic downturn, let's take a look at some of the data from the FRED on industrial production. It does seem to peak prior to a recession so let's smooth and look at the derivative as it might be a good indicator as well.
 
 ```{r indpro, echo=FALSE}
-datay <- "INDPRO"
+datay <- "INDPRO.Value"
 ylim <- c(0, 125)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
