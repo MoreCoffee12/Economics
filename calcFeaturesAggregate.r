@@ -212,12 +212,13 @@ if ( require_columns(df.data, lst.syms ) ){
 rm(lst.syms)
 
 # Trading signal based on S&P 50 day SMA minus 200 day SMA
-if ( require_columns(df.data, c("GSPC.Open_mva050_mva200") ) ){
+lst.syms <- c("GSPC__Open__mva050__minus__mva200")
+if ( require_columns(df.data, lst.syms) ){
 
   # Define the new symbol and make the calculation
   str.symbol.new <- "GSPC__Open__mva050__mva200__sig"
   df.data[[str.symbol.new]] <-
-    as.numeric( df.data$GSPC.Open_mva050_mva200 > 0 )
+    as.numeric( df.data[[lst.syms[[1]]]] > 0 )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
@@ -240,6 +241,9 @@ if ( require_columns(df.data, c("GSPC.Open_mva050_mva200") ) ){
   rm(str.symbol.new)
 
 }
+
+# Tidy memory
+rm(lst.syms)
 
 # These are dashboard metrics
 getRecentHighCol <- function(iDays) {
@@ -884,11 +888,13 @@ if ( require_columns(df.data, c("GDP", "GDPI") ) ){
 #--------------------------------------------------------------------------
 
 # returns for base case (S&P 500)
-if ( require_columns(df.data, c("GSPC.Close") ) ){
+lst.syms <- c("X_GSPC.GSPC.Close")
+
+if ( require_columns( df.data, lst.syms ) ){
 
   # Define the new symbol and make the calculation
   str.symbol.new <- "retBase"
-  df.data[[str.symbol.new]] <- ROC(df.data$GSPC.Close)
+  df.data[[str.symbol.new]] <- ROC(df.data[[lst.syms[[1]]]])
   df.data[[str.symbol.new]][is.na(df.data[[str.symbol.new]])] <- 0
   
   # Update the symbols table    
@@ -914,6 +920,9 @@ if ( require_columns(df.data, c("GSPC.Close") ) ){
   rm(str.symbol.new)
 
 }
+
+# Tidy up
+rm(lst.syms)
 
 # returns for 3-month t-bills (assumed to be short position)
 if ( require_columns(df.data, c("TB3MS") ) ){

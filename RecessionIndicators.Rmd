@@ -109,7 +109,7 @@ str.data.dir <- "C:/Users/Rainy/OneDrive/Documents/IssaquahDynamical/Datasets/25
 # Define the plotting ranges
 dt.recent = as.Date("2017-01-01")
 dtStartBackTest = as.Date('1960-01-01')
-ylimBackTest <- c(0, 60)
+ylimBackTest <- c(0, 120)
 dt.start.prediction <- as.Date("01/02/1962", "%d/%m/%Y")
 
 # Define trend limits
@@ -1931,9 +1931,12 @@ The last two years compare favorably with the period around the late 1950's. Nee
 
 ```{r SP500SPpltNear.similar, echo=FALSE}
 datay <- "GDPSP500"
-ylim <- c(0.10, 0.20)
+ylim <- c(0.10, 0.30)
 my.data <- plotSimilarPeriods(df.data, dfRecession, df.symbols, datay, ylim, i.window = 50)
 my.data[[1]]
+
+rm(datay)
+rm(ylim)
 
 ```
 
@@ -1987,14 +1990,14 @@ Look at the 50 DMA versus 200 DMA, often used as a technical indicator of market
 ```{r SP500MA050MinusMA200}
 
 datay <- "GSPC__Open__mva050__minus__mva200"
-ylim <- c(-300, 300)
+ylim <- c(-500, 500)
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStartBackTest)
 
 ```
 
 ```{r SP500MA050MinusMA200Sig}
 
-datay <- "GSPC.Open_mva050_mva200_sig "
+datay <- "GSPC__Open__mva050__mva200__sig "
 ylim <- c(0.0, 1.0)
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStartBackTest)
 
@@ -2003,45 +2006,76 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStartBackTest)
 ```{r SP500MA050MinusMA200SigTrade, echo=FALSE, fig.width=7,fig.height=10}
 
 
-df.data$ret050MAMinus200MA <- df.data$retBase * df.data$GSPC.Open_mva050_mva200_sig
-df.data$ret050MAMinus200MAShort <- df.data$retBase * abs(df.data$GSPC.Open_mva050_mva200_sig-1.0)
+lst.syms <- c("GSPC__Open__mva050__mva200__sig", "retBase")
+if ( require_columns( df.data, lst.syms ) ){
 
-df.symbols <-
-  rbind(
+  str.symbol.new <- "ret050MAMinus200MA"
+  df.data[[str.symbol.new]] <- df.data[[lst.syms[[2]]]] * df.data[[lst.syms[[1]]]]
+  #df.data$ret050MAMinus200MAShort <- df.data$retBase * abs(df.data$GSPC.Open_mva050_mva200_sig-1.0)
+  
+  # Update the symbols table    
+  df.symbols <- symbols_append_row(
     df.symbols,
-    data.frame(
-      string.symbol = "ret050MAMinus200MA",
-      string.source = "Calc",
-      string.description =  "Rate of Change, 50 DMA - 200 DMA Rule",
-      string.label.y = "Percent",
-      float.expense.ratio = -1.00,
-      Max030 = FALSE,
-      Max180 = FALSE,
-      date.series.start = dt.start.prediction ,
-      date.series.end = as.Date(Sys.Date())
+    list(
+        string.symbol = str.symbol.new,
+        string.source = "Calc",
+        string.description =  "Rate of Change, 50 DMA - 200 DMA Rule",
+        string.label.y = "Percent",
+        float.expense.ratio = -1.00,
+        Max030 = FALSE,
+        Max180 = FALSE,
+        date.series.start = dt.start.prediction ,
+        date.series.end = as.Date(Sys.Date()),
+        string.symbol_safe = safe_symbol_name(str.symbol.new),
+        string.object_name = safe_symbol_name(str.symbol.new)
     )
-  )
+  )   
 
-df.data$ret050MAMinus200MARet <- exp(cumsum(df.data$ret050MAMinus200MA))
-df.data$ret050MAMinus200MARet <- df.data$ret050MAMinus200MARet/df.data[min(which(df.data$date>dtStartBackTest)),"ret050MAMinus200MARet"]
-df.symbols <-
-  rbind(
+  # Tidy  up
+  rm( str.symbol.new )
+}
+
+# Tidy memory
+rm(lst.syms)
+
+
+lst.syms <- c("ret050MAMinus200MA", "retBase")
+if ( require_columns( df.data, lst.syms ) ){
+  
+  str.symbol.new <- "ret050MAMinus200MARet"
+  df.data[[str.symbol.new]] <- exp(cumsum(df.data[[lst.syms[[1]]]]))
+  df.data[[str.symbol.new]] <-    
+      df.data[[str.symbol.new]]/df.data[min(which(df.data$date>dtStartBackTest)),str.symbol.new]
+
+  # Update the symbols table    
+  df.symbols <- symbols_append_row(
     df.symbols,
-    data.frame(
-      string.symbol = "ret050MAMinus200MARet",
-      string.source = "Calc",
-      string.description =  "Equity Return, 50 DMA - 200 DMA Rule",
-      string.label.y = "$1 Invested",
-      float.expense.ratio = -1.00,
-      Max030 = FALSE,
-      Max180 = FALSE,
-      date.series.start = dt.start.prediction ,
-      date.series.end = as.Date(Sys.Date())
+    list(
+        string.symbol = str.symbol.new,
+        string.source = "Calc",
+        string.description =  "Equity Return, 50 DMA - 200 DMA Rule",
+        string.label.y = "$1 Invested",
+        float.expense.ratio = -1.00,
+        Max030 = FALSE,
+        Max180 = FALSE,
+        date.series.start = dt.start.prediction ,
+        date.series.end = as.Date(Sys.Date()),
+        string.symbol_safe = safe_symbol_name(str.symbol.new),
+        string.object_name = safe_symbol_name(str.symbol.new)
     )
-  )
+  )   
 
+  # Tidy  up
+  rm( str.symbol.new )
+}
 
-dataTrade <- "GSPC.Open_mva050_mva200_sig"
+# Tidy memory
+rm(lst.syms)
+```
+
+```{r SP500MA050MinusMA200SigTradePlot, echo=FALSE, fig.width=7,fig.height=10}
+
+dataTrade <- "GSPC__Open__mva050__mva200__sig"
 dataRet <- "ret050MAMinus200MA"
 dataEq <- "ret050MAMinus200MARet"
 p1 <-
@@ -2056,6 +2090,11 @@ p1 <-
     dtStartBackTest,
     ylimBackTest
   )
+
+# Tidy up memory
+rm(dataTrade)
+rm(dataRet)
+rm(dataEq)
 
 ```
 
