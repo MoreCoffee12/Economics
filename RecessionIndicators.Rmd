@@ -1570,13 +1570,21 @@ df.dict <- data.frame(
 # 2) Derive the *root* symbol from each df.data column:
 #    drop only the final ".<Field>" so "BRK.B.Adjusted" -> "BRK.B"
 root_symbol <- sub("\\.[^.]*$", "", df.dict$column)
+
+# Does the raw ticker symbol exist in df.symbols? Only in the case where it does
+# not exist try the root symbol.
+for ( idx in seq_along(root_symbol)){ 
+  if( df.dict$column[[idx]] %in% df.symbols$string.symbol){
+    root_symbol[[idx]] <- safe_symbol_name(df.dict$column[[idx]])  
+  }
+}
 df.dict$string.symbol_root <- root_symbol
 
 # 3) Pick the symbols table and validate required columns
 sym_tbl <- if (exists("dt.symbols")) dt.symbols else if (exists("df.symbols")) df.symbols else NULL
 
 if (!is.null(sym_tbl)) {
-  needed <- c("string.symbol", "string.description")
+  needed <- c("string.symbol_safe", "string.description")
   missing <- setdiff(needed, names(sym_tbl))
   if (length(missing)) {
     stop("Symbols table is missing columns: ", paste(missing, collapse = ", "))
@@ -1585,7 +1593,7 @@ if (!is.null(sym_tbl)) {
   # 4) Build a name -> description map and attach descriptions
   desc_map <- setNames(
     as.character(sym_tbl$string.description),
-    as.character(sym_tbl$string.symbol)
+    as.character(sym_tbl$string.symbol_safe)
   )
   df.dict$string.description <- unname(desc_map[df.dict$string.symbol_root])
 } else {
@@ -1600,7 +1608,6 @@ write.csv(df.dict, out.file, row.names = TRUE)
 
 # Cleanup
 rm(df.dict)
-rm(str.data.dir)
 rm(out.file)
 
 
@@ -1861,7 +1868,7 @@ datay.aux <- "RLGSP500"
 datay.aux.1 <- "DJISP500"
 datay.aux.scale <- 0.1
 ylim <- c(0.00, 0.25)
-dtStart = as.Date('1980-01-01')
+dt.start = as.Date('1980-01-01')
 my.plot <-
   plotSingle(
     dfRecession,
@@ -1871,7 +1878,7 @@ my.plot <-
     getPlotTitle(df.symbols, datay),
     "Date",
     getPlotYLabel(df.symbols, datay),
-    c(dtStart, Sys.Date()),
+    c(dt.start, Sys.Date()),
     ylim,
     TRUE
   )
@@ -1908,7 +1915,7 @@ my.plot
 
 datay <- "GDPSP500"
 ylim <- c(0.00, 0.22)
-dtStart = as.Date('1995-01-01')
+dt.start = as.Date('1995-01-01')
 my.plot <-
   plotSingle(
     dfRecession,
@@ -1918,7 +1925,7 @@ my.plot <-
     getPlotTitle(df.symbols, datay),
     "Date",
     getPlotYLabel(df.symbols, datay),
-    c(dtStart, Sys.Date()),
+    c(dt.start, Sys.Date()),
     ylim,
     TRUE
   )
@@ -1954,9 +1961,9 @@ Look at how the different segments of the market move
 
 datay <- "GSPC__CloseBYMDY__Close__YoY"
 ylim <- c(-50, 75)
-dtStart = as.Date('1980-01-01')
+dt.start = as.Date('1980-01-01')
 plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
-            getPlotYLabel(df.symbols, datay), c(dtStart, Sys.Date()), ylim, TRUE)
+            getPlotYLabel(df.symbols, datay), c(dt.start, Sys.Date()), ylim, TRUE)
 
 ```
 
@@ -1964,9 +1971,9 @@ plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay),
 
 datay <- "GSPC__CloseBYMDY__Close"
 ylim <- c(0, 20)
-dtStart = as.Date('1980-01-01')
+dt.start = as.Date('1980-01-01')
 plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
-            getPlotYLabel(df.symbols, datay), c(dtStart, Sys.Date()), ylim, TRUE)
+            getPlotYLabel(df.symbols, datay), c(dt.start, Sys.Date()), ylim, TRUE)
 
 ```
 
@@ -2614,15 +2621,15 @@ https://www.quandl.com/data/MULTPL/SP500_DIV_MONTH-S-P-500-Dividend-by-Month
 
 # datay <- "MULTPLSP500DIVMONTH"
 # ylim <- c(0, 70)
-# dtStart = as.Date('1990-01-01')
+# dt.start = as.Date('1990-01-01')
 # p1 <-
-#   plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = FALSE)
+#   plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = FALSE)
 # 
 # 
 # datay.1 <- "CASHDIVIDENDSPERSHR"
 # ylim.1 <- c(0, 20)
 # p2 <-
-#   plotSingleQuick(dfRecession, df.data, datay.1, ylim.1, dtStart, b.percentile = FALSE)
+#   plotSingleQuick(dfRecession, df.data, datay.1, ylim.1, dt.start, b.percentile = FALSE)
 # 
 # grid.arrange(p1,
 #              p2,
@@ -2637,8 +2644,8 @@ Evaluate year over year dividend growth.
  
 # datay <- "MULTPLSP500DIVMONTH_YoY"
 # ylim <- c(-50, 50)
-# dtStart = as.Date('1960-01-01')
-# plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = FALSE)
+# dt.start = as.Date('1960-01-01')
+# plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = FALSE)
  
 ```
 
@@ -2648,8 +2655,8 @@ Real value dividend growth.
  
 # datay <- "MULTPLSP500DIVMONTH"
 # ylim <- c(20, 70)
-# dtStart = as.Date('2001-01-01')
-# plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = FALSE)
+# dt.start = as.Date('2001-01-01')
+# plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = FALSE)
  
 ```
 
@@ -2658,8 +2665,8 @@ Real value dividend growth.
 
 <!-- datay <- "MULTPLSP500DIVMONTH_YoY" -->
 <!-- ylim <- c(-40, 20) -->
-<!-- dtStart = as.Date('2001-01-01') -->
-<!-- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = FALSE) -->
+<!-- dt.start = as.Date('2001-01-01') -->
+<!-- plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = FALSE) -->
 
 <!-- ``` -->
 
@@ -2671,8 +2678,8 @@ https://www.quandl.com/data/MULTPL/SP500_DIV_YIELD_MONTH-S-P-500-Dividend-Yield-
 
 # datay <- "MULTPLSP500DIVYIELDMONTH"
 # ylim <- c(0, 12)
-# dtStart = as.Date('1950-01-01')
-# plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = FALSE)
+# dt.start = as.Date('1950-01-01')
+# plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = FALSE)
 
 
 ```
@@ -2681,8 +2688,8 @@ https://www.quandl.com/data/MULTPL/SP500_DIV_YIELD_MONTH-S-P-500-Dividend-Yield-
 
 # datay <- "MULTPLSP500DIVYIELDMONTH"
 # ylim <- c(1, 4)
-# dtStart = as.Date('2001-01-01')
-# plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = FALSE)
+# dt.start = as.Date('2001-01-01')
+# plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = FALSE)
 
 ```
 
@@ -2828,10 +2835,10 @@ ylim1 <- c(0, d.Russell.max )
 datay2 <- "X_GSPC.GSPC.Open"
 ylim2 <- c(0, d.GSPC.max)
 
-dtStart <- as.Date("1jan2003","%d%b%Y")
+dt.start <- as.Date("1jan2003","%d%b%Y")
 
 w <- 30
-corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, datay2, ylim2, w, dtStart)
+corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, datay2, ylim2, w, dt.start)
 
 # Tidy up memory
 rm(w)
@@ -2852,7 +2859,7 @@ ylim1 <- c(0, d.Russell.max)
 datay2 <- "MDY.Open"
 ylim2 <- c(0, 1000)
 
-dtStart <- as.Date("1jan2003","%d%b%Y")
+dt.start <- as.Date("1jan2003","%d%b%Y")
 
 w <- 30
 corrName <-
@@ -2864,7 +2871,7 @@ corrName <-
                   datay2,
                   ylim2,
                   w,
-                  dtStart)
+                  dt.start)
 
 # Tidy up memory
 rm(w)
@@ -2969,7 +2976,7 @@ ylim1 <- c(-100, 100)
 datay2 <- "X_GSPC.GSPC.Close__YoY"
 ylim2 <- c(-100, 100)
 
-dtStart <- as.Date("1jan1995","%d%b%Y")
+dt.start <- as.Date("1jan1995","%d%b%Y")
 
 w <- 200
 corrName <-
@@ -2981,14 +2988,14 @@ corrName <-
                   datay2,
                   ylim2,
                   w,
-                  dtStart)
+                  dt.start)
 
 # Tidy up memory
 rm(datay1)
 rm(ylim1)
 rm(datay2)
 rm(ylim2)
-rm(dtStart)
+rm(dt.start)
 rm(w)
 
 ```
@@ -3003,7 +3010,7 @@ ylim1 <- c(-100, 100)
 datay2 <- "X_RLG.RLG.Close__YoY"
 ylim2 <- c(-100, 100)
 
-dtStart <- as.Date("1jan1995","%d%b%Y")
+dt.start <- as.Date("1jan1995","%d%b%Y")
 
 w <- 200
 corrName <-
@@ -3015,14 +3022,14 @@ corrName <-
                   datay2,
                   ylim2,
                   w,
-                  dtStart)
+                  dt.start)
 
 # Tidy up memory
 rm(datay1)
 rm(ylim1)
 rm(datay2)
 rm(ylim2)
-rm(dtStart)
+rm(dt.start)
 rm(w)
 
 ```
@@ -3064,8 +3071,8 @@ Looks like options on non-equity co-occurs with peaks/troughs?.
 
 datay <- "OCC_NonEquityVolume"
 ylim <- c(0, 7.5)
-dtStart = as.Date('2015-01-01')
-p1 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('2015-01-01')
+p1 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 p1 <-
   p1 + geom_vline(
     xintercept = as.Date("2015-08-24"),
@@ -3107,7 +3114,7 @@ p2 <-
     getPlotTitle(df.symbols, datay),
     "Date",
     getPlotYLabel(df.symbols, datay),
-    c(dtStart, Sys.Date()),
+    c(dt.start, Sys.Date()),
     ylim,
     TRUE
   )
@@ -3171,8 +3178,8 @@ As markets become complacent (low VIX) and high values, peaks often occur.
 
 datay <- "VIXCLS.Value"
 ylim <- c(0, 80)
-dtStart = as.Date('2015-01-01')
-p1 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = TRUE)
+dt.start = as.Date('2015-01-01')
+p1 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = TRUE)
 p1 <-
   p1 + geom_vline(
     xintercept = as.Date("2015-08-24"),
@@ -3213,7 +3220,7 @@ p2 <-
     getPlotTitle(df.symbols, datay),
     "Date",
     getPlotYLabel(df.symbols, datay),
-    c(dtStart, Sys.Date()),
+    c(dt.start, Sys.Date()),
     ylim,
     TRUE
   )
@@ -3262,8 +3269,8 @@ Compare the VIX to some of the ETF's out there.
 
 datay <- "VIXCLS.Value"
 ylim <- c(0, 80)
-dtStart = as.Date('2015-01-01')
-p1 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = TRUE)
+dt.start = as.Date('2015-01-01')
+p1 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = TRUE)
 p1 <-
   p1 + geom_vline(
     xintercept = as.Date("2015-08-24"),
@@ -3304,7 +3311,7 @@ p2 <-
     getPlotTitle(df.symbols, datay),
     "Date",
     getPlotYLabel(df.symbols, datay),
-    c(dtStart, Sys.Date()),
+    c(dt.start, Sys.Date()),
     ylim,
     TRUE
   )
@@ -3356,10 +3363,10 @@ ylim1 <- c(0, 80)
 datay2 <- "X_GSPC.GSPC.Open"
 ylim2 <- c(1000, d.GSPC.max)
 
-dtStart <-  as.Date('2005-01-01')
+dt.start <-  as.Date('2005-01-01')
 
 w <- 30
-corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, datay2, ylim2, w, dtStart)
+corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, datay2, ylim2, w, dt.start)
 
 ```
 
@@ -3394,8 +3401,8 @@ More of a correlating series than a predictor.
 
 datay <- "GSPC__DailySwing"
 ylim <- c(0, 0.10)
-dtStart = as.Date('2015-01-01')
-p1 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('2015-01-01')
+p1 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 p1 <-
   p1 + geom_vline(
     xintercept = as.Date("2015-08-24"),
@@ -3437,7 +3444,7 @@ p2 <-
     getPlotTitle(df.symbols, datay),
     "Date",
     getPlotYLabel(df.symbols, datay),
-    c(dtStart, Sys.Date()),
+    c(dt.start, Sys.Date()),
     ylim,
     TRUE
   )
@@ -3722,7 +3729,7 @@ datay <- "GDPSP500"
 datay.aux <- "UNRATE.Value" 
 datay.aux.scale <- 0.01;
 ylim <- c(0, 0.2)
-dtStart = as.Date('1998-01-01')
+dt.start = as.Date('1998-01-01')
 myPlot <-
   plotSingle(
     dfRecession,
@@ -3732,7 +3739,7 @@ myPlot <-
     getPlotTitle(df.symbols, datay),
     "Date",
     getPlotYLabel(df.symbols, datay),
-    c(dtStart, Sys.Date()),
+    c(dt.start, Sys.Date()),
     ylim,
     b.legend = TRUE,
     b.percentile = FALSE,
@@ -4052,10 +4059,10 @@ ylim1 <- c(-20, 12)
 datay2 <- "X_GSPC.GSPC.Close__YoY"
 ylim2 <- c(-100, 50)
 
-dtStart <- as.Date("1jan1981","%d%b%Y")
+dt.start <- as.Date("1jan1981","%d%b%Y")
 
 w <- 360
-corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, datay2, ylim2, w, dtStart)
+corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, datay2, ylim2, w, dt.start)
 
 ```
 
@@ -4118,9 +4125,9 @@ datay <- "RSALESAGG__YoY"
 datay.aux <- "UNRATE.Value__YoY" 
 datay.aux.scale <- 0.25;
 ylim <- c(-15, 70)
-dtStart = as.Date('1998-01-01')
+dt.start = as.Date('1998-01-01')
 myPlot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
-            getPlotYLabel(df.symbols, datay), c(dtStart, Sys.Date()), ylim, TRUE)
+            getPlotYLabel(df.symbols, datay), c(dt.start, Sys.Date()), ylim, TRUE)
 myPlot <- myPlot + geom_line(data=df.data, aes_string(x="date", y=df.data[[datay.aux]]*datay.aux.scale, colour=shQuote(datay.aux)), na.rm = TRUE)
 myPlot + scale_y_continuous(sec.axis = sec_axis(~.*(1/datay.aux.scale), name = "Percent"), limits = ylim)
 
@@ -4137,10 +4144,10 @@ ylim1 <- c(-12.5, 12.5)
 datay2 <- "UNEMPLOY.Value__YoY"
 ylim2 <- c(-30, 150)
 
-dtStart <- as.Date("1jan1970","%d%b%Y")
+dt.start <- as.Date("1jan1970","%d%b%Y")
 
 w <- 200
-corrName <- calcRollingCorr(dfRecession,df.data, df.symbols, datay1, ylim1, datay2, ylim2, w, dtStart)
+corrName <- calcRollingCorr(dfRecession,df.data, df.symbols, datay1, ylim1, datay2, ylim2, w, dt.start)
 
 ```
 
@@ -4156,10 +4163,10 @@ ylim1 <- c(40, 125)
 datay2 <- "RSALESAGG"
 ylim2 <- c(100000, 200000)
 
-dtStart <- as.Date("1jan1981","%d%b%Y")
+dt.start <- as.Date("1jan1981","%d%b%Y")
 
 w <- 60
-corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, datay2, ylim2, w, dtStart)
+corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, datay2, ylim2, w, dt.start)
 
 ```
 
@@ -4173,10 +4180,10 @@ ylim1 <- c(-20, 20)
 datay2 <- "RSALESAGG__YoY"
 ylim2 <- c(-20, 20)
 
-dtStart <- as.Date("1jan1981","%d%b%Y")
+dt.start <- as.Date("1jan1981","%d%b%Y")
 
 w <- 200
-corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, datay2, ylim2, w, dtStart)
+corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, datay2, ylim2, w, dt.start)
 
 ```
 
@@ -4187,8 +4194,8 @@ This is an advanced estimate of the retail sales value.
 ```{r rsafs, echo=FALSE}
 datay <- "RSAFS.Value"
 ylim <- c(150000, 900000)
-dtStart = as.Date('1992-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('1992-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
@@ -4197,8 +4204,8 @@ Also take a look at year over year
 ```{r rsafs.yoy, echo=FALSE}
 datay <- "RSAFS.Value__YoY"
 ylim <- c(-22.5, 42.5)
-dtStart = as.Date('1992-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('1992-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
@@ -4316,7 +4323,7 @@ datay.aux.scale <- 0.5
 datay.aux.1 <- "PCEPI.Value__YoY"
 
 ylim <- c(-10, 20)
-dtStart = as.Date('1960-01-01')
+dt.start = as.Date('1960-01-01')
 myPlot <-
   plotSingle(
     dfRecession,
@@ -4326,7 +4333,7 @@ myPlot <-
     getPlotTitle(df.symbols, datay),
     "Date",
     paste(getPlotYLabel(df.symbols, datay), ", ", datay, sep=""),
-    c(dtStart, Sys.Date()),
+    c(dt.start, Sys.Date()),
     ylim,
     b.legend = TRUE,
     b.long.legend = TRUE
@@ -4364,8 +4371,8 @@ myPlot + scale_y_continuous(sec.axis = sec_axis(
 ```{r plot.ppi, echo=FALSE}
 datay <- "PPIACO.Value"
 ylim <- c(0, 350)
-dtStart = as.Date('1965-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('1965-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
@@ -4379,8 +4386,8 @@ Take a look at some trends of baskets of commodities.
 
 datay <- "GSG.Close"
 ylim <- c(-10, 100)
-dtStart = as.Date('2005-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('2005-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
@@ -4392,8 +4399,8 @@ This plot examines commodity performance relative to the GDP deflator
 
 datay <- "GSG__Close__by__GDPDEF"
 ylim <- c(0, 1.0)
-dtStart = as.Date('2005-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('2005-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
@@ -4402,8 +4409,8 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
 datay <- "GSG__Close__by__GSPC__Close"
 ylim <- c(0, 0.1)
-dtStart = as.Date('2005-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('2005-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
@@ -4563,12 +4570,19 @@ rm(b.percentile)
 
 ```{r crude.yoy.recent, echo=FALSE}
 
-datay <- "DCOILWTICO_YoY"
+datay <- "DCOILWTICO.Value__YoY"
 ylim <- c(-100, 500)
-dtStart = dt.recent
+dt.start = dt.recent
 b.legend <- TRUE
 b.percentile <- TRUE
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.legend, b.percentile)
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.legend, b.percentile)
+
+# Tidy up
+rm(datay)
+rm(ylim)
+rm(dt.start)
+rm(b.legend)
+rm(b.percentile)
 
 ```
 
@@ -4579,10 +4593,15 @@ As risks increase investors often flock to safe haven assets like gold. An up-ti
 
 ```{r gold.nominal.price, echo=FALSE}
 
-# datay <- "LBMAGOLD.USD_PM"
-# ylim <- c(0, 2500)
-# dtStart = as.Date('1970-01-01')
-# plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+datay <- "GC_F.Close"
+ylim <- c(0, 4000)
+dt.start = as.Date('1970-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
+
+# Tidy up memory
+rm(datay)
+rm(ylim)
+rm(dt.start)
 
 ```
 
@@ -4626,7 +4645,7 @@ See how nominal and real prices look year over year. From the long-term view see
 
 # datay <- "LBMAGOLD.USD_PM_YoY"
 # ylim <- c(-75, 75)
-# dtStart = as.Date('1970-01-01')
+# dt.start = as.Date('1970-01-01')
 # datay.aux <- "LBMAGOLD.USD_PM.by.CPIAUCSL_YoY"
 # datay.aux.1 <- "LBMAGOLD.USD_PM.by.PPIACO_YoY"
 # my.plot <- plotSingle(
@@ -4679,9 +4698,9 @@ See how gold correlates with the VIX. Both gold and VIX should respond to invest
 # xlabel <- paste(datax, ", ", df.symbols[grep(datax, df.symbols$string.symbol),]$yLabel, sep="")
 # bLegend <- FALSE
 # bFitLinear <- TRUE
-# dtStart = as.Date('2000-01-01')
+# dt.start = as.Date('2000-01-01')
 # b.reverse.y = FALSE
-# plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, ylim, bLegend, bFitLinear, dtStart, b.reverse.y)
+# plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, ylim, bLegend, bFitLinear, dt.start, b.reverse.y)
 
 ```
 
@@ -4694,9 +4713,9 @@ Dr. Copper has a reputation as an indicator of economic malaise, but it does not
 # datay <- "CHRISCMEHG1"
 # datay_aux <- "CHRISCMEHG1_Smooth"
 # ylim <- c(0, 5)
-# dtStart = as.Date('1959-01-01')
+# dt.start = as.Date('1959-01-01')
 # myPlot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
-#             getPlotYLabel(df.symbols, datay), c(dtStart, Sys.Date()), ylim, TRUE)
+#             getPlotYLabel(df.symbols, datay), c(dt.start, Sys.Date()), ylim, TRUE)
 # myPlot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuote(datay_aux)), na.rm = TRUE)
 
 ```
@@ -4705,9 +4724,9 @@ Dr. Copper has a reputation as an indicator of economic malaise, but it does not
 # datay <- "CHRISCMEHG1"
 # datay_aux <- "CHRISCMEHG1_Smooth"
 # ylim <- c(0, 5)
-# dtStart = as.Date('2008-01-01')
+# dt.start = as.Date('2008-01-01')
 # myPlot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
-#             getPlotYLabel(df.symbols, datay), c(dtStart, Sys.Date()), ylim, TRUE)
+#             getPlotYLabel(df.symbols, datay), c(dt.start, Sys.Date()), ylim, TRUE)
 # myPlot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuote(datay_aux)), na.rm = TRUE)
 
 ```
@@ -4751,8 +4770,8 @@ The change in prices, year over year, do generally peak prior to a recession. Th
 ```{r plot.CHRISCMEHG1.yoy, echo=FALSE}
 # datay <- "CHRISCMEHG1_YoY"
 # ylim <- c(-100, 100)
-# dtStart = as.Date('1960-01-01')
-# plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = TRUE)
+# dt.start = as.Date('1960-01-01')
+# plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = TRUE)
 
 ```
 
@@ -4766,10 +4785,10 @@ There is some correlation between copper and the smooth recession initiator, esp
 # datay2 <- "CHRISCMEHG1_YoY"
 # ylim2 <- c(-100, 100)
 # 
-# dtStart = as.Date('1960-01-01')
+# dt.start = as.Date('1960-01-01')
 # 
 # w <- 360
-# corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, datay2, ylim2, w, dtStart)
+# corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, datay2, ylim2, w, dt.start)
 
 ```
 
@@ -4788,10 +4807,10 @@ Might be easier to see correlation in a dot plot format.
 # titlelabel <- paste(datay, " | ", datax)
 # bLegend <- FALSE
 # bFitLinear <- TRUE
-# dtStart = as.Date('1950-01-01')
+# dt.start = as.Date('1950-01-01')
 # b.reverse.y = FALSE
 # plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, ylim, bLegend, bFitLinear, 
-#         dtStart, b.reverse.y)
+#         dt.start, b.reverse.y)
 
 ```
 
@@ -4801,8 +4820,8 @@ This is a legacy series from FRED. It has not been updated in a couple of years 
 ```{r cuprice, echo=FALSE}
 datay <- "PCOPPUSDM"
 ylim <- c(0, 12000)
-dtStart = as.Date('1980-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('1980-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
@@ -4816,14 +4835,14 @@ Amazing events in the first half of 2020, take a look at those
 #datay <- "DCOILWTICO"
 datay <- "CLF.Close"
 datay.aux <- "DCOILBRENTEU"
-dtStart = as.Date('2019-01-01')
+dt.start = as.Date('2019-01-01')
 p1 <-
   plotSingleQuick(
     dfRecession,
     df.data,
     datay,
     ylim = c(-10, 150),
-    dtStart,
+    dt.start,
     b.legend = TRUE,
     b.long.legend = FALSE
   )
@@ -4895,7 +4914,7 @@ p2 <-
     df.data,
     datay,
     ylim = c(5, 60),
-    dtStart,
+    dt.start,
     b.legend = TRUE,
     b.long.legend = FALSE
   )
@@ -4949,7 +4968,7 @@ p3 <-
     df.data,
     datay,
     ylim = c(0, 60),
-    dtStart,
+    dt.start,
     b.legend = TRUE,
     b.long.legend = FALSE
   )
@@ -4985,7 +5004,7 @@ p4 <-
     df.data,
     datay,
     ylim = c(0, 60),
-    dtStart,
+    dt.start,
     b.legend = TRUE,
     b.long.legend = FALSE
   )
@@ -5037,14 +5056,14 @@ See how the players are doing
 ## Rig counts
 datay <- "BKRTotal_YoY"
 ylim <- c(-50, 20)
-dtStart = as.Date('2019-01-01')
+dt.start = as.Date('2019-01-01')
 p1 <-
   plotSingleQuick(
     dfRecession,
     df.data,
     datay,
     ylim,
-    dtStart,
+    dt.start,
     b.legend = TRUE,
     b.percentile = FALSE,
     b.long.legend = FALSE
@@ -5123,7 +5142,7 @@ p2 <-
     df.data,
     datay,
     ylim = c(-100, 50),
-    dtStart,
+    dt.start,
     b.legend = TRUE,
     b.long.legend = FALSE
   )
@@ -5174,8 +5193,8 @@ Little bit closer
 
 datay <- "WALCL"
 ylim <- c(0, 10000)
-dtStart = as.Date('2003-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('2003-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
@@ -5187,8 +5206,8 @@ Compare liabilities to reverse repo trends
 
 datay <- "WLRRAL"
 ylim <- c(0, 3000)
-dtStart = as.Date('2003-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('2003-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
@@ -5199,8 +5218,8 @@ Take a look at more recent trends
 
 datay <- "WLRRAL"
 ylim <- c(0, 3000)
-dtStart = as.Date('2020-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('2020-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
@@ -5210,8 +5229,8 @@ Spiky, might be easier to look at year-over-year
 
 datay <- "WLRRAL_YoY"
 ylim <- c(-100, 500)
-dtStart = as.Date('2003-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('2003-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
@@ -5221,8 +5240,8 @@ Normalized by GDP
 
 datay <- "WLRRAL.by.GDP"
 ylim <- c(0, 4)
-dtStart = as.Date('2003-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('2003-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
@@ -5338,8 +5357,8 @@ Take a look at the variation (99th - 1st percentile)
 
 datay <- "SOFR99.minus.SOFR1"
 ylim <- c(0, 4)
-dtStart = as.Date('2018-01-01')
-my.plot <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('2018-01-01')
+my.plot <- plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 add.quarter.lines(my.plot, dt.start.year = 2016)
 
@@ -5562,8 +5581,8 @@ Did the reserve balances increase after the 2016 and 2018 drops? Not in the same
 
 datay <- "WRESBAL_YoY"
 ylim <- c(-40, 150)
-dtStart = as.Date('2015-01-01')
-p1 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('2015-01-01')
+p1 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 p1 <-
   p1 + geom_vline(
     xintercept = as.Date("2015-08-24"),
@@ -5605,7 +5624,7 @@ p2 <-
     getPlotTitle(df.symbols, datay),
     "Date",
     getPlotYLabel(df.symbols, datay),
-    c(dtStart, Sys.Date()),
+    c(dt.start, Sys.Date()),
     ylim,
     b.legend = FALSE,
     b.percentile = FALSE,
@@ -5662,9 +5681,9 @@ xlim <- c(-30, 30)
 xlabel <- paste(datax, ", ", df.symbols[grep(datax, df.symbols$string.symbol),]$yLabel, sep="")
 bLegend <- FALSE
 bFitLinear <- TRUE
-dtStart = as.Date('2008-01-01')
+dt.start = as.Date('2008-01-01')
 b.reverse.y <- FALSE
-plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, ylim, bLegend, bFitLinear, dtStart, b.reverse.y)
+plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, ylim, bLegend, bFitLinear, dt.start, b.reverse.y)
 
 ```
 
@@ -5689,10 +5708,10 @@ Currency trend, base
 ```{r BOGMBASE.trend, echo=FALSE}
 
 datay <- "BOGMBASE"
-dtStart = as.Date('1959-01-01')
+dt.start = as.Date('1959-01-01')
 ylim <- c(0, 7000)
 my.plot <-
-  plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+  plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 my.plot
 
 ```
@@ -5702,9 +5721,9 @@ my.plot
 
 
 # datay <- "BOGMBASE"
-# dtStart = as.Date('1959-01-01')
+# dt.start = as.Date('1959-01-01')
 # ylim <- c(0, 7000)
-# p1 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+# p1 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 # p1 <-
 #   p1 + geom_vline(
 #     xintercept = as.Date("2015-08-24"),
@@ -5745,7 +5764,7 @@ my.plot
 #     getPlotTitle(df.symbols, datay),
 #     "Date",
 #     getPlotYLabel(df.symbols, datay),
-#     c(dtStart, Sys.Date()),
+#     c(dt.start, Sys.Date()),
 #     ylim,
 #     b.legend = FALSE,
 #     b.percentile = FALSE,
@@ -5795,10 +5814,10 @@ This used to trend along with GDP. It doesn't anymore.
 ```{r BOGMBASE.trend.by.GDP, echo=FALSE}
 
 datay <- "BOGMBASE.by.GDP"
-dtStart = as.Date('1959-01-01')
+dt.start = as.Date('1959-01-01')
 ylim <- c(0, 30)
 my.plot <-
-  plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+  plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 my.plot
 
 ```
@@ -5810,9 +5829,9 @@ Basic currency trend (currency component of M1)
 ```{r currrency.trend, echo=FALSE}
 
 datay <- "WCURRNS"
-dtStart = as.Date('1970-01-01')
+dt.start = as.Date('1970-01-01')
 ylim <- c(0, 2500)
-myplot <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+myplot <- plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 myplot
 
 ```
@@ -5820,9 +5839,9 @@ myplot
 ```{r currrency.trend.yoy}
 
 datay <- "WCURRNS_YoY"
-dtStart = as.Date('1980-01-01')
+dt.start = as.Date('1980-01-01')
 ylim <- c(0, 17)
-myplot <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+myplot <- plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 myplot
 
 ```
@@ -5831,9 +5850,9 @@ myplot
 ```{r currrency.trend.yoy.close}
 
 datay <- "WCURRNS_YoY"
-dtStart = as.Date('2000-01-01')
+dt.start = as.Date('2000-01-01')
 ylim <- c(0, 20)
-myplot <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+myplot <- plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 myplot
 
 ```
@@ -5846,11 +5865,11 @@ The rate of change of money supply could be an indicator of a recession. Let's s
 datay <- "M1_YoY"
 ylim <- c(-15, 35)
 datay_aux <- "M2_YoY"
-dtStart = as.Date('1980-01-01')
-myplot <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('1980-01-01')
+myplot <- plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 myPlot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
-            getPlotYLabel(df.symbols, datay), c(dtStart, Sys.Date()), ylim, TRUE)
+            getPlotYLabel(df.symbols, datay), c(dt.start, Sys.Date()), ylim, TRUE)
 myPlot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuote(datay_aux)), na.rm = TRUE)
 
 ```
@@ -6031,10 +6050,10 @@ xlim <- c(-20, 5)
 xlabel <- paste(datax, ", ", df.symbols[grep(datax, df.symbols$string.symbol),]$yLabel, sep="")
 bLegend <- FALSE
 bFitLinear <- FALSE
-dtStart = as.Date('1960-01-01')
+dt.start = as.Date('1960-01-01')
 b.reverse.y = TRUE
 plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, ylim, bLegend, bFitLinear, 
-        dtStart, b.reverse.y)
+        dt.start, b.reverse.y)
 
 ```
 
@@ -6111,8 +6130,8 @@ Zoom in to the last couple of decades
 
 datay <- "TOTLNNSA_YoY"
 ylim <- c(-10, 15)
-dtStart = as.Date('2000-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('2000-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
@@ -6759,9 +6778,9 @@ p1 + geom_line(data=df.data, aes_string(x="date", y=datay.aux, colour=shQuote(da
 datay <- "TB3MS"
 datay.aux <- "DTB3"
 ylim <- c(0, 6.0)
-dtStart = as.Date('2017-01-01')
+dt.start = as.Date('2017-01-01')
 p1 <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
-            getPlotYLabel(df.symbols, datay), c(dtStart, Sys.Date()), ylim, TRUE)
+            getPlotYLabel(df.symbols, datay), c(dt.start, Sys.Date()), ylim, TRUE)
 p1 + geom_line(data=df.data, aes_string(x="date", y=datay.aux, colour=shQuote(datay.aux)), na.rm = TRUE)
 
 ```
@@ -6770,9 +6789,9 @@ p1 + geom_line(data=df.data, aes_string(x="date", y=datay.aux, colour=shQuote(da
 # datay <- "TB3MS"
 # datay_aux <- "USD1MTD156N"
 # ylim <- c(0, 12)
-# dtStart = as.Date('1985-01-01')
+# dt.start = as.Date('1985-01-01')
 # myPlot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
-#             getPlotYLabel(df.symbols, datay), c(dtStart, Sys.Date()), ylim, TRUE)
+#             getPlotYLabel(df.symbols, datay), c(dt.start, Sys.Date()), ylim, TRUE)
 # myPlot <- myPlot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuote(datay_aux)), na.rm = TRUE)
 # 
 # myPlot
@@ -6812,7 +6831,7 @@ datay.aux <- "TNX.Open"
 datay.aux1 <- "DTB3"
 datay.aux2 <- "IRX.Open"
 ylim <- c(0.5, 5.0)
-dtStart = as.Date('2018-01-01')
+dt.start = as.Date('2018-01-01')
 p1 <-
   plotSingle(
     dfRecession,
@@ -6822,7 +6841,7 @@ p1 <-
     getPlotTitle(df.symbols, datay),
     "Date",
     getPlotYLabel(df.symbols, datay),
-    c(dtStart, Sys.Date()),
+    c(dt.start, Sys.Date()),
     ylim,
     b.legend = TRUE,
     b.long.legend = TRUE
@@ -6869,10 +6888,10 @@ ylim1 <- c(-5, 5)
 datay2 <- "TOTLNNSA_YoY"
 ylim2 <- c(-25, 25)
 
-dtStart <- as.Date("1jan1985","%d%b%Y")
+dt.start <- as.Date("1jan1985","%d%b%Y")
 
 w <- 60
-corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, datay2, ylim2, w, dtStart)
+corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, datay2, ylim2, w, dt.start)
 
 ```
 
@@ -6886,10 +6905,10 @@ ylim1 <- c(0, 20)
 datay2 <- "TOTLNNSA_YoY"
 ylim2 <- c(-25, 25)
 
-dtStart <- as.Date("1jan1985","%d%b%Y")
+dt.start <- as.Date("1jan1985","%d%b%Y")
 
 w <- 30
-corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, datay2, ylim2, w, dtStart)
+corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, datay2, ylim2, w, dt.start)
 
 ```
 
@@ -6934,9 +6953,9 @@ datay_aux <- "DGS10TO1"
 ylim <- c(-3, 5)
 datay_aux2 <- "DGS10TO2"
 datay_aux3 <- "DGS30TO10"
-dtStart = as.Date('1995-01-01')
+dt.start = as.Date('1995-01-01')
 myPlot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
-            getPlotYLabel(df.symbols, datay), c(dtStart, Sys.Date()), ylim, TRUE)
+            getPlotYLabel(df.symbols, datay), c(dt.start, Sys.Date()), ylim, TRUE)
 myPlot <- myPlot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuote(datay_aux)), na.rm = TRUE)
 myPlot <- myPlot + geom_line(data=df.data, aes_string(x="date", y=datay_aux2, colour=shQuote(datay_aux2)), na.rm = TRUE)
 myPlot + geom_line(data=df.data, aes_string(x="date", y=datay_aux3, colour=shQuote(datay_aux3)), na.rm = TRUE)
@@ -6952,9 +6971,9 @@ datay_aux <- "DGS10TO1"
 ylim <- c(-2.00, 2.00)
 datay_aux2 <- "DGS10TO2"
 datay_aux3 <- "DGS30TO10"
-dtStart = as.Date('2018-01-01')
+dt.start = as.Date('2018-01-01')
 myPlot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
-            getPlotYLabel(df.symbols, datay), c(dtStart, Sys.Date()), ylim, TRUE)
+            getPlotYLabel(df.symbols, datay), c(dt.start, Sys.Date()), ylim, TRUE)
 myPlot <- myPlot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuote(datay_aux)), na.rm = TRUE)
 myPlot <- myPlot + geom_line(data=df.data, aes_string(x="date", y=datay_aux2, colour=shQuote(datay_aux2)), na.rm = TRUE)
 myPlot + geom_line(data=df.data, aes_string(x="date", y=datay_aux3, colour=shQuote(datay_aux3)), na.rm = TRUE)
@@ -6967,11 +6986,11 @@ Plot the 10 Year to 3 month over a few decades to see what the outling cases loo
 
 datay <- "DGS10TOTB3MS"
 ylim <- c(-2, 4)
-dtStart = as.Date('1989-01-01')
+dt.start = as.Date('1989-01-01')
 b.legend <- FALSE
 b.percentile <- TRUE
 plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
-            getPlotYLabel(df.symbols, datay), c(dtStart, Sys.Date()), ylim, b.legend, b.percentile)
+            getPlotYLabel(df.symbols, datay), c(dt.start, Sys.Date()), ylim, b.legend, b.percentile)
 
 ```
 
@@ -7059,8 +7078,8 @@ GS5Yr <- period.apply(GS5, endpoints(GS5,"years", 1), mean)
 
 datay <- "AAA"
 ylim <- c(1.5, 10)
-dtStart = as.Date('1997-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('1997-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
@@ -7072,8 +7091,8 @@ High quality bonds long-term trend.
 
 datay <- "DGS10ByAAA"
 ylim <- c(1, 6.0)
-dtStart = as.Date('1967-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('1967-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
@@ -7084,8 +7103,8 @@ High quality bonds near-term trend.
 
 datay <- "DGS10ByAAA"
 ylim <- c(1, 6.0)
-dtStart = as.Date('2007-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('2007-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
@@ -7101,8 +7120,8 @@ The ICE BofAML OASs are the calculated spreads between a computed OAS index of a
 
 datay <- "BAMLC0A3CA"
 ylim <- c(0, 7)
-dtStart = as.Date('1997-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('1997-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
@@ -7116,8 +7135,8 @@ https://www.wsj.com/articles/risky-municipal-bonds-are-on-a-hot-streak-115589494
 
 datay <- "HYMB.Close"
 ylim <- c(40, 62)
-dtStart = as.Date('2011-01-01')
-p1 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('2011-01-01')
+p1 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 p1 <-
   p1 + geom_vline(
@@ -7151,7 +7170,7 @@ p1 <-
 
 datay <- "HYMB.Volume"
 ylim <- c(0, 1750000)
-p1.vol <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+p1.vol <- plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 p1.vol <-
   p1.vol + geom_vline(
@@ -7196,7 +7215,7 @@ p2 <-
     getPlotTitle(df.symbols, datay),
     "Date",
     getPlotYLabel(df.symbols, datay),
-    c(dtStart, Sys.Date()),
+    c(dt.start, Sys.Date()),
     ylim,
     TRUE
   )
@@ -7253,10 +7272,10 @@ xlim <- c(-10, 20)
 xlabel <- paste(datax, ", ", df.symbols[grep(datax, df.symbols$string.symbol),]$yLabel, sep="")
 bLegend <- FALSE
 bFitLinear <- TRUE
-dtStart = as.Date('2000-01-01')
+dt.start = as.Date('2000-01-01')
 b.reverse.y = FALSE
 plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, ylim, bLegend, bFitLinear, 
-        dtStart, b.reverse.y)
+        dt.start, b.reverse.y)
 
 ```
 
@@ -7274,10 +7293,10 @@ xlim <- c(-10, 15)
 xlabel <- paste(datax, ", ", df.symbols[grep(datax, df.symbols$string.symbol),]$yLabel, sep="")
 bLegend <- FALSE
 bFitLinear <- TRUE
-dtStart = as.Date('1980-01-01')
+dt.start = as.Date('1980-01-01')
 b.reverse.y = FALSE
 plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, ylim, bLegend, bFitLinear, 
-        dtStart, b.reverse.y)
+        dt.start, b.reverse.y)
 
 ```
 
@@ -7296,10 +7315,10 @@ xlim <- c(-20, 30)
 xlabel <- paste(datax, ", ", df.symbols[grep(datax, df.symbols$string.symbol),]$yLabel, sep="")
 bLegend <- FALSE
 bFitLinear <- TRUE
-dtStart = as.Date('1970-01-01')
+dt.start = as.Date('1970-01-01')
 b.reverse.y = FALSE
 plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, ylim, bLegend, bFitLinear, 
-        dtStart, b.reverse.y)
+        dt.start, b.reverse.y)
 
 ```
 
@@ -7316,10 +7335,10 @@ xlim <- c(-30, 25)
 xlabel <- paste(datax, ", ", df.symbols[grep(datax, df.symbols$string.symbol),]$yLabel, sep="")
 bLegend <- FALSE
 bFitLinear <- TRUE
-dtStart = as.Date('1970-01-01')
+dt.start = as.Date('1970-01-01')
 b.reverse.y = FALSE
 plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, ylim, bLegend, bFitLinear, 
-        dtStart, b.reverse.y)
+        dt.start, b.reverse.y)
 
 ```
 
@@ -7333,10 +7352,10 @@ ylim1 <- c(-10, 20)
 datay2 <- "DGS10TO1"
 ylim2 <- c(-5, 10)
 
-dtStart <- as.Date("1jan1960","%d%b%Y")
+dt.start <- as.Date("1jan1960","%d%b%Y")
 
 w <- 360
-corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, datay2, ylim2, w, dtStart)
+corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, datay2, ylim2, w, dt.start)
 
 ```
 
@@ -7348,10 +7367,10 @@ ylim1 <- c(-10, 20)
 datay2 <- "DGS10TO1"
 ylim2 <- c(-5, 10)
 
-dtStart <- as.Date("1jan1960","%d%b%Y")
+dt.start <- as.Date("1jan1960","%d%b%Y")
 
 w <- 720
-corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, datay2, ylim2, w, dtStart)
+corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, datay2, ylim2, w, dt.start)
 
 ```
 
@@ -7369,9 +7388,9 @@ xlim <- c(-10, 20)
 xlabel <- paste(datax, ", ", df.symbols[grep(datax, df.symbols$string.symbol),]$yLabel, sep="")
 bLegend <- FALSE
 bFitLinear <- TRUE
-dtStart = as.Date('2000-01-01')
+dt.start = as.Date('2000-01-01')
 b.reverse.y = FALSE
-plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, ylim, bLegend, bFitLinear, dtStart, b.reverse.y)
+plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, ylim, bLegend, bFitLinear, dt.start, b.reverse.y)
 
 ```
 
@@ -7388,14 +7407,14 @@ plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, yl
 <!-- datay.aux.2 <- "PETA143B00001M" -->
 <!-- datay.aux.3 <- "PETA133B00001M" -->
 <!-- ylim <- c(7.5, 100000) -->
-<!-- dtStart = as.Date('1983-01-01') -->
+<!-- dt.start = as.Date('1983-01-01') -->
 <!-- p1 <- -->
 <!--   plotSingleQuick( -->
 <!--     dfRecession, -->
 <!--     df.data, -->
 <!--     datay, -->
 <!--     ylim, -->
-<!--     dtStart, -->
+<!--     dt.start, -->
 <!--     b.legend = TRUE, -->
 <!--     b.percentile = FALSE, -->
 <!--     b.long.legend = TRUE -->
@@ -7441,14 +7460,14 @@ plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, yl
 <!-- datay.aux.1 <- "TOTALOGNRPUSM" -->
 <!-- datay.aux.2 <- "TOTALNGNRPUSM" -->
 <!-- ylim <- c(7.5, 2500) -->
-<!-- dtStart = as.Date('1983-01-01') -->
+<!-- dt.start = as.Date('1983-01-01') -->
 <!-- p1 <- -->
 <!--   plotSingleQuick( -->
 <!--     dfRecession, -->
 <!--     df.data, -->
 <!--     datay, -->
 <!--     ylim, -->
-<!--     dtStart, -->
+<!--     dt.start, -->
 <!--     b.legend = TRUE, -->
 <!--     b.percentile = FALSE, -->
 <!--     b.long.legend = TRUE -->
@@ -7487,14 +7506,14 @@ datay.aux.1 <- "BKRTotal"
 datay.aux.2 <- "BKROil"
 datay.aux.3 <- "BKRGas"
 ylim <- c(7.5, 2500)
-dtStart = as.Date('1983-01-01')
+dt.start = as.Date('1983-01-01')
 p1 <-
   plotSingleQuick(
     dfRecession,
     df.data,
     datay,
     ylim,
-    dtStart,
+    dt.start,
     b.legend = TRUE,
     b.percentile = FALSE,
     b.long.legend = TRUE
@@ -7539,14 +7558,14 @@ datay.aux.1 <- "TOTALOGNRPUSM"
 datay.aux.2 <- "BKROil"
 datay.aux.3 <- "BKRGas"
 ylim <- c(7.5, 1200)
-dtStart = as.Date('2019-01-01')
+dt.start = as.Date('2019-01-01')
 p1 <-
   plotSingleQuick(
     dfRecession,
     df.data,
     datay,
     ylim,
-    dtStart,
+    dt.start,
     b.legend = TRUE,
     b.percentile = FALSE,
     b.long.legend = TRUE
@@ -7607,8 +7626,8 @@ A WSJ article suggested that auto sales might be a good indicator so bring that 
 
 datay <- "ALTSALES"
 ylim <- c(7.5, 25)
-dtStart = as.Date('1977-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('1977-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 
 ```
@@ -7620,8 +7639,8 @@ There might be some seasonal variance in the auto sales so lets take a look at t
 datay <- "ALTSALES_YoY"
 ylim <- c(-75, 50)
 b.percentile <- TRUE
-dtStart = as.Date('1977-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile)
+dt.start = as.Date('1977-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile)
 
 ```
 
@@ -7684,8 +7703,8 @@ Normalize GDP by CPI
 
 datay <- "GDPBYCPIAUCSL"
 ylim <- c(1000, 10000)
-dtStart = as.Date('1959-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('1959-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
@@ -7824,8 +7843,8 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 datay <- "PCE"
 ylim <- c(6000, 18000)
-dtStart = as.Date('2000-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('2000-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
@@ -7833,8 +7852,8 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
 datay <- "PCE_YoY"
 ylim <- c(-20, 25)
-dtStart = as.Date('2000-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('2000-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
@@ -7867,8 +7886,8 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 datay <- "PCEPI"
 ylim <- c(60, 140)
-dtStart = as.Date('2000-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('2000-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
@@ -7876,8 +7895,8 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
 datay <- "PCEPI_YoY"
 ylim <- c(-2, 8)
-dtStart = as.Date('2000-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('2000-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
@@ -7950,9 +7969,9 @@ xlim <- c(0, 15)
 xlabel <- paste(datax, ", ", df.symbols[grep(datax, df.symbols$string.symbol),]$yLabel, sep="")
 bLegend <- FALSE
 bFitLinear <- TRUE
-dtStart = as.Date('1995-01-01')
+dt.start = as.Date('1995-01-01')
 b.reverse.y = FALSE
-plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, ylim, bLegend, bFitLinear, dtStart, b.reverse.y)
+plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, ylim, bLegend, bFitLinear, dt.start, b.reverse.y)
 
 ```
 
@@ -7967,10 +7986,10 @@ ylim1 <- c(2, 12)
 datay2 <- "PSAVERT"
 ylim2 <- c(0, 35)
 
-dtStart <- as.Date("1jan1985","%d%b%Y")
+dt.start <- as.Date("1jan1985","%d%b%Y")
 
 w <- 360
-corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, datay2, ylim2, w, dtStart)
+corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, datay2, ylim2, w, dt.start)
 
 ```
 
@@ -7989,10 +8008,10 @@ xlim <- c(440, 750)
 xlabel <- paste(datax, ", ", df.symbols[grep(datax, df.symbols$string.symbol),]$yLabel, sep="")
 bLegend <- FALSE
 bFitLinear <- TRUE
-dtStart = as.Date('1980-01-01')
+dt.start = as.Date('1980-01-01')
 b.reverse.y = FALSE
 plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, ylim, bLegend, bFitLinear, 
-        dtStart, b.reverse.y)
+        dt.start, b.reverse.y)
 
 ```
 
@@ -8113,12 +8132,12 @@ Read an article suggesting that housing sales and sales growth could be useful. 
 
 datay <- "HSN1FNSA"
 ylim <- c(0, 200)
-dtStart = as.Date('1964-01-01')
-p1 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('1964-01-01')
+p1 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 datay <- "HNFSUSNSA"
 ylim <- c(0, 600)
-p2 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+p2 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 datay <- "HNFSUSNSA.minus.HSN1FNSA"
 ylim <- c(0, 600)
@@ -8131,7 +8150,7 @@ p3 <-
     getPlotTitle(df.symbols, datay),
     "Date",
     getPlotYLabel(df.symbols, datay),
-    c(dtStart, Sys.Date()),
+    c(dt.start, Sys.Date()),
     ylim,
     TRUE
   )
@@ -8149,11 +8168,11 @@ New housing yoy
 
 datay <- "HSN1FNSA_YoY"
 ylim <- c(-50, 100)
-dtStart = as.Date('1964-01-01')
-p1 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('1964-01-01')
+p1 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 datay <- "HNFSUSNSA_YoY"
-p2 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+p2 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 datay <- "HNFSUSNSA.minus.HSN1FNSA_YoY"
 p3 <-
@@ -8165,7 +8184,7 @@ p3 <-
     getPlotTitle(df.symbols, datay),
     "Date",
     getPlotYLabel(df.symbols, datay),
-    c(dtStart, Sys.Date()),
+    c(dt.start, Sys.Date()),
     ylim,
     TRUE
   )
@@ -8817,8 +8836,8 @@ Not sure if these relates to a recession, but fascinating to see how output and 
 
 datay <- "OUTMS"
 ylim <- c(60, 120)
-dtStart = as.Date('1987-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('1987-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
@@ -8826,8 +8845,8 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
 datay <- "MANEMP"
 ylim <- c(10000, 20000)
-dtStart = as.Date('1948-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('1948-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
@@ -8835,8 +8854,8 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
 datay <- "PRS30006163"
 ylim <- c(40, 120)
-dtStart = as.Date('1986-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('1986-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
@@ -8846,8 +8865,8 @@ Shipping volumes might be helpful in determining state of the economy.
 
 datay <- "FRGSHPUSM649NCIS"
 ylim <- c(0.8, 1.4)
-dtStart = as.Date('1999-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('1999-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
@@ -8855,8 +8874,8 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
 datay <- "FRGSHPUSM649NCIS_YoY"
 ylim <- c(-30, 30)
-dtStart = as.Date('1999-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('1999-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
@@ -8867,8 +8886,8 @@ Freight, loosely, moves inversely to the trade deficit.
 
 datay <- "BOPGTB_YoY"
 ylim <- c(-30, 30)
-dtStart = as.Date('1999-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('1999-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
@@ -8879,8 +8898,8 @@ World bank air transportation. Only updated annually so less usefull, but intere
 
 # datay <- "WWDIWLDISAIRGOODMTK1"
 # ylim <- c(0, 250000)
-# dtStart = as.Date('1999-01-01')
-# plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+# dt.start = as.Date('1999-01-01')
+# plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
@@ -9015,8 +9034,8 @@ This is a look at manufacturing industrial production. The yoY change should be 
 
 datay <- "IPMAN"
 ylim <- c(30, 120)
-dtStart = as.Date('1972-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('1972-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
@@ -9025,9 +9044,9 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
 datay <- "IPMAN_YoY"
 ylim <- c(-25, 15)
-dtStart = as.Date('1972-01-01')
+dt.start = as.Date('1972-01-01')
 b.percentile <- TRUE
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile)
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile)
 
 ```
 
@@ -9053,8 +9072,8 @@ December 24, 2022.
 
 datay <- "HOUST"
 ylim <- c(400, 2700)
-dtStart = as.Date('1960-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('1960-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 Housing starts, NSA
@@ -9076,8 +9095,8 @@ https://fred.stlouisfed.org/series/HOUSTNSA, December 24, 2022.
 
 datay <- "HOUSTNSA"
 ylim <- c(0, 2700)
-dtStart = as.Date('1960-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('1960-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
@@ -9086,9 +9105,9 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 datay <- "HOUST_YoY"
 datay_aux <- "HOUSTNSA_YoY"
 ylim <- c(-50, 100)
-dtStart = as.Date('1960-01-01')
+dt.start = as.Date('1960-01-01')
 b.percentile <- TRUE
-my.plot <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile)
+my.plot <- plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile)
 
 my.plot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuote(datay_aux)), na.rm = TRUE)
 
@@ -9100,8 +9119,8 @@ Case-schiller price index
 
 datay <- "CSUSHPINSA"
 ylim <- c(60, 350)
-dtStart = as.Date('1987-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('1987-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
@@ -9109,8 +9128,8 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
 datay <- "CSUSHPINSA_YoY"
 ylim <- c(-25, 25)
-dtStart = as.Date('1987-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('1987-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
@@ -9124,8 +9143,8 @@ Many of the economic series can be better understood if normalized by population
 
 datay <- "POPTHM"
 ylim <- c(160000, 350000)
-dtStart = as.Date('1959-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('1959-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
@@ -9134,8 +9153,8 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
 datay <- "POPTHM_YoY"
 ylim <- c(0, 2.5)
-dtStart = as.Date('1960-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('1960-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
@@ -9145,8 +9164,8 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
 datay <- "GDPBYPOPTHM"
 ylim <- c(0, 75000)
-dtStart = as.Date('1960-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('1960-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
@@ -9155,10 +9174,10 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 datay <- "GDPBYPOPTHM_YoY"
 ylim <- c(-5, 15)
 datay_aux <- "CPIAUCSL_YoY"
-dtStart = as.Date('1960-01-01')
+dt.start = as.Date('1960-01-01')
 bLegend <- TRUE
 my.plot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
-            getPlotYLabel(df.symbols, datay), c(dtStart, Sys.Date()), ylim, bLegend)
+            getPlotYLabel(df.symbols, datay), c(dt.start, Sys.Date()), ylim, bLegend)
 my.plot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuote(datay_aux)), na.rm = TRUE)
 
 ```
@@ -9169,8 +9188,8 @@ Look at GDP divided by CPI per person. It flattens and even dips a little prior 
 
 datay <- "GDPBYCPIAUCSLBYPOPTHM"
 ylim <- c(10000, 30000)
-dtStart = as.Date('1960-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('1960-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
@@ -9178,9 +9197,9 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
 datay <- "GDPBYCPIAUCSLBYPOPTHM_SmoothDer"
 ylim <- c(-5, 5)
-dtStart = as.Date('1960-01-01')
+dt.start = as.Date('1960-01-01')
 b.percentile <- TRUE
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile)
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile)
 
 ```
 
@@ -9194,10 +9213,10 @@ ylim1 <- c(-5, 5)
 datay2 <- "RecInit_Smooth"
 ylim2 <- c(0, 1)
 
-dtStart <- as.Date("1jan1960","%d%b%Y")
+dt.start <- as.Date("1jan1960","%d%b%Y")
 
 w <- 30
-corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, datay2, ylim2, w, dtStart)
+corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, datay2, ylim2, w, dt.start)
 
 ```
 
