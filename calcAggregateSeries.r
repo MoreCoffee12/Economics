@@ -339,12 +339,13 @@ if ( require_columns(df.data, c("TOTCINSA.Value", "DGS10.Value") ) ){
 }
 
 # Business loans (weekly, NSA) interest divided by GDP
-if ( require_columns(df.data, c("TOTCINSA.INTEREST", "GDP.Value") ) ){
+lst.sym <- c("TOTCINSA__INTEREST", "GDP.Value")
+if ( require_columns(df.data, lst.sym ) ){
 
   # Add the aggregate to the main data frame
   str.symbol.new <- "TOTCINSA__INTEREST__by__GDP"
   df.data[[str.symbol.new]] <-
-    (df.data$TOTCINSA__INTEREST / df.data$GDP.Value) * 100
+    ( ( df.data[[lst.sym[[1]]]] / df.data[[lst.sym[[2]]]]) * 100.0 )
 
   # Update the symbols table    
   df.symbols <- symbols_append_row(
@@ -356,10 +357,10 @@ if ( require_columns(df.data, c("TOTCINSA.INTEREST", "GDP.Value") ) ){
       string.label.y = "PERCENT",
       float.expense.ratio = -1.00,
       date.series.start =  as.Date(max(
-        c(df.symbols$date.series.start[df.symbols$Symbol == 'TOTCINSA.INTEREST.by.GDP'], index(GDP[1]))
+        c(df.symbols$date.series.start[df.symbols$Symbol == lst.sym[[1]]], index(GDP[1]))
       ))  ,
       date.series.end = as.Date(min(c(
-        df.symbols$date.series.end[df.symbols$Symbol == 'TOTCINSA.INTEREST.by.GDP'], index(tail(GDP, 1))
+        df.symbols$date.series.end[df.symbols$Symbol == lst.sym[[1]]], index(tail(GDP, 1))
       ))),
       string.symbol_safe = safe_symbol_name(str.symbol.new),
       string.object_name = safe_symbol_name(str.symbol.new)
@@ -370,6 +371,9 @@ if ( require_columns(df.data, c("TOTCINSA.INTEREST", "GDP.Value") ) ){
   rm(str.symbol.new)
   
 }
+
+# Tidy memory
+rm (lst.sym)
 
 # Normalize real personal income by GDP
 if ( require_columns(df.data, c("W875RX1.Value", "GDP.Value") ) ){
@@ -771,14 +775,15 @@ if ( require_columns(df.data, c("DGORDER", "GDP.Value") ) ){
   
 }
 
-# All home mortgages as percet of GDP. Have to convert from millions to
+# All home mortgages as percent of GDP. Have to convert from millions to
 # billions to be consistent with H.8 and GDP series
-if ( require_columns(df.data, c("ASHMA", "GDP.Value") ) ){
+lst.sym <- c("ASHMA.Value", "GDP.Value") 
+if ( require_columns(df.data, lst.sym ) ){
 
   # Add the aggregate to the main data frame
   str.symbol.new <- "ASHMA__by__GDP"
   df.data[[str.symbol.new]] <-
-    ( ( ( df.data$ASHMA.Value / 1000.0 ) / df.data$GDP.Value) * 100.0 )
+    ( ( ( df.data[[lst.sym[[1]]]] / 1000.0 ) / df.data[[lst.sym[[2]]]]) * 100.0 )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
@@ -1499,7 +1504,7 @@ if ( require_columns(df.data, c("ASFMA.Value", "MORTGAGE30US.Value") ) ){
 if ( require_columns(df.data, c("ASFMA__INTEREST", "GDP.Value") ) ){
   
   # Add the aggregate to the main data frame
-  str.symbol.new <- "ASFMA__INTEREST__by_GDP"
+  str.symbol.new <- "ASFMA__INTEREST__by__GDP"
   df.data[[str.symbol.new]] <-
     ( ( df.data$ASFMA__INTEREST / df.data$GDP.Value) * 100.0 )
   
@@ -2696,15 +2701,13 @@ if ( require_columns(df.data, c("MSPUS.Value", "HSN1FNSA.Value",
 
 # Normalize single-family home sales volume (billions) by GDP
 # (which is in billions)
-if ( require_columns(df.data, c("MSPUS.times.HSN1FNSA.plusEXHOSLUSM495S",
-                                "GDP.Value") ) ){
+lst.sym <- c("MSPUS__times__HSN1FNSA__plus__EXHOSLUSM495S", "GDP.Value")
+if ( require_columns(df.data, lst.sym ) ){
   
   # Add the aggregate to the main data frame
-  str.symbol.new <- "BUSLOANS__minus__BUSLOANSNSA__by__GDP"
+  str.symbol.new <- "MSPUS__times__HSN1FNSA__plus__EXHOSLUSM495S__by__GDP"
   df.data[[str.symbol.new]] <-
-    
-    df.data$MSPUS.times.HSN1FNSA.plusEXHOSLUSM495S.by.GDP <-
-    (df.data$MSPUS.times.HSN1FNSA.plusEXHOSLUSM495S / df.data$GDP.Value) * 100
+    ( ( df.data[[lst.sym[[1]]]] / df.data[[lst.sym[[2]]]]) * 100.0 )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
@@ -2716,10 +2719,10 @@ if ( require_columns(df.data, c("MSPUS.times.HSN1FNSA.plusEXHOSLUSM495S",
       string.label.y = "Percent",
       float.expense.ratio = -1.00,
       date.series.start =  as.Date(max(c(
-        index(BUSLOANS[1]), index(GDP[1])
+        index(MSPUS[1]), index(GDP[1])
       )))  ,
       date.series.end = as.Date(min(c(
-        index(tail(BUSLOANS, 1)), index(tail(GDP, 1))
+        index(tail(MSPUS, 1)), index(tail(GDP, 1))
       ))),
       string.symbol_safe = safe_symbol_name(str.symbol.new),
       string.object_name = safe_symbol_name(str.symbol.new)
