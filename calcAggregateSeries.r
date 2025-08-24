@@ -2355,7 +2355,7 @@ if ( require_columns(df.data, c("GDPBYCPIAUCSL", "POPTHM.Value") ) ){
 if ( require_columns(df.data, c("X_GSPC.GSPC.Close", "MDY.Close") ) ){
   
   # Add the aggregate to the main data frame
-  str.symbol.new <- "GSPC__CloseBYMDY__Close"
+  str.symbol.new <- "X_GSPC__Close__by__MDY__Close"
   df.data[[str.symbol.new]] <- 
     ( df.data$X_GSPC.GSPC.Close / df.data$MDY.Close )
   
@@ -2365,7 +2365,7 @@ if ( require_columns(df.data, c("X_GSPC.GSPC.Close", "MDY.Close") ) ){
     list(
       string.symbol = str.symbol.new,
       string.source = "Calc",
-      string.description = "GSPC by MDY",
+      string.description = "GSPC divided by MDY",
       string.label.y = "-",
       float.expense.ratio = -1.00,
       date.series.start =  as.Date(max(c(
@@ -2422,7 +2422,7 @@ if ( require_columns(df.data, c("X_GSPC.GSPC.High",
                                 "X_GSPC.GSPC.Low","X_GSPC.GSPC.Open") ) ){
   
   # Add the aggregate to the main data frame
-  str.symbol.new <- "GSPC__DailySwing"
+  str.symbol.new <- "X_GSPC__DailySwing"
   df.data$X_GSPC.GSPC.Open[df.data$X_GSPC.GSPC.Open <=0] <- 1
   df.data[[str.symbol.new]] <-
     ((df.data$X_GSPC.GSPC.High - df.data$X_GSPC.GSPC.Low) / df.data$X_GSPC.GSPC.Open)
@@ -2456,7 +2456,7 @@ if ( require_columns(df.data, c("X_GSPC.GSPC.High",
 if ( require_columns(df.data, c("X_GSPC.GSPC.Open", "GDPDEF.Value") ) ){
   
   # Add the aggregate to the main data frame
-  str.symbol.new <- "GSPC__Open__by__GDPDEF"
+  str.symbol.new <- "X_GSPC__Open__by__GDPDEF"
   df.data[[str.symbol.new]] <-
     ( df.data$X_GSPC.GSPC.Open / ( df.data$GDPDEF.Value / 100.0 ) )
   
@@ -2489,7 +2489,7 @@ if ( require_columns(df.data, c("X_GSPC.GSPC.Open", "GDPDEF.Value") ) ){
 if ( require_columns(df.data, c("X_GSPC.GSPC.Close", "GDPDEF.Value") ) ){
   
   # Add the aggregate to the main data frame
-  str.symbol.new <- "GSPC__Close__by__GDPDEF"
+  str.symbol.new <- "X_GSPC__Close__by__GDPDEF"
   df.data[[str.symbol.new]] <-
     ( df.data$X_GSPC.GSPC.Close / ( df.data$GDPDEF.Value / 100.0 ) )
   

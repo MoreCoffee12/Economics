@@ -1,12 +1,14 @@
-#------------ Extrace features from the aggregate series
+#------------ Extract features from the aggregate series
 
 
 # Loans + reserves to compare to deposits
-if ( require_columns(df.data, c("TOTLNNSA", "WRESBAL") ) ){
+lst.sym <- c("TOTLLNSA.Value", "WRESBAL.Value")
+if ( require_columns(df.data, lst.sym ) ){
 
   # Define the new symbol and make the calculation
   str.symbol.new <- "TOTLLNSA__plus__WRESBAL"
-  df.data[[str.symbol.new]] <- ( df.data$TOTLLNSA + df.data$WRESBAL )
+  df.data[[str.symbol.new]] <- 
+    ( df.data[[lst.sym[[1]]]] + df.data[[lst.sym[[2]]]] )
 
   # Update the symbols table    
   df.symbols <- symbols_append_row(
@@ -33,6 +35,9 @@ if ( require_columns(df.data, c("TOTLNNSA", "WRESBAL") ) ){
   rm(str.symbol.new)
   
 }
+
+# Free up memory
+rm(lst.sym)
 
 # Compare GDP growth the 1-year treasury
 if ( require_columns(df.data, c("GDP_YoY", "DGS1") ) ){
