@@ -2052,11 +2052,13 @@ if ( require_columns(df.data, c("DCOILBRENTEU.Value", "PPIACO.Value") ) ){
 }
 
 # Normalize the oil price by the producer price index
-if ( require_columns(df.data, c("DCOILWTICO.Value", "PPIACO.Value") ) ){
+lst.syms <- c("DCOILWTICO.Value", "PPIACO.Value")
+if ( require_columns(df.data, lst.syms ) ){
   
   # Add the aggregate to the main data frame
   str.symbol.new <- "DCOILWTICO__by__PPIACO"
-    ( df.data$DCOILWTICO.Value / df.data$PPIACO.Value )
+  df.data[[str.symbol.new]] <-
+    ( df.data[[lst.syms[[1]]]] / df.data[[lst.syms[[2]]]] )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
@@ -2081,7 +2083,12 @@ if ( require_columns(df.data, c("DCOILWTICO.Value", "PPIACO.Value") ) ){
   # Tidy memory
   rm(str.symbol.new)
   
+}else{
+  print(paste("Failed to find: ", lst.syms))
 }
+
+# Free up memory
+rm(lst.syms)
 
 # # Normalize gold by commodities producer price index (PPIACO)
 # df.data$LBMAGOLD.USD_PM.by.PPIACO <-

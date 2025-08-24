@@ -4299,7 +4299,7 @@ plotSingleQuickModern(datay, ylim)
 Check out the YoY growth
 
 ```{r CPIPlot_YoY}
-datay <- "CPIAUCSL_YoY"
+datay <- "CPIAUCSL.Value__YoY"
 ylim <- c(-2, 15)
 plotSingleQuickModern(datay, ylim)
 
@@ -4310,10 +4310,10 @@ plotSingleQuickModern(datay, ylim)
 Suggested by Charlie, it can be helpful to look at the relationship between producer prices and consumer prices.
 
 ```{r CPItoPPI, echo=FALSE, fig.width = 9, fig.asp = 0.4}
-datay <- "CPIAUCSL_YoY"
-datay.aux <- "PPIACO_YoY"
+datay <- "CPIAUCSL.Value__YoY"
+datay.aux <- "PPIACO.Value__YoY"
 datay.aux.scale <- 0.5
-datay.aux.1 <- "PCEPI_YoY"
+datay.aux.1 <- "PCEPI.Value__YoY"
 
 ylim <- c(-10, 20)
 dtStart = as.Date('1960-01-01')
@@ -4362,7 +4362,7 @@ myPlot + scale_y_continuous(sec.axis = sec_axis(
 ### Producer Price Index (Commodities)
 
 ```{r plot.ppi, echo=FALSE}
-datay <- "PPIACO"
+datay <- "PPIACO.Value"
 ylim <- c(0, 350)
 dtStart = as.Date('1965-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
@@ -4390,7 +4390,7 @@ This plot examines commodity performance relative to the GDP deflator
 
 ```{r comm.basket.gdp, echo=FALSE}
 
-datay <- "GSG.Close.by.GDPDEF"
+datay <- "GSG__Close__by__GDPDEF"
 ylim <- c(0, 1.0)
 dtStart = as.Date('2005-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
@@ -4400,7 +4400,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
 
 ```{r comm.basket.GSPC, echo=FALSE}
 
-datay <- "GSG.Close.by.GSPC.Close"
+datay <- "GSG__Close__by__GSPC__Close"
 ylim <- c(0, 0.1)
 dtStart = as.Date('2005-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
@@ -4413,10 +4413,15 @@ Look at a trend of West Texas Intermediate (WTI)
 
 ```{r Crude, echo=FALSE}
 
-datay <- "DCOILWTICO"
+datay <- "DCOILWTICO.Value"
 ylim <- c(-10, 150)
-dtStart = as.Date('1987-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('1987-01-01')
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
+
+# Tidy memory
+rm(datay)
+rm(ylim)
+rm(dt.start)
 
 ```
 
@@ -4424,26 +4429,18 @@ This is ticker data from yahoo
 
 ```{r Crude.yahoo, echo=FALSE, fig.width = 9, fig.asp = 1.0}
 
-datay <- "CLF.Close"
+datay <- "CL_F.Close"
 ylim <- c(-10, 150)
-dtStart = as.Date('2000-01-01')
-p1 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+dt.start = as.Date('2000-01-01')
+p1 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
-
-# my.plot<- df.data %>% plot_ly(x = ~index(df.data), type="candlestick",
-#           open = ~CLF.Open, close = ~CLF.Close,
-#           high = ~CLF.High, low = ~CLF.Low) 
-# my.plot <- my.plot %>% layout(title = "Basic Candlestick Chart")
-# 
-# my.plot
-
-datay <- "CLF.Volume"
+datay <- "CL_F.Volume"
 ylim <- c(0, 1500000)
-p2 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+p2 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
-datay <- "CLF.Volume_YoY"
+datay <- "CL_F.Volume__YoY"
 ylim <- c(-150, 150)
-p3 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart)
+p3 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 
 grid.arrange(p1,
@@ -4451,6 +4448,14 @@ grid.arrange(p1,
              p3,
              ncol = 1,
              top = "Crude oil prices and volume")
+
+# Tidy up memory
+rm(datay)
+rm(ylim)
+rm(dt.start)
+rm(p1)
+rm(p2)
+rm(p3)
 
 ```
 
@@ -4460,17 +4465,17 @@ Take a look at both WTI and Brent crude.
 
 ```{r crude.recent, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
-datay <- "DCOILWTICO"
-datay.aux <- "DCOILBRENTEU"
-datay.aux.1 <- "CLF.Close"
-dtStart = as.Date('2019-01-01')
+datay <- "DCOILWTICO.Value"
+datay.aux <- "DCOILBRENTEU.Value"
+datay.aux.1 <- "CL_F.Close"
+dt.start = as.Date('2019-01-01')
 my.plot <-
   plotSingleQuick(
     dfRecession,
     df.data,
     datay,
     ylim = c(-10, 150),
-    dtStart,
+    dt.start,
     b.legend = TRUE,
     b.long.legend = TRUE
   )
@@ -4494,6 +4499,12 @@ my.plot <- my.plot + geom_line(
 )
 my.plot
 
+# Tidy up memory
+rm(datay )
+rm(datay.aux )
+rm(datay.aux.1 )
+rm(dt.start )
+
 
 ```
 
@@ -4502,16 +4513,16 @@ Real price of crude using producer price index for commodities
 
 ```{r crude.recent.real, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
-datay <- "DCOILWTICO.by.PPIACO"
-datay.aux <- "DCOILBRENTEU.by.PPIACO"
-dtStart = as.Date('1987-01-01')
+datay <- "DCOILWTICO__by__PPIACO"
+datay.aux <- "DCOILBRENTEU__by__PPIACO"
+dt.start = as.Date('1987-01-01')
 my.plot <-
   plotSingleQuick(
     dfRecession,
     df.data,
     datay,
     ylim = c(0, 0.75),
-    dtStart,
+    dt.start,
     b.legend = TRUE,
     b.long.legend = TRUE
   )
@@ -4525,16 +4536,28 @@ my.plot + geom_line(
   na.rm = TRUE
 )
 
+# Tidy up memory
+rm(datay )
+rm(datay.aux )
+rm(dt.start )
+
 ```
 
 ```{r Crude_YoY, echo=FALSE}
 
-datay <- "DCOILWTICO_YoY"
+datay <- "DCOILWTICO.Value__YoY"
 ylim <- c(-100, 150)
-dtStart = as.Date('1987-01-01')
+dt.start = as.Date('1987-01-01')
 b.legend <- TRUE
 b.percentile <- TRUE
-plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.legend, b.percentile)
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.legend, b.percentile)
+
+# Tidy up
+rm(datay)
+rm(ylim)
+rm(dt.start)
+rm(b.percentile)
+
 
 ```
 
