@@ -7936,7 +7936,7 @@ U.S. Bureau of Economic Analysis, Personal Consumption Expenditures: Chain-type 
 
 ```{r PCEPI, echo=FALSE}
 
-datay <- "PCEPI"
+datay <- "PCEPI.Value"
 ylim <- c(0, 130)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
