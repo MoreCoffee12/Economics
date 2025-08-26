@@ -8712,12 +8712,10 @@ plotSingleQuick(dfRecession,
 
 ```{r SRPSABSNNCB.YoY.z.1, echo=FALSE}
 
-datay <- "SRPSABSNNCB_YoY"
-ylim <- c(-250, 250)
 plotSingleQuick(dfRecession,
                 df.data,
-                datay,
-                ylim,
+                datay = "SRPSABSNNCB.Value__YoY",
+                ylim =  c(-250, 250),
                 dt.start = as.Date("1jan1965", "%d%b%Y"))
 
 ```
