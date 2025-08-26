@@ -100,7 +100,7 @@ source("utilSyms.r")
 ```{r RefreshFlag, echo=FALSE}
 
 # Define the source of the data (local or web) and whether to update the models.
-bRefresh = FALSE
+bRefresh = TRUE
 b.refresh.models = FALSE
 str.data.dir <- "C:/Users/Rainy/OneDrive/Documents/IssaquahDynamical/Datasets/2529RS0082_HistEconData"
 
@@ -8966,10 +8966,16 @@ Spending most certainly tips down prior to a recession. The gross private domest
 
 ```{r GPDI.by.GDP, echo=FALSE}
 
-datay <- "GPDI.by.GDP"
-ylim <- c(0.0, 0.3)
-plotSingleQuick(dfRecession, df.data, datay, ylim)
+lst.syms <- c("GPDI__by__GDP")
+if ( require_columns(df.data, lst.syms ) ){
+  
+plotSingleQuick(dfRecession, 
+                df.data, 
+                datay = lst.syms[[1]], 
+                ylim =  c(0.0, 0.3))
 
+}
+rm(lst.syms)
 
 ```
 
@@ -9151,10 +9157,17 @@ https://fred.stlouisfed.org/series/HOUSTNSA, December 24, 2022.
 
 ```{r Houst.NSA, echo=FALSE}
 
-datay <- "HOUSTNSA"
-ylim <- c(0, 2700)
-dt.start = as.Date('1960-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
+lst.syms <- c("HOUSTNSA.Value")
+if ( require_columns(df.data, lst.syms ) ){
+
+  plotSingleQuick(dfRecession, df.data, 
+                  datay = lst.syms[[1]], 
+                  ylim = c(0, 2700), 
+                  dt.start = as.Date('1960-01-01'),
+                  b.percentile = TRUE)
+  
+}
+rm(lst.syms)
 
 ```
 

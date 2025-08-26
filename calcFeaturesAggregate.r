@@ -817,7 +817,7 @@ if ( require_columns(df.data, list.sym  ) ){
 }
 
 
-# This is the NY Fed's model for recession basedon the 10 y to 3 month spread
+# This is the NY Fed's model for recession based on the 10 y to 3 month spread
 if ( require_columns(df.data, c("DGS10TOTB3MS") ) ){
   
   nyfed.alpha = -0.5333
@@ -853,11 +853,13 @@ if ( require_columns(df.data, c("DGS10TOTB3MS") ) ){
 }
 
 # Gross Private Domestic Investment to GDP
-if ( require_columns(df.data, c("GDP", "GDPI") ) ){
+lst.sym <- c("GDP.Value", "GDPI.Value")
+if ( require_columns(df.data, lst.sym ) ){
 
   # Define the new symbol and make the calculation
   str.symbol.new <- "GPDI__by__GDP"
-  df.data[[str.symbol.new]] <- ( df.data$GPDI / df.data$GDP )
+  df.data[[str.symbol.new]] <- 
+    ( df.data[[lst.sym[[1]]]] / df.data[[lst.sym[[2]]]] )
   df.data[[str.symbol.new]] <- na.approx(df.data[[str.symbol.new]], rule = 2)
   
   # Update the symbols table    
@@ -887,6 +889,10 @@ if ( require_columns(df.data, c("GDP", "GDPI") ) ){
   rm(str.symbol.new)
 
 }
+
+# Clean up memory
+rm(lst.sym)
+
 
 #--------------------------------------------------------------------------
 # Calculate returns
