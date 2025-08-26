@@ -135,8 +135,70 @@ Data is pulled from several sources include FRED, yahoo, and Google. The code be
 
 ```{r defsyms, echo=FALSE}
 
+## --- Save symbols_catalog.csv from the df.symbols dataframe -----------------
 # Call code that defines the desired symbols.
-source("SymbolList.r")
+# source("SymbolList.r")
+# 
+# catalog_path <- file.path(str.data.dir, "symbols_catalog.csv")
+# tmp <- subset(df.symbols,
+#               select = c(string.symbol,string.source,string.description,
+#                          string.label.y,float.expense.ratio,
+#                          date.series.start,date.series.end))
+# # store \n literally so it’s one line per row in the CSV
+# tmp$string.description <- gsub("\n", "\\\\n", tmp$string.description)
+# write.csv(tmp, catalog_path, row.names = FALSE, na = "")
+
+
+## --- Load symbols_catalog.csv into df.symbols -------------------------------
+
+# Pick a path that exists in your project
+catalog_path <- file.path(str.data.dir, "symbols_catalog.csv")
+
+# Read CSV (prefer readr if available for strict types)
+if (requireNamespace("readr", quietly = TRUE)) {
+  df.symbols <- readr::read_csv(
+    catalog_path,
+    col_types = readr::cols(
+      string.symbol       = readr::col_character(),
+      string.source       = readr::col_character(),
+      string.description  = readr::col_character(),
+      string.label.y      = readr::col_character(),
+      float.expense.ratio = readr::col_double(),
+      date.series.start   = readr::col_date(format = ""),
+      date.series.end     = readr::col_date(format = "")
+    ),
+    na = c("", "NA")
+  ) |> as.data.frame(stringsAsFactors = FALSE)
+} else {
+  df.symbols <- read.csv(catalog_path, stringsAsFactors = FALSE, na.strings = c("", "NA"))
+  # Coerce types
+  if ("float.expense.ratio" %in% names(df.symbols))
+    df.symbols$float.expense.ratio <- as.numeric(df.symbols$float.expense.ratio)
+  for (nm in c("date.series.start","date.series.end"))
+    if (nm %in% names(df.symbols)) df.symbols[[nm]] <- as.Date(df.symbols[[nm]])
+}
+
+# # Turn literal "\n" in CSV into real newlines for pretty printing
+# if ("string.description" %in% names(df.symbols)) {
+#   df.symbols$string.description <- gsub("\\\\n", "\n", df.symbols$string.description)
+# }
+# 
+# # Add safe/object names if your CSV doesn’t already have them
+# if (!"string.symbol_safe" %in% names(df.symbols)) {
+#   safe_symbol_name <- function(sym) {
+#     s <- make.names(sym, unique = TRUE)
+#     s <- gsub("\\.", "_", s)
+#     gsub("_+", "_", s)
+#   }
+#   df.symbols$string.symbol_safe <- safe_symbol_name(df.symbols$string.symbol)
+#   df.symbols$string.object_name <- df.symbols$string.symbol_safe
+# }
+
+# quick sanity check
+#str(df.symbols)
+#head(df.symbols)
+
+
 
 ```
 

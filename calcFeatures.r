@@ -150,82 +150,93 @@ calcFeatures <- function(df.data, df.symbols){
     #print( paste ("str.symbolYoY 1: ", str.symbolYoY))
     df.data[str.symbolYoY] <- CalcYoY(df.data, str.symbol, 365)
     #print( paste ("str.symbolYoY 2: ", str.symbolYoY))
-    df.symbols <-
-      rbind(
-        df.symbols,
-        data.frame(
-          string.symbol = str.symbolYoY,
-          string.source = "Calc",
-          string.description = paste(str.description, "\nYear over Year", sep = ""),
-          string.label.y = "Percent",
-          float.expense.ratio = -1.00,
-          date.series.start = date.temp.start,
-          date.series.end = date.temp.end,
-          string.symbol_safe = safe_symbol_name(str.symbolYoY),
-          string.object_name = safe_symbol_name(str.symbolYoY),
-          status = "ok",
-          error = NA,
-          nrows = 0,
-          first_date = date.series.start,
-          last_date = date.series.end
-        )
-      )
 
+    # Append a metadata row for the derived series to df.symbols
+    df.symbols <- symbols_append_row(
+      df.symbols,
+      list(
+        string.symbol = str.symbolYoY,
+        string.source = "Calc",
+        string.description = paste(str.description, "\nYear over Year", sep = ""),
+        string.label.y = "Percent",
+        float.expense.ratio = -1.00,
+        date.series.start = date.temp.start,
+        date.series.end = date.temp.end,
+        string.symbol_safe = safe_symbol_name(str.symbolYoY),
+        string.object_name = safe_symbol_name(str.symbolYoY),
+        status = "ok",
+        error = NA,
+        nrows = 0,
+        first_date = date.temp.start,
+        last_date = date.temp.end
+      )
+    )
+    
+    #---------------------------------------------------------------------------
     # These series were added to help evaluate structured products and
     # answer the question, what is the probability of a decline over a period of
     # 4 and 5 years.
+
+    
+    #-------------------- The 4-year series -----------------------------------
     str.symbolYoY4 <- paste(str.symbol, "__YoY4", sep = "")
     df.data[str.symbolYoY4] <- CalcYoY(df.data, str.symbol, (365*4))
     #print(paste(str.symbol,'-',str.symbolYoY4, '-', str.description))
-    df.symbols <-
-      rbind(
-        df.symbols,
-        data.frame(
-          string.symbol = str.symbolYoY4,
-          string.source = "Calc",
-          string.description = paste(str.description, "\n4 Year over 4 Year", sep =
-                                       ""),
-          string.label.y = "Percent",
-          float.expense.ratio = -1.00,
-          date.series.start = date.temp.start,
-          date.series.end = date.temp.end,
-          string.symbol_safe = safe_symbol_name(str.symbolYoY4),
-          string.object_name = safe_symbol_name(str.symbolYoY4),
-          status = "ok",
-          error = NA,
-          nrows = 0,
-          first_date = date.series.start,
-          last_date = date.series.end
-        )
+
+    # Append a metadata row for the derived series to df.symbols
+    df.symbols <- symbols_append_row(
+      df.symbols,
+      list(
+        string.symbol = str.symbolYoY4,
+        string.source = "Calc",
+        string.description = paste(str.description,
+                                   "\n4 Year over 4 Year", sep =
+                                     ""),
+        string.label.y = "Percent",
+        float.expense.ratio = -1.00,
+        date.series.start = date.temp.start,
+        date.series.end = date.temp.end,
+        string.symbol_safe = safe_symbol_name(str.symbolYoY4),
+        string.object_name = safe_symbol_name(str.symbolYoY4),
+        status = "ok",
+        error = NA,
+        nrows = 0,
+        first_date = date.temp.start,
+        last_date = date.temp.end
       )
+    )
     
-    # The 5-year series
+    
+    #-------------------- The 5-year series -----------------------------------
     str.symbolYoY5 <- paste(str.symbol, "__YoY5", sep = "")
     df.data[str.symbolYoY5] <- CalcYoY(df.data, str.symbol, (365*5))
     #print(paste(str.symbol,'-',str.symbolYoY5, '-', str.description))
-    df.symbols <-
-      rbind(
-        df.symbols,
-        data.frame(
-          string.symbol = str.symbolYoY5,
-          string.source = "Calc",
-          string.description = paste(str.description, "\n5 Year over 5 Year", sep =
-                                       ""),
-          string.label.y = "Percent",
-          float.expense.ratio = -1.00,
-          date.series.start = date.temp.start,
-          date.series.end = date.temp.end,
-          string.symbol_safe = safe_symbol_name(str.symbolYoY5),
-          string.object_name = safe_symbol_name(str.symbolYoY5),
-          status = "ok",
-          error = NA,
-          nrows = 0,
-          first_date = date.series.start,
-          last_date = date.series.end
-        )
+
+    # Append a metadata row for the derived series to df.symbols
+    df.symbols <- symbols_append_row(
+      df.symbols,
+      list(
+        string.symbol = str.symbolYoY5,
+        string.source = "Calc",
+        string.description = paste(str.description,
+                                   "\n5 Year over 5 Year", sep =
+                                     ""),
+        string.label.y = "Percent",
+        float.expense.ratio = -1.00,
+        date.series.start = date.temp.start,
+        date.series.end = date.temp.end,
+        string.symbol_safe = safe_symbol_name(str.symbolYoY5),
+        string.object_name = safe_symbol_name(str.symbolYoY5),
+        status = "ok",
+        error = NA,
+        nrows = 0,
+        first_date = date.temp.start,
+        last_date = date.temp.end
       )
-    
-    # Smooth the series, kernel of 1-year
+    )    
+        
+  
+    #---------------- Smooth the series, kernel of 1-year ---------------------
     strNewYLabel <- get_y_label_for_symbol(df.symbols, str.symbol.root)
     str.symbolSmooth <- paste(str.symbol, "__Smooth", sep = "")
     df.data[str.symbolSmooth] <-
@@ -236,33 +247,38 @@ calcFeatures <- function(df.data, df.symbols){
         m = 0,
         ts = 1
       )
-    df.symbols <-
-      rbind(
-        df.symbols,
-        data.frame(
-          string.symbol = str.symbolSmooth,
-          string.source = "Calc",
-          string.description = paste(
-            "Savitsky-Golay Smoothed (p=3, n=365)\n",
-            str.description,
-            sep = ""
-          ),
-          string.label.y = paste(strNewYLabel, "/period", sep =
-                           ""),
-          float.expense.ratio = -1.00,
-          date.series.start = date.temp.start,
-          date.series.end = date.temp.end,
-          string.symbol_safe = safe_symbol_name(str.symbolSmooth),
-          string.object_name = safe_symbol_name(str.symbolSmooth),
-          status = "ok",
-          error = NA,
-          nrows = 0,
-          first_date = date.series.start,
-          last_date = date.series.end
-        )
+
+    # Append a metadata row for the derived series to df.symbols
+    df.symbols <- symbols_append_row(
+      df.symbols,
+      list(
+        string.symbol = str.symbolSmooth,
+        string.source = "Calc",
+        string.description = paste(
+          "Savitsky-Golay Smoothed (p=3, n=365)\n",
+          str.description,
+          sep = ""
+        ),
+        string.label.y = paste(strNewYLabel,
+                               "/period", sep =
+                               ""),
+        float.expense.ratio = -1.00,
+        date.series.start = date.temp.start,
+        date.series.end = date.temp.end,
+        string.symbol_safe = safe_symbol_name(str.symbolSmooth),
+        string.object_name = safe_symbol_name(str.symbolSmooth),
+        status = "ok",
+        error = NA,
+        nrows = 0,
+        first_date = date.temp.start,
+        last_date = date.temp.end
       )
+    )
+    rm(strNewYLabel)
+    rm(str.symbolSmooth)
     
-    # Smooth the series, kernel of 15 days (inspired by RSI length)
+        
+    # ----- Smooth the series, kernel of 15 days (inspired by RSI length) ------
     strNewYLabel <- get_y_label_for_symbol(df.symbols, str.symbol.root)
     str.symbolSmooth <- paste(str.symbol, "__Smooth__short", sep = "")
     df.data[str.symbolSmooth] <-
@@ -273,33 +289,37 @@ calcFeatures <- function(df.data, df.symbols){
         m = 0,
         ts = 1
       )
-    df.symbols <-
-      rbind(
-        df.symbols,
-        data.frame(
-          string.symbol = str.symbolSmooth,
-          string.source = "Calc",
-          string.description = paste(
-            "Savitsky-Golay Smoothed (p=3, n=15)\n",
-            str.description,
-            sep = ""
-          ),
-          string.label.y = paste(strNewYLabel, "/period", sep =
-                           ""),
-          float.expense.ratio = -1.00,
-          date.series.start = date.temp.start,
-          date.series.end = date.temp.end,
-          string.symbol_safe = safe_symbol_name(str.symbolSmooth),
-          string.object_name = safe_symbol_name(str.symbolSmooth),
-          status = "ok",
-          error = NA,
-          nrows = 0,
-          first_date = date.series.start,
-          last_date = date.series.end
-        )
-      )
     
-    # Smooth and derivative in one step
+    # Append a metadata row for the derived series to df.symbols
+    df.symbols <- symbols_append_row(
+      df.symbols,
+      list(
+        string.symbol = str.symbolSmooth,
+        string.source = "Calc",
+        string.description = paste(
+          "Savitsky-Golay Smoothed (p=3, n=15)\n",
+          str.description,
+          sep = ""
+        ),
+        string.label.y = paste(strNewYLabel, "/period", sep =
+                                 ""),
+        float.expense.ratio = -1.00,
+        date.series.start = date.temp.start,
+        date.series.end = date.temp.end,
+        string.symbol_safe = safe_symbol_name(str.symbolSmooth),
+        string.object_name = safe_symbol_name(str.symbolSmooth),
+        status = "ok",
+        error = NA,
+        nrows = 0,
+        first_date = date.temp.start,
+        last_date = date.temp.end
+      )
+    )
+    rm(strNewYLabel)
+    rm(str.symbolSmooth)
+    
+        
+    #----------------- Smooth and derivative in one step ----------------------
     strNewYLabel <- get_y_label_for_symbol(df.symbols, str.symbol.root)
     str.symbolSmoothDer <- paste(str.symbol, "__SmoothDer", sep = "")
     df.data[str.symbolSmoothDer] <-
@@ -310,30 +330,34 @@ calcFeatures <- function(df.data, df.symbols){
         m = 1,
         ts = 1
       )
-    df.symbols <-
-      rbind(
-        df.symbols,
-        data.frame(
-          string.symbol = str.symbolSmoothDer,
-          string.source = "Calc",
-          string.description = paste("Derivative of Smoothed\n", str.description, sep =
-                         ""),
-          string.label.y = paste(strNewYLabel, "/period", sep =
-                           ""),
-          float.expense.ratio = -1.00,
-          date.series.start = date.temp.start,
-          date.series.end = date.temp.end,
-          string.symbol_safe = safe_symbol_name(str.symbolSmoothDer),
-          string.object_name = safe_symbol_name(str.symbolSmoothDer),
-          status = "ok",
-          error = NA,
-          nrows = 0,
-          first_date = date.series.start,
-          last_date = date.series.end
-        )
+
+    # Append a metadata row for the derived series to df.symbols
+    df.symbols <- symbols_append_row(
+      df.symbols,
+      list(
+        string.symbol = str.symbolSmoothDer,
+        string.source = "Calc",
+        string.description = paste("Derivative of Smoothed\n", str.description, sep =
+                                     ""),
+        string.label.y = paste(strNewYLabel, "/period", sep =
+                                 ""),
+        float.expense.ratio = -1.00,
+        date.series.start = date.temp.start,
+        date.series.end = date.temp.end,
+        string.symbol_safe = safe_symbol_name(str.symbolSmoothDer),
+        string.object_name = safe_symbol_name(str.symbolSmoothDer),
+        status = "ok",
+        error = NA,
+        nrows = 0,
+        first_date = date.temp.start,
+        last_date = date.temp.end
       )
+    )
+    rm(strNewYLabel)
+    rm(str.symbolSmoothDer)
     
-    # Take the log
+    
+    #------------------------------ Take the log ------------------------------
     strNewYLabel <- get_y_label_for_symbol(df.symbols, str.symbol.root)
     str.symbolLog <- paste(str.symbol, "__Log", sep = "")
     if (any(df.data[,str.symbol] <=0)){
@@ -344,30 +368,34 @@ calcFeatures <- function(df.data, df.symbols){
     }
     df.data[!is.finite(df.data[, str.symbolLog]), str.symbolLog] <- NA
     df.data[, str.symbolLog] <- na.approx(df.data[, str.symbolLog], rule = 2)
-    df.symbols <-
-      rbind(
-        df.symbols,
-        data.frame(
-          string.symbol = str.symbolLog,
-          string.source = "Calc",
-          string.description = paste("Log of ", str.description, sep =
-                         ""),
-          string.label.y = paste("log(", strNewYLabel, ")", sep =
-                           ""),
-          float.expense.ratio = -1.00,
-          date.series.start = date.temp.start,
-          date.series.end = date.temp.end,
-          string.symbol_safe = safe_symbol_name(str.symbolLog),
-          string.object_name = safe_symbol_name(str.symbolLog),
-          status = "ok",
-          error = NA,
-          nrows = 0,
-          first_date = date.series.start,
-          last_date = date.series.end
-        )
+
+    # Append a metadata row for the derived series to df.symbols
+    df.symbols <- symbols_append_row(
+      df.symbols,
+      list(
+        string.symbol = str.symbolLog,
+        string.source = "Calc",
+        string.description = paste("Log of ", str.description, sep =
+                                     ""),
+        string.label.y = paste("log(", strNewYLabel, ")", sep =
+                                 ""),
+        float.expense.ratio = -1.00,
+        date.series.start = date.temp.start,
+        date.series.end = date.temp.end,
+        string.symbol_safe = safe_symbol_name(str.symbolLog),
+        string.object_name = safe_symbol_name(str.symbolLog),
+        status = "ok",
+        error = NA,
+        nrows = 0,
+        first_date = date.temp.start,
+        last_date = date.temp.end
       )
+    )
+    rm(strNewYLabel)
+    rm(str.symbolLog)
     
-    # Add the 365 day moving average
+    
+    #---------------------- Add the 365 day moving average --------------------
     mav <- function(x, n = 365) {
       stats::filter(x, rep(1 / n, n), sides = 1)
     }
@@ -376,30 +404,33 @@ calcFeatures <- function(df.data, df.symbols){
     df.data[str.symbolMVA365] <- mav(df.data[, str.symbol])
     df.data[, str.symbolMVA365] <-
       na.approx(df.data[, str.symbolMVA365], rule = 2)
-    df.symbols <-
-      rbind(
-        df.symbols,
-        data.frame(
-          string.symbol = str.symbolMVA365,
-          string.source = "Calc",
-          string.description = paste(str.description, " 365 Day MA", sep =
-                                       ""),
-          string.label.y = paste(strNewYLabel, " 365 Day MA", sep =
-                                   ""),
-          float.expense.ratio = -1.00,
-          date.series.start = date.temp.start,
-          date.series.end = date.temp.end,
-          string.symbol_safe = safe_symbol_name(str.symbolMVA365),
-          string.object_name = safe_symbol_name(str.symbolMVA365),
-          status = "ok",
-          error = NA,
-          nrows = 0,
-          first_date = date.series.start,
-          last_date = date.series.end
-        )
+
+    # Append a metadata row for the derived series to df.symbols
+    df.symbols <- symbols_append_row(
+      df.symbols,
+      list(
+        string.symbol = str.symbolMVA365,
+        string.source = "Calc",
+        string.description = paste(str.description, " 365 Day MA", sep =
+                                     ""),
+        string.label.y = paste(strNewYLabel, " 365 Day MA", sep =
+                                 ""),
+        float.expense.ratio = -1.00,
+        date.series.start = date.temp.start,
+        date.series.end = date.temp.end,
+        string.symbol_safe = safe_symbol_name(str.symbolMVA365),
+        string.object_name = safe_symbol_name(str.symbolMVA365),
+        status = "ok",
+        error = NA,
+        nrows = 0,
+        first_date = date.temp.start,
+        last_date = date.temp.end
       )
-    
-    # Add the 200 day moving average
+    )
+    rm(strNewYLabel)
+    rm(str.symbolMVA365)
+        
+    #------------------ Add the 200 day moving average ------------------------
     mav <- function(x, n = 200) {
       stats::filter(x, rep(1 / n, n), sides = 1)
     }
@@ -408,59 +439,63 @@ calcFeatures <- function(df.data, df.symbols){
     df.data[str.symbolMVA200] <- mav(df.data[, str.symbol])
     df.data[, str.symbolMVA200] <-
       na.approx(df.data[, str.symbolMVA200], rule = 2)
-    df.symbols <-
-      rbind(
-        df.symbols,
-        data.frame(
-          string.symbol = str.symbolMVA200,
-          string.source = "Calc",
-          string.description = paste(str.description, " 200 Day MA", sep =
-                         ""),
-          string.label.y = paste(strNewYLabel, " 200 Day MA", sep =
-                           ""),
-          float.expense.ratio = -1.00,
-          date.series.start = date.temp.start,
-          date.series.end = date.temp.end,
-          string.symbol_safe = safe_symbol_name(str.symbolMVA200),
-          string.object_name = safe_symbol_name(str.symbolMVA200),
-          status = "ok",
-          error = NA,
-          nrows = 0,
-          first_date = date.series.start,
-          last_date = date.series.end
-        )
-      )
 
+    # Append a metadata row for the derived series to df.symbols
+    df.symbols <- symbols_append_row(
+      df.symbols,
+      list(
+        string.symbol = str.symbolMVA200,
+        string.source = "Calc",
+        string.description = paste(str.description, " 200 Day MA", sep =
+                                     ""),
+        string.label.y = paste(strNewYLabel, " 200 Day MA", sep =
+                                 ""),
+        float.expense.ratio = -1.00,
+        date.series.start = date.temp.start,
+        date.series.end = date.temp.end,
+        string.symbol_safe = safe_symbol_name(str.symbolMVA200),
+        string.object_name = safe_symbol_name(str.symbolMVA200),
+        status = "ok",
+        error = NA,
+        nrows = 0,
+        first_date = date.temp.start,
+        last_date = date.temp.end
+      )
+    )
+    rm(strNewYLabel)
+    rm(str.symbolMVA200)
+    
         
-    # Add the 50 day moving average
+    #---------------------- Add the 50 day moving average ----------------------
     strNewYLabel <- get_y_label_for_symbol(df.symbols, str.symbol.root)
     str.symbolMVA050 <- paste(str.symbol, "__mva050", sep = "")
     df.data[str.symbolMVA050] <- mav(df.data[, str.symbol], n = 50)
     df.data[, str.symbolMVA050] <-
       na.approx(df.data[, str.symbolMVA050], rule = 2)
-    df.symbols <-
-      rbind(
-        df.symbols,
-        data.frame(
-          string.symbol = str.symbolMVA050,
-          string.source = "Calc",
-          string.description = paste(str.description, " 50 Day MA", sep =
-                         ""),
-          string.label.y = paste(strNewYLabel, " 50 Day MA", sep =
-                           ""),
-          float.expense.ratio = -1.00,
-          date.series.start = date.temp.start,
-          date.series.end = date.temp.end,
-          string.symbol_safe = safe_symbol_name(str.symbolMVA050),
-          string.object_name = safe_symbol_name(str.symbolMVA050),
-          status = "ok",
-          error = NA,
-          nrows = 0,
-          first_date = date.series.start,
-          last_date = date.series.end
-        )
-      )
 
+    # Append a metadata row for the derived series to df.symbols
+    df.symbols <- symbols_append_row(
+      df.symbols,
+      list(
+        string.symbol = str.symbolMVA050,
+        string.source = "Calc",
+        string.description = paste(str.description, " 50 Day MA", sep =
+                                     ""),
+        string.label.y = paste(strNewYLabel, " 50 Day MA", sep =
+                                 ""),
+        float.expense.ratio = -1.00,
+        date.series.start = date.temp.start,
+        date.series.end = date.temp.end,
+        string.symbol_safe = safe_symbol_name(str.symbolMVA050),
+        string.object_name = safe_symbol_name(str.symbolMVA050),
+        status = "ok",
+        error = NA,
+        nrows = 0,
+        first_date = date.temp.start,
+        last_date = date.temp.end
+      )
+    )
+    
   }  
   
   return(list(df.data, df.symbols))

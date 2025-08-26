@@ -56,52 +56,47 @@ if ( require_columns(df.data, c("USREC") ) ){
                                      df.data$date < dfRecession$initEnd[idx])])
   }
   
-  df.symbols <-
-    rbind(
-      df.symbols,
-      data.frame(
-        string.symbol = "RecInit",
-        string.source = "Calc",
-        string.description = "1 for Recession Initiation Period, 0 For All Else",
-        string.label.y = "(-)",
-        float.expense.ratio = -1.00,
-        Max030 = FALSE,
-        Max180 = FALSE,
-        date.series.start = as.Date(index(USREC[1])),
-        date.series.end = as.Date(index(tail(USREC, 1))),
-        string.symbol_safe = safe_symbol_name("RecInit"),
-        string.object_name = safe_symbol_name("RecInit"),
-        status = "ok",
-        error = NA,
-        nrows = 0,
-        first_date = date.series.start,
-        last_date = date.series.end
-      )
+  # Append a metadata row for the derived series to df.symbols
+  df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = "RecInit",
+      string.source = "Calc",
+      string.description = "1 for Recession Initiation Period, 0 For All Else",
+      string.label.y = "(-)",
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = as.Date(index(USREC[1])),
+      date.series.end = as.Date(index(tail(USREC, 1))),
+      string.symbol_safe = safe_symbol_name("RecInit"),
+      string.object_name = safe_symbol_name("RecInit"),
+      status = "ok",
+      error = NA,
+      nrows = 0,
     )
-  
-  df.symbols <-
-    rbind(
-      df.symbols,
-      data.frame(
-        string.symbol = "RecInit_Smooth",
-        string.source = "Calc",
-        string.description = "1 for Recession Initiation Period, 0 For All Else (Smoothed)",
-        string.label.y = "(-)",
-        float.expense.ratio = -1.00,
-        Max030 = FALSE,
-        Max180 = FALSE,
-        date.series.start = as.Date(index(USREC[1])),
-        date.series.end = as.Date(index(tail(USREC, 1))),
-        string.symbol_safe = safe_symbol_name("RecInit_Smooth"),
-        string.object_name = safe_symbol_name("RecInit_Smooth"),
-        status = "ok",
-        error = NA,
-        nrows = 0,
-        first_date = date.series.start,
-        last_date = date.series.end
-      )
+  )
+
+  # Append a metadata row for the derived series to df.symbols
+  df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = "RecInit_Smooth",
+      string.source = "Calc",
+      string.description = "1 for Recession Initiation Period, 0 For All Else (Smoothed)",
+      string.label.y = "(-)",
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = as.Date(index(USREC[1])),
+      date.series.end = as.Date(index(tail(USREC, 1))),
+      string.symbol_safe = safe_symbol_name("RecInit_Smooth"),
+      string.object_name = safe_symbol_name("RecInit_Smooth"),
+      status = "ok",
+      error = NA,
+      nrows = 0,
     )
-  
+  )    
   
   # Additional smoothing and processing for the smooth curve
   df.data$RecInit_Smooth <- sgolayfilt(df.data$RecInit_Smooth, p=3, n=201, m=0, ts=1)
