@@ -57,10 +57,11 @@ if ( require_columns(df.data, c("USREC") ) ){
   }
   
   # Append a metadata row for the derived series to df.symbols
+  str.sym.new <- "RecInit"
   df.symbols <- symbols_append_row(
     df.symbols,
     list(
-      string.symbol = "RecInit",
+      string.symbol = str.sym.new,
       string.source = "Calc",
       string.description = "1 for Recession Initiation Period, 0 For All Else",
       string.label.y = "(-)",
@@ -69,14 +70,15 @@ if ( require_columns(df.data, c("USREC") ) ){
       Max180 = FALSE,
       date.series.start = as.Date(index(USREC[1])),
       date.series.end = as.Date(index(tail(USREC, 1))),
-      string.symbol_safe = safe_symbol_name("RecInit"),
-      string.object_name = safe_symbol_name("RecInit"),
+      string.symbol_safe = safe_symbol_name(str.sym.new),
+      string.object_name = safe_symbol_name(str.sym.new),
       status = "ok",
       error = NA,
-      nrows = 0,
+      nrows = 0
     )
   )
-
+  rm(str.sym.new)
+  
   # Append a metadata row for the derived series to df.symbols
   df.symbols <- symbols_append_row(
     df.symbols,
@@ -94,7 +96,7 @@ if ( require_columns(df.data, c("USREC") ) ){
       string.object_name = safe_symbol_name("RecInit_Smooth"),
       status = "ok",
       error = NA,
-      nrows = 0,
+      nrows = 0
     )
   )    
   
