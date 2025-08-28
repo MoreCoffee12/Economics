@@ -31,6 +31,10 @@ vignettes/*.pdf
 # OSX
 # =========================
 
+
+# Image and output files
+*.png
+
 .DS_Store
 .AppleDouble
 .LSOverride
