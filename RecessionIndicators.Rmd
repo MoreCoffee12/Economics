@@ -1715,7 +1715,7 @@ In this worksheet a model predicting the onset of recession was built. From the 
 # my.plot + geom_line(data=df.data, aes_string(x="date", y=datay.aux, colour=shQuote(datay.aux)), na.rm = TRUE)
 ```
 
-- S&P 500 Volume, last updated on `r index(tail(GSPC,1))`, is `r getTrendString(df.data, 'X_GSPC.GSPC.Volume', 365)` over the last year and `r getTrendString(df.data, 'X_GSPC.GSPC.Volume', 30)` over the last month. 
+- S&P 500 Volume, last updated on `r index(tail(X_GSPC,1))`, is `r getTrendString(df.data, 'X_GSPC.GSPC.Volume', 365)` over the last year and `r getTrendString(df.data, 'X_GSPC.GSPC.Volume', 30)` over the last month. 
 
 
 ```{r bullet2, echo=FALSE}
@@ -1745,7 +1745,7 @@ rm(my.plot)
 
 ## Unemployment 
 
-- Headline unemployment (U-3) stands at `r paste(sprintf("%3.2f", tail(df.data$UNRATE.Value,1)),"%", sep="")` (last updated on `r index(tail(UNRATE,1))`) which is near the 1-year average of `r paste(sprintf("%3.2f",mean(tail(df.data$UNRATE.Value, 365))),"%",sep="")` and rising with respect to the low in the last twelve months of `r paste(sprintf("%3.2f", min(tail(UNRATE.Value,12))),"%",sep="")`. Unlikely the rate will drop again. 
+- Headline unemployment (U-3) stands at `r paste(sprintf("%3.2f", tail(df.data$UNRATE.Value,1)),"%", sep="")` (last updated on `r index(tail(UNRATE,1))`) which is near the 1-year average of `r paste(sprintf("%3.2f",mean(tail(df.data$UNRATE.Value, 365))),"%",sep="")` and rising with respect to the low in the last twelve months of `r paste(sprintf("%3.2f", min(tail(UNRATE,12))),"%",sep="")`. Unlikely the rate will drop again. 
 
 ```{r bullet3, echo=FALSE}
 
