@@ -3933,23 +3933,44 @@ my.plot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuo
 ADP data here. comes out before the official numbers.
 
 ```{r NPPTTL, echo=FALSE}
-datay <- "NPPTTL.Value"
-ylim <- c(100000, 135000)
-dt.start <- as.Date('2000-01-01')
-  plotSingle(
-    dfRecession,
-    df.data,
-    "date",
-    datay,
-    getPlotTitle(df.symbols, datay),
-    "Date",
-    getPlotYLabel(df.symbols, datay),
-    c(dt.start, Sys.Date()),
-    ylim,
-    TRUE,
-    b.long.legend = FALSE
-  )
 
+lst_syms <- c("NPPTTL.Value", "ADPWNUSNERSA.Value")
+if (require_columns(df.data, lst_syms )) {
+    
+  my_plot <- plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_syms[[1]],
+      getPlotTitle(df.symbols, lst_syms[[1]]),
+      "Date",
+      getPlotYLabel(df.symbols, lst_syms[[1]]),
+      c(as.Date('2000-01-01'), Sys.Date()),
+      ylim = c(100000, 135000),
+      TRUE,
+      b.long.legend = FALSE
+    )
+    my_plot + geom_line(
+      data = df.data,
+      aes_string(
+        x = "date",
+        y = lst_syms[[2]],
+        colour = shQuote(lst_syms[[2]])
+      ),
+      na.rm = TRUE
+    )
+    
+
+}
+
+# Clean and tidy memory  
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
+
+if( exists("my_plot")){
+  rm(my_plot)
+}  
 ```
 
 Look at the year-over-year change in ADP.

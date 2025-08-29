@@ -159,3 +159,32 @@ symbols_append_row <- function(df.symbols, fields, compute_safe = TRUE) {
   
   rbind(df.symbols, new_row)
 }
+
+
+#-------- Check that the columns exist in the data frame-----------------------
+#' Check if data frame contains required columns
+#'
+#' This helper function verifies whether all specified column names
+#' are present in a data frame. Returns \code{TRUE} if all columns exist,
+#' otherwise \code{FALSE}.
+#'
+#' @param df A data frame to check.
+#' @param cols A character vector of column names to verify.
+#'
+#' @return A logical scalar: \code{TRUE} if all required columns exist,
+#'   otherwise \code{FALSE}.
+#' @export
+#'
+#' @examples
+#' df <- data.frame(a = 1:3, b = 4:6)
+#' require_columns(df, c("a", "b"))    # TRUE
+#' require_columns(df, c("a", "c"))    # FALSE
+require_columns <- function(df, cols ) {
+  miss <- setdiff(cols, names(df))
+  if (length(miss)){
+    FALSE
+  }else{
+    TRUE
+  } 
+}
+

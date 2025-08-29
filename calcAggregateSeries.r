@@ -1,16 +1,27 @@
-
-
-#-------- Check that the columns exist in the data frame-----------------------
-require_columns <- function(df, cols ) {
-  miss <- setdiff(cols, names(df))
-  if (length(miss)){
-    FALSE
-  }else{
-    TRUE
-  } 
+#------------------------- Unit conversions -----------------------------------
+# Federal reserve repos, from millions to billions
+# TODO - Update df.symbols with the new units
+lst_syms <- c("WLRRAL.Value")
+if ( require_columns(df.data, lst_syms[[1]] ) ){
+  
+  df.data[[lst_syms[[1]]]] <- ( df.data[[lst_syms[[1]]]] / 1000.0 )
+  
 }
+rm(lst_syms)
+
+# This series must be converted from jobs to thousands of jobs to match the
+# previous NPPTTL series. I have updated the units in symbols_catalog.csv 
+lst_syms <- c("ADPWNUSNERSA.Value")
+if ( require_columns(df.data, lst_syms ) ){
+  
+  df.data[[lst_syms[[1]]]] <- ( df.data[[lst_syms[[1]]]] / 1000.0 )
+  
+}
+rm(lst_syms)
 
 
+
+#------------------------ Create the aggregate series--------------------------
 # Create an aggregate column for retail sales (mean of RRSFS.Value and RSALES.Value)
 if (require_columns(df.data, c("RRSFS.Value", "RSALES.Value"))) {
   
@@ -1149,14 +1160,6 @@ if ( require_columns(df.data, c("EXCSRESNW.Value", "GDP.Value") ) ){
   # Tidy memory
   rm(str.symbol.new)
   
-}
-
-# Federal reserve repos, from millions to billions
-# TODO - Update df.symbols with the new units
-if ( require_columns(df.data, c("WLRRAL.Value") ) ){
-  
-  df.data$WLRRAL.Value <- df.data$WLRRAL.Value / 1000
-
 }
 
 # Reverse repos (in billions) divided by GDP
