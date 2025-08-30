@@ -3930,11 +3930,22 @@ my.plot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuo
 
 ### Unemployment Level
 
-ADP data here. comes out before the official numbers.
+This plot shows three smooth lines tracking employment levels across cycles,
+with downturns/recoveries highlighted by the recession shading. The ADP line
+often moves similarly to the BLS series but can lead slightly month-to-month;
+the PAYEMS line sits above the private series because it includes government
+jobs.
 
-```{r NPPTTL, echo=FALSE}
+Payrolls roll over ahead of or early in recessions and re-accelerate during
+recoveries. The shaded bands, indicating recessions, let you see that
+relationship.
 
-lst_syms <- c("NPPTTL.Value", "ADPWNUSNERSA.Value")
+Comparing private (NPPTTL) to total (PAYEMS) highlights whether the public
+sector is cushioning weakness (or amplifying strength).
+
+```{r NPPTTL, echo=FALSE, fig.width = 10, fig.asp = .32}
+
+lst_syms <- c("NPPTTL.Value", "ADPWNUSNERSA.Value", "PAYEMS.Value")
 if (require_columns(df.data, lst_syms )) {
     
   my_plot <- plotSingle(
@@ -3942,25 +3953,34 @@ if (require_columns(df.data, lst_syms )) {
       df.data,
       "date",
       datay = lst_syms[[1]],
-      getPlotTitle(df.symbols, lst_syms[[1]]),
+      "Payroll Trends",
       "Date",
       getPlotYLabel(df.symbols, lst_syms[[1]]),
       c(as.Date('2000-01-01'), Sys.Date()),
-      ylim = c(100000, 135000),
+      ylim = c(100000, 165000),
       TRUE,
-      b.long.legend = FALSE
+      b.long.legend = TRUE
     )
-    my_plot + geom_line(
+    my_plot <- my_plot + geom_line(
       data = df.data,
       aes_string(
         x = "date",
         y = lst_syms[[2]],
-        colour = shQuote(lst_syms[[2]])
+        colour = shQuote(getPlotTitle(df.symbols, lst_syms[[2]]))
       ),
       na.rm = TRUE
     )
-    
+    my_plot <- my_plot + geom_line(
+      data = df.data,
+      aes_string(
+        x = "date",
+        y = lst_syms[[3]],
+        colour = shQuote(getPlotTitle(df.symbols, lst_syms[[3]]))
+      ),
+      na.rm = TRUE
+    )    
 
+    print(my_plot)
 }
 
 # Clean and tidy memory  
@@ -3973,25 +3993,71 @@ if( exists("my_plot")){
 }  
 ```
 
-Look at the year-over-year change in ADP.
+This plot shows three tightly related growth-rate curves. ADP YoY often turns a
+bit earlier; PAYEMS YoY is the benchmark; private YoY isolates underlying
+business hiring (government swings can make PAYEMS look sturdier or weaker than
+the private economy).
 
-```{r NPPTTL.YoY, echo=FALSE}
-datay <- "NPPTTL.Value__YoY"
-ylim <- c(-20, 10)
-dt.start <- as.Date('2000-01-01')
-  plotSingle(
-    dfRecession,
-    df.data,
-    "date",
-    datay,
-    getPlotTitle(df.symbols, datay),
-    "Date",
-    getPlotYLabel(df.symbols, datay),
-    c(dt.start, Sys.Date()),
-    ylim,
-    TRUE,
-    b.long.legend = FALSE
-  )
+Inflections in YoY often precede (or coincide with) NBER recession starts and
+equity draw downs.
+
+Payroll growth ≈ breadth of labor demand; sustained deceleration usually
+foreshadows softer PCE and revenue growth.
+
+Weakening YoY increases odds of easing; re-acceleration keeps policy tighter for
+longer—key for duration, curve, and equity style.
+
+```{r NPPTTL.YoY, echo=FALSE, fig.width = 10, fig.asp = .32}
+
+lst_syms <- c("NPPTTL.Value__YoY", "ADPWNUSNERSA.Value__YoY",
+              "PAYEMS.Value__YoY")
+
+if (require_columns(df.data, lst_syms )) {
+  
+  my_plot <-plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_syms[[1]],
+      "Payroll Year-Over-Year Trends",
+      "Date",
+      getPlotYLabel(df.symbols, lst_syms[[1]]),
+      c(as.Date('2000-01-01'), Sys.Date()),
+      ylim = c(-20, 10),
+      TRUE,
+      b.long.legend = TRUE
+    )
+
+    my_plot <- my_plot + geom_line(
+      data = df.data,
+      aes_string(
+        x = "date",
+        y = lst_syms[[2]],
+        colour = shQuote(getPlotTitle(df.symbols, lst_syms[[2]]))
+      ),
+      na.rm = TRUE
+    )
+    my_plot <- my_plot + geom_line(
+      data = df.data,
+      aes_string(
+        x = "date",
+        y = lst_syms[[3]],
+        colour = shQuote(getPlotTitle(df.symbols, lst_syms[[3]]))
+      ),
+      na.rm = TRUE
+    )    
+
+    print(my_plot)  
+}
+
+# Clean and tidy memory  
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
+
+if( exists("my_plot")){
+  rm(my_plot)
+}  
 
 ```
 
