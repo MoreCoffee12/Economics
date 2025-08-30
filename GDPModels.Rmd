@@ -1,7 +1,7 @@
 ---
 title: "GDP Models"
 author: "Brian Howard"
-date: "August 2, 2020"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
 output: 
   html_document:
     toc: true
@@ -15,6 +15,7 @@ options("getSymbols.warning4.0"=FALSE)
 ```
 
 ```{r libraries, echo=FALSE, message=FALSE}
+library(tidyverse)
 library(UsingR)
 library(quantmod)
 library(ggplot2)
@@ -33,17 +34,19 @@ library(rpart.plot)
 library(randomForest)
 library(Quandl)
 library(nnet)
-library(pls)
 library(readr)
 #library(devtools)
 #install_github("andrewuhl/RollingWindow")
 library(RollingWindow)
-#install.packages("EIAdata")
-library(EIAdata)
+#library(devtools)
+#devtools::install_github("jameelalsalam/eia2")
+library(eia2)
 library(gtable)
 library(data.table)
 library(readxl)
 library(plotly)
+#install.packages('pls')
+library(pls)
 ```
 
 ```{r helper functions, echo=FALSE}
@@ -59,47 +62,42 @@ source("plotHelper.r")
 dt.recent = as.Date("2017-01-01")
 
 # Define the S&P 500 limits
-d.GSPC.max = 3500
+d.GSPC.max = 7000
 
 ```
-
-
-```{r defsyms, echo=FALSE}
-
-# Call code that defines the desired symbols.
-source("SymbolList.r")
-
-```
-
 
 
 ```{r load.data, echo=FALSE}
 
+str.data.dir <- "C:/Users/Rainy/OneDrive/Documents/IssaquahDynamical/Datasets/2529RS0082_HistEconData"
+out.file <- file.path(str.data.dir, "RecessionIndicator_Buffer.RData")
+
 # Load data
-load("C:/Users/Rainy/OneDrive//RecessionIndicator_Buffer.RData")
+load(out.file)
 
-```
-
-
-```{r symTidy, echo=FALSE}
-
-#This snippet is needed because some of the ticker symbols include are invalid variable names so re-cast those variable names.
-
-df.symbols$string.symbol <-
-  str_replace_all(df.symbols$string.symbol, "[^[:alnum:]]", "")
+rm(str.data.dir)
+rm(out.file)
 
 ```
 
 ## Feature Extraction
 
-With the raw data downloaded, some of the interesting features can be extracted. The first step is reconcile the time intervals. Some of the data is released monthly and some daily. I chose to interpolate all data to a daily interval. The first section of code adds the daily rows to the dataframe. 
+With the raw data downloaded, some of the interesting features can be extracted.
+The first step is reconcile the time intervals. Some of the data is released
+monthly and some daily. I chose to interpolate all data to a daily interval. The
+first section of code adds the daily rows to the dataframe.
 
-The code performs interpolation for continuous data or carries it forward for binary data like the recession indicators.
+The code performs interpolation for continuous data or carries it forward for
+binary data like the recession indicators.
 
 ```{r aggsyms}
 
+source("utilSyms.r")
 source("calcInterpolate.r")
-df.data <- calcInterpolate(df.data, df.symbols)
+df.data <- calcInterpolate(df.symbols)
+
+# Truncate data
+df.data <- df.data[as.Date(rownames(df.data)) > as.Date("1940-01-01"),]
 
 ```
 
@@ -131,15 +129,6 @@ source("calcFeaturesAggregate.r")
 
 ```
 
-
-```{r data.trunc, echo=FALSE}
-
-# A very few data series do go back to 1854, but most
-# don't even go past WWII so truncate the dataframe
-df.data <- df.data[df.data$date > as.Date("1940-01-01"),]
-
-```
-
 # Recession Initiation (Switch Model)
 
 Build the recession and recession initiation dates
@@ -152,127 +141,712 @@ source("calcRecession.r")
 
 ## GDP Models
 
-### Regression, Retail sales
+### Validate GDP Series
 
-See if we can get there with a simple regression model. Begin by taking a look at how these datapoints correlate
+I was confused about what was in the GDPNow series. I created this series of plots to be sure nominal and real GDP were correct.
 
-```{r date.setup, echo=FALSE}
+```{r validate_gdp_series, echo=FALSE, fig.width = 10, fig.asp = .62}
 
-# Exclude the Covid19 datasets
+datay <- "GDP.Value__YoY"
+ylim <- c(-10, 20)
+dtStart = as.Date('2000-01-01')
+p1 <-
+  plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = FALSE)
+
+
+datay.1 <- "GDPC1.Value__YoY"
+datay.aux.1 <- "GDPNOW.Value"
+ylim.1 <- c(-10, 20)
+p2 <- plotSingleQuick(dfRecession, df.data, datay.1, ylim.1, dtStart, b.percentile = FALSE, b.legend = TRUE)
+p2 <- p2 + geom_line(
+    data = df.data,
+    aes_string(x = "date",
+      y = datay.aux.1,
+      colour = shQuote(datay.aux.1)
+    ),
+    na.rm = TRUE
+  )
+
+grid.arrange(p1,
+             p2,
+             ncol = 1,
+             top = "Nominal and real GDP")
+
+```
+
+
+```{r validate_gdp_series_yoy, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+datay <- "GDPC1.Value__YoY"
+datay.aux.1 <- "GDP__by__GDPDEF__YoY"
+ylim <- c(-10, 20)
+dtStart = as.Date('2000-01-01')
+p1 <-
+  plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.legend <- TRUE, b.percentile = FALSE)
+p1 + geom_line(
+    data = df.data,
+    aes_string(x = "date",
+      y = datay.aux.1,
+      colour = shQuote(datay.aux.1)
+    ),
+    na.rm = TRUE
+  )
+
+```
+
+```{r define_ranges, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+# Define training ranges and parameters
+
+# Exclude the Covid19 data sets
 dt.start.prediction <- as.Date(max(c(index(CLF16OV[1]), index(POPTHM[1]))))
 dt.end.prediction <- as.Date("2020-01-31")
 
 ```
 
+# Supporting Series Models
 
-```{r corplot1.gdp, echo=FALSE, fig.width=12,fig.height=12}
+The underlying data series for GDP only get updated once a month and they are
+often delayed by weeks. I would like to synthesize a few series that could be
+used to get more up to date estimates. I am going to start with the PCE series
+since that is the largest contributor to the GDP numbers.
 
-# Correlation for the entire data set
+## PCE
+
+### Data exploration
+
+Truncate the data. Yahoo rarely goes past 2000
+
+```{r pce_data_exp, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+dt.start.prediction.pce <- as.Date("2000-01-01")
+df.data.pce <- df.data[as.Date(rownames(df.data)) > dt.start.prediction.pce,]
+
+```
+
+Starting with some correlation see if we can find market data series (updated
+daily) that could be used to estimate PCE.
+
+```{r pce_data_exp_corr, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+training.cor.pce <-
+  df.data.pce[, c("PCE.Value", "GSG.Close", "XLE.Close", "PKG.Close", "IP.Close", "UPS.Close", "FDX.Close", "X_DJI.DJI.Open")]
+
+  rcorr.data <- rcorr(as.matrix(training.cor.pce), type = "pearson")
+  #print(rcorr.data)
+
+  corrplot::corrplot(cor(training.cor.pce), type="upper", order="original", 
+           tl.col="black", tl.srt=45, title ="GDP Data")
+
+```
+
+### Begin training up some models for PCE
+
+```{r pce_model_dates, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+df.pce.model <-
+  df.data[df.data$date >= dt.start.prediction.pce &
+            df.data$date <= dt.end.prediction,]
+
+```
+
+#### I break the data into three sets: 50% for training, 25% for testing, and 25% for validation.
+
+```{r pce_model_partition, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+set.seed(123456)
+in.train <- createDataPartition(y = df.pce.model$PCE.Value, p = 0.50, list = FALSE)
+df.train <- df.pce.model[in.train,]
+df.data.rest <- df.pce.model[-in.train,]
+in.val <- createDataPartition(y = df.data.rest$PCE.Value, p = 0.50, list = FALSE)
+df.val <- df.data.rest[in.val,]
+df.test <- df.data.rest[-in.val,]
+rm(df.data.rest)
+
+```
+
+#### Perform the linear fit
+
+```{r pce_model_fit_linear, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+list.fit.reg.pce <- train(
+  PCE.Value ~ GSG.Close + PKG.Close + UPS.Close + FDX.Close,
+  data = df.train,
+  method = "lm",
+  preProcess = c('center', 'scale')
+)
+
+```
+
+#### Perform the pca fit
+
+```{r pce_model_fit_pca, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+list.fit.pcr.pce <- train(
+  PCE.Value ~ GSG.Close + PKG.Close + UPS.Close + FDX.Close + X_DJI.DJI.Open,
+  data = df.train,
+  method = "pcr",
+  preProcess = c('center', 'scale')
+)
+
+```
+
+#### Perform the knn fit
+
+```{r pce_model_fit_knn, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+list.fit.knn.pce <- train(
+  PCE.Value ~ GSG.Close + PKG.Close + UPS.Close + FDX.Close + X_DJI.DJI.Open,
+  data = df.train,
+  method = "knn",
+  preProcess = c('center', 'scale')
+)
+
+```
+
+### Adds the linear prediction to the data frame
+
+#### Make the prediction
+
+```{r pce_model_sym_def, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+# Add linear prediction to the data frame
+str.symbol <- "PCE.lm"
+df.data[str.symbol] <-
+  predict(list.fit.reg.pce, newdata = df.data)
+
+```
+
+
+```{r pce_model_sym_add, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+str.description <- "Linear Model Prediction\nPCE given GSG,\nPKG, UPS, and FDX"
+# Update the symbols table    
+df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = str.symbol,
+      string.source = "Predict",
+      string.description = str.description,
+      string.label.y = getPlotYLabel(df.symbols, "PCE")[1],
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = dt.start.prediction,
+      date.series.end = as.Date(Sys.Date()),
+      string.symbol_safe = safe_symbol_name(str.symbol),
+      string.object_name = safe_symbol_name(str.symbol)
+    )
+)
+
+
+str.description <- "Linear Model Prediction\nPCE given GSG,\nPKG, UPS, and FDX"
+# Update the symbols table    
+df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = str.symbol,
+      string.source = "Predict",
+      string.description = str.description,
+      string.label.y = getPlotYLabel(df.symbols, "PCE")[1],
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = dt.start.prediction,
+      date.series.end = as.Date(Sys.Date()),
+      string.symbol_safe = safe_symbol_name(str.symbol),
+      string.object_name = safe_symbol_name(str.symbol)
+  )
+)
+
+```
+
+#### Create the year-over-year values
+
+Add the linear prediction year-over-year growth
+
+```{r pce_model_sym_yoy, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+# The YoY calculation for the linear model
+str.symbolYoY <- paste(str.symbol, "__YoY", sep = "")
+df.data[str.symbolYoY] <- CalcYoY(df.data, str.symbol, 365)
+
+# Update the symbols table    
+df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = str.symbolYoY,
+      string.source = "Calc",
+      string.description = paste(str.description, "\nYear over Year", sep =
+                                   ""),
+      string.label.y = "Percent",
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = dt.start.prediction,
+      date.series.end = as.Date(Sys.Date()),
+      string.symbol_safe = safe_symbol_name(str.symbolYoY),
+      string.object_name = safe_symbol_name(str.symbolYoY)
+  )
+)
+
+```
+
+
+### Add linear prediction by PCA to the dataframe
+
+```{r pce_model_sym_def_pca, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+str.symbol.pcr <- "PCE.pcr"
+df.data[str.symbol.pcr] <-
+  predict(list.fit.pcr.pce, newdata = df.data, ncomp = 1)
+
+```
+
+Describe the model
+
+```{r pce_model_sym_def_pca_desc, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+list.fit.pcr.pce
+
+
+```
+
+```{r pce_model_sym_add_pca, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+# Add the linear model prediction to the symbols table
+str.description.pcr <- "PCE Regression Prediction\nPCE given GSG,\nPKG, UPS, and FDX"
+df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = str.symbol.pcr,
+      string.source = "Predict",
+      string.description = str.description.pcr,
+      string.label.y = getPlotYLabel(df.symbols, "PCE")[1],
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = dt.start.prediction,
+      date.series.end = as.Date(Sys.Date()),
+      string.symbol_safe = safe_symbol_name(str.symbol.pcr),
+      string.object_name = safe_symbol_name(str.symbol.pcr)
+  )
+)
+
+```
+
+
+### Add KNN prediction to the dataframe
+
+```{r pce_model_sym_def_knn, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+str.symbol.pcr <- "PCE.knn"
+df.data[str.symbol.pcr] <-
+  predict(list.fit.pcr.pce, newdata = df.data, ncomp = 1)
+
+```
+
+```{r pce_model_sym_def_knn_desc, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+list.fit.knn.pce
+
+```
+Add the linear model prediction to the symbols table
+
+```{r pce_model_sym_add_knn, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+str.description.pcr <- "KNN Prediction\nPCE given GSG,\nPKG, UPS, and FDX"
+df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = str.symbol.pcr,
+      string.source = "Predict",
+      string.description = str.description.pcr,
+      string.label.y = getPlotYLabel(df.symbols, "PCE")[1],
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = dt.start.prediction,
+      date.series.end = as.Date(Sys.Date()),
+      string.symbol_safe = safe_symbol_name(str.symbol.pcr),
+      string.object_name = safe_symbol_name(str.symbol.pcr)
+  )
+)
+
+```
+
+#### Add the PCA prediction year-over-year growth
+
+
+```{r pce_model_sym_knn_yoy, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+# The YoY calculation
+str.symbolYoY <- paste(str.symbol.pcr, "_YoY", sep = "")
+df.data[str.symbolYoY] <- CalcYoY(df.data, str.symbol.pcr, 365)
+
+df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = str.symbolYoY,
+      string.source = "Calc",
+      string.description = paste(str.description.pcr, "\nYear over Year", sep =
+                                   ""),
+      string.label.y = "Percent",
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = dt.start.prediction,
+      date.series.end = as.Date(Sys.Date()),
+      string.symbol_safe = safe_symbol_name(str.symbolYoY),
+      string.object_name = safe_symbol_name(str.symbolYoY)
+  )
+)
+
+```
+
+
+#### create PCE plot
+
+```{r pce_model_plot, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+datay <- "PCE.Value"
+datay.aux <- "PCE.lm"
+datay.aux.1 <- "PCE.pcr"
+datay.aux.2 <- "PCE.knn"
+ylim <- c(1000, 18000)
+dt.end <- Sys.Date()
+myPlot <- 
+  plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay,
+    "PCE Compared to PCE predicted using linear model",
+    "Date",
+    getPlotYLabel(df.symbols, datay),
+    c(dt.start.prediction.pce, dt.end),
+    ylim,
+    b.legend = TRUE,
+    b.percentile = FALSE,
+    b.long.legend = TRUE
+  )
+myPlot <- myPlot + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux)[[1]])
+  ),
+  na.rm = TRUE
+)
+myPlot <- myPlot + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux.1,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux.1))
+  ),
+  na.rm = TRUE
+)
+myPlot <- myPlot + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux.2,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux.2))
+  ),
+  na.rm = TRUE
+)
+
+
+print(myPlot)
+
+```
+
+
+## GDP Models
+
+### Regression, Retail sales
+
+See if we can get there with a simple regression model. Begin by taking a look
+at how these data points correlate
+
+```{r gdp_corr_plot, echo=FALSE, fig.width = 10, fig.asp = .62}
+
 training.cor <-
-  df.data[, c("GDP", "INDPRO", "PCE", "RSALESAGG", "ALTSALES", "MSPUS.times.HOUST")]
+  df.data[, c("GDP.Value", "INDPRO.Value", "PCE.Value", "RSALESAGG", "ALTSALES.Value", "MSPUS__times__HOUST")]
 
   rcorr.data <- rcorr(as.matrix(training.cor), type = "pearson")
   #print(rcorr.data)
 
   corrplot::corrplot(cor(training.cor), type="upper", order="original", 
            tl.col="black", tl.srt=45, title ="GDP Data")
+
 ```
 
 
-```{r gdp.lm.setup, echo=FALSE}
+### Begin training up some models for GDP
+
+
+```{r gdp_define_dates, echo=FALSE, fig.width = 10, fig.asp = .62}
 
 df.gdp.model <-
   df.data[df.data$date >= dt.start.prediction &
             df.data$date <= dt.end.prediction,]
 
-# I break the data into three sets: 50% for training, 25% for testing, and 25% for validation.
+```
+
+#### I break the data into three sets: 50% for training, 25% for testing, and 25% for validation.
+
+```{r gdp_partition_data, echo=FALSE, fig.width = 10, fig.asp = .62}
+
 set.seed(123456)
-in.train <- createDataPartition(y=df.gdp.model$GDP, p = 0.50, list=FALSE)
+in.train <- createDataPartition(y=df.gdp.model$GDP.Value, p = 0.50, list=FALSE)
 df.train <- df.gdp.model[in.train,]
 df.data.rest <- df.gdp.model[-in.train,]
-in.val <- createDataPartition(y = df.data.rest$GDP, p = 0.50, list = FALSE)
+in.val <- createDataPartition(y = df.data.rest$GDP.Value, p = 0.50, list = FALSE)
 df.val <- df.data.rest[in.val,]
 df.test <- df.data.rest[-in.val,]
 rm(df.data.rest)
 
-# Perform the linear fit
+```
+
+#### Perform the linear fit
+
+```{r gdp_fit_lm, echo=FALSE, fig.width = 10, fig.asp = .62}
+
 list.fit.reg <- train(
-  GDP ~ INDPRO + PCE + RSALESAGG + ALTSALES + MSPUS.times.HOUST,
+  GDP.Value ~ INDPRO.Value + PCE.Value + RSALESAGG + ALTSALES.Value + MSPUS__times__HOUST,
   data = df.train,
   method = "lm",
   preProcess = c('center', 'scale')
 )
 
+```
 
-# Perform the pca fit
+#### Perform the pca fit
+
+```{r gdp_fit_pca, echo=FALSE, fig.width = 10, fig.asp = .62}
+
 list.fit.pcr <- train(
-  GDP ~ INDPRO + PCE + RSALESAGG + ALTSALES,
+  GDP.Value ~ INDPRO.Value + PCE.Value + RSALESAGG + ALTSALES.Value + MSPUS__times__HOUST,
   data = df.train,
   method = "pcr",
   preProcess = c('center', 'scale')
 )
 
-
 ```
 
-```{r gdp.lm.update, echo=FALSE}
+### Adds the linear prediction to the data frame
 
-# Add linear prediction to the dataframe
+Add the nominal linear prediction year-over-year growth
+
+#### Add linear prediction to the dataframe
+
+```{r gdp_fit_ln_add, echo=FALSE, fig.width = 10, fig.asp = .62}
+
 str.symbol <- "GDP.lm"
 df.data[str.symbol] <-
   predict(list.fit.reg, newdata = df.data)
 
 # Add the linear model prediction to the symbols table
-df.symbols <-
-  rbind(
+str.description <- "Linear Model Prediction\nGDP given INDPRO,\nPCE, RSALESAGG, ALTSALES,\nand housing"
+
+df.symbols <- symbols_append_row(
     df.symbols,
-    data.frame(
+    list(
       string.symbol = str.symbol,
       string.source = "Predict",
-      string.description = "Linear Model Prediction\nGDP given INDPRO,\nPCE, RSALESAGG, auto sales,\nand housing",
+      string.description = str.description,
       string.label.y = getPlotYLabel(df.symbols, "POPTHM")[1],
       float.expense.ratio = -1.00,
       Max030 = FALSE,
       Max180 = FALSE,
       date.series.start = dt.start.prediction,
-      date.series.end = as.Date(Sys.Date())
-    )
+      date.series.end = as.Date(Sys.Date()),
+      string.symbol_safe = safe_symbol_name(str.symbol),
+      string.object_name = safe_symbol_name(str.symbol)
   )
+)
 
 ```
 
-```{r gdp.pcr.update, echo=FALSE}
+#### Make the year over year calculation
 
-# Add linear prediction to the dataframe
+```{r gdp_fit_lm_norm_yoy_calc, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+str.symbolYoY <- paste(str.symbol, "_YoY", sep = "")
+df.data[str.symbolYoY] <- CalcYoY(df.data, str.symbol, 365)
+
+df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = str.symbolYoY,
+      string.source = "Calc",
+      string.description = paste(str.description, "\nYear over Year", sep =
+                                   ""),
+      string.label.y = "Percent",
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = dt.start.prediction,
+      date.series.end = as.Date(Sys.Date()),
+      string.symbol_safe = safe_symbol_name(str.symbolYoY),
+      string.object_name = safe_symbol_name(str.symbolYoY)
+  )
+)
+
+# Clean and tidy memory  
+if( exists("str.symbolYoY")){
+  rm(str.symbolYoY)
+}
+ 
+if( exists("str.symbol")){
+  rm(str.symbol)
+}
+
+```
+
+#### Normalize linear model GDP commodities by GDP deflator
+
+```{r gdp_fit_ln_norm_def, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+str.symbol <- "GDP.lm.by.GDPDEF" 
+df.data[str.symbol] <-
+  (df.data$GDP.lm / df.data$GDPDEF.Value)
+
+df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = "GDP.lm.by.GDPDEF",
+      string.source = "Calc",
+      string.description = "Linear Model Est. GDP \nNormalized by GDP def",
+      string.label.y = "(-)",
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start =  as.Date(max(c(
+        index(GDP[1]), index(GDPDEF[1])
+      ))) ,
+      date.series.end = as.Date(min(c(
+        index(tail(GDP, 1)), index(tail(GDPDEF, 1))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol),
+      string.object_name = safe_symbol_name(str.symbol)
+  )
+)
+
+```
+
+
+Add the real linear prediction (nominal/deflator) year-over-year growth
+
+```{r gdp_fit_ln_norm_lm_def, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+str.symbol <- "GDP.lm.by.GDPDEF"
+str.symbolYoY <- paste(str.symbol, "_YoY", sep = "")
+df.data[str.symbolYoY] <- CalcYoY(df.data, str.symbol, 365)
+
+df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = str.symbolYoY,
+      string.source = "Calc",
+      string.description = paste(str.description, "\nYear over Year", sep =
+                                   ""),
+      string.label.y = "Percent",
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = dt.start.prediction,
+      date.series.end = as.Date(Sys.Date()),
+      string.symbol_safe = safe_symbol_name(str.symbolYoY),
+      string.object_name = safe_symbol_name(str.symbolYoY)
+  )
+)
+
+```
+
+### Add linear prediction by PCA to the dataframe
+
+```{r gdp_pred_pcr_calc, echo=FALSE, fig.width = 10, fig.asp = .62}
+
 str.symbol.pcr <- "GDP.pcr"
 df.data[str.symbol.pcr] <-
-  predict(list.fit.pcr, newdata = df.data)
+  predict(list.fit.pcr, newdata = df.data, ncomp = 1)
 
-# Add the linear model prediction to the symbols table
-df.symbols <-
-  rbind(
+
+```
+
+
+```{r gdp_pred_pcr_describe, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+
+list.fit.pcr  
+
+```
+
+#### Add the linear model prediction to the symbols table
+
+```{r gdp_pred_add_to_syms, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+str.description.pcr <- "PCA regression\nGDP given INDPRO,\nPCE, RSALESAGG, ALTSALES,\nand housing"  
+
+df.symbols <- symbols_append_row(
     df.symbols,
-    data.frame(
+    list(
       string.symbol = str.symbol.pcr,
       string.source = "Predict",
-      string.description = "PCA regression\nGDP given INDPRO,\nPCE, and RSALESAGG, and auto sales",
-      string.label.y = getPlotYLabel(df.symbols, "POPTHM")[1],
+      string.description = str.description.pcr,
+      string.label.y = getPlotYLabel(df.symbols, "PCE")[1],
       float.expense.ratio = -1.00,
       Max030 = FALSE,
       Max180 = FALSE,
       date.series.start = dt.start.prediction,
       date.series.end = as.Date(Sys.Date())
-    )
   )
+)
 
 ```
 
-```{r gdp.lm.setup.plot, echo=FALSE, fig.width = 8, fig.asp = .52}
+Add the PCA prediction year-over-year growth
+
+```{r gdp_pred_pcr_yoy, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+# The YoY calculation for PCA
+str.symbolYoY <- paste(str.symbol.pcr, "_YoY", sep = "")
+df.data[str.symbolYoY] <- CalcYoY(df.data, str.symbol.pcr, 365)
+
+df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = str.symbolYoY,
+      string.source = "Calc",
+      string.description = paste(str.description.pcr, "\nYear over Year", sep =
+                                   ""),
+      string.label.y = "Percent",
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = dt.start.prediction,
+      date.series.end = as.Date(Sys.Date())
+  )
+)
+
+# Clean and tidy memory  
+if( exists("str.description.pcr")){
+  rm(str.description.pcr)
+}
+```
+
+Plot the predicted and actual values
+
+```{r gdp_pred_plot_long, echo=FALSE, fig.width = 10, fig.asp = .62}
 
 datay <- "GDP.lm"
 datay.aux <- "GDP.pcr"
-datay.aux.1 <- "GDP"
-ylim <- c(0, 25000)
+datay.aux.1 <- "GDP.Value"
+ylim <- c(0, 35000)
 dt.end <- Sys.Date()
 myPlot <- 
   plotSingle(
@@ -309,17 +883,18 @@ myPlot <- myPlot + geom_line(
 )
 
 print(myPlot)
+
 ```
+  
+  
+  Looking at some more recent data points
 
-Looking at some more recent data points
-
-
-```{r gdp.lm.setup.plot.recent, echo=FALSE, fig.width = 8, fig.asp = .52}
+```{r gdp_pred_plot_near, echo=FALSE, fig.width = 10, fig.asp = .62}
 
 datay <- "GDP.lm"
 datay.aux <- "GDP.pcr"
-datay.aux.1 <- "GDP"
-ylim <- c(10000, 25000)
+datay.aux.1 <- "GDP.Value"
+ylim <- c(10000, 35000)
 dt.end <- Sys.Date()
 dt.start <- as.Date("2015-01-01")
 myPlot <-
@@ -357,271 +932,18 @@ myPlot <- myPlot + geom_line(
 )
 
 print(myPlot)
-```
 
+```  
 
-Look at how the GDP linear fit performed on the test data partition
+```{r gdp_pred_plot_long_yoy, echo=FALSE, fig.width = 10, fig.asp = .62}
 
-```{r gdp.lm.perf, echo=FALSE}
-
-d.test.resid = (df.test$GDP - predict(list.fit.reg, newdata = df.test))
-hist(d.test.resid, main=paste("Residual For", str.symbol, sep=" "))
-sd.fit.gdp.m = sd(d.test.resid)
-
-```
-
-```{r gdp.lm.modelout, echo=FALSE}
-
-list.fit.reg$finalModel
-
-```
-
-```{r gdp.pcr.perf, echo=FALSE}
-
-d.test.resid = (df.test$GDP - predict(list.fit.pcr, newdata = df.test))
-hist(d.test.resid, main=paste("Residual For", str.symbol.pcr, sep=" "))
-sd.fit.gdp.pcr = sd(d.test.resid)
-
-```
-
-```{r gdp.pcr.modelout, echo=FALSE}
-
-summary(list.fit.pcr)
-
-```
-
-
-
-```{r gdp.lm.resid, echo=FALSE}
-
-# Document the residual as well
-str.symbol.res <- "GDP.lm.res"
-df.data[str.symbol.res] <- df.data$GDP - df.data[str.symbol]
-
-# Add the GDP linear model prediction residual to the symbols table
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
-      string.symbol = str.symbol.res,
-      string.source = "Predict Resid.",
-      string.description = "Residual for \nGDP given INDPRO,PCE, RSALESAGG,\nauto sales, and home sales",
-      string.label.y = df.symbols[df.symbols$string.symbol==str.symbol,"string.label.y"],
-      float.expense.ratio = -1.00,
-      Max030 = FALSE,
-      Max180 = FALSE,
-      date.series.start = dt.start.prediction,
-      date.series.end = as.Date(Sys.Date())
-    )
-  )
-
-
-```
-
-Document the PCR residual
-
-```{r gdp.pcr.resid, echo=FALSE}
-
-# Document the residual as well
-str.symbol.pcr.res <- "GDP.pcr.res"
-df.data[str.symbol.pcr.res] <- df.data$GDP - df.data[str.symbol.pcr]
-
-# Add the GDP linear model prediction residual to the symbols table
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
-      string.symbol = str.symbol.pcr.res,
-      string.source = "Predict Resid.",
-      string.description = "PCR Residual for \nGDP given INDPRO,\nPCE, and RSALESAGG",
-      string.label.y = df.symbols[df.symbols$string.symbol==str.symbol,"string.label.y"],
-      float.expense.ratio = -1.00,
-      Max030 = FALSE,
-      Max180 = FALSE,
-      date.series.start = dt.start.prediction,
-      date.series.end = as.Date(Sys.Date())
-    )
-  )
-
-
-```
-
-Plot the residual  GDP to the linear fit prediction. 
-
-The residuals decrease quite a bit during the Covid numbers, at least as of Jun 2020. Probably indicates uncertainty in the numbers.
-
-```{r gdp.cor.resid, echo=FALSE,, fig.width = 6, fig.asp = .82}
-
-datay <- str.symbol.res
-ylim <- c(-2000, 2000)
-myPlot <- plotSingle(
-  dfRecession,
-  df.data,
-  "date",
-  datay,
-  getPlotTitle(df.symbols, datay),
-  "Date",
-  getPlotYLabel(df.symbols, datay),
-  c(as.Date("1jan1967", "%d%b%Y"), Sys.Date()),
-  ylim,
-  b.legend = TRUE,
-  b.percentile = TRUE,
-  b.long.legend = FALSE
-)
-
-myPlot <- myPlot + geom_hline(yintercept=(6*sd.fit.gdp.m), color = "red", linetype="dashed")
-myPlot <- myPlot + geom_hline(yintercept=(-6*sd.fit.gdp.m), color = "red", linetype="dashed")
-
-print(myPlot)
-
-```
-
-Plot the residual GDP to the PCR fit prediction. 
-
-The residuals decrease quite a bit during the Covid numbers, at least as of Jun 2020. Probably indicates uncertainty in the numbers.
-
-```{r gdp.cor.pcr.resid, echo=FALSE,, fig.width = 6, fig.asp = .82}
-
-datay <- str.symbol.pcr.res
-ylim <- c(-2000, 2000)
-myPlot <- plotSingle(
-  dfRecession,
-  df.data,
-  "date",
-  datay,
-  getPlotTitle(df.symbols, datay),
-  "Date",
-  getPlotYLabel(df.symbols, datay),
-  c(as.Date("1jan1967", "%d%b%Y"), Sys.Date()),
-  ylim,
-  b.legend = TRUE,
-  b.percentile = TRUE,
-  b.long.legend = FALSE
-)
-
-myPlot <- myPlot + geom_hline(yintercept=(6*sd.fit.gdp.pcr), color = "red", linetype="dashed")
-myPlot <- myPlot + geom_hline(yintercept=(-6*sd.fit.gdp.pcr), color = "red", linetype="dashed")
-
-print(myPlot)
-
-```
-
-### Regression, Advanced Retail sales
-
-See if we can get there with a simple regression model. Begin by taking a look at how these datapoints correlate with advanced retail sales
-
-
-```{r corplot1.gdp.adv, echo=FALSE, fig.width=12,fig.height=12}
-
-# Correlation for the entire data set
-training.cor <-
-  df.data[, c("GDP", "INDPRO", "PCE", "RSAFS", "ALTSALES", "MSPUS.times.HOUST")]
-
-  rcorr.data <- rcorr(as.matrix(training.cor), type = "pearson")
-  #print(rcorr.data)
-
-  corrplot::corrplot(cor(training.cor), type="upper", order="original", 
-           tl.col="black", tl.srt=45, title ="GDP Data")
-```
-
-
-```{r gdp.lm.adv.setup, echo=FALSE}
-
-df.gdp.model <-
-  df.data[df.data$date >= dt.start.prediction &
-            df.data$date <= dt.end.prediction,]
-
-# I break the data into three sets: 50% for training, 25% for testing, and 25% for validation.
-set.seed(123456)
-in.train <- createDataPartition(y=df.gdp.model$GDP, p = 0.50, list=FALSE)
-df.train <- df.gdp.model[in.train,]
-df.data.rest <- df.gdp.model[-in.train,]
-in.val <- createDataPartition(y = df.data.rest$GDP, p = 0.50, list = FALSE)
-df.val <- df.data.rest[in.val,]
-df.test <- df.data.rest[-in.val,]
-rm(df.data.rest)
-
-# Perform the linear fit
-list.fit.reg.adv <- train(
-  GDP ~ INDPRO + PCE + RSAFS + ALTSALES + MSPUS.times.HOUST,
-  data = df.train,
-  method = "lm",
-  preProcess = c('center', 'scale')
-)
-
-```
-
-```{r gdp.lm.adv.update, echo=FALSE}
-
-# Add linear prediction to the dataframe
-str.symbol <- "GDP.lm.adv"
-df.data[str.symbol] <-
-  predict(list.fit.reg.adv, newdata = df.data)
-
-# Add the linear model prediction to the symbols table
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
-      string.symbol = str.symbol,
-      string.source = "Predict",
-      string.description = "Linear Model Prediction\nGDP given INDPRO,\nPCE, RSAFS, auto sales,\nand housing",
-      string.label.y = getPlotYLabel(df.symbols, "POPTHM")[1],
-      float.expense.ratio = -1.00,
-      Max030 = FALSE,
-      Max180 = FALSE,
-      date.series.start = dt.start.prediction,
-      date.series.end = as.Date(Sys.Date())
-    )
-  )
-
-```
-
-```{r gdp.lm.adv.setup.plot, echo=FALSE, fig.width = 8, fig.asp = .52}
-
-datay <- "GDP.lm.adv"
-datay.aux <- "GDP"
-ylim <- c(0, 25000)
+datay <- "GDP.Value__YoY"
+datay.aux <- "GDP.lm_YoY"
+datay.aux.2 <- "GDP.pcr_YoY"
+ylim <- c(-50, 50)
 dt.end <- Sys.Date()
-myPlot <- 
-  plotSingle(
-    dfRecession,
-    df.data,
-    "date",
-    datay,
-    "GDP Compared to GDP predicted using linear model",
-    "Date",
-    getPlotYLabel(df.symbols, datay),
-    c(dt.start.prediction, dt.end),
-    ylim,
-    b.legend = TRUE,
-    b.percentile = FALSE,
-    b.long.legend = TRUE
-  )
-myPlot <- myPlot + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay.aux,
-    colour = shQuote(getPlotTitle(df.symbols, datay.aux))
-  ),
-  na.rm = TRUE
-)
-
-print(myPlot)
-```
-
-Looking at some more recent data points
-
-
-```{r gdp.lm.adv.setup.plot.recent, echo=FALSE, fig.width = 8, fig.asp = .52}
-
-datay <- "GDP.lm.adv"
-datay.aux <- "GDP"
-ylim <- c(10000, 25000)
-dt.end <- Sys.Date()
-dt.start <- as.Date("2018-01-01")
-myPlot <-
+dt.start <- as.Date("2015-01-01")
+p1 <-
   plotSingle(
     dfRecession,
     df.data,
@@ -636,7 +958,7 @@ myPlot <-
     b.percentile = FALSE,
     b.long.legend = TRUE
   )
-myPlot <- myPlot + geom_line(
+p1 <- p1 + geom_line(
   data = df.data,
   aes_string(
     x = "date",
@@ -645,70 +967,170 @@ myPlot <- myPlot + geom_line(
   ),
   na.rm = TRUE
 )
+p1 <- p1 + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux.1,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux.1))
+  ),
+  na.rm = TRUE
+)
 
-print(myPlot)
+p1 <- p1 + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = datay.aux.2,
+    colour = shQuote(getPlotTitle(df.symbols, datay.aux.2))
+  ),
+  na.rm = TRUE
+)
+
+datay.1 <- "GDP.lm.by.GDPDEF_YoY"
+datay.aux.1 <- "GDPNOW.Value"
+ylim.1 <- c(-10, 20)
+p2 <- plotSingleQuick(dfRecession, 
+                      df.data, datay.1, 
+                      ylim.1, dtStart, 
+                      b.percentile = FALSE, 
+                      b.legend = TRUE,
+                      b.long.legend = TRUE)
+p2 <- p2 + geom_line(
+    data = df.data,
+    aes_string(x = "date",
+      y = datay.aux.1,
+      colour = shQuote(datay.aux.1)
+    ),
+    na.rm = TRUE
+  )
+
+grid.arrange(p1,
+             p2,
+             ncol = 1,
+             top = "Nominal and real GDP")  
+
 ```
-
 
 Look at how the GDP linear fit performed on the test data partition
 
-```{r gdp.lm.adv.perf, echo=FALSE}
+```{r gdp_lm_resid_calc, echo=FALSE, fig.width = 10, fig.asp = .62}
 
-d.test.resid.adv = (df.test$GDP - predict(list.fit.reg.adv, newdata = df.test))
+
+d.test.resid = (df.test$GDP.Value - predict(list.fit.reg, newdata = df.test))
 hist(d.test.resid, main=paste("Residual For", str.symbol, sep=" "))
-sd.fit.gdp.lm.adv = sd(d.test.resid)
+sd.fit.gdp.m = sd(d.test.resid)
 
 ```
 
-```{r gdp.lm.modelout.adv, echo=FALSE}
+Print out the coefficients to see how the linear weights the input values
 
-list.fit.reg.adv$finalModel
+```{r gdp_lm_resid_calc_desc, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+list.fit.reg$finalModel
 
 ```
 
 
-```{r gdp.lm.adv.resid, echo=FALSE}
+```{r gdp_pcr_resid_calc, echo=FALSE, fig.width = 10, fig.asp = .62}
 
-# Document the residual as well
-str.symbol.res <- "GDP.lm.adv.res"
-df.data[str.symbol.res] <- df.data$GDP - df.data[str.symbol]
+d.test.resid = (df.test$GDP.Value - predict(list.fit.pcr, newdata = df.test))
+hist(d.test.resid, main=paste("Residual For", str.symbol.pcr, sep=" "))
+sd.fit.gdp.pcr = sd(d.test.resid)
+
+```
+
+```{r gdp_pcr_resid_calc_desc, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+summary(list.fit.pcr)
+
+```
+
+Document the residual as well
+
+
+```{r gdp_lm_resid_calc_syms, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+str.symbol.res <- "GDP.lm.res"
+df.data[str.symbol.res] <- df.data$GDP.Value - df.data$GDP.lm
 
 # Add the GDP linear model prediction residual to the symbols table
-df.symbols <-
-  rbind(
+df.symbols <- symbols_append_row(
     df.symbols,
-    data.frame(
+    list(
       string.symbol = str.symbol.res,
       string.source = "Predict Resid.",
-      string.description = "Residual for \nGDP given INDPRO,\nPCE, and RSALESAGG",
+      string.description = "Residual for \nGDP given INDPRO,PCE, RSALESAGG,\nauto sales, and home sales",
       string.label.y = df.symbols[df.symbols$string.symbol==str.symbol,"string.label.y"],
       float.expense.ratio = -1.00,
       Max030 = FALSE,
       Max180 = FALSE,
       date.series.start = dt.start.prediction,
-      date.series.end = as.Date(Sys.Date())
-    )
+      date.series.end = as.Date(Sys.Date()),
+      string.symbol_safe = safe_symbol_name(str.symbolYoY),
+      string.object_name = safe_symbol_name(str.symbolYoY)
   )
+)
 
+# Clean and tidy memory  
+if( exists("str.symbol.res")){
+  rm(str.symbol.res)
+}
 
 ```
+
+Document the PCR residual
+
+
+```{r gdp_lm_resid_calc_syms, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+
+str.symbol.pcr.res <- "GDP.pcr.res"
+df.data[str.symbol.pcr.res] <- df.data$GDP.Value - df.data$GDP.pcr
+
+# Add the GDP linear model prediction residual to the symbols table
+
+df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = str.symbol.pcr.res,
+      string.source = "Predict Resid.",
+      string.description = "PCR Residual for \nGDP given INDPRO,\nPCE, and RSALESAGG",
+      string.label.y = getPlotYLabel(df.symbols, "GDP"),
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = dt.start.prediction,
+      date.series.end = as.Date(Sys.Date()),
+      string.symbol_safe = safe_symbol_name(str.symbolYoY),
+      string.object_name = safe_symbol_name(str.symbolYoY)
+  )
+)
+
+# Clean and tidy memory  
+if( exists("str.symbol.pcr.res")){
+  rm(str.symbol.pcr.res)
+}
+
+```
+
 
 Plot the residual  GDP to the linear fit prediction. 
 
 The residuals decrease quite a bit during the Covid numbers, at least as of Jun 2020. Probably indicates uncertainty in the numbers.
 
-```{r gdp.cor.adv.resid, echo=FALSE,, fig.width = 6, fig.asp = .82}
+```{r gdp_lm_resid_calc_plot, echo=FALSE, fig.width = 10, fig.asp = .62}
 
-datay <- str.symbol.res
+str.symbol.res <- "GDP.lm.res"
 ylim <- c(-2000, 2000)
 myPlot <- plotSingle(
   dfRecession,
   df.data,
   "date",
-  datay,
-  getPlotTitle(df.symbols, datay),
+  datay = str.symbol.res,
+  getPlotTitle(df.symbols, str.symbol.res),
   "Date",
-  getPlotYLabel(df.symbols, datay),
+  getPlotYLabel(df.symbols, str.symbol.res),
   c(as.Date("1jan1967", "%d%b%Y"), Sys.Date()),
   ylim,
   b.legend = TRUE,
@@ -716,11 +1138,62 @@ myPlot <- plotSingle(
   b.long.legend = FALSE
 )
 
-myPlot <- myPlot + geom_hline(yintercept=(6*sd.fit.gdp.lm.adv), color = "red", linetype="dashed")
-myPlot <- myPlot + geom_hline(yintercept=(-6*sd.fit.gdp.lm.adv), color = "red", linetype="dashed")
+myPlot <- myPlot + geom_hline(yintercept=(6*sd.fit.gdp.m), color = "red", linetype="dashed")
+myPlot <- myPlot + geom_hline(yintercept=(-6*sd.fit.gdp.m), color = "red", linetype="dashed")
 
 print(myPlot)
 
+# Clean and tidy memory  
+if( exists("str.symbol.res")){
+  rm(str.symbol.res)
+}
+
+if( exists("myPlot")){
+  rm(myPlot)
+}
+
 ```
+
+Plot the residual GDP to the PCR fit prediction. 
+
+The residuals decrease quite a bit during the Covid numbers, at least as of Jun
+2020. Probably indicates uncertainty in the numbers.
+
+```{r gdp_pcr_resid_calc_plot, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+str.symbol <- "GDP.pcr.res"
+ylim <- c(-9000, 9000)
+myPlot <- plotSingle(
+  dfRecession,
+  df.data,
+  "date",
+  datay = str.symbol,
+  getPlotTitle(df.symbols, str.symbol),
+  "Date",
+  getPlotYLabel(df.symbols, str.symbol),
+  c(as.Date("1jan1967", "%d%b%Y"), Sys.Date()),
+  ylim,
+  b.legend = TRUE,
+  b.percentile = TRUE,
+  b.long.legend = FALSE
+)
+
+myPlot <- myPlot + geom_hline(yintercept=(6*sd.fit.gdp.pcr), color = "red", linetype="dashed")
+myPlot <- myPlot + geom_hline(yintercept=(-6*sd.fit.gdp.pcr), color = "red", linetype="dashed")
+
+print(myPlot)
+
+# Clean and tidy memory  
+if( exists("str.symbol.res")){
+  rm(str.symbol.res)
+}
+
+if( exists("myPlot")){
+  rm(myPlot)
+}
+
+```
+
+
 
 

@@ -9403,7 +9403,8 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
-Look at GDP divided by CPI per person. It flattens and even dips a little prior to a recession. Might be worth looking at the derivative of this series.
+Look at GDP divided by CPI per person. It flattens and even dips a little prior
+to a recession. Might be worth looking at the derivative of this series.
 
 ```{r GDPBYCPIAUCSLBYPOPTHM, echo=FALSE}
 
@@ -9426,11 +9427,22 @@ if( exists("lst_syms")){
 
 ```{r GDPBYCPIAUCSLBYPOPTHM_SmoothDer, echo=FALSE}
 
-# datay <- "GDPBYCPIAUCSLBYPOPTHM_SmoothDer"
-# ylim <- c(-5, 5)
-# dt.start = as.Date('1960-01-01')
-# b.percentile <- TRUE
-# plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile)
+lst_syms <- c("GDPBYCPIAUCSLBYPOPTHM__SmoothDer")
+if ( require_columns(df.data, lst_syms ) ){
+  
+  plotSingleQuick(dfRecession, 
+                  df.data, 
+                  datay = lst_syms[[1]],
+                  ylim = c(-5, 5), 
+                  dt.start = as.Date('1960-01-01'), 
+                  b.percentile = TRUE)
+
+}
+
+# Clean and tidy memory  
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
 
 ```
 
