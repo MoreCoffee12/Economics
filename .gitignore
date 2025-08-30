@@ -17,6 +17,9 @@
 # RStudio files
 .Rproj.user/
 
+# Anaconda
+*.db
+
 # produced vignettes
 vignettes/*.html
 vignettes/*.pdf
