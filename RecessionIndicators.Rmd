@@ -7325,12 +7325,13 @@ The ICE BofAML OASs are the calculated spreads between a computed OAS index of a
 - ICE Benchmark Administration Limited (IBA), ICE BofAML US Corporate A Option-Adjusted Spread [BAMLC0A3CA], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/BAMLC0A3CA, July 4, 2019.
 
 
-```{r ASpread}
+```{r ASpread, echo=FALSE}
 
-datay <- "BAMLC0A3CA.Value"
-ylim <- c(0, 7)
-dt.start = as.Date('1997-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
+plotSingleQuick(dfRecession, df.data,
+                datay =  "BAMLC0A3CA.Value",
+                ylim = c(0, 7),
+                dt.start = as.Date('1997-01-01'),
+                b.percentile = TRUE)
 
 ```
 
@@ -9406,10 +9407,20 @@ Look at GDP divided by CPI per person. It flattens and even dips a little prior 
 
 ```{r GDPBYCPIAUCSLBYPOPTHM, echo=FALSE}
 
-# datay <- "GDPBYCPIAUCSLBYPOPTHM"
-# ylim <- c(10000, 30000)
-# dt.start = as.Date('1960-01-01')
-# plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
+lst_syms <- c("GDPBYCPIAUCSLBYPOPTHM")
+if ( require_columns(df.data, lst_syms ) ){
+  
+  plotSingleQuick(dfRecession, 
+                  df.data, 
+                  datay = lst_syms[[1]], 
+                  ylim = c(10000, 30000), 
+                  dt.start = as.Date('1960-01-01'))
+}
+
+# Clean and tidy memory  
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
 
 ```
 

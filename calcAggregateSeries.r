@@ -2,7 +2,7 @@
 # Federal reserve repos, from millions to billions
 # TODO - Update df.symbols with the new units
 lst_syms <- c("WLRRAL.Value")
-if ( require_columns(df.data, lst_syms[[1]] ) ){
+if ( require_columns(df.data, lst_syms ) ){
   
   df.data[[lst_syms[[1]]]] <- ( df.data[[lst_syms[[1]]]] / 1000.0 )
   
