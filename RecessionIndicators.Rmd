@@ -115,7 +115,7 @@ ylimBackTest <- c(0, 120)
 dt.start.prediction <- as.Date("01/02/1962", "%d/%m/%Y")
 
 # Define trend limits
-d.GSPC.max = 7000
+source("SetGSPCMax.r")
 d.Russell.max = 5000
 
 ```

@@ -15,6 +15,7 @@ options("getSymbols.warning4.0"=FALSE)
 ```
 
 ```{r libraries, echo=FALSE, message=FALSE}
+library(tidyverse)
 library(UsingR)
 library(quantmod)
 library(ggplot2)
@@ -37,15 +38,13 @@ library(readr)
 #library(devtools)
 #install_github("andrewuhl/RollingWindow")
 library(RollingWindow)
-#install.packages("EIAdata")
-library(EIAdata)
 library(gtable)
 library(data.table)
 library(readxl)
 library(plotly)
 ```
 
-# Load, Clean, and Tidy the data
+# Load, Clean, and Tidy the Data
 
 ```{r helper functions, echo=TRUE}
 
@@ -60,18 +59,9 @@ source("plotHelper.r")
 dt.recent = as.Date("2017-01-01")
 
 # Define the S&P 500 limits
-d.GSPC.max = 3500
+source("SetGSPCMax.r")
 
 ```
-
-
-```{r defsyms, echo=TRUE}
-
-# Call code that defines the desired symbols.
-source("SymbolList.r")
-
-```
-
 
 
 ```{r load.data, echo=TRUE}
@@ -390,17 +380,18 @@ if (require_columns(df.data, lst_syms )) {
       dfRecession,
       df.data,
       "date",
-      datay = str_sym_new,
+      datay = lst_syms[[1]],
       "Oil price per barrel divided by gold price",
       "Date",
-      getPlotYLabel(df.symbols, str_sym_new),
+      getPlotYLabel(df.symbols, lst_syms[[1]]),
       c(as.Date('1986-01-02'), Sys.Date()),
       ylim = c(-0.1, 0.20),
       b.legend = TRUE,
       b.percentile = TRUE,
       b.long.legend = TRUE
     )
-  my_plot
+  
+  print(my_plot)
   
   # Clean and tidy memory  
   if( exists("my_plot")){

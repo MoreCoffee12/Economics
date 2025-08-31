@@ -163,16 +163,16 @@ plotSingle <-
     theme(plot.background = element_rect(fill = 'white', colour = 'white')) +
     theme(panel.background = element_rect(fill = 'white', colour = 'grey')) +
     theme(panel.grid.major.x = element_blank()) +
-    theme(panel.grid.major.y = element_line(colour = "grey", size = 0.5)) +
+    theme(panel.grid.major.y = element_line(colour = "grey", linewidth = 0.5)) +
     geom_line(
       data = datadf,
-      aes_string(
-        x = datax,
-        y = datay,
-        colour = factor(str.legend)
+      aes(
+        x = .data[[datax]],
+        y = .data[[datay]],
+        colour = factor(.env$str.legend)
       ),
       na.rm = TRUE,
-      size = 0.7
+      linewidth = 0.7
     ) +
     scale_colour_manual(values = cbbPalette) +
     guides(
@@ -1331,19 +1331,19 @@ plot_index_yoy <- function(lst_syms,
   )
   
   # ---- Overlay remaining series ------------------------------------------
-  if (length(lst_syms) > 1L) {
-    for (sym in lst_syms[-1]) {
-      p <- p + ggplot2::geom_line(
-        data = df.data,
-        ggplot2::aes_string(
-          x = "date",
-          y = sym,
-          colour = shQuote(getPlotTitle(df.symbols, sym))
-        ),
-        na.rm = TRUE
-      )
-    }
-  }
+  # if (length(lst_syms) > 1L) {
+  #   for (sym in lst_syms[-1]) {
+  #     p <- p + ggplot2::geom_line(
+  #       data = df.data,
+  #       ggplot2::aes_string(
+  #         x = "date",
+  #         y = sym,
+  #         colour = shQuote(getPlotTitle(df.symbols, sym))
+  #       ),
+  #       na.rm = TRUE
+  #     )
+  #   }
+  # }
   
   # ---- Output -------------------------------------------------------------
   print(p)                 # side-effect for interactive use

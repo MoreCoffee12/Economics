@@ -62,7 +62,7 @@ source("plotHelper.r")
 dt.recent = as.Date("2017-01-01")
 
 # Define the S&P 500 limits
-d.GSPC.max = 7000
+source("SetGSPCMax.r")
 
 ```
 
