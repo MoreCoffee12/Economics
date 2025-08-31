@@ -1162,6 +1162,51 @@ if ( require_columns(df.data, c("EXCSRESNW.Value", "GDP.Value") ) ){
   
 }
 
+
+# Normalize the FINRA margin debt by the GDP
+lst_syms <- c("FINRAMarginDebt", "GDPDEF.Value")
+
+if ( require_columns(df.data,lst_syms ) ){
+  
+  # Perform the calculation
+  str_sym_new <- "FINRAMarginDebt__by__GDPDEF" 
+  df.data[[str_sym_new]] <-
+    (df.data$FINRAMarginDebt / df.data$GDPDEF)
+
+  
+  # Update the symbols table    
+  df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = str_sym_new,
+      string.source = "Calc",
+      string.description = "Margin debt normalized by GDP deflator",
+      string.label.y = "Dollars (Real)",
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start =  as.Date(max(c(
+        index(FINRAMarginDebt[1]), index(GDPDEF[1])
+      ))) ,
+      date.series.end = as.Date(min(c(
+        index(tail(FINRAMarginDebt, 1)), index(tail(GDPDEF, 1))
+      ))),
+      string.symbol_safe = safe_symbol_name(str_sym_new),
+      string.object_name = safe_symbol_name(str_sym_new)
+    )
+  )  
+
+  # Tidy up memory
+  if( exists("str_sym_new")){
+    rm(str_sym_new)
+  }
+}
+
+# Tidy up memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
+
 # Reverse repos (in billions) divided by GDP
 if ( require_columns(df.data, c("WLRRAL.Value", "GDP.Value") ) ){
   
@@ -1191,7 +1236,9 @@ if ( require_columns(df.data, c("WLRRAL.Value", "GDP.Value") ) ){
   )
   
   # Tidy memory
-  rm(str.symbol.new)
+  if( exists("str.symbol.new")){
+    rm(str.symbol.new)
+  }
   
 }
 

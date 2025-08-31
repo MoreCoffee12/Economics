@@ -3017,16 +3017,43 @@ Take a close look at recent activity
 
 ```{r FINRA.margin.debt.nearterm, echo=FALSE}
 
-datay <- "FINRA_MarginDebt"
-ylim <- c(100000, 1500000)
-dt.start <- as.Date('2000-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
+lst_syms <- c("FINRA_MarginDebt", "FINRAMarginDebt__by__GDPDEF")
 
-# Tidy up memory
-rm(datay)
-rm(ylim)
-rm(dt.start)
+if ( require_columns(df.data,lst_syms ) ){
+  
+  p1 <- plotSingleQuick(dfRecession, 
+                        df.data, 
+                        datay = lst_syms[[1]], 
+                        ylim =  c(100000, 1500000), 
+                        dt.start = dt_plot_start, 
+                        b.percentile = FALSE)
+  
+  p2 <- plotSingleQuick(dfRecession,
+                        df.data, 
+                        datay = lst_syms[[2]], 
+                        ylim = c(0, 5000), 
+                        dt.start = dt_plot_start, 
+                        b.percentile = FALSE)
+  
+  grid.arrange(p1, p2, ncol = 1, top = "Options Volumes")
 
+  # Tidy up memory
+  if( exists("dt_plot_start")){
+    rm(dt_plot_start)
+  }
+  if( exists("p1")){
+    rm(p1)
+  }
+  if( exists("p2")){
+    rm(p2)
+  }
+  
+}
+
+# Last bit of clean up
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
 ```
 
 Sometimes it is more helpful to view year over year growth.
