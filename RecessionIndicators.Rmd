@@ -2100,7 +2100,7 @@ rm(ylim)
 
 ```{r SP500MA050MinusMA200Sig}
 
-datay <- "GSPC__Open__mva050__mva200__sig "
+datay <- "GSPC__Open__mva050__mva200__sig"
 ylim <- c(0.0, 1.0)
 plotSingleQuick(dfRecession, df.data, datay, ylim, dtStartBackTest)
 
