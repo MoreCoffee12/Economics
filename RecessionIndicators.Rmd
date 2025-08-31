@@ -3015,23 +3015,28 @@ rm(ylim)
 
 Take a close look at recent activity
 
-```{r FINRA.margin.debt.nearterm, echo=FALSE}
+```{r FINRA.margin.debt.nearterm, echo=FALSE, fig.width = 10, fig.asp = .62}
 
 lst_syms <- c("FINRA_MarginDebt", "FINRAMarginDebt__by__GDPDEF")
 
 if ( require_columns(df.data,lst_syms ) ){
   
+  # This series go back to the 1970s
+  dt_plot_start <- as.Date('1970-01-01')
+  
+  # Create the plot showing margin debt
   p1 <- plotSingleQuick(dfRecession, 
                         df.data, 
                         datay = lst_syms[[1]], 
-                        ylim =  c(100000, 1500000), 
+                        ylim =  c(1000, 1200000), 
                         dt.start = dt_plot_start, 
                         b.percentile = FALSE)
   
+  # Create the plot showing margin debt normalized by the GDP deflator
   p2 <- plotSingleQuick(dfRecession,
                         df.data, 
                         datay = lst_syms[[2]], 
-                        ylim = c(0, 5000), 
+                        ylim = c(0, 10000), 
                         dt.start = dt_plot_start, 
                         b.percentile = FALSE)
   

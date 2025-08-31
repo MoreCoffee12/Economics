@@ -1186,10 +1186,10 @@ if ( require_columns(df.data,lst_syms ) ){
       Max030 = FALSE,
       Max180 = FALSE,
       date.series.start =  as.Date(max(c(
-        index(FINRAMarginDebt[1]), index(GDPDEF[1])
+        index(FINRA_MarginDebt[1]), index(GDPDEF[1])
       ))) ,
       date.series.end = as.Date(min(c(
-        index(tail(FINRAMarginDebt, 1)), index(tail(GDPDEF, 1))
+        index(tail(FINRA_MarginDebt, 1)), index(tail(GDPDEF, 1))
       ))),
       string.symbol_safe = safe_symbol_name(str_sym_new),
       string.object_name = safe_symbol_name(str_sym_new)
