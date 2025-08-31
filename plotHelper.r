@@ -1216,3 +1216,280 @@ plotSimilarPeriods <-
     return(list(my.plot, dt.start.similar, dt.end.similar))
   }
 
+#' Plot year-over-year performance for a set of index symbols
+#'
+#' Builds a multi-series time-series chart of year-over-year (%)
+#' changes using \code{plotSingle()} for the base layer and overlays
+#' additional series. Recession shading is included if your
+#' \code{plotSingle()} uses \code{dfRecession}.
+#'
+#' @param lst_syms Character vector of column names in \code{df.data}
+#'   to plot. The first element is used as the base series and for
+#'   deriving the y-axis label via \code{getPlotYLabel()}.
+#' @param ylim Numeric length-2 vector giving the y-axis limits
+#'   (e.g., \code{c(-100, 300)}).
+#' @param start_date A \code{Date} or a character coercible to
+#'   \code{Date}, used as the left x-axis bound (right bound is
+#'   \code{Sys.Date()}).
+#'
+#' @details
+#' This function expects the following to exist in the calling
+#' environment:
+#' \itemize{
+#'   \item \code{df.data}: data.frame with a \code{date} column and the
+#'         requested series in \code{lst_syms}.
+#'   \item \code{dfRecession}: data.frame for recession shading.
+#'   \item \code{df.symbols}: lookup used by \code{getPlotTitle()} and
+#'         \code{getPlotYLabel()}.
+#'   \item \code{plotSingle()}, \code{getPlotTitle()}, \code{getPlotYLabel()}.
+#'   \item Optional: \code{require_columns()}; if absent, a simple column
+#'         presence check is used.
+#' }
+#'
+#' @return A \code{ggplot} object (invisibly). The plot is also printed.
+#'
+#' @examples
+#' \dontrun{
+#' p <- plot_index_yoy(
+#'   lst_syms = c(
+#'     "X_GSPC.GSPC.Close__YoY5",
+#'     "X_DJI.DJI.Close__YoY5",
+#'     "X_RLG.RLG.Close__YoY5",
+#'     "QQQ.Close__YoY5"
+#'   ),
+#'   ylim = c(-100, 300),
+#'   start_date = "1940-01-01"
+#' )
+#' }
+#'
+#' @export
+plot_index_yoy <- function(lst_syms,
+                           ylim = c(-100, 300),
+                           start_date = as.Date("1940-01-01")) {
+  # ---- Argument checks ----------------------------------------------------
+  if (!is.character(lst_syms) || length(lst_syms) < 1L) {
+    stop("`lst_syms` must be a non-empty character vector of column names.")
+  }
+  if (!is.numeric(ylim) || length(ylim) != 2L) {
+    stop("`ylim` must be a numeric vector of length 2.")
+  }
+  if (!inherits(start_date, "Date")) {
+    start_date <- as.Date(start_date)
+  }
+  if (!exists("df.data", inherits = TRUE)) {
+    stop("`df.data` not found in the calling environment.")
+  }
+  if (!("date" %in% names(df.data))) {
+    stop("`df.data` must contain a 'date' column.")
+  }
+  if (!exists("dfRecession", inherits = TRUE)) {
+    stop("`dfRecession` not found in the calling environment.")
+  }
+  if (!exists("df.symbols", inherits = TRUE)) {
+    stop("`df.symbols` not found in the calling environment.")
+  }
+  if (!exists("plotSingle", mode = "function")) {
+    stop("`plotSingle()` not found. Please load/define it before calling.")
+  }
+  if (!exists("getPlotTitle", mode = "function") ||
+      !exists("getPlotYLabel", mode = "function")) {
+    stop("`getPlotTitle()` and `getPlotYLabel()` are required.")
+  }
+  
+  # Column presence check (use user's helper if available)
+  has_cols <- if (exists("require_columns", mode = "function")) {
+    require_columns(df.data, lst_syms)
+  } else {
+    all(lst_syms %in% names(df.data))
+  }
+  if (!has_cols) {
+    missing_cols <- setdiff(lst_syms, names(df.data))
+    stop(sprintf("Missing required columns in df.data: %s",
+                 paste(missing_cols, collapse = ", ")))
+  }
+  
+  # Only display the percentile for a single series
+  b_percentile_flag <- TRUE
+  if( length(lst_syms) > 1 ){
+    b_percentile_flag <- FALSE  
+  }
+
+  # ---- Build base plot ----------------------------------------------------
+  p <- plotSingle(
+    datadf_rec = dfRecession,
+    datadf     = df.data,
+    datax      = "date",
+    datay      = lst_syms[[1]],
+    titlelabel = "Major Index Change, Year-over-Year",
+    xlabel     = "Date",
+    ylabel     = getPlotYLabel(df.symbols, lst_syms[[1]]),
+    xlim       = c(as.Date(start_date), Sys.Date()),
+    ylim       = ylim,
+    b.legend   = TRUE,
+    b.percentile = b_percentile_flag,
+    b.long.legend = TRUE
+  )
+  
+  # ---- Overlay remaining series ------------------------------------------
+  if (length(lst_syms) > 1L) {
+    for (sym in lst_syms[-1]) {
+      p <- p + ggplot2::geom_line(
+        data = df.data,
+        ggplot2::aes_string(
+          x = "date",
+          y = sym,
+          colour = shQuote(getPlotTitle(df.symbols, sym))
+        ),
+        na.rm = TRUE
+      )
+    }
+  }
+  
+  # ---- Output -------------------------------------------------------------
+  print(p)                 # side-effect for interactive use
+  return(invisible(p))     # also return the ggplot object
+}
+
+
+#' Plot a price series with moving-average overlays
+#'
+#' Builds a time-series chart using \code{plotSingle()} where the first symbol
+#' in \code{lst_syms} is plotted as the base series (e.g., price) and the
+#' remaining symbols are overlaid (e.g., moving averages). The x-axis spans
+#' from \code{start_date} to \code{Sys.Date()}. Recession shading is included
+#' if your \code{plotSingle()} uses \code{dfRecession}.
+#'
+#' @param lst_syms Character vector of column names in \code{df.data} to plot.
+#'   The first element is used as the base series and for deriving the y-axis
+#'   label via \code{getPlotYLabel()}. Typical usage is length 3
+#'   (price, mva200, mva50), but any length ≥ 1 is supported.
+#' @param ylim Numeric length-2 vector giving y-axis limits,
+#'   e.g. \code{c(2000, 5500)}. If \code{NULL}, limits are computed from the
+#'   first series within the date window and expanded by 5\%.
+#' @param start_date A \code{Date} or a character coercible to \code{Date};
+#'   used as the left x-axis bound (right bound is \code{Sys.Date()}).
+#'
+#' @details
+#' This function expects the following to exist in the calling environment:
+#' \itemize{
+#'   \item \code{df.data}: a data.frame with a \code{date} column and the
+#'         requested series in \code{lst_syms}.
+#'   \item \code{dfRecession}: a data.frame for recession shading.
+#'   \item \code{df.symbols}: lookup used by \code{getPlotTitle()} and
+#'         \code{getPlotYLabel()}.
+#'   \item \code{plotSingle()}, \code{getPlotTitle()}, \code{getPlotYLabel()}.
+#'   \item Optional: \code{require_columns()}; if absent, a simple column
+#'         presence check is used.
+#'   \item Optional: a character scalar \code{datay_aux2} naming an extra
+#'         column in \code{df.data} to overlay; if present it will be added.
+#' }
+#'
+#' @return A \code{ggplot} object (invisibly). The plot is also printed.
+#'
+#' @examples
+#' \dontrun{
+#' p <- plot_price_with_mas(
+#'   lst_syms = c("X_GSPC.GSPC.Close",
+#'                "X_GSPC.GSPC.Close__mva200",
+#'                "X_GSPC.GSPC.Close__mva050"),
+#'   ylim = c(2000, 5500),
+#'   start_date = "2018-01-01"
+#' )
+#' }
+#'
+#' @export
+plot_price_with_mas <- function(lst_syms,
+                                ylim = NULL,
+                                start_date = as.Date("2018-01-01")) {
+  # ---- Argument checks ----------------------------------------------------
+  if (!is.character(lst_syms) || length(lst_syms) < 1L) {
+    stop("`lst_syms` must be a non-empty character vector of column names.")
+  }
+  if (!inherits(start_date, "Date")) {
+    start_date <- as.Date(start_date)
+  }
+  if (!exists("df.data", inherits = TRUE)) {
+    stop("`df.data` not found in the calling environment.")
+  }
+  if (!("date" %in% names(df.data))) {
+    stop("`df.data` must contain a 'date' column.")
+  }
+  if (!exists("dfRecession", inherits = TRUE)) {
+    stop("`dfRecession` not found in the calling environment.")
+  }
+  if (!exists("df.symbols", inherits = TRUE)) {
+    stop("`df.symbols` not found in the calling environment.")
+  }
+  if (!exists("plotSingle", mode = "function")) {
+    stop("`plotSingle()` not found. Please load/define it before calling.")
+  }
+  if (!exists("getPlotTitle", mode = "function") ||
+      !exists("getPlotYLabel", mode = "function")) {
+    stop("`getPlotTitle()` and `getPlotYLabel()` are required.")
+  }
+  
+  # Column presence check (use user's helper if available)
+  has_cols <- if (exists("require_columns", mode = "function")) {
+    require_columns(df.data, lst_syms)
+  } else {
+    all(lst_syms %in% names(df.data))
+  }
+  if (!has_cols) {
+    missing_cols <- setdiff(lst_syms, names(df.data))
+    stop(sprintf("Missing required columns in df.data: %s",
+                 paste(missing_cols, collapse = ", ")))
+  }
+  
+  # ---- Compute default ylim if not provided -------------------------------
+  if (is.null(ylim)) {
+    in_win <- df.data$date >= start_date & df.data$date <= Sys.Date()
+    rng <- range(df.data[in_win, lst_syms[[1]]], na.rm = TRUE)
+    pad <- diff(rng) * 0.05
+    if (!is.finite(pad)) pad <- 1
+    ylim <- c(rng[1] - pad, rng[2] + pad)
+  } else {
+    if (!is.numeric(ylim) || length(ylim) != 2L) {
+      stop("`ylim` must be a numeric vector of length 2.")
+    }
+  }
+  
+  # Helper to choose legend labels (friendly title if available)
+  .label_for <- function(sym) {
+    if (exists("getPlotTitle", mode = "function")) {
+      getPlotTitle(df.symbols, sym)
+    } else sym
+  }
+  
+  # ---- Build base plot ----------------------------------------------------
+  p <- plotSingle(
+    datadf_rec = dfRecession,
+    datadf     = df.data,
+    datax      = "date",
+    datay      = lst_syms[[1]],
+    titlelabel = getPlotTitle(df.symbols, lst_syms[[1]]),
+    xlabel     = "Date",
+    ylabel     = getPlotYLabel(df.symbols, lst_syms[[1]]),
+    xlim       = c(as.Date(start_date), Sys.Date()),
+    ylim       = ylim,
+    b.legend   = TRUE
+  )
+  
+  # ---- Overlay remaining series from lst_syms -----------------------------
+  if (length(lst_syms) > 1L) {
+    for (sym in lst_syms[-1]) {
+      p <- p + ggplot2::geom_line(
+        data = df.data,
+        ggplot2::aes_string(
+          x = "date",
+          y = sym,
+          colour = shQuote(.label_for(sym))
+        ),
+        na.rm = TRUE
+      )
+    }
+  }
+
+  # ---- Output -------------------------------------------------------------
+  print(p)                 # side-effect for interactive use
+  invisible(p)            # return the ggplot object
+}

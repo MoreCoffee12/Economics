@@ -1,0 +1,417 @@
+---
+title: "Historical Relationships"
+author: "Brian Howard"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 4
+    smart: false
+---
+
+```{r setup, echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options("getSymbols.warning4.0"=FALSE)
+```
+
+```{r libraries, echo=FALSE, message=FALSE}
+library(UsingR)
+library(quantmod)
+library(ggplot2)
+library(grid)
+library(gridExtra)
+library(knitr)
+library(kableExtra)
+library(tools)
+library(zoo)
+library(signal)
+library(stringr)
+library(corrplot)
+library(caret)
+library(rpart)
+library(rpart.plot)
+library(randomForest)
+library(Quandl)
+library(nnet)
+library(readr)
+#library(devtools)
+#install_github("andrewuhl/RollingWindow")
+library(RollingWindow)
+#install.packages("EIAdata")
+library(EIAdata)
+library(gtable)
+library(data.table)
+library(readxl)
+library(plotly)
+```
+
+# Load, Clean, and Tidy the data
+
+```{r helper functions, echo=TRUE}
+
+# Call helper functions
+source("plotHelper.r")
+
+```
+
+```{r plot.limits, echo=TRUE}
+
+# Define the plotting ranges
+dt.recent = as.Date("2017-01-01")
+
+# Define the S&P 500 limits
+d.GSPC.max = 3500
+
+```
+
+
+```{r defsyms, echo=TRUE}
+
+# Call code that defines the desired symbols.
+source("SymbolList.r")
+
+```
+
+
+
+```{r load.data, echo=TRUE}
+
+str.data.dir <- "C:/Users/Rainy/OneDrive/Documents/IssaquahDynamical/Datasets/2529RS0082_HistEconData"
+out.file <- file.path(str.data.dir, "RecessionIndicator_Buffer.RData")
+
+# Load data
+load(out.file)
+
+rm(str.data.dir)
+rm(out.file)
+
+```
+
+## Feature Extraction
+
+With the raw data downloaded, some of the interesting features can be extracted. The first step is reconcile the time intervals. Some of the data is released monthly and some daily. I chose to interpolate all data to a daily interval. The first section of code adds the daily rows to the dataframe. 
+
+The code performs interpolation for continuous data or carries it forward for binary data like the recession indicators.
+
+```{r aggsyms}
+
+source("calcInterpolate.r")
+df.data <- calcInterpolate(df.symbols)
+
+```
+
+## Truncate data
+
+```{r data.trunc, echo=TRUE}
+
+# A very few data series do go back to 1854, but most
+# don't even go past WWII so truncate the dataframe
+df.data1 <- df.data[as.Date(rownames(df.data)) > as.Date("1940-01-01"),]
+
+```
+
+## Create aggregate series
+
+Some analysis requires that two or more series be combined. For example, normallizing debt by GDP to get a sense of the proportion of debt to the total economy helps understand the debt cycle.
+
+```{r create aggregate, echo=TRUE}
+
+source("calcAggregateSeries.r")
+
+```
+
+Year over year, smoothed derivative, and log trends tend to smooth out seasonal variation. It gets used so often that I do this for every series downloaded.
+
+```{r calcsYoYSmoothLog}
+
+source("calcFeatures.r")
+lst.df <- calcFeatures(df.data, df.symbols)
+df.data <- lst.df[[1]]
+df.symbols <- lst.df[[2]]
+```
+
+
+```{r calc.features.for.aggregate, echo=TRUE}
+
+# Calculate the features for the aggregated series
+source("calcFeaturesAggregate.r")
+
+```
+
+
+## Recession initiation and termination dates/times
+
+Build the recession and recession initiation dates
+
+```{r recframe}
+
+source("calcRecession.r")
+
+```
+
+## Load up default plot format functions
+
+```{r hist_func_defs, echo=TRUE}
+
+## Define functions for this use case
+
+source("plotHelper.r")
+
+``` 
+
+# Historical statistics
+
+## Equities
+
+### Equity Year over Year Behavior
+
+How much did the market change in a year, or 4, or 5? This data is used to evaluate the probability of a XX% decline in a certain period.
+
+Start with year-over-year
+
+#### US Equity - S&P 500 Rolling 5 year returns (1940 - present)
+
+```{r GSPC_Close_YoY1, echo=FALSE, echo=FALSE, fig.width = 10, fig.asp = .62 }
+
+p <- plot_index_yoy(
+  lst_syms = c(
+    "X_GSPC.GSPC.Close__YoY"
+  ),
+  ylim = c(-50, 100),
+  start_date = "1940-01-01"
+)
+
+```
+
+#### US Equity - Major Indexes Rolling 5 year returns (1940 - present)
+
+```{r GSPC_DJI_RLG_Close_YoY1, echo=FALSE, echo=FALSE, fig.width = 10, fig.asp = .62 }
+
+p <- plot_index_yoy(
+  lst_syms = c(
+    "X_GSPC.GSPC.Close__YoY",
+    "X_DJI.DJI.Close__YoY",
+    "X_RLG.RLG.Close__YoY"
+  ),
+  ylim = c(-50, 100),
+  start_date = "1940-01-01"
+)
+
+```
+
+See how it looks over a 4-year period
+
+```{r GSPC.Close_YoY4, echo=FALSE, fig.width = 10, fig.asp = .62  }
+
+p <- plot_index_yoy(
+  lst_syms = c(
+    "X_GSPC.GSPC.Close__YoY4",
+    "X_DJI.DJI.Close__YoY4",
+    "X_RLG.RLG.Close__YoY4",
+    "QQQ.Close__YoY4"
+  ),
+  ylim = c(-100, 200),
+  start_date = "1940-01-01"
+)
+
+```
+
+With a 4-year window, what are the probabilities of certain returns?
+
+```{r GSPC.Close_YoY4.hist, echo=FALSE, fig.width = 10, fig.asp = .62 }
+
+data.hist <- 
+  df.data$X_GSPC.GSPC.Close__YoY4[df.data$date>c(as.Date('1940-01-01'))]
+my.h <- hist(data.hist,breaks=500,main="S&P 500 4 year returns")
+abline(v = median(data.hist), col = "blue", lwd = 2)
+my.h$counts=100*my.h$counts/sum(my.h$counts)
+#plot(my.h)
+#abline(v = median(data.hist), col = "blue", lwd = 2)
+
+```
+
+
+See how it looks over a 5-year period
+
+```{r GSPC.Close_YoY5, echo=FALSE, fig.width = 10, fig.asp = .62  }
+
+p <- plot_index_yoy(
+  lst_syms = c(
+    "X_GSPC.GSPC.Close__YoY5",
+    "X_DJI.DJI.Close__YoY5",
+    "X_RLG.RLG.Close__YoY5",
+    "QQQ.Close__YoY5"
+  ),
+  ylim = c(-100, 300),
+  start_date = "1940-01-01"
+)
+
+```
+
+With a 5-year window, what are the probabilities of certain returns?
+
+```{r GSPC.Close_YoY5.hist, echo=FALSE, fig.width = 10, fig.asp = .62  }
+
+
+data.hist <- 
+  df.data$X_GSPC.GSPC.Close__YoY5[df.data$date>c(as.Date('1940-01-01'))]
+my.h <- hist(data.hist,breaks=500,main="S&P 500 4 year returns")
+abline(v = median(data.hist), col = "blue", lwd = 2)
+my.h$counts=100*my.h$counts/sum(my.h$counts)
+#plot(my.h)
+#abline(v = median(data.hist), col = "blue", lwd = 2)
+
+
+```
+
+#### US Equity - Rolling 5 year returns (2018 - present)
+
+```{r GSPC.Close_YoY5_near, echo=FALSE, fig.width = 10, fig.asp = .62  }
+
+p <- plot_index_yoy(
+  lst_syms = c(
+    "X_GSPC.GSPC.Close__YoY5",
+    "X_DJI.DJI.Close__YoY5",
+    "X_RLG.RLG.Close__YoY5",
+    "QQQ.Close__YoY5"
+  ),
+  ylim = c(-100, 300),
+  start_date = "2018-01-01"
+)
+
+```
+
+### Moving Average
+
+#### US Equity - S&P 500 Moving Average (2018 - present)
+
+```{r GSPC_close_moving_avg, echo=FALSE, fig.width = 10, fig.asp = .62  }
+
+p <- plot_price_with_mas(
+  lst_syms = c(
+    "X_GSPC.GSPC.Close",
+    "X_GSPC.GSPC.Close__mva200",
+    "X_GSPC.GSPC.Close__mva050"
+  ),
+  ylim = c(2000, 7000),
+  start_date = "2018-01-01"
+)
+
+```
+
+
+
+#### US Equity - Dividend Aristocrats (NOBL) Moving Average (2018 - present)
+
+```{r NOBL_close_moving_avg, echo=FALSE, fig.width = 10, fig.asp = .62  }
+
+p <- plot_price_with_mas(
+  lst_syms = c(
+    "NOBL.Close",
+    "NOBL.Close__mva200",
+    "NOBL.Close__mva050"
+  ),
+  ylim = c(40, 120),
+  start_date = "2018-01-01"
+)
+
+```
+
+#### US Equity - NASDAQ (QQQ) Moving Average (2018 - present)
+
+```{r NOBL_close_moving_avg, echo=FALSE, fig.width = 10, fig.asp = .62  }
+
+p <- plot_price_with_mas(
+  lst_syms = c(
+    "QQQ.Close",
+    "QQQ.Close__mva200",
+    "QQQ.Close__mva050"
+  ),
+  ylim = c(100, 700),
+  start_date = "2018-01-01"
+)
+
+```
+
+
+## Commodities
+
+### Energy and money supply
+
+Suggested by James Turk, look at the relationship between the price of gold and crude oil
+
+```{r commod_energy_oil_gold_calc, echo=FALSE, fig.width = 10, fig.asp = .62  }
+
+# Calculate the ratio of crude to gold
+str_sym_new = "DCOILWTICO__by__GC_F.Close"
+
+lst_syms <- c("DCOILWTICO.Value", "GC_F.Close")
+if (require_columns(df.data, lst_syms )) {
+  
+  df.data[[str_sym_new]] <- df.data[[lst_syms[[1]]]] / df.data[[lst_syms[[2]]]]
+
+}
+
+rm(lst_syms)
+
+```
+
+```{r commod_energy_oil_gold_calc_add_sym, echo=FALSE, fig.width = 10, fig.asp = .62  }
+
+# Add the ratio of crude oil to gold to the symbols table    
+df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = str_sym_new,
+      string.source = "Calc",
+      string.description = "Oil Price Divided by Gold Price",
+      string.label.y = '- ($ Oil/$ Gold)',
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start =  as.Date(max(c(
+        index(DCOILWTICO[1]), index(GC_F[1])
+      ))),
+      date.series.end = as.Date(min(c(
+        index(tail(DCOILWTICO, 1)), index(tail(GC_F, 1))
+      )))
+    )
+)
+
+```
+
+```{r commod_energy_oil_gold_calc_plot, echo=FALSE, fig.width = 10, fig.asp = .62  }
+
+lst_syms <- c("DCOILWTICO__by__GC_F.Close")
+if (require_columns(df.data, lst_syms )) {
+  
+  my_plot <-
+    plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = str_sym_new,
+      "Oil price per barrel divided by gold price",
+      "Date",
+      getPlotYLabel(df.symbols, str_sym_new),
+      c(as.Date('1986-01-02'), Sys.Date()),
+      ylim = c(-0.1, 0.20),
+      b.legend = TRUE,
+      b.percentile = TRUE,
+      b.long.legend = TRUE
+    )
+  my_plot
+  
+  # Clean and tidy memory  
+  if( exists("my_plot")){
+    rm(my_plot)
+  }
+}
+
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
+
+```
+
+

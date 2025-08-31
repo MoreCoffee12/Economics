@@ -320,7 +320,9 @@ df.data[str.symbol] <-
 
 ```{r pce_model_sym_add, echo=FALSE, fig.width = 10, fig.asp = .62}
 
+# Define the new description
 str.description <- "Linear Model Prediction\nPCE given GSG,\nPKG, UPS, and FDX"
+
 # Update the symbols table    
 df.symbols <- symbols_append_row(
     df.symbols,
@@ -992,7 +994,7 @@ datay.aux.1 <- "GDPNOW.Value"
 ylim.1 <- c(-10, 20)
 p2 <- plotSingleQuick(dfRecession, 
                       df.data, datay.1, 
-                      ylim.1, dtStart, 
+                      ylim.1, dt.start = c(dt.start, dt.end), 
                       b.percentile = FALSE, 
                       b.legend = TRUE,
                       b.long.legend = TRUE)
@@ -1082,7 +1084,7 @@ if( exists("str.symbol.res")){
 Document the PCR residual
 
 
-```{r gdp_lm_resid_calc_syms, echo=FALSE, fig.width = 10, fig.asp = .62}
+```{r gdp_pcr_resid_calc_syms, echo=FALSE, fig.width = 10, fig.asp = .62}
 
 
 str.symbol.pcr.res <- "GDP.pcr.res"
