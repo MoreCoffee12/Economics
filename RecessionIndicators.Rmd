@@ -3018,7 +3018,7 @@ Take a close look at recent activity
 ```{r FINRA.margin.debt.nearterm, echo=FALSE}
 
 datay <- "FINRA_MarginDebt"
-ylim <- c(100000, 1000000)
+ylim <- c(100000, 1500000)
 dt.start <- as.Date('2000-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
