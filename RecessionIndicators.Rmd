@@ -3048,6 +3048,8 @@ if ( require_columns(df.data,lst_syms ) ){
     rm(p2)
   }
   
+}else{
+  print(paste("Failed to find these columns: ", lst_syms))
 }
 
 # Last bit of clean up

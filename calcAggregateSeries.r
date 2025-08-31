@@ -1164,7 +1164,7 @@ if ( require_columns(df.data, c("EXCSRESNW.Value", "GDP.Value") ) ){
 
 
 # Normalize the FINRA margin debt by the GDP
-lst_syms <- c("FINRAMarginDebt", "GDPDEF.Value")
+lst_syms <- c("FINRA_MarginDebt", "GDPDEF.Value")
 
 if ( require_columns(df.data,lst_syms ) ){
   
