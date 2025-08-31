@@ -1,5 +1,5 @@
 rscript -e "str_out <- 'C:/Users/Rainy/OneDrive/Documents/IssaquahDynamical/Datasets/2529RS0082_HistEconData'; rmarkdown::render('C:/Users/Rainy/Documents/GitHub/Economics/RecessionIndicators.Rmd', output_dir = str_out)"
 rscript -e "str_out <- 'C:/Users/Rainy/OneDrive/Documents/IssaquahDynamical/Datasets/2529RS0082_HistEconData'; rmarkdown::render('D:/Local Documents/GitHub/Economics/RecessionIndicators.Rmd', output_dir = str_out)"
 rscript -e "str_out <- 'C:/Users/Rainy/OneDrive/Documents/IssaquahDynamical/Datasets/2529RS0082_HistEconData'; rmarkdown::render('D:/Local Documents/GitHub/Economics/GDPModels.Rmd', output_dir = str_out)"
-rscript -e "str_out <- 'C:/Users/Rainy/OneDrive/Documents/IssaquahDynamical/Datasets/2529RS0082_HistEconData'; rmarkdown::render('D:/Local Documents/GitHub/EconomicsHistorical Relationships.Rmd', output_dir = str_out)"
+rscript -e "str_out <- 'C:/Users/Rainy/OneDrive/Documents/IssaquahDynamical/Datasets/2529RS0082_HistEconData'; rmarkdown::render('D:/Local Documents/GitHub/Economics/Historical Relationships.Rmd', output_dir = str_out)"
 pause

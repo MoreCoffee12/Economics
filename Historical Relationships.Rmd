@@ -189,6 +189,22 @@ p <- plot_index_yoy(
 
 ```
 
+#### US Equity - Major Indexes Rolling 5 year returns (2018 - present)
+
+```{r GSPC_DJI_RLG_Close_YoY1_2018, echo=FALSE, echo=FALSE, fig.width = 10, fig.asp = .62 }
+
+p <- plot_index_yoy(
+  lst_syms = c(
+    "X_GSPC.GSPC.Close__YoY",
+    "X_DJI.DJI.Close__YoY",
+    "X_RLG.RLG.Close__YoY"
+  ),
+  ylim = c(-50, 100),
+  start_date = "2018-01-01"
+)
+
+```
+
 See how it looks over a 4-year period
 
 ```{r GSPC.Close_YoY4, echo=FALSE, fig.width = 10, fig.asp = .62  }

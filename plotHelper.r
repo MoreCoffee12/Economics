@@ -1331,19 +1331,19 @@ plot_index_yoy <- function(lst_syms,
   )
   
   # ---- Overlay remaining series ------------------------------------------
-  # if (length(lst_syms) > 1L) {
-  #   for (sym in lst_syms[-1]) {
-  #     p <- p + ggplot2::geom_line(
-  #       data = df.data,
-  #       ggplot2::aes_string(
-  #         x = "date",
-  #         y = sym,
-  #         colour = shQuote(getPlotTitle(df.symbols, sym))
-  #       ),
-  #       na.rm = TRUE
-  #     )
-  #   }
-  # }
+  if (length(lst_syms) > 1L) {
+    for (sym in lst_syms[-1]) {
+      p <- p + ggplot2::geom_line(
+        data = df.data,
+        ggplot2::aes_string(
+          x = "date",
+          y = sym,
+          colour = shQuote(getPlotTitle(df.symbols, sym))
+        ),
+        na.rm = TRUE
+      )
+    }
+  }
   
   # ---- Output -------------------------------------------------------------
   print(p)                 # side-effect for interactive use

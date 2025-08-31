@@ -1,6 +1,0 @@
-From what I can tell, the NYX data source was discontinued. This site has some good details: https://www.advisorperspectives.com/dshort/updates/2018/11/30/margin-debt-and-the-market-down-6-25-mom
-
-
-The data in available on FINRA and I am using that for now
-
-http://www.finra.org/investors/margin-statistics
