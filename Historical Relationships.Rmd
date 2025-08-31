@@ -325,7 +325,7 @@ p <- plot_price_with_mas(
 
 #### US Equity - NASDAQ (QQQ) Moving Average (2018 - present)
 
-```{r NOBL_close_moving_avg, echo=FALSE, fig.width = 10, fig.asp = .62  }
+```{r QQQ_close_moving_avg, echo=FALSE, fig.width = 10, fig.asp = .62  }
 
 p <- plot_price_with_mas(
   lst_syms = c(

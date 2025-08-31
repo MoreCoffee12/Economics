@@ -1393,12 +1393,11 @@ if(bRefresh){
 
 ```{r margin.debt.load, echo=FALSE}
 if(bRefresh){
-  
-  # Manually change dirs for testing
-  #setwd('C:/Users/Rainy/OneDrive/Documents/Hobby/GitHub/Economics')
-  
+
   # Read in the data
-  df.margin <- data.frame(read_excel('MarginData.xlsx'))
+  input_file <- file.path(str.data.dir, "Margin Data/MarginData.xlsx")
+  df.margin <- data.frame(read_excel(input_file))
+  rm(input_file)
   df.margin$Date <- as.Date(df.margin$Date)
   list.margin.names <- names(df.margin)
   
