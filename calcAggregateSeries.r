@@ -1171,7 +1171,7 @@ if ( require_columns(df.data,lst_syms ) ){
   # Perform the calculation
   str_sym_new <- "FINRAMarginDebt__by__GDPDEF" 
   df.data[[str_sym_new]] <-
-    (df.data$FINRAMarginDebt / df.data$GDPDEF)
+    (df.data[[lst_syms[[1]]]] / df.data[[lst_syms[[2]]]])
 
   
   # Update the symbols table    
