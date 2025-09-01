@@ -8094,10 +8094,7 @@ Data is Line 1 of Table 6.16D
 
 ```{r CPROFIT, echo=FALSE}
 
-datay <- "CPROFIT.Value"
-ylim <- c(0, 4000)
-plotSingleQuickModern(datay, ylim)
-
+plotSingleQuickModern(datay = "CPROFIT.Value", yli = c(0, 5000))
 
 ```
 
