@@ -15,33 +15,15 @@ options("getSymbols.warning4.0"=FALSE)
 ```
 
 ```{r libraries, echo=FALSE, message=FALSE}
+
 library(tidyverse)
-library(UsingR)
-library(quantmod)
-library(ggplot2)
-library(grid)
+library(tidyquant)
+library(Hmisc)
 library(gridExtra)
-library(knitr)
-library(kableExtra)
-library(tools)
-library(zoo)
 library(signal)
-library(stringr)
-library(corrplot)
 library(caret)
-library(rpart)
-library(rpart.plot)
-library(randomForest)
-library(Quandl)
-library(nnet)
-library(readr)
-#library(devtools)
-#install_github("andrewuhl/RollingWindow")
-library(RollingWindow)
-library(gtable)
 library(data.table)
-library(readxl)
-library(plotly)
+
 ```
 
 # Load, Clean, and Tidy the Data
@@ -53,17 +35,6 @@ source("plotHelper.r")
 
 ```
 
-```{r plot.limits, echo=TRUE}
-
-# Define the plotting ranges
-dt.recent = as.Date("2017-01-01")
-
-# Define the S&P 500 limits
-source("SetGSPCMax.r")
-
-```
-
-
 ```{r load.data, echo=TRUE}
 
 str.data.dir <- "C:/Users/Rainy/OneDrive/Documents/IssaquahDynamical/Datasets/2529RS0082_HistEconData"
@@ -74,6 +45,100 @@ load(out.file)
 
 rm(str.data.dir)
 rm(out.file)
+
+```
+
+
+```{r plot.limits, echo=TRUE}
+
+# Define the plotting ranges
+dt.recent = as.Date("2017-01-01")
+
+# Define the start of the prediction
+dt.start.prediction <- as.Date("01/02/1962", "%d/%m/%Y")
+
+# Back test range
+dt_start_back_test = as.Date('1960-01-01')
+
+# Define the S&P 500 limits
+source("SetGSPCMax.r")
+
+```
+
+```{r clean_data, echo=FALSE}
+
+# Keep only the symbols needed by this code
+df.symbols <- dplyr::filter(df.symbols,
+                            string.symbol %in% c("USREC",
+                                                 "GDP",
+                                                 "GDPC1",
+                                                 "GDPNOW",
+                                                 "PCE",
+                                                 "QQQ",
+                                                 "NOBL",
+                                                 "^RLG",
+                                                 "^GSPC",
+                                                 "^DJI"))
+
+if( exists("b.refresh.models")){
+  rm(b.refresh.models)
+}
+
+if( exists("bRefresh")){
+  rm(bRefresh)
+}
+
+if( exists("d.income")){
+  rm(d.income)
+}
+
+if( exists("d.Russell.max")){
+  rm(d.Russell.max)
+}
+
+if( exists("dt.date")){
+  rm(dt.date)
+}
+
+if( exists("dt.date.c")){
+  rm(dt.date.c)
+}
+
+if( exists("i.cols")){
+  rm(i.cols)
+}
+
+if( exists("idx")){
+  rm(idx)
+}
+
+if( exists("list.margin.names")){
+  rm(list.margin.names)
+}
+
+if( exists("list.options.names")){
+  rm(list.options.names)
+}
+
+if( exists("str.name")){
+  rm(str.name)
+}
+
+if( exists("str.safe.name")){
+  rm(str.safe.name)
+}
+
+if( exists("str.symbol")){
+  rm(str.symbol)
+}
+
+if( exists("str.symbol.raw")){
+  rm(str.symbol.raw)
+}
+
+if( exists("ylimBackTest")){
+  rm(ylimBackTest)
+}
 
 ```
 
