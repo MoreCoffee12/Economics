@@ -76,7 +76,7 @@ df.symbols <- dplyr::filter(df.symbols,
                                                  "PCE",
                                                  "QQQ",
                                                  "NOBL",
-                                                 "^RLG",
+                                                 "ICSA",
                                                  "POPTHM",
                                                  "CLF16OV"))
 
@@ -303,9 +303,9 @@ myPlot <-
   )
 myPlot <- myPlot + geom_line(
   data = df.data,
-  aes_string(
-    x = "date",
-    y = datay.aux,
+  aes(
+    x = .data[["date"]],
+    y = .data[[datay.aux]],
     colour = shQuote(getPlotTitle(df.symbols, datay.aux))
   ),
   na.rm = TRUE
