@@ -2983,11 +2983,85 @@ rm(ylim2)
 
 This is an interesting series, they should perform better through the recessions. Unfortunately they are short lived so there is not much data so this is more of a place holder for now.
 
-```{r DivStocks }
-datay <- "NOBL.Open"
-ylim <- c(40, 110)
-dt.start <- as.Date('2014-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
+```{r DivStocks, echo=FALSE, fig.width = 10, fig.asp = .62 }
+
+lst_sym <- c( "NOBL.Close", "SCHD.Close")
+
+if (require_columns(df.data, lst_sym)) {
+  
+  my.plot <-
+    plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_sym[[1]],
+      getPlotTitle(df.symbols, lst_sym[[1]]),
+      "Date",
+      getPlotYLabel(df.symbols, lst_sym[[1]]),
+      c(as.Date('2014-01-01'), Sys.Date()),
+      ylim =  c(4, 110),
+      b.legend = TRUE,
+      b.percentile = FALSE,
+      b.long.legend = TRUE
+    )
+
+
+  my.plot + geom_line(
+    data = df.data,
+    aes_string(
+      x = "date",
+      y = lst_sym[[2]],
+      colour = shQuote(getPlotTitle(df.symbols, lst_sym[[2]]))
+    ),
+    na.rm = TRUE
+  )
+}
+
+# Clean and tidy
+if( exists ("lst_sym")){
+  rm(lst_sym)
+}
+
+```
+
+```{r DivStocks_yoy, echo=FALSE, fig.width = 10, fig.asp = .62 }
+
+lst_sym <- c( "NOBL.Close__YoY", "SCHD.Close__YoY")
+
+if (require_columns(df.data, lst_sym)) {
+  
+  my.plot <-
+    plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_sym[[1]],
+      getPlotTitle(df.symbols, lst_sym[[1]]),
+      "Date",
+      getPlotYLabel(df.symbols, lst_sym[[1]]),
+      c(as.Date('2014-01-01'), Sys.Date()),
+      ylim =  c(-50, 110),
+      b.legend = TRUE,
+      b.percentile = FALSE,
+      b.long.legend = TRUE
+    )
+
+
+  my.plot + geom_line(
+    data = df.data,
+    aes_string(
+      x = "date",
+      y = lst_sym[[2]],
+      colour = shQuote(getPlotTitle(df.symbols, lst_sym[[2]]))
+    ),
+    na.rm = TRUE
+  )
+}
+
+# Clean and tidy
+if( exists ("lst_sym")){
+  rm(lst_sym)
+}
 
 ```
 
@@ -5123,7 +5197,7 @@ p1 <-
     vjust = "bottom"
   ))
 
-##-----------------------------------------------------------------------------------------------------------------##
+##----------------------------------------------------------------------------##
 # Baker
 datay <- "BKR.Close"
 p2 <-
@@ -5177,7 +5251,7 @@ p2 <-
     vjust = "top"
   ))
 
-##-----------------------------------------------------------------------------------------------------------------##
+##----------------------------------------------------------------------------##
 # Haliburton
 datay <- "HAL.Close"
 p3 <-
@@ -5213,7 +5287,7 @@ p3 <-
 
 
 
-##-----------------------------------------------------------------------------------------------------------------##
+##----------------------------------------------------------------------------##
 # Schlumberger
 datay <- "SLB.Close"
 p4 <-
@@ -5270,7 +5344,7 @@ See how the players are doing
 
 ```{r crude.recent.bkr.players, echo=FALSE, fig.width = 13, fig.asp = 0.4}
 
-##-----------------------------------------------------------------------------------------------------------------##
+##----------------------------------------------------------------------------##
 ## Rig counts
 datay <- "BKR_Total__YoY"
 ylim <- c(-100, 150)
@@ -5349,7 +5423,7 @@ p1 <-
     vjust = "top"
   ))  
 
-##-----------------------------------------------------------------------------------------------------------------##
+##----------------------------------------------------------------------------##
 ## Ticker price change
 datay <- "BKR.Close__YoY"
 datay.aux.1 <- "SLB.Close__YoY"
