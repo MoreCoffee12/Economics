@@ -8,6 +8,7 @@ output:
     toc_depth: 4
     smart: false
 ---
+
 ```{r}
 ```
 
@@ -4605,55 +4606,39 @@ plotSingleQuickModern(datay, ylim)
 
 ### CPI to PPI
 
-Suggested by Charlie, it can be helpful to look at the relationship between producer prices and consumer prices.
+Suggested by Charlie, it can be helpful to look at the relationship between
+producer prices and consumer prices.
 
-```{r CPItoPPI, echo=FALSE, fig.width = 9, fig.asp = 0.4}
-datay <- "CPIAUCSL.Value__YoY"
-datay.aux <- "PPIACO.Value__YoY"
-datay.aux.scale <- 0.5
-datay.aux.1 <- "PCEPI.Value__YoY"
+```{r CPItoPPI_long, echo=FALSE,  fig.width = 10, fig.asp = .62}
 
-ylim <- c(-10, 20)
-dt.start = as.Date('1960-01-01')
-my.plot <-
-  plotSingle(
-    dfRecession,
-    df.data,
-    "date",
-    datay,
-    getPlotTitle(df.symbols, datay),
-    "Date",
-    paste(getPlotYLabel(df.symbols, datay), ", ", datay, sep=""),
-    c(dt.start, Sys.Date()),
-    ylim,
-    b.legend = TRUE,
-    b.long.legend = TRUE
-  )
-my.plot <- my.plot + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = df.data[[datay.aux]] * datay.aux.scale,
-    colour = shQuote(getPlotTitle(df.symbols, datay.aux, str.sep = "\n"))
-  ),
-  na.rm = TRUE
-)
+lst_syms <- c("CPIAUCSL.Value__YoY", "PPIACO.Value__YoY", "PCEPI.Value__YoY")
 
-my.plot <- my.plot + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = df.data[[datay.aux.1]] * datay.aux.scale,
-    colour = shQuote(getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n"))
-  ),
-  na.rm = TRUE
-)
+plot_three_series_sec_axis(dfRecession, df.data, df.symbols,
+   lst_syms = lst_syms,
+   ylim = c(-10, 20),
+   dt.start = as.Date("1960-01-01"),
+   datay_aux_scale = 0.5)
 
+# Clean and tidy memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
 
-my.plot + scale_y_continuous(sec.axis = sec_axis(
-  ~ . * (1 / datay.aux.scale),
-  name = paste(getPlotYLabel(df.symbols, datay.aux), ", ", datay.aux, sep = "")
-), limits = ylim)
+```
+```{r CPItoPPI_short, echo=FALSE,  fig.width = 10, fig.asp = .62}
+
+lst_syms <- c("CPIAUCSL.Value__YoY", "PPIACO.Value__YoY", "PCEPI.Value__YoY")
+
+plot_three_series_sec_axis(dfRecession, df.data, df.symbols,
+   lst_syms = lst_syms,
+   ylim = c(-10, 20),
+   dt.start = as.Date("2007-01-01"),
+   datay_aux_scale = 0.5)
+
+# Clean and tidy memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
 
 ```
 
@@ -4900,33 +4885,22 @@ This plots out the real price of gold by two different deflators. PPI corrected 
 
 ```{r gold.by.index, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
-# datay <- "LBMAGOLD.USD_PM.by.CPIAUCSL"
-# ylim <- c(0, 12)
-# dt.start = as.Date('1970-01-01')
-# datay.aux <- "LBMAGOLD.USD_PM.by.PPIACO"
-# my.plot <- plotSingle(
-#   dfRecession,
-#   df.data,
-#   datax = "date",
-#   datay,
-#   titlelabel = "Real Price of Gold",
-#   xlabel = "Date",
-#   ylabel = getPlotYLabel(df.symbols, datay),
-#   ylim,
-#   xlim = c(dt.start, Sys.Date()),
-#   b.legend = TRUE,
-#   b.long.legend = TRUE
-# )
-# 
-# my.plot + geom_line(
-#   data = df.data,
-#   aes_string(
-#     x = "date",
-#     y = datay.aux,
-#     colour = shQuote(getPlotTitle(df.symbols, datay.aux, str.sep = "\n"))
-#   ),
-#   na.rm = TRUE
-# )
+sym_plot <- "GC_F.Close__by__PPIACO.Value"
+ylim <- c(0, 12)
+dt.start = as.Date('1970-01-01')
+plotSingle(
+  dfRecession,
+  df.data,
+  datax = "date",
+  datay = sym_plot,
+  titlelabel =  getPlotTitle(df.symbols, sym_plot),
+  xlabel = "Date",
+  ylabel = getPlotYLabel(df.symbols, sym_plot),
+  ylim,
+  xlim = c(dt.start, Sys.Date()),
+  b.legend = TRUE,
+  b.long.legend = TRUE
+)
 
 ```
 

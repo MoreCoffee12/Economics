@@ -161,7 +161,7 @@ df.data <- calcInterpolate(df.symbols)
 
 # A very few data series do go back to 1854, but most
 # don't even go past WWII so truncate the dataframe
-df.data1 <- df.data[as.Date(rownames(df.data)) > as.Date("1940-01-01"),]
+df.data <- df.data[as.Date(rownames(df.data)) > as.Date("1940-01-01"),]
 
 ```
 

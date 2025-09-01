@@ -2166,26 +2166,44 @@ rm(lst.syms)
 #     )
 #   )
 
-# # Normalize gold by consumer price index (CPI)
-# df.data$LBMAGOLD.USD_PM.by.CPIAUCSL <-
-#   (df.data$LBMAGOLD.USD_PM / df.data$CPIAUCSL)
-# df.symbols <-
-#   rbind(
-#     df.symbols,
-#     data.frame(
-#       string.symbol = "LBMAGOLD.USD_PM.by.CPIAUCSL",
-#       string.source = "Calc",
-#       string.description = "Gold, USD/Troy OUnce, Normalized by\nconsumer price index",
-#       string.label.y = "$/t oz/Index",
-#       float.expense.ratio = -1.00,
-#       date.series.start =  as.Date(max(c(
-#         index(LBMAGOLD[1]), index(CPIAUCSL[1])
-#       ))) ,
-#       date.series.end = as.Date(min(c(
-#         index(tail(LBMAGOLD, 1)), index(tail(CPIAUCSL, 1))
-#       )))
-#     )
-#   )
+# Normalize gold by consumer price index (CPI)
+lst.syms <- c("GC_F.Close", "PPIACO.Value")
+if ( require_columns(df.data, lst.syms ) ){
+
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "GC_F.Close__by__PPIACO.Value"    
+  df.data[[str.symbol.new]] <-
+    ( df.data[[lst.syms[[1]]]] / df.data[[lst.syms[[2]]]] )
+
+  # Update the symbols table    
+  df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = str.symbol.new,
+      string.source = "Calc",
+      string.description = "Gold, USD/Troy OUnce, Normalized by\nconsumer price index",
+      string.label.y = "$/t oz/Index",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(c(
+        index(GC_F[1]), index(PPIACO[1])
+      ))) ,
+      date.series.end = as.Date(min(c(
+        index(tail(GC_F, 1)), index(tail(PPIACO, 1))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
+    )
+  )
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
+}else{
+  print(paste("Failed to find: ", lst.syms))
+}
+
+# Free up memory
+rm(lst.syms)
 
 # # Normalize gold by GDP
 # df.data$LBMAGOLD.USD_PM.by.GDP <-

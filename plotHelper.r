@@ -1493,3 +1493,127 @@ plot_price_with_mas <- function(lst_syms,
   print(p)                 # side-effect for interactive use
   invisible(p)            # return the ggplot object
 }
+
+
+#' Plot three series with a secondary axis (scaled)
+#'
+#' Builds a plot using \code{plotSingle()} for the primary series (first symbol),
+#' then overlays two auxiliary series (second and third symbols) scaled to the
+#' primary y-axis. A linear secondary axis is added that inverts the scale
+#' factor so the auxiliary series can be read in their native units.
+#'
+#' @param dfRecession data.frame used by \code{plotSingle()} (e.g., recession shading).
+#' @param df.data data.frame containing a \code{date} column and the series named in \code{lst_syms}.
+#' @param df.symbols data.frame or lookup used by \code{getPlotTitle()} and \code{getPlotYLabel()}.
+#' @param lst_syms character vector of length >= 3. \cr
+#'   \itemize{
+#'     \item \code{lst_syms[1]}: primary series (plotted by \code{plotSingle()})
+#'     \item \code{lst_syms[2]}, \code{lst_syms[3]}: auxiliary series (scaled, drawn as lines)
+#'   }
+#' @param ylim numeric(2). y-axis limits for the primary axis. Default \code{c(-10, 20)}.
+#' @param dt.start Date scalar for the x-axis start (default \code{as.Date("1960-01-01")}).
+#' @param datay_aux_scale numeric scalar scale applied to auxiliary series (default \code{0.5}).
+#'   The secondary axis uses the inverse transform so labels are in auxiliary units.
+#' @param apply_y_scale logical; if \code{TRUE} (default) apply a single \code{scale_y_continuous()}
+#'   with the secondary axis. Set \code{FALSE} if \code{plotSingle()} already sets the y-scale.
+#' @param print_plot logical; if \code{TRUE} (default) print the plot.
+#'
+#' @return A \code{ggplot} object (invisibly if \code{print_plot = TRUE}).
+#'
+#' @examples
+#' \dontrun{
+#' p <- plot_three_series_sec_axis(
+#'   dfRecession, df.data, df.symbols,
+#'   lst_syms = c("RSAG", "GDP", "UNRATE"),
+#'   ylim = c(-10, 20),
+#'   dt.start = as.Date("1960-01-01"),
+#'   datay_aux_scale = 0.5
+#' )
+#' }
+plot_three_series_sec_axis <- function(
+    dfRecession,
+    df.data,
+    df.symbols,
+    lst_syms,
+    ylim = c(-10, 20),
+    dt.start = as.Date("1960-01-01"),
+    datay_aux_scale = 0.5,
+    apply_y_scale = TRUE,
+    print_plot = TRUE
+) {
+  # ---- Validation -----------------------------------------------------------
+  stopifnot(is.data.frame(df.data), is.character(lst_syms), length(lst_syms) >= 3)
+  
+  needed <- unique(c("date", lst_syms[1:3]))
+  has_all <- all(needed %in% names(df.data))
+  
+  # If a user-supplied require_columns() exists, use it; otherwise do a base check.
+  if (exists("require_columns") && is.function(require_columns)) {
+    if (!require_columns(df.data, needed)) return(invisible(NULL))
+  } else if (!has_all) {
+    missing <- setdiff(needed, names(df.data))
+    stop("Missing required columns in df.data: ", paste(missing, collapse = ", "))
+  }
+  
+  # ---- Primary plot via plotSingle() ---------------------------------------
+  # Note: plotSingle() is assumed to NOT set its own y-scale if apply_y_scale=TRUE.
+  # If plotSingle() already sets a y-scale, either set apply_y_scale=FALSE here,
+  # or remove the scale from plotSingle() to avoid duplicate-scale warnings.
+  primary_sym <- lst_syms[[1]]
+  aux_sym2    <- lst_syms[[2]]
+  aux_sym3    <- lst_syms[[3]]
+  
+  my.plot <- plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay = primary_sym,
+    getPlotTitle(df.symbols, primary_sym),
+    "Date",
+    paste(getPlotYLabel(df.symbols, primary_sym), ", ", primary_sym, sep = ""),
+    c(dt.start, Sys.Date()),
+    ylim,
+    b.legend      = TRUE,
+    b.long.legend = TRUE
+  )
+  
+  # ---- Overlay auxiliary series (scaled to primary axis) -------------------
+  # Using tidy-eval and the .data pronoun to avoid deprecated aes_string().
+  # The colour aesthetic is mapped to a constant legend label via a fixed string.
+  my.plot <- my.plot +
+    ggplot2::geom_line(
+      data = df.data,
+      mapping = ggplot2::aes(
+        x = .data[["date"]],
+        y = .data[[aux_sym2]] * datay_aux_scale,
+        colour = getPlotTitle(df.symbols, aux_sym2, str.sep = "\n")
+      ),
+      na.rm = TRUE
+    ) +
+    ggplot2::geom_line(
+      data = df.data,
+      mapping = ggplot2::aes(
+        x = .data[["date"]],
+        y = .data[[aux_sym3]] * datay_aux_scale,
+        colour = getPlotTitle(df.symbols, aux_sym3, str.sep = "\n")
+      ),
+      na.rm = TRUE
+    )
+  
+  # ---- Single y-scale with secondary axis (invert the scale) ---------------
+  if (apply_y_scale) {
+    inv <- if (datay_aux_scale == 0) 1 else 1 / datay_aux_scale
+    # Use one representative auxiliary label for the secondary axis title.
+    sec_name <- paste(getPlotYLabel(df.symbols, aux_sym2), ", ", aux_sym2, sep = "")
+    
+    my.plot <- my.plot +
+      ggplot2::scale_y_continuous(
+        limits = ylim,
+        sec.axis = ggplot2::sec_axis(~ . * inv, name = sec_name)
+      )
+  }
+  
+  # ---- Output ---------------------------------------------------------------
+  if (print_plot) print(my.plot)
+  invisible(my.plot)
+}
