@@ -15,38 +15,15 @@ options("getSymbols.warning4.0"=FALSE)
 ```
 
 ```{r libraries, echo=FALSE, message=FALSE}
+
 library(tidyverse)
-library(UsingR)
-library(quantmod)
-library(ggplot2)
-library(grid)
+library(tidyquant)
+library(Hmisc)
 library(gridExtra)
-library(knitr)
-library(kableExtra)
-library(tools)
-library(zoo)
 library(signal)
-library(stringr)
-library(corrplot)
 library(caret)
-library(rpart)
-library(rpart.plot)
-library(randomForest)
-library(Quandl)
-library(nnet)
-library(readr)
-#library(devtools)
-#install_github("andrewuhl/RollingWindow")
-library(RollingWindow)
-#library(devtools)
-#devtools::install_github("jameelalsalam/eia2")
-library(eia2)
-library(gtable)
 library(data.table)
-library(readxl)
-library(plotly)
-#install.packages('pls')
-library(pls)
+
 ```
 
 ```{r helper functions, echo=FALSE}
@@ -515,7 +492,7 @@ datay <- "PCE.Value"
 datay.aux <- "PCE.lm"
 datay.aux.1 <- "PCE.pcr"
 datay.aux.2 <- "PCE.knn"
-ylim <- c(1000, 18000)
+ylim <- c(1000, 20000)
 dt.end <- Sys.Date()
 myPlot <- 
   plotSingle(
