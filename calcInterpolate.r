@@ -31,7 +31,9 @@ calcInterpolate <- function(df.symbols) {
   df.data <- data.frame(zooData)
   
   # The recession data is binary and needs to be carried forward
-  df.data$USREC <- na.locf(df.data$USREC)
+  if( ("USREC" %in% names(df.symbols)) ){
+    df.data$USREC <- na.locf(df.data$USREC)
+  }
   
   # This sections removes NA's with an approximation. It returns a zoo object so the
   # row names have to be reset
