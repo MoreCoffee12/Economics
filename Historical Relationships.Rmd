@@ -160,7 +160,7 @@ df.data <- calcInterpolate(df.symbols)
 ```{r data.trunc, echo=TRUE}
 
 # A very few data series do go back to 1854, but most
-# don't even go past WWII so truncate the dataframe
+# don't even go past WWII so truncate the data frame
 df.data <- df.data[as.Date(rownames(df.data)) > as.Date("1940-01-01"),]
 
 ```

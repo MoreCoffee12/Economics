@@ -77,8 +77,8 @@ df.symbols <- dplyr::filter(df.symbols,
                                                  "QQQ",
                                                  "NOBL",
                                                  "^RLG",
-                                                 "^GSPC",
-                                                 "^DJI"))
+                                                 "POPTHM",
+                                                 "CLF16OV"))
 
 if( exists("b.refresh.models")){
   rm(b.refresh.models)
@@ -151,16 +151,16 @@ The code performs interpolation for continuous data or carries it forward for bi
 ```{r aggsyms}
 
 source("calcInterpolate.r")
-df.data <- calcInterpolate(df.data, df.symbols)
+df.data <- calcInterpolate(df.symbols)
 
 ```
 
 ## Truncate data
 
-```{r data.trunc, echo=FALSE}
+```{r data.trunc, echo=FALSE, fig.width = 10, fig.asp = .62}
 
 # A very few data series do go back to 1854, but most
-# don't even go past WWII so truncate the dataframe
+# don't even go past WWII so truncate the data frame.
 df.data <- df.data[as.Date(rownames(df.data)) > as.Date("1940-01-01"),]
 
 ```
@@ -183,6 +183,7 @@ source("calcFeatures.r")
 lst.df <- calcFeatures(df.data, df.symbols)
 df.data <- lst.df[[1]]
 df.symbols <- lst.df[[2]]
+
 ```
 
 
@@ -217,50 +218,72 @@ This makes the BLS measures of labor force less useful when I want to normalized
 dt.start.prediction <- as.Date(max(c(index(CLF16OV[1]), index(POPTHM[1]))))
 dt.end.prediction <- as.Date("2020-01-01")
 
-df.lf.model <-
-  df.data[df.data$date >= dt.start.prediction &
-            df.data$date <= dt.end.prediction,]
+lst.syms <- c("CLF16OV.Value", "POPTHM.Value")
+if ( require_columns(df.data, lst.syms ) ){
+  
+  df.lf.model <-
+    df.data[df.data$date >= dt.start.prediction &
+              df.data$date <= dt.end.prediction,]
+  
+  # Perform the fit
+  str_form <- as.formula(paste(lst.syms[[1]], "~", lst.syms[[2]]))
+  list.fit.clf16ovpopthm <- train(
+    str_form,
+    data = df.lf.model,
+    method = "lm",
+    preProcess = c('center', 'scale')
+  )
+  
+  if( exists("str_form")){
+    rm(str_form)
+  }
 
-# Perform the fit
-list.fit.clf16ovpopthm <- train(
-  CLF16OV.Value ~ POPTHM.Value,
-  data = df.lf.model,
-  method = "lm",
-  preProcess = c('center', 'scale')
-)
+}
 
+# Clean and tidy memory
+if( exists ("lst.syms")){
+  rm(lst.syms)
+}
 
 ```
 
-```{r lf.lm.update, echo=FALSE}
-# Add linear prediction to the dataframe
-str.symbol <- "CLF16OV.lm.POPTHM"
+```{r lf.lm.update, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+# Add linear prediction to the data frame
+str.symbol <- "CLF16OV__lm__POPTHM"
 df.data[str.symbol] <-
   predict(list.fit.clf16ovpopthm, newdata = df.data)
 
+
 # Add the linear model prediction to the symbols table
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
-      string.symbol = str.symbol,
-      string.source = "Predict",
-      string.description = "Linear Model Prediction\nCLF16OV given POPTHM",
-      string.label.y = getPlotYLabel(df.symbols, "POPTHM")[1],
-      float.expense.ratio = -1.00,
-      Max030 = FALSE,
-      Max180 = FALSE,
-      date.series.start = dt.start.prediction,
-      date.series.end = as.Date(Sys.Date())
-    )
+df.symbols <- symbols_append_row(
+  df.symbols,
+  list(
+    string.symbol = str.symbol,
+    string.source = "Predict",
+    string.description = "Linear Model Prediction\nCLF16OV given POPTHM",
+    string.label.y = getPlotYLabel(df.symbols, "POPTHM")[1],
+    float.expense.ratio = -1.00,
+    Max030 = FALSE,
+    Max180 = FALSE,
+    date.series.start = dt.start.prediction,
+    date.series.end = as.Date(Sys.Date()),
+    string.symbol_safe = safe_symbol_name(str.symbol),
+    string.object_name = safe_symbol_name(str.symbol)
   )
+)
+
+# Clean and tidy memory
+if( exists("str.symbol")){
+  rm(str.symbol)
+}
 
 ```
 
-```{r lf.lm.setup.plot, echo=FALSE, fig.width = 8, fig.asp = .52}
+```{r lf.lm.setup.plot, echo=FALSE, fig.width = 10, fig.asp = .62}
 
-datay <- "CLF16OV.lm.POPTHM"
-datay.aux <- "CLF16OV"
+str.symbol <- "CLF16OV__lm__POPTHM"
+datay.aux <- "CLF16OV.Value"
 ylim <- c(0, 200000)
 dt.end <- Sys.Date()
 myPlot <-
@@ -268,10 +291,10 @@ myPlot <-
     dfRecession,
     df.data,
     "date",
-    datay,
+    datay = str.symbol,
     "CLF16OV Compared to CLF16OV predicted using overall population, POPTHM",
     "Date",
-    getPlotYLabel(df.symbols, datay),
+    getPlotYLabel(df.symbols, str.symbol),
     c(dt.start.prediction, dt.end),
     ylim,
     b.legend = TRUE,
@@ -289,15 +312,17 @@ myPlot <- myPlot + geom_line(
 )
 
 print(myPlot)
+
+
 ```
 
 This section normalizes initial claims, ICSA, by the labor force estimated from the U.S. population, POPTHM.
 
 ```{r lf.lm.ICSA.norm, echo=FALSE, fig.width = 8, fig.asp = .52}
 
-# Add linear prediction to the dataframe
-str.symbol <- "ICSA.by.CLF16OV.lm.POPTHM"
-df.data[str.symbol] <- df.data$ICSA / df.data$CLF16OV.lm.POPTHM
+# Add linear prediction to the data frame
+str.symbol <- "ICSA.by.CLF16OV__lm__POPTHM"
+df.data[str.symbol] <- df.data$ICSA / df.data$CLF16OV__lm__POPTHM
 
 # Add the linear model prediction to the symbols table
 df.symbols <-
@@ -322,7 +347,7 @@ df.symbols <-
 
 ```{r lf.lm.ICSA.norm.plot, echo=FALSE, fig.width = 8, fig.asp = .52}
 
-datay <- "ICSA.by.CLF16OV.lm.POPTHM"
+datay <- "ICSA.by.CLF16OV__lm__POPTHM"
 datay.aux <- "UNRATE"
 ylim <- c(0, 20)
 dt.end <- Sys.Date()
@@ -360,8 +385,8 @@ This section normalizes continued claims, CCSA, by the labor force estimated fro
 ```{r lf.lm.CCSA.norm, echo=FALSE, fig.width = 8, fig.asp = .52}
 
 # Add linear prediction to the dataframe
-str.symbol <- "CCSA.by.CLF16OV.lm.POPTHM"
-df.data[str.symbol] <- df.data$CCSA / df.data$CLF16OV.lm.POPTHM
+str.symbol <- "CCSA.by.CLF16OV__lm__POPTHM"
+df.data[str.symbol] <- df.data$CCSA / df.data$CLF16OV__lm__POPTHM
 
 # Add the linear model prediction to the symbols table
 df.symbols <-
@@ -386,7 +411,7 @@ df.symbols <-
 
 ```{r lf.lm.CCSA.norm.plot, echo=FALSE, fig.width = 8, fig.asp = .52}
 
-datay <- "CCSA.by.CLF16OV.lm.POPTHM"
+datay <- "CCSA.by.CLF16OV__lm__POPTHM"
 datay.aux <- "UNRATE"
 ylim <- c(0, 50)
 dt.end <- Sys.Date()
@@ -423,8 +448,8 @@ This section normalizes total non-farm payroll data provided by ADP and in the N
 ```{r lf.lm.NPPTTL.norm, echo=FALSE, fig.width = 8, fig.asp = .52}
 
 # Add linear prediction to the dataframe
-str.symbol <- "NPPTTL.by.CLF16OV.lm.POPTHM"
-df.data[str.symbol] <- 100 * ( 1 - (df.data$NPPTTL / df.data$CLF16OV.lm.POPTHM) )
+str.symbol <- "NPPTTL.by.CLF16OV__lm__POPTHM"
+df.data[str.symbol] <- 100 * ( 1 - (df.data$NPPTTL / df.data$CLF16OV__lm__POPTHM) )
 
 # Add the linear model prediction to the symbols table
 df.symbols <-
@@ -449,7 +474,7 @@ df.symbols <-
 
 ```{r lf.lm.NPPTTL.norm.plot, echo=FALSE, fig.width = 8, fig.asp = .52}
 
-datay <- "NPPTTL.by.CLF16OV.lm.POPTHM"
+datay <- "NPPTTL.by.CLF16OV__lm__POPTHM"
 datay.aux <- "UNRATE"
 ylim <- c(0, 40)
 dt.end <- Sys.Date()
@@ -866,14 +891,14 @@ rm(df.data.rest)
 ```{r U3.pred.ICSA.fit, echo=FALSE}
 # Perform the fit
 list.fit.u3icsapaynsa <- train(
-  UNRATE ~ ICSA.by.CLF16OV.lm.POPTHM,
+  UNRATE ~ ICSA.by.CLF16OV__lm__POPTHM,
   data = df.train,
   method = "lm",
   preProcess = c('center', 'scale')
 )
 
 list.fit.knn.u3icsapaynsa <- train(
-  UNRATE ~ ICSA.by.CLF16OV.lm.POPTHM,
+  UNRATE ~ ICSA.by.CLF16OV__lm__POPTHM,
   data = df.train,
   method = "knn",
   preProcess = c('center', 'scale')
@@ -890,7 +915,7 @@ rm(df.val)
 ```{r U3.pred.ICSA, echo=FALSE}
 
 # Add linear prediction to the dataframe
-str.symbol <- "U3.lm.ICSA.by.CLF16OV.lm.POPTHM"
+str.symbol <- "U3.lm.ICSA.by.CLF16OV__lm__POPTHM"
 df.data[str.symbol] <-
   predict(list.fit.u3icsapaynsa, newdata = df.data)
 
@@ -912,7 +937,7 @@ df.symbols <-
   )
 
 # Document the residual as well
-str.symbol.res <- "U3.lm.ICSA.by.CLF16OV.lm.POPTHM.res"
+str.symbol.res <- "U3.lm.ICSA.by.CLF16OV__lm__POPTHM.res"
 df.data[str.symbol.res] <- df.data$UNRATE - df.data[str.symbol]
 
 # Add the U3 linear model prediction residual to the symbols table
@@ -933,7 +958,7 @@ df.symbols <-
   )
 
 # Add knn prediction to the dataframe
-str.symbol.knn <- "U3.knn.ICSA.by.CLF16OV.lm.POPTHM"
+str.symbol.knn <- "U3.knn.ICSA.by.CLF16OV__lm__POPTHM"
 df.data[str.symbol.knn] <-
   predict(list.fit.knn.u3icsapaynsa, newdata = df.data)
 
@@ -955,7 +980,7 @@ df.symbols <-
   )
 
 # Document the residual as well
-str.symbol.res.knn <- "U3.knn.ICSA.by.CLF16OV.lm.POPTHM.res"
+str.symbol.res.knn <- "U3.knn.ICSA.by.CLF16OV__lm__POPTHM.res"
 df.data[str.symbol.res.knn] <- df.data$UNRATE - df.data[str.symbol.knn]
 
 # Add the U3 nearest neighbor prediction residual to the symbols table
@@ -999,7 +1024,7 @@ Plot the measured U3 (UNRATE) to U3 predicted by a linear fit to ICSA.
 ```{r U3.pred.ICSA.plot, echo=FALSE, fig.width = 8, fig.asp = .62}
 
 
-datay <- "U3.lm.ICSA.by.CLF16OV.lm.POPTHM"
+datay <- "U3.lm.ICSA.by.CLF16OV__lm__POPTHM"
 datay.aux <- "UNRATE"
 # datay.aux.1 <- "UNRATE"
 ylim <- c(0, 15)
@@ -1047,7 +1072,7 @@ Take a closer look, given the interest around latest U3 numbers
 ```{r U3.pred.ICSA.plot.recent, echo=FALSE, fig.width = 8, fig.asp = .62}
 
 
-datay <- "U3.lm.ICSA.by.CLF16OV.lm.POPTHM"
+datay <- "U3.lm.ICSA.by.CLF16OV__lm__POPTHM"
 datay.aux <- "UNRATE"
 datay.aux.1 <- "UNRATE"
 ylim <- c(-10, 75)
@@ -1124,7 +1149,7 @@ print(myPlot)
 
 ```{r U3.pred.ICSA.resid.knn, echo=FALSE, fig.width = 6, fig.asp = .82}
 
-datay <- "U3.knn.ICSA.by.CLF16OV.lm.POPTHM.res"
+datay <- "U3.knn.ICSA.by.CLF16OV__lm__POPTHM.res"
 ylim <- c(-100, 10)
 myPlot <- plotSingle(
   dfRecession,
@@ -1183,14 +1208,14 @@ gc()
 
 # Perform the fit
 list.fit.u3ccsa <- train(
-  UNRATE ~ CCSA.by.CLF16OV.lm.POPTHM,
+  UNRATE ~ CCSA.by.CLF16OV__lm__POPTHM,
   data = df.train,
   method = "lm",
   preProcess = c('center', 'scale')
 )
 
 list.fit.knn.u3ccsa <- train(
-  UNRATE ~ CCSA.by.CLF16OV.lm.POPTHM,
+  UNRATE ~ CCSA.by.CLF16OV__lm__POPTHM,
   data = df.train,
   method = "knn",
   preProcess = c('center', 'scale')
@@ -1205,7 +1230,7 @@ rm(df.val)
 ```{r U3.pred.CCSA, echo=FALSE}
 
 # Add linear model prediction to the dataframe
-str.symbol <- "U3.lm.CCSA.by.CLF16OV.lm.POPTHM"
+str.symbol <- "U3.lm.CCSA.by.CLF16OV__lm__POPTHM"
 df.data[str.symbol] <-
   predict(list.fit.u3ccsa, newdata = df.data)
 
@@ -1227,7 +1252,7 @@ df.symbols <-
   )
 
 # Document the residual as well
-str.symbol.res <- "U3.lm.CCSA.by.CLF16OV.lm.POPTHM.res"
+str.symbol.res <- "U3.lm.CCSA.by.CLF16OV__lm__POPTHM.res"
 df.data[str.symbol.res] <- df.data$UNRATE - df.data[str.symbol]
 
 # Add the U3 linear model model prediction residual to the symbols table
@@ -1248,7 +1273,7 @@ df.symbols <-
   )
 
 # Add KNN model prediction to the dataframe
-str.symbol <- "U3.knn.CCSA.by.CLF16OV.lm.POPTHM"
+str.symbol <- "U3.knn.CCSA.by.CLF16OV__lm__POPTHM"
 df.data[str.symbol] <-
   predict(list.fit.knn.u3ccsa, newdata = df.data)
 
@@ -1270,7 +1295,7 @@ df.symbols <-
   )
 
 # Document the residual as well
-str.symbol.res.knn <- "U3.knn.CCSA.by.CLF16OV.lm.POPTHM.res"
+str.symbol.res.knn <- "U3.knn.CCSA.by.CLF16OV__lm__POPTHM.res"
 df.data[str.symbol.res.knn] <- df.data$UNRATE - df.data[str.symbol]
 
 # Add the U3 knn model prediction residual to the symbols table
@@ -1315,7 +1340,7 @@ Plot the measured U3 (UNRATE) to U3 predicted by a linear fit to CCSA.
 
 
 datay <- "UNRATE"
-datay_aux <- "U3.lm.CCSA.by.CLF16OV.lm.POPTHM"
+datay_aux <- "U3.lm.CCSA.by.CLF16OV__lm__POPTHM"
 ylim <- c(0, 15)
 dt.end <- Sys.Date()
 myPlot <-
@@ -1351,7 +1376,7 @@ Zoom in a little. There is a lot of discussion about how valid the latest U3 num
 
 
 datay <- "UNRATE"
-datay_aux <- "U3.lm.CCSA.by.CLF16OV.lm.POPTHM"
+datay_aux <- "U3.lm.CCSA.by.CLF16OV__lm__POPTHM"
 ylim <- c(0, 50)
 dt.end <- Sys.Date()
 dt.start <- as.Date("2019-01-01")
@@ -1387,7 +1412,7 @@ Plot the residual for the U3 linear fit. The residuals decrease quite a bit duri
 
 ```{r U3.pred.CCSA.resid, echo=FALSE,, fig.width = 6, fig.asp = .82}
 
-datay <- "U3.lm.CCSA.by.CLF16OV.lm.POPTHM.res"
+datay <- "U3.lm.CCSA.by.CLF16OV__lm__POPTHM.res"
 ylim <- c(-20, 10)
 myPlot <- plotSingle(
   dfRecession,
@@ -1445,14 +1470,14 @@ rm(df.data.rest)
 
 # Perform the fit
 list.fit.u3nppttl <- train(
-  UNRATE ~ NPPTTL.by.CLF16OV.lm.POPTHM,
+  UNRATE ~ NPPTTL.by.CLF16OV__lm__POPTHM,
   data = df.emp.model,
   method = "lm",
   preProcess = c('center', 'scale')
 )
 
 list.fit.knn.u3nppttl <- train(
-  UNRATE ~ NPPTTL.by.CLF16OV.lm.POPTHM,
+  UNRATE ~ NPPTTL.by.CLF16OV__lm__POPTHM,
   data = df.train,
   method = "knn",
   preProcess = c('center', 'scale')
@@ -1466,7 +1491,7 @@ rm(df.val)
 ```{r U3.pred.NPPTTL, echo=FALSE}
 
 # Add linear model prediction to the dataframe
-str.symbol <- "U3.lm.NPPTTL.by.CLF16OV.lm.POPTHM"
+str.symbol <- "U3.lm.NPPTTL.by.CLF16OV__lm__POPTHM"
 df.data[str.symbol] <-
   predict(list.fit.u3nppttl, newdata = df.data)
 
@@ -1488,7 +1513,7 @@ df.symbols <-
   )
 
 # Document the residual as well
-str.symbol.res <- "U3.lm.NPPTTL.by.CLF16OV.lm.POPTHM.res"
+str.symbol.res <- "U3.lm.NPPTTL.by.CLF16OV__lm__POPTHM.res"
 df.data[str.symbol.res] <- df.data$UNRATE - df.data[str.symbol]
 
 # Add the U3 linear model model prediction residual to the symbols table
@@ -1509,7 +1534,7 @@ df.symbols <-
   )
 
 # Add KNN model prediction to the dataframe
-str.symbol <- "U3.knn.NPPTTL.by.CLF16OV.lm.POPTHM"
+str.symbol <- "U3.knn.NPPTTL.by.CLF16OV__lm__POPTHM"
 df.data[str.symbol] <-
   predict(list.fit.knn.u3nppttl, newdata = df.data)
 
@@ -1531,7 +1556,7 @@ df.symbols <-
   )
 
 # Document the residual as well
-str.symbol.res.knn <- "U3.knn.NPPTTL.by.CLF16OV.lm.POPTHM.res"
+str.symbol.res.knn <- "U3.knn.NPPTTL.by.CLF16OV__lm__POPTHM.res"
 df.data[str.symbol.res.knn] <- df.data$UNRATE - df.data[str.symbol]
 
 # Add the U3 knn model prediction residual to the symbols table
@@ -1580,7 +1605,7 @@ plot(df.emp.model$NPPTTL,
      ylab = "UNRATE (U3), Percent")
 
 
-plot( 100*( df.emp.model$CLF16OV.lm.POPTHM -  df.emp.model$NPPTTL ) / df.emp.model$CLF16OV.lm.POPTHM,
+plot( 100*( df.emp.model$CLF16OV__lm__POPTHM -  df.emp.model$NPPTTL ) / df.emp.model$CLF16OV__lm__POPTHM,
      df.emp.model$UNRATE,
      main = "ADP v. U3",
      xlab = "NPPTTL (ADP) normalized by labor force, Percent",
@@ -1597,7 +1622,7 @@ Plot the measured U3 (UNRATE) to U3 predicted by a linear fit to NPPTTL normaliz
 
 
 datay <- "UNRATE"
-datay_aux <- "U3.lm.NPPTTL.by.CLF16OV.lm.POPTHM"
+datay_aux <- "U3.lm.NPPTTL.by.CLF16OV__lm__POPTHM"
 ylim <- c(0, 15)
 dt.end <- Sys.Date()
 myPlot <-
@@ -1633,7 +1658,7 @@ Zoom in a little. There is a lot of discussion about how valid the latest U3 num
 
 
 datay <- "UNRATE"
-datay_aux <- "U3.lm.NPPTTL.by.CLF16OV.lm.POPTHM"
+datay_aux <- "U3.lm.NPPTTL.by.CLF16OV__lm__POPTHM"
 ylim <- c(0, 20)
 dt.end <- Sys.Date()
 dt.start <- as.Date("2020-01-01")
@@ -1669,7 +1694,7 @@ Plot the residual for the U3 linear fit. The residuals decrease quite a bit duri
 
 ```{r U3.pred.NPPTTL.resid, echo=FALSE,, fig.width = 6, fig.asp = .82}
 
-datay <- "U3.lm.NPPTTL.by.CLF16OV.lm.POPTHM.res"
+datay <- "U3.lm.NPPTTL.by.CLF16OV__lm__POPTHM.res"
 ylim <- c(-10, 10)
 myPlot <- plotSingle(
   dfRecession,
