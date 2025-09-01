@@ -7,7 +7,7 @@
 #'
 #' @param df.symbols Data frame with symbols. Each of these must exist as a zoo object in the global environment.
 #'
-#' @return df.data Dataframe with all series interpolated or carried forward to daily frequency
+#' @return df.data Data frame with all series interpolated or carried forward to daily frequency
 #' @export
 #'
 #' @examples
@@ -31,8 +31,12 @@ calcInterpolate <- function(df.symbols) {
   df.data <- data.frame(zooData)
   
   # The recession data is binary and needs to be carried forward
-  if( ("USREC" %in% names(df.symbols)) ){
-    df.data$USREC <- na.locf(df.data$USREC)
+  if( ("string.symbol" %in% names(df.symbols)) ){
+    
+    # The column exists, does it contain the US recession series?
+    if( any(df.symbols$string.symbol == "USREC", na.rm = TRUE) ){
+      df.data$USREC <- na.locf(df.data$USREC)
+    }
   }
   
   # This sections removes NA's with an approximation. It returns a zoo object so the

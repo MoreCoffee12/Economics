@@ -33,7 +33,7 @@ if ( require_columns(df.data, c("USREC") ) ){
   
   
   # We need to cast the recession data into
-  # a dataframe.
+  # a data frame.
   dfRecession <-
     data.frame(
       initStart = dtInitStart,

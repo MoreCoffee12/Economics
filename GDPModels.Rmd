@@ -67,6 +67,29 @@ source("SetGSPCMax.r")
 
 ```{r clean_data, echo=FALSE}
 
+# Keep only the symbols needed by this code
+df.symbols <- dplyr::filter(df.symbols,
+                            string.symbol %in% c("USREC",
+                                                 "GDP",
+                                                 "GDPC1",
+                                                 "GDPNOW",
+                                                 "PCE",
+                                                 "GDPDEF",
+                                                 "PCE",
+                                                 "GSG",
+                                                 "XLE",
+                                                 "PKG",
+                                                 "IP",
+                                                 "UPS",
+                                                 "FDX",
+                                                 "^DJI",
+                                                 "INDPRO",
+                                                 "RRSFS",
+                                                 "RSALES",
+                                                 "ALTSALES",
+                                                 "MSPUS",
+                                                 "HOUST"))
+
 if( exists("b.refresh.models")){
   rm(b.refresh.models)
 }
