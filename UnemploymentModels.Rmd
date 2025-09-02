@@ -25,6 +25,7 @@ library(signal)
 library(caret)
 library(data.table)
 
+
 ```
 
 ```{r helper functions, echo=FALSE}
@@ -74,8 +75,8 @@ df.symbols <- dplyr::filter(df.symbols,
                                                  "GDPC1",
                                                  "GDPNOW",
                                                  "PCE",
-                                                 "QQQ",
-                                                 "NOBL",
+                                                 "U6RATE",
+                                                 "UNRATE",
                                                  "ICSA",
                                                  "POPTHM",
                                                  "CLF16OV"))
@@ -128,12 +129,12 @@ if( exists("str.safe.name")){
   rm(str.safe.name)
 }
 
-if( exists("str.symbol")){
-  rm(str.symbol)
+if( exists("str_symbol")){
+  rm(str_symbol)
 }
 
-if( exists("str.symbol.raw")){
-  rm(str.symbol.raw)
+if( exists("str_symbol.raw")){
+  rm(str_symbol.raw)
 }
 
 if( exists("ylimBackTest")){
@@ -144,9 +145,13 @@ if( exists("ylimBackTest")){
 
 ## Feature Extraction
 
-With the raw data downloaded, some of the interesting features can be extracted. The first step is reconcile the time intervals. Some of the data is released monthly and some daily. I chose to interpolate all data to a daily interval. The first section of code adds the daily rows to the dataframe. 
+With the raw data downloaded, some of the interesting features can be extracted.
+The first step is reconcile the time intervals. Some of the data is released
+monthly and some daily. I chose to interpolate all data to a daily interval. The
+first section of code adds the daily rows to the data frame.
 
-The code performs interpolation for continuous data or carries it forward for binary data like the recession indicators.
+The code performs interpolation for continuous data or carries it forward for
+binary data like the recession indicators.
 
 ```{r aggsyms}
 
@@ -218,15 +223,15 @@ This makes the BLS measures of labor force less useful when I want to normalized
 dt.start.prediction <- as.Date(max(c(index(CLF16OV[1]), index(POPTHM[1]))))
 dt.end.prediction <- as.Date("2020-01-01")
 
-lst.syms <- c("CLF16OV.Value", "POPTHM.Value")
-if ( require_columns(df.data, lst.syms ) ){
+lst_syms <- c("CLF16OV.Value", "POPTHM.Value")
+if ( require_columns(df.data, lst_syms ) ){
   
   df.lf.model <-
     df.data[df.data$date >= dt.start.prediction &
               df.data$date <= dt.end.prediction,]
   
   # Perform the fit
-  str_form <- as.formula(paste(lst.syms[[1]], "~", lst.syms[[2]]))
+  str_form <- as.formula(paste(lst_syms[[1]], "~", lst_syms[[2]]))
   list.fit.clf16ovpopthm <- train(
     str_form,
     data = df.lf.model,
@@ -241,8 +246,8 @@ if ( require_columns(df.data, lst.syms ) ){
 }
 
 # Clean and tidy memory
-if( exists ("lst.syms")){
-  rm(lst.syms)
+if( exists ("lst_syms")){
+  rm(lst_syms)
 }
 
 ```
@@ -250,8 +255,8 @@ if( exists ("lst.syms")){
 ```{r lf.lm.update, echo=FALSE, fig.width = 10, fig.asp = .62}
 
 # Add linear prediction to the data frame
-str.symbol <- "CLF16OV__lm__POPTHM"
-df.data[str.symbol] <-
+str_symbol <- "CLF16OV__lm__POPTHM"
+df.data[str_symbol] <-
   predict(list.fit.clf16ovpopthm, newdata = df.data)
 
 
@@ -259,7 +264,7 @@ df.data[str.symbol] <-
 df.symbols <- symbols_append_row(
   df.symbols,
   list(
-    string.symbol = str.symbol,
+    string.symbol = str_symbol,
     string.source = "Predict",
     string.description = "Linear Model Prediction\nCLF16OV given POPTHM",
     string.label.y = getPlotYLabel(df.symbols, "POPTHM")[1],
@@ -268,40 +273,40 @@ df.symbols <- symbols_append_row(
     Max180 = FALSE,
     date.series.start = dt.start.prediction,
     date.series.end = as.Date(Sys.Date()),
-    string.symbol_safe = safe_symbol_name(str.symbol),
-    string.object_name = safe_symbol_name(str.symbol)
+    string.symbol_safe = safe_symbol_name(str_symbol),
+    string.object_name = safe_symbol_name(str_symbol)
   )
 )
 
 # Clean and tidy memory
-if( exists("str.symbol")){
-  rm(str.symbol)
+if( exists("str_symbol")){
+  rm(str_symbol)
 }
 
 ```
 
 ```{r lf.lm.setup.plot, echo=FALSE, fig.width = 10, fig.asp = .62}
 
-str.symbol <- "CLF16OV__lm__POPTHM"
+str_symbol <- "CLF16OV__lm__POPTHM"
 datay.aux <- "CLF16OV.Value"
 ylim <- c(0, 200000)
 dt.end <- Sys.Date()
-myPlot <-
+my_plot <-
   plotSingle(
     dfRecession,
     df.data,
     "date",
-    datay = str.symbol,
+    datay = str_symbol,
     "CLF16OV Compared to CLF16OV predicted using overall population, POPTHM",
     "Date",
-    getPlotYLabel(df.symbols, str.symbol),
+    getPlotYLabel(df.symbols, str_symbol),
     c(dt.start.prediction, dt.end),
     ylim,
     b.legend = TRUE,
     b.percentile = FALSE,
     b.long.legend = TRUE
   )
-myPlot <- myPlot + geom_line(
+my_plot <- my_plot + geom_line(
   data = df.data,
   aes(
     x = .data[["date"]],
@@ -311,7 +316,7 @@ myPlot <- myPlot + geom_line(
   na.rm = TRUE
 )
 
-print(myPlot)
+print(my_plot)
 
 
 ```
@@ -320,16 +325,19 @@ This section normalizes initial claims, ICSA, by the labor force estimated from 
 
 ```{r lf.lm.ICSA.norm, echo=FALSE, fig.width = 8, fig.asp = .52}
 
-# Add linear prediction to the data frame
-str.symbol <- "ICSA.by.CLF16OV__lm__POPTHM"
-df.data[str.symbol] <- df.data$ICSA / df.data$CLF16OV__lm__POPTHM
+lst_syms <- c("ICSA.Value", "CLF16OV__lm__POPTHM")
+if ( require_columns(df.data, lst_syms ) ){
 
-# Add the linear model prediction to the symbols table
-df.symbols <-
-  rbind(
+  # Define the new symbol, make the calculation    
+  str_symbol <- "ICSA__by__CLF16OV__lm__POPTHM"
+  df.data[str_symbol] <- 
+    df.data[[lst_syms[[1]]]] / df.data[[lst_syms[[2]]]]
+
+  # Add the ICSA normalization to the symbols table
+  df.symbols <- symbols_append_row(
     df.symbols,
-    data.frame(
-      string.symbol = str.symbol,
+    list(
+      string.symbol = str_symbol,
       string.source = "Predict",
       string.description = "ICSA normalized by\nlabor force from POPTHM",
       string.label.y = "Percent",
@@ -337,46 +345,74 @@ df.symbols <-
       Max030 = FALSE,
       Max180 = FALSE,
       date.series.start = dt.start.prediction,
-      date.series.end = as.Date(Sys.Date())
+      date.series.end = as.Date(Sys.Date()),
+      string.symbol_safe = safe_symbol_name(str_symbol),
+      string.object_name = safe_symbol_name(str_symbol)
     )
   )
+  
+  # Clean and tidy memory
+  if( exists("str_symbol")){
+    rm(str_symbol)
+  }
+}
 
+# Free up memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
 
 ```
 
 
 ```{r lf.lm.ICSA.norm.plot, echo=FALSE, fig.width = 8, fig.asp = .52}
 
-datay <- "ICSA.by.CLF16OV__lm__POPTHM"
-datay.aux <- "UNRATE"
-ylim <- c(0, 20)
-dt.end <- Sys.Date()
-myPlot <-
-  plotSingle(
-    dfRecession,
-    df.data,
-    "date",
-    datay,
-    "UNRATE Compared to ICSA divided by labor force from POPTHM",
-    "Date",
-    getPlotYLabel(df.symbols, datay),
-    c(index(ICSA[1]), dt.end),
-    ylim,
-    b.legend = TRUE,
-    b.percentile = FALSE,
-    b.long.legend = TRUE
-  )
-myPlot <- myPlot + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay.aux,
-    colour = shQuote(getPlotTitle(df.symbols, datay.aux))
-  ),
-  na.rm = TRUE
-)
+# Define the symbols in the plot
+lst_syms <- c("ICSA__by__CLF16OV__lm__POPTHM", "UNRATE.Value")
+#lst_syms <- c("UNRATE.Value", "U6RATE.Value")
 
-print(myPlot)
+# Do they exist in the data frame?
+if ( require_columns(df.data, lst_syms ) ){
+  
+  my_plot <-
+    plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_syms[[1]],
+      "UNRATE Compared to ICSA divided by labor force from POPTHM",
+      "Date",
+      getPlotYLabel(df.symbols, lst_syms[[1]]),
+      c(index(ICSA[1]), Sys.Date()),
+      ylim =  c(0, 20),
+      b.legend = TRUE,
+      b.percentile = FALSE,
+      b.long.legend = TRUE
+    )
+  my_plot <- my_plot + geom_line(
+    data = df.data,
+    aes_string(
+      x = "date",
+      y = lst_syms[[2]],
+      colour = shQuote(getPlotTitle(df.symbols, lst_syms[[2]]))
+    ),
+    na.rm = TRUE
+  )
+  
+  print(my_plot)
+  
+  # Free up memory
+  if( exists("my_plot")){
+    rm(my_plot)
+  }
+  
+}
+
+# Free up memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
+
 ```
 
 
@@ -385,15 +421,15 @@ This section normalizes continued claims, CCSA, by the labor force estimated fro
 ```{r lf.lm.CCSA.norm, echo=FALSE, fig.width = 8, fig.asp = .52}
 
 # Add linear prediction to the dataframe
-str.symbol <- "CCSA.by.CLF16OV__lm__POPTHM"
-df.data[str.symbol] <- df.data$CCSA / df.data$CLF16OV__lm__POPTHM
+str_symbol <- "CCSA.by.CLF16OV__lm__POPTHM"
+df.data[str_symbol] <- df.data$CCSA / df.data$CLF16OV__lm__POPTHM
 
 # Add the linear model prediction to the symbols table
 df.symbols <-
   rbind(
     df.symbols,
     data.frame(
-      string.symbol = str.symbol,
+      string.symbol = str_symbol,
       string.source = "Predict",
       string.description = "CCSA normalized by\nlabor force from POPTHM",
       string.label.y = "Percent",
@@ -415,7 +451,7 @@ datay <- "CCSA.by.CLF16OV__lm__POPTHM"
 datay.aux <- "UNRATE"
 ylim <- c(0, 50)
 dt.end <- Sys.Date()
-myPlot <-
+my_plot <-
   plotSingle(
     dfRecession,
     df.data,
@@ -430,7 +466,7 @@ myPlot <-
     b.percentile = FALSE,
     b.long.legend = TRUE
   )
-myPlot <- myPlot + geom_line(
+my_plot <- my_plot + geom_line(
   data = df.data,
   aes_string(
     x = "date",
@@ -440,7 +476,7 @@ myPlot <- myPlot + geom_line(
   na.rm = TRUE
 )
 
-print(myPlot)
+print(my_plot)
 ```
 
 This section normalizes total non-farm payroll data provided by ADP and in the NPPTTL series on FRED. Unlike ICSA or CCSA the values here are thousands rather than numbers.
@@ -448,15 +484,15 @@ This section normalizes total non-farm payroll data provided by ADP and in the N
 ```{r lf.lm.NPPTTL.norm, echo=FALSE, fig.width = 8, fig.asp = .52}
 
 # Add linear prediction to the dataframe
-str.symbol <- "NPPTTL.by.CLF16OV__lm__POPTHM"
-df.data[str.symbol] <- 100 * ( 1 - (df.data$NPPTTL / df.data$CLF16OV__lm__POPTHM) )
+str_symbol <- "NPPTTL.by.CLF16OV__lm__POPTHM"
+df.data[str_symbol] <- 100 * ( 1 - (df.data$NPPTTL / df.data$CLF16OV__lm__POPTHM) )
 
 # Add the linear model prediction to the symbols table
 df.symbols <-
   rbind(
     df.symbols,
     data.frame(
-      string.symbol = str.symbol,
+      string.symbol = str_symbol,
       string.source = "Predict",
       string.description = "NPPTTL (ADP) normalized by\nlabor force from POPTHM",
       string.label.y = "Percent",
@@ -479,7 +515,7 @@ datay.aux <- "UNRATE"
 ylim <- c(0, 40)
 dt.end <- Sys.Date()
 dt.start <- index(NPPTTL[1])
-myPlot <-
+my_plot <-
   plotSingle(
     dfRecession,
     df.data,
@@ -494,7 +530,7 @@ myPlot <-
     b.percentile = FALSE,
     b.long.legend = TRUE
   )
-myPlot <- myPlot + geom_line(
+my_plot <- my_plot + geom_line(
   data = df.data,
   aes_string(
     x = "date",
@@ -504,7 +540,7 @@ myPlot <- myPlot + geom_line(
   na.rm = TRUE
 )
 
-print(myPlot)
+print(my_plot)
 ```
 
 ### Employment Correlation, U6 and U3
@@ -570,8 +606,8 @@ rm(df.val)
 ```{r EMP.cor, echo=FALSE}
 
 # Add prediction to the dataframe
-str.symbol <- "U6.lm.U3"
-df.data[str.symbol] <-
+str_symbol <- "U6.lm.U3"
+df.data[str_symbol] <-
   predict(list.fit.u3u6, newdata = df.data)
 
 # Add the linear model prediction to the symbols table
@@ -579,7 +615,7 @@ df.symbols <-
   rbind(
     df.symbols,
     data.frame(
-      string.symbol = str.symbol,
+      string.symbol = str_symbol,
       string.source = "Predict",
       string.description = "Linear Model Prediction\nU6 given U3",
       string.label.y = df.symbols[df.symbols$string.symbol=="UNRATE","string.label.y"],
@@ -592,18 +628,18 @@ df.symbols <-
   )
 
 # Document the residual as well
-str.symbol.res <- "U6.lm.U3.res"
-df.data[str.symbol.res] <- df.data$U6RATE - df.data[str.symbol]
+str_symbol.res <- "U6.lm.U3.res"
+df.data[str_symbol.res] <- df.data$U6RATE - df.data[str_symbol]
 
 # Add the u6 linear model residual to the symbols table
 df.symbols <-
   rbind(
     df.symbols,
     data.frame(
-      string.symbol = str.symbol.res,
+      string.symbol = str_symbol.res,
       string.source = "Predict Resid.",
       string.description = "Linear Model Residual\nU6 given U3",
-      string.label.y = df.symbols[df.symbols$string.symbol==str.symbol,"string.label.y"],
+      string.label.y = df.symbols[df.symbols$string.symbol==str_symbol,"string.label.y"],
       float.expense.ratio = -1.00,
       Max030 = FALSE,
       Max180 = FALSE,
@@ -613,8 +649,8 @@ df.symbols <-
   )
 
 # Add knn prediction to the dataframe
-str.symbol.knn <- "U6.knn.U3"
-df.data[str.symbol.knn] <-
+str_symbol.knn <- "U6.knn.U3"
+df.data[str_symbol.knn] <-
   predict(list.fit.knn.u3u6, newdata = df.data)
 
 # Add the knn prediction to the symbols table
@@ -622,7 +658,7 @@ df.symbols <-
   rbind(
     df.symbols,
     data.frame(
-      string.symbol = str.symbol.knn,
+      string.symbol = str_symbol.knn,
       string.source = "Predict",
       string.description = "KNN Model Prediction\nU6 given U3",
       string.label.y = df.symbols[df.symbols$string.symbol=="UNRATE","string.label.y"],
@@ -635,18 +671,18 @@ df.symbols <-
   )
 
 # Document the residual as well
-str.symbol.res.knn <- "U6.knn.U3.res"
-df.data[str.symbol.res.knn] <- df.data$U6RATE - df.data[str.symbol.knn]
+str_symbol.res.knn <- "U6.knn.U3.res"
+df.data[str_symbol.res.knn] <- df.data$U6RATE - df.data[str_symbol.knn]
 
 # Add the u6 linear model residual to the symbols table
 df.symbols <-
   rbind(
     df.symbols,
     data.frame(
-      string.symbol = str.symbol.res.knn,
+      string.symbol = str_symbol.res.knn,
       string.source = "Predict Resid.",
       string.description = "KNN Model Residual\nU6 given U3",
-      string.label.y = df.symbols[df.symbols$string.symbol==str.symbol,"string.label.y"],
+      string.label.y = df.symbols[df.symbols$string.symbol==str_symbol,"string.label.y"],
       float.expense.ratio = -1.00,
       Max030 = FALSE,
       Max180 = FALSE,
@@ -657,8 +693,8 @@ df.symbols <-
 
 
 # # Add nnet prediction to the dataframe
-# str.symbol.nnet <- "U6.nnet.U3"
-# df.data[str.symbol.nnet] <-
+# str_symbol.nnet <- "U6.nnet.U3"
+# df.data[str_symbol.nnet] <-
 #   predict(list.fit.nnet.u3u6, newdata = df.data)
 # 
 # # Add the nnet prediction to the symbols table
@@ -666,7 +702,7 @@ df.symbols <-
 #   rbind(
 #     df.symbols,
 #     data.frame(
-#       string.symbol = str.symbol.nnet,
+#       string.symbol = str_symbol.nnet,
 #       string.source = "Predict",
 #       string.description = "NN Model Prediction\nU6 given U3",
 #       string.label.y = df.symbols[df.symbols$string.symbol=="UNRATE","string.label.y"],
@@ -679,18 +715,18 @@ df.symbols <-
 #   )
 # 
 # # Document the residual as well
-# str.symbol.res.nnet <- "U6.nnet.U3.res"
-# df.data[str.symbol.res.nnet] <- df.data$U6RATE - df.data[str.symbol.nnet]
+# str_symbol.res.nnet <- "U6.nnet.U3.res"
+# df.data[str_symbol.res.nnet] <- df.data$U6RATE - df.data[str_symbol.nnet]
 # 
 # # Add the u6 nnet model residual to the symbols table
 # df.symbols <-
 #   rbind(
 #     df.symbols,
 #     data.frame(
-#       string.symbol = str.symbol.res.nnet,
+#       string.symbol = str_symbol.res.nnet,
 #       string.source = "Predict Resid.",
 #       string.description = "NN Model Residual\nU6 given U3",
-#       string.label.y = df.symbols[df.symbols$string.symbol==str.symbol,"string.label.y"],
+#       string.label.y = df.symbols[df.symbols$string.symbol==str_symbol,"string.label.y"],
 #       float.expense.ratio = -1.00,
 #       Max030 = FALSE,
 #       Max180 = FALSE,
@@ -708,16 +744,16 @@ Look at how the fits performed on the test data partition
 ```{r U3.EMP.cor.perf, echo=FALSE}
 
 d.test.resid = (df.test$U6RATE - predict(list.fit.u3u6, newdata = df.test))
-hist(d.test.resid, main=paste("Residual For", str.symbol.res, sep=" "))
+hist(d.test.resid, main=paste("Residual For", str_symbol.res, sep=" "))
 sd.fit.u3u6 = sd(d.test.resid)
 
 
 d.test.resid.knn = (df.test$U6RATE - predict(list.fit.knn.u3u6, newdata = df.test))
-hist(d.test.resid.knn, main=paste("Residual For", str.symbol.res.knn, sep=" "))
+hist(d.test.resid.knn, main=paste("Residual For", str_symbol.res.knn, sep=" "))
 sd.fit.knn.u3u6 = sd(d.test.resid.knn)
 
 # d.test.resid.nnet = (df.test$U6RATE - predict(list.fit.nnet.u3u6, newdata = df.test))
-# hist(d.test.resid.nnet, main=paste("Residual For", str.symbol.res.nnet, sep=" "))
+# hist(d.test.resid.nnet, main=paste("Residual For", str_symbol.res.nnet, sep=" "))
 # sd.fit.nnet.u3u6 = sd(d.test.resid.nnet)
 
 ```
@@ -727,11 +763,11 @@ Plot the measured U6 (U6RATE) to U6 predicted by a linear fit to U3.
 ```{r EMP.cor.plot, echo=FALSE, fig.width = 10, fig.asp = .62}
 
 datay <- "U6.lm.U3"
-# datay.aux <- str.symbol.nnet
+# datay.aux <- str_symbol.nnet
 datay.aux <- "U6RATE"
 # datay.aux.1 <- "U6RATE"
 ylim <- c(0, 25)
-myPlot <-
+my_plot <-
   plotSingle(
     dfRecession,
     df.data,
@@ -746,7 +782,7 @@ myPlot <-
     b.percentile = FALSE,
     b.long.legend = TRUE
   )
-myPlot <- myPlot + geom_line(
+my_plot <- my_plot + geom_line(
   data = df.data,
   aes_string(
     x = "date",
@@ -756,7 +792,7 @@ myPlot <- myPlot + geom_line(
   na.rm = TRUE
 )
 
-# myPlot <- myPlot + geom_line(
+# my_plot <- my_plot + geom_line(
 #   data = df.data,
 #   aes_string(
 #     x = "date",
@@ -766,7 +802,7 @@ myPlot <- myPlot + geom_line(
 #   na.rm = TRUE
 # )
 
-# myPlot <- myPlot + geom_line(
+# my_plot <- my_plot + geom_line(
 #   data = df.data,
 #   aes_string(
 #     x = "date",
@@ -776,7 +812,7 @@ myPlot <- myPlot + geom_line(
 #   na.rm = TRUE
 # )
 
-print(myPlot)
+print(my_plot)
 
 ```
 
@@ -787,7 +823,7 @@ datay.aux <- "U6RATE"
 # datay.aux.1 <- "U6RATE"
 ylim <- c(0, 30)
 dt.start <- as.Date('2020-01-02')
-myPlot <-
+my_plot <-
   plotSingle(
     dfRecession,
     df.data,
@@ -802,7 +838,7 @@ myPlot <-
     b.percentile = FALSE,
     b.long.legend = TRUE
   )
-myPlot <- myPlot + geom_line(
+my_plot <- my_plot + geom_line(
   data = df.data,
   aes_string(
     x = "date",
@@ -811,7 +847,7 @@ myPlot <- myPlot + geom_line(
   ),
   na.rm = TRUE
 )
-# myPlot <- myPlot + geom_line(
+# my_plot <- my_plot + geom_line(
 #   data = df.data,
 #   aes_string(
 #     x = "date",
@@ -822,7 +858,7 @@ myPlot <- myPlot + geom_line(
 # )
 
 
-print(myPlot)
+print(my_plot)
 
 ```
 
@@ -831,10 +867,10 @@ Plot the residual for the U6 linear fit. The residuals decrease quite a bit duri
 
 ```{r EMP.cor.resid, echo=FALSE,, fig.width = 6, fig.asp = .82}
 
-datay <- str.symbol.res
-datay.aux <- str.symbol.res.knn
+datay <- str_symbol.res
+datay.aux <- str_symbol.res.knn
 ylim <- c(-4, 4)
-myPlot <- plotSingle(
+my_plot <- plotSingle(
   dfRecession,
   df.data,
   "date",
@@ -849,10 +885,10 @@ myPlot <- plotSingle(
   b.long.legend = FALSE
 )
 
-myPlot <- myPlot + geom_hline(yintercept=(6*sd.fit.u3u6), color = "red", linetype="dashed")
-myPlot <- myPlot + geom_hline(yintercept=(-6*sd.fit.u3u6), color = "red", linetype="dashed")
+my_plot <- my_plot + geom_hline(yintercept=(6*sd.fit.u3u6), color = "red", linetype="dashed")
+my_plot <- my_plot + geom_hline(yintercept=(-6*sd.fit.u3u6), color = "red", linetype="dashed")
 
-print(myPlot)
+print(my_plot)
 
 ```
 
@@ -915,8 +951,8 @@ rm(df.val)
 ```{r U3.pred.ICSA, echo=FALSE}
 
 # Add linear prediction to the dataframe
-str.symbol <- "U3.lm.ICSA.by.CLF16OV__lm__POPTHM"
-df.data[str.symbol] <-
+str_symbol <- "U3.lm.ICSA.by.CLF16OV__lm__POPTHM"
+df.data[str_symbol] <-
   predict(list.fit.u3icsapaynsa, newdata = df.data)
 
 # Add the linear model prediction to the symbols table
@@ -924,7 +960,7 @@ df.symbols <-
   rbind(
     df.symbols,
     data.frame(
-      string.symbol = str.symbol,
+      string.symbol = str_symbol,
       string.source = "Predict",
       string.description = "Linear Model Prediction\nU3 given ICSA",
       string.label.y = df.symbols[df.symbols$string.symbol=="UNRATE","string.label.y"],
@@ -937,18 +973,18 @@ df.symbols <-
   )
 
 # Document the residual as well
-str.symbol.res <- "U3.lm.ICSA.by.CLF16OV__lm__POPTHM.res"
-df.data[str.symbol.res] <- df.data$UNRATE - df.data[str.symbol]
+str_symbol.res <- "U3.lm.ICSA.by.CLF16OV__lm__POPTHM.res"
+df.data[str_symbol.res] <- df.data$UNRATE - df.data[str_symbol]
 
 # Add the U3 linear model prediction residual to the symbols table
 df.symbols <-
   rbind(
     df.symbols,
     data.frame(
-      string.symbol = str.symbol.res,
+      string.symbol = str_symbol.res,
       string.source = "Predict Resid.",
       string.description = "Linear Model Residual\nU3 given ICSA",
-      string.label.y = df.symbols[df.symbols$string.symbol==str.symbol,"string.label.y"],
+      string.label.y = df.symbols[df.symbols$string.symbol==str_symbol,"string.label.y"],
       float.expense.ratio = -1.00,
       Max030 = FALSE,
       Max180 = FALSE,
@@ -958,8 +994,8 @@ df.symbols <-
   )
 
 # Add knn prediction to the dataframe
-str.symbol.knn <- "U3.knn.ICSA.by.CLF16OV__lm__POPTHM"
-df.data[str.symbol.knn] <-
+str_symbol.knn <- "U3.knn.ICSA.by.CLF16OV__lm__POPTHM"
+df.data[str_symbol.knn] <-
   predict(list.fit.knn.u3icsapaynsa, newdata = df.data)
 
 # Add the nearest neighbors prediction to the symbols table
@@ -967,7 +1003,7 @@ df.symbols <-
   rbind(
     df.symbols,
     data.frame(
-      string.symbol = str.symbol.knn,
+      string.symbol = str_symbol.knn,
       string.source = "Predict",
       string.description = "KNN Model Prediction\nU3 given ICSA",
       string.label.y = df.symbols[df.symbols$string.symbol=="UNRATE","string.label.y"],
@@ -980,18 +1016,18 @@ df.symbols <-
   )
 
 # Document the residual as well
-str.symbol.res.knn <- "U3.knn.ICSA.by.CLF16OV__lm__POPTHM.res"
-df.data[str.symbol.res.knn] <- df.data$UNRATE - df.data[str.symbol.knn]
+str_symbol.res.knn <- "U3.knn.ICSA.by.CLF16OV__lm__POPTHM.res"
+df.data[str_symbol.res.knn] <- df.data$UNRATE - df.data[str_symbol.knn]
 
 # Add the U3 nearest neighbor prediction residual to the symbols table
 df.symbols <-
   rbind(
     df.symbols,
     data.frame(
-      string.symbol = str.symbol.res.knn,
+      string.symbol = str_symbol.res.knn,
       string.source = "Predict Resid.",
       string.description = "KNN Model Residual\nU3 given ICSA",
-      string.label.y = df.symbols[df.symbols$string.symbol==str.symbol.knn,"string.label.y"],
+      string.label.y = df.symbols[df.symbols$string.symbol==str_symbol.knn,"string.label.y"],
       float.expense.ratio = -1.00,
       Max030 = FALSE,
       Max180 = FALSE,
@@ -1007,12 +1043,12 @@ Look at how the fits performed on the test data partition
 ```{r U3.pred.ICSA.perf, echo=FALSE}
 
 d.test.resid = (df.test$UNRATE - predict(list.fit.u3icsapaynsa, newdata = df.test))
-hist(d.test.resid, main=paste("Residual For", str.symbol.res, sep=" "))
+hist(d.test.resid, main=paste("Residual For", str_symbol.res, sep=" "))
 sd.fit.u3icsapaynsa = sd(d.test.resid)
 
 
 d.test.resid.knn = (df.test$UNRATE - predict(list.fit.knn.u3icsapaynsa, newdata = df.test))
-hist(d.test.resid.knn, main=paste("Residual For", str.symbol.res.knn, sep=" "))
+hist(d.test.resid.knn, main=paste("Residual For", str_symbol.res.knn, sep=" "))
 sd.fit.knn.u3icsapaynsa = sd(d.test.resid.knn)
 rm(list.fit.knn.u3icsapaynsa)
 
@@ -1029,7 +1065,7 @@ datay.aux <- "UNRATE"
 # datay.aux.1 <- "UNRATE"
 ylim <- c(0, 15)
 dt.end <- Sys.Date()
-myPlot <-
+my_plot <-
   plotSingle(
     dfRecession,
     df.data,
@@ -1044,7 +1080,7 @@ myPlot <-
     b.percentile = FALSE,
     b.long.legend = TRUE
   )
-myPlot <- myPlot + geom_line(
+my_plot <- my_plot + geom_line(
   data = df.data,
   aes_string(
     x = "date",
@@ -1054,7 +1090,7 @@ myPlot <- myPlot + geom_line(
   na.rm = TRUE
 )
 
-# myPlot + geom_line(
+# my_plot + geom_line(
 #   data = df.data,
 #   aes_string(
 #     x = "date",
@@ -1064,7 +1100,7 @@ myPlot <- myPlot + geom_line(
 #   na.rm = TRUE
 # )
 
-print(myPlot)
+print(my_plot)
 ```
 
 Take a closer look, given the interest around latest U3 numbers
@@ -1078,7 +1114,7 @@ datay.aux.1 <- "UNRATE"
 ylim <- c(-10, 75)
 dt.end <- Sys.Date()
 dt.start <- as.Date("2020-01-01")
-myPlot <-
+my_plot <-
   plotSingle(
     dfRecession,
     df.data,
@@ -1093,7 +1129,7 @@ myPlot <-
     b.percentile = FALSE,
     b.long.legend = TRUE
   )
-myPlot <- myPlot + geom_line(
+my_plot <- my_plot + geom_line(
   data = df.data,
   aes_string(
     x = "date",
@@ -1103,7 +1139,7 @@ myPlot <- myPlot + geom_line(
   na.rm = TRUE
 )
 
-# myPlot <- myPlot + geom_line(
+# my_plot <- my_plot + geom_line(
 #   data = df.data,
 #   aes_string(
 #     x = "date",
@@ -1113,7 +1149,7 @@ myPlot <- myPlot + geom_line(
 #   na.rm = TRUE
 # )
 
-print(myPlot)
+print(my_plot)
 
 ```
 
@@ -1122,9 +1158,9 @@ Plot the residual for the U3 to predict U3 from ICSA.
 
 ```{r U3.pred.ICSA.resid.lm, echo=FALSE, fig.width = 6, fig.asp = .82}
 
-datay <- str.symbol.res
+datay <- str_symbol.res
 ylim <- c(-50, 10)
-myPlot <- plotSingle(
+my_plot <- plotSingle(
   dfRecession,
   df.data,
   "date",
@@ -1140,10 +1176,10 @@ myPlot <- plotSingle(
 )
 
 
-myPlot <- myPlot + geom_hline(yintercept=(6*sd.fit.u3icsapaynsa), color = "red", linetype="dashed")
-myPlot <- myPlot + geom_hline(yintercept=(-6*sd.fit.u3icsapaynsa), color = "red", linetype="dashed")
+my_plot <- my_plot + geom_hline(yintercept=(6*sd.fit.u3icsapaynsa), color = "red", linetype="dashed")
+my_plot <- my_plot + geom_hline(yintercept=(-6*sd.fit.u3icsapaynsa), color = "red", linetype="dashed")
 
-print(myPlot)
+print(my_plot)
 
 ```
 
@@ -1151,7 +1187,7 @@ print(myPlot)
 
 datay <- "U3.knn.ICSA.by.CLF16OV__lm__POPTHM.res"
 ylim <- c(-100, 10)
-myPlot <- plotSingle(
+my_plot <- plotSingle(
   dfRecession,
   df.data,
   "date",
@@ -1167,10 +1203,10 @@ myPlot <- plotSingle(
 )
 
 
-myPlot <- myPlot + geom_hline(yintercept=(6*sd.fit.knn.u3icsapaynsa), color = "red", linetype="dashed")
-myPlot <- myPlot + geom_hline(yintercept=(-6*sd.fit.knn.u3icsapaynsa), color = "red", linetype="dashed")
+my_plot <- my_plot + geom_hline(yintercept=(6*sd.fit.knn.u3icsapaynsa), color = "red", linetype="dashed")
+my_plot <- my_plot + geom_hline(yintercept=(-6*sd.fit.knn.u3icsapaynsa), color = "red", linetype="dashed")
 
-print(myPlot)
+print(my_plot)
 
 ```
 
@@ -1230,8 +1266,8 @@ rm(df.val)
 ```{r U3.pred.CCSA, echo=FALSE}
 
 # Add linear model prediction to the dataframe
-str.symbol <- "U3.lm.CCSA.by.CLF16OV__lm__POPTHM"
-df.data[str.symbol] <-
+str_symbol <- "U3.lm.CCSA.by.CLF16OV__lm__POPTHM"
+df.data[str_symbol] <-
   predict(list.fit.u3ccsa, newdata = df.data)
 
 # Add the linear model prediction to the symbols table
@@ -1239,7 +1275,7 @@ df.symbols <-
   rbind(
     df.symbols,
     data.frame(
-      string.symbol = str.symbol,
+      string.symbol = str_symbol,
       string.source = "Predict",
       string.description = "\nLinear Model Prediction\nU3 given CCSA",
       string.label.y = df.symbols[df.symbols$string.symbol=="UNRATE","string.label.y"],
@@ -1252,18 +1288,18 @@ df.symbols <-
   )
 
 # Document the residual as well
-str.symbol.res <- "U3.lm.CCSA.by.CLF16OV__lm__POPTHM.res"
-df.data[str.symbol.res] <- df.data$UNRATE - df.data[str.symbol]
+str_symbol.res <- "U3.lm.CCSA.by.CLF16OV__lm__POPTHM.res"
+df.data[str_symbol.res] <- df.data$UNRATE - df.data[str_symbol]
 
 # Add the U3 linear model model prediction residual to the symbols table
 df.symbols <-
   rbind(
     df.symbols,
     data.frame(
-      string.symbol = str.symbol.res,
+      string.symbol = str_symbol.res,
       string.source = "Predict Resid.",
       string.description = "\nLinear Model Residual\nU3 given CCSA",
-      string.label.y = df.symbols[df.symbols$string.symbol==str.symbol,"string.label.y"],
+      string.label.y = df.symbols[df.symbols$string.symbol==str_symbol,"string.label.y"],
       float.expense.ratio = -1.00,
       Max030 = FALSE,
       Max180 = FALSE,
@@ -1273,8 +1309,8 @@ df.symbols <-
   )
 
 # Add KNN model prediction to the dataframe
-str.symbol <- "U3.knn.CCSA.by.CLF16OV__lm__POPTHM"
-df.data[str.symbol] <-
+str_symbol <- "U3.knn.CCSA.by.CLF16OV__lm__POPTHM"
+df.data[str_symbol] <-
   predict(list.fit.knn.u3ccsa, newdata = df.data)
 
 # Add the knn model prediction to the symbols table
@@ -1282,7 +1318,7 @@ df.symbols <-
   rbind(
     df.symbols,
     data.frame(
-      string.symbol = str.symbol,
+      string.symbol = str_symbol,
       string.source = "Predict",
       string.description = "KNN Prediction\nU3 given CCSA",
       string.label.y = df.symbols[df.symbols$string.symbol=="UNRATE","string.label.y"],
@@ -1295,18 +1331,18 @@ df.symbols <-
   )
 
 # Document the residual as well
-str.symbol.res.knn <- "U3.knn.CCSA.by.CLF16OV__lm__POPTHM.res"
-df.data[str.symbol.res.knn] <- df.data$UNRATE - df.data[str.symbol]
+str_symbol.res.knn <- "U3.knn.CCSA.by.CLF16OV__lm__POPTHM.res"
+df.data[str_symbol.res.knn] <- df.data$UNRATE - df.data[str_symbol]
 
 # Add the U3 knn model prediction residual to the symbols table
 df.symbols <-
   rbind(
     df.symbols,
     data.frame(
-      string.symbol = str.symbol.res.knn,
+      string.symbol = str_symbol.res.knn,
       string.source = "Predict Resid.",
       string.description = "KNN Residual\nU3 given CCSA",
-      string.label.y = df.symbols[df.symbols$string.symbol==str.symbol,"string.label.y"],
+      string.label.y = df.symbols[df.symbols$string.symbol==str_symbol,"string.label.y"],
       float.expense.ratio = -1.00,
       Max030 = FALSE,
       Max180 = FALSE,
@@ -1322,12 +1358,12 @@ Look at how the fits performed on the test data partition
 ```{r U3.pred.CCSA.perf, echo=FALSE}
 
 d.test.resid = (df.test$UNRATE - predict(list.fit.u3ccsa, newdata = df.test))
-hist(d.test.resid, main=paste("Residual For", str.symbol.res, sep=" "))
+hist(d.test.resid, main=paste("Residual For", str_symbol.res, sep=" "))
 sd.fit.u3ccsa = sd(d.test.resid)
 
 
 d.test.resid.knn = (df.test$UNRATE - predict(list.fit.knn.u3ccsa, newdata = df.test))
-hist(d.test.resid.knn, main=paste("Residual For", str.symbol.res.knn, sep=" "))
+hist(d.test.resid.knn, main=paste("Residual For", str_symbol.res.knn, sep=" "))
 sd.fit.knn.u3ccsa = sd(d.test.resid.knn)
 rm(list.fit.knn.u3ccsa)
 
@@ -1343,7 +1379,7 @@ datay <- "UNRATE"
 datay_aux <- "U3.lm.CCSA.by.CLF16OV__lm__POPTHM"
 ylim <- c(0, 15)
 dt.end <- Sys.Date()
-myPlot <-
+my_plot <-
   plotSingle(
     dfRecession,
     df.data,
@@ -1358,7 +1394,7 @@ myPlot <-
     b.percentile = FALSE,
     b.long.legend = TRUE
   )
-myPlot + geom_line(
+my_plot + geom_line(
   data = df.data,
   aes_string(
     x = "date",
@@ -1380,7 +1416,7 @@ datay_aux <- "U3.lm.CCSA.by.CLF16OV__lm__POPTHM"
 ylim <- c(0, 50)
 dt.end <- Sys.Date()
 dt.start <- as.Date("2019-01-01")
-myPlot <-
+my_plot <-
   plotSingle(
     dfRecession,
     df.data,
@@ -1395,7 +1431,7 @@ myPlot <-
     b.percentile = FALSE,
     b.long.legend = TRUE
   )
-myPlot + geom_line(
+my_plot + geom_line(
   data = df.data,
   aes_string(
     x = "date",
@@ -1414,7 +1450,7 @@ Plot the residual for the U3 linear fit. The residuals decrease quite a bit duri
 
 datay <- "U3.lm.CCSA.by.CLF16OV__lm__POPTHM.res"
 ylim <- c(-20, 10)
-myPlot <- plotSingle(
+my_plot <- plotSingle(
   dfRecession,
   df.data,
   "date",
@@ -1429,10 +1465,10 @@ myPlot <- plotSingle(
   b.long.legend = FALSE
 )
 
-myPlot <- myPlot + geom_hline(yintercept=(6*sd.fit.u3ccsa), color = "red", linetype="dashed")
-myPlot <- myPlot + geom_hline(yintercept=(-6*sd.fit.u3ccsa), color = "red", linetype="dashed")
+my_plot <- my_plot + geom_hline(yintercept=(6*sd.fit.u3ccsa), color = "red", linetype="dashed")
+my_plot <- my_plot + geom_hline(yintercept=(-6*sd.fit.u3ccsa), color = "red", linetype="dashed")
 
-print(myPlot)
+print(my_plot)
 
 
 ```
@@ -1491,8 +1527,8 @@ rm(df.val)
 ```{r U3.pred.NPPTTL, echo=FALSE}
 
 # Add linear model prediction to the dataframe
-str.symbol <- "U3.lm.NPPTTL.by.CLF16OV__lm__POPTHM"
-df.data[str.symbol] <-
+str_symbol <- "U3.lm.NPPTTL.by.CLF16OV__lm__POPTHM"
+df.data[str_symbol] <-
   predict(list.fit.u3nppttl, newdata = df.data)
 
 # Add the linear model prediction to the symbols table
@@ -1500,7 +1536,7 @@ df.symbols <-
   rbind(
     df.symbols,
     data.frame(
-      string.symbol = str.symbol,
+      string.symbol = str_symbol,
       string.source = "Predict",
       string.description = "Linear Model Prediction\nU3 given NPPTTL by POPTH",
       string.label.y = df.symbols[df.symbols$string.symbol=="UNRATE","string.label.y"],
@@ -1513,18 +1549,18 @@ df.symbols <-
   )
 
 # Document the residual as well
-str.symbol.res <- "U3.lm.NPPTTL.by.CLF16OV__lm__POPTHM.res"
-df.data[str.symbol.res] <- df.data$UNRATE - df.data[str.symbol]
+str_symbol.res <- "U3.lm.NPPTTL.by.CLF16OV__lm__POPTHM.res"
+df.data[str_symbol.res] <- df.data$UNRATE - df.data[str_symbol]
 
 # Add the U3 linear model model prediction residual to the symbols table
 df.symbols <-
   rbind(
     df.symbols,
     data.frame(
-      string.symbol = str.symbol.res,
+      string.symbol = str_symbol.res,
       string.source = "Predict Resid.",
       string.description = "Linear Model Residual\nU3 given NPPTTL by POPTHM",
-      string.label.y = df.symbols[df.symbols$string.symbol==str.symbol,"string.label.y"],
+      string.label.y = df.symbols[df.symbols$string.symbol==str_symbol,"string.label.y"],
       float.expense.ratio = -1.00,
       Max030 = FALSE,
       Max180 = FALSE,
@@ -1534,8 +1570,8 @@ df.symbols <-
   )
 
 # Add KNN model prediction to the dataframe
-str.symbol <- "U3.knn.NPPTTL.by.CLF16OV__lm__POPTHM"
-df.data[str.symbol] <-
+str_symbol <- "U3.knn.NPPTTL.by.CLF16OV__lm__POPTHM"
+df.data[str_symbol] <-
   predict(list.fit.knn.u3nppttl, newdata = df.data)
 
 # Add the knn model prediction to the symbols table
@@ -1543,7 +1579,7 @@ df.symbols <-
   rbind(
     df.symbols,
     data.frame(
-      string.symbol = str.symbol,
+      string.symbol = str_symbol,
       string.source = "Predict",
       string.description = "KNN Prediction\nU3 given NPPTTL by POPTHM",
       string.label.y = df.symbols[df.symbols$string.symbol=="UNRATE","string.label.y"],
@@ -1556,18 +1592,18 @@ df.symbols <-
   )
 
 # Document the residual as well
-str.symbol.res.knn <- "U3.knn.NPPTTL.by.CLF16OV__lm__POPTHM.res"
-df.data[str.symbol.res.knn] <- df.data$UNRATE - df.data[str.symbol]
+str_symbol.res.knn <- "U3.knn.NPPTTL.by.CLF16OV__lm__POPTHM.res"
+df.data[str_symbol.res.knn] <- df.data$UNRATE - df.data[str_symbol]
 
 # Add the U3 knn model prediction residual to the symbols table
 df.symbols <-
   rbind(
     df.symbols,
     data.frame(
-      string.symbol = str.symbol.res.knn,
+      string.symbol = str_symbol.res.knn,
       string.source = "Predict Resid.",
       string.description = "KNN Residual\nU3 given NPPTTL by POPTHM",
-      string.label.y = df.symbols[df.symbols$string.symbol==str.symbol,"string.label.y"],
+      string.label.y = df.symbols[df.symbols$string.symbol==str_symbol,"string.label.y"],
       float.expense.ratio = -1.00,
       Max030 = FALSE,
       Max180 = FALSE,
@@ -1582,12 +1618,12 @@ Look at how the fits performed on the test data partition
 ```{r U3.pred.NPPTTL.perf, echo=FALSE}
 
 d.test.resid = (df.test$UNRATE - predict(list.fit.u3nppttl, newdata = df.test))
-hist(d.test.resid, main=paste("Residual For", str.symbol.res, sep=" "))
+hist(d.test.resid, main=paste("Residual For", str_symbol.res, sep=" "))
 sd.fit.u3nppttl = sd(d.test.resid)
 
 
 d.test.resid.knn = (df.test$UNRATE - predict(list.fit.knn.u3nppttl, newdata = df.test))
-hist(d.test.resid.knn, main=paste("Residual For", str.symbol.res.knn, sep=" "))
+hist(d.test.resid.knn, main=paste("Residual For", str_symbol.res.knn, sep=" "))
 sd.fit.knn.u3nppttl = sd(d.test.resid.knn)
 rm(list.fit.knn.u3nppttl)
 
@@ -1625,7 +1661,7 @@ datay <- "UNRATE"
 datay_aux <- "U3.lm.NPPTTL.by.CLF16OV__lm__POPTHM"
 ylim <- c(0, 15)
 dt.end <- Sys.Date()
-myPlot <-
+my_plot <-
   plotSingle(
     dfRecession,
     df.data,
@@ -1640,7 +1676,7 @@ myPlot <-
     b.percentile = FALSE,
     b.long.legend = TRUE
   )
-myPlot + geom_line(
+my_plot + geom_line(
   data = df.data,
   aes_string(
     x = "date",
@@ -1662,7 +1698,7 @@ datay_aux <- "U3.lm.NPPTTL.by.CLF16OV__lm__POPTHM"
 ylim <- c(0, 20)
 dt.end <- Sys.Date()
 dt.start <- as.Date("2020-01-01")
-myPlot <-
+my_plot <-
   plotSingle(
     dfRecession,
     df.data,
@@ -1677,7 +1713,7 @@ myPlot <-
     b.percentile = FALSE,
     b.long.legend = TRUE
   )
-myPlot + geom_line(
+my_plot + geom_line(
   data = df.data,
   aes_string(
     x = "date",
@@ -1696,7 +1732,7 @@ Plot the residual for the U3 linear fit. The residuals decrease quite a bit duri
 
 datay <- "U3.lm.NPPTTL.by.CLF16OV__lm__POPTHM.res"
 ylim <- c(-10, 10)
-myPlot <- plotSingle(
+my_plot <- plotSingle(
   dfRecession,
   df.data,
   "date",
@@ -1711,10 +1747,10 @@ myPlot <- plotSingle(
   b.long.legend = FALSE
 )
 
-myPlot <- myPlot + geom_hline(yintercept=(6*sd.fit.u3nppttl), color = "red", linetype="dashed")
-myPlot <- myPlot + geom_hline(yintercept=(-6*sd.fit.u3nppttl), color = "red", linetype="dashed")
+my_plot <- my_plot + geom_hline(yintercept=(6*sd.fit.u3nppttl), color = "red", linetype="dashed")
+my_plot <- my_plot + geom_hline(yintercept=(-6*sd.fit.u3nppttl), color = "red", linetype="dashed")
 
-print(myPlot)
+print(my_plot)
 
 
 ```
