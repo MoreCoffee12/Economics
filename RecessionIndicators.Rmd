@@ -2984,9 +2984,22 @@ rm(ylim2)
 
 This is an interesting series, they should perform better through the recessions. Unfortunately they are short lived so there is not much data so this is more of a place holder for now.
 
-```{r DivStocks, echo=FALSE, fig.width = 10, fig.asp = .62 }
+#### ProShares S&P 500 Dividend Aristocrats ETF (NOBL) 
 
-lst_sym <- c( "NOBL.Close", "SCHD.Close")
+The fund invests in financial instruments that ProShare Advisors believes, in
+combination, should track the performance of the index. The index is designed to
+measure the performance of companies in the S&P 500 Index that have consistently
+increased dividends each year for at least 25 years. Under normal circumstances,
+it will invest at least 80% of its total assets in components of the index or in
+instruments with similar economic characteristics.
+
+Suggested Citation:
+
+“ProShares S\&P 500 Dividend Aristocrats ETF (NOBL) Company Profile & Facts.” *Yahoo Finance*, [https://finance.yahoo.com/quote/NOBL/profile/](https://finance.yahoo.com/quote/NOBL/profile/). Accessed 3 Sept. 2025.
+
+```{r DivStocks_NOBL, echo=FALSE, fig.width = 10, fig.asp = .62 }
+
+lst_sym <- c( "NOBL.Close", "NOBL.Close__mva050", "NOBL.Close__mva200")
 
 if (require_columns(df.data, lst_sym)) {
   
@@ -3000,14 +3013,13 @@ if (require_columns(df.data, lst_sym)) {
       "Date",
       getPlotYLabel(df.symbols, lst_sym[[1]]),
       c(as.Date('2014-01-01'), Sys.Date()),
-      ylim =  c(4, 110),
+      ylim =  c(30, round_up_to(max(df.data[[lst_sym[[1]]]]),1)),
       b.legend = TRUE,
       b.percentile = FALSE,
       b.long.legend = TRUE
     )
 
-
-  my.plot + geom_line(
+  my.plot <- my.plot + geom_line(
     data = df.data,
     aes_string(
       x = "date",
@@ -3016,6 +3028,22 @@ if (require_columns(df.data, lst_sym)) {
     ),
     na.rm = TRUE
   )
+  
+  my.plot <- my.plot + geom_line(
+    data = df.data,
+    aes_string(
+      x = "date",
+      y = lst_sym[[3]],
+      colour = shQuote(getPlotTitle(df.symbols, lst_sym[[3]]))
+    ),
+    na.rm = TRUE
+  )
+
+  print(my.plot)
+  
+  if( exists("my.plot")){
+    rm(my.plot)
+  }    
 }
 
 # Clean and tidy
@@ -3024,6 +3052,76 @@ if( exists ("lst_sym")){
 }
 
 ```
+
+#### Schwab U.S. Dividend Equity ETF (SCHD)
+
+To pursue its goal, the fund generally invests in stocks that are included in
+the index. The index is designed to measure the performance of high dividend
+yielding stocks issued by U.S. companies that have a record of consistently
+paying dividends, selected for fundamental strength relative to their peers,
+based on financial ratios. The fund will invest at least 90% of its net assets
+in these stocks.
+
+Suggested Citation:
+“Schwab U.S. Dividend Equity ETF (SCHD).” *Yahoo Finance*, [https://finance.yahoo.com/quote/SCHD/](https://finance.yahoo.com/quote/SCHD/). Accessed 3 Sept. 2025.
+
+
+```{r DivStocks_SCHD, echo=FALSE, fig.width = 10, fig.asp = .62 }
+
+lst_sym <- c( "SCHD.Close", "SCHD.Close__mva050", "SCHD.Close__mva200")
+
+if (require_columns(df.data, lst_sym)) {
+  
+  my.plot <-
+    plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_sym[[1]],
+      getPlotTitle(df.symbols, lst_sym[[1]]),
+      "Date",
+      getPlotYLabel(df.symbols, lst_sym[[1]]),
+      c(as.Date('2014-01-01'), Sys.Date()),
+      ylim =  c(10, round_up_to(max(df.data[[lst_sym[[1]]]]),1)),
+      b.legend = TRUE,
+      b.percentile = FALSE,
+      b.long.legend = TRUE
+    )
+
+  my.plot <- my.plot + geom_line(
+    data = df.data,
+    aes_string(
+      x = "date",
+      y = lst_sym[[2]],
+      colour = shQuote(getPlotTitle(df.symbols, lst_sym[[2]]))
+    ),
+    na.rm = TRUE
+  )
+  my.plot <- my.plot + geom_line(
+    data = df.data,
+    aes_string(
+      x = "date",
+      y = lst_sym[[3]],
+      colour = shQuote(getPlotTitle(df.symbols, lst_sym[[3]]))
+    ),
+    na.rm = TRUE
+  )
+  
+  print(my.plot)
+  
+  if( exists("my.plot")){
+    rm(my.plot)
+  }  
+}
+
+# Clean and tidy
+if( exists ("lst_sym")){
+  rm(lst_sym)
+}
+
+```
+
+#### Dividend year-over-year growth
 
 ```{r DivStocks_yoy, echo=FALSE, fig.width = 10, fig.asp = .62 }
 
@@ -3048,7 +3146,7 @@ if (require_columns(df.data, lst_sym)) {
     )
 
 
-  my.plot + geom_line(
+  my.plot <- my.plot + geom_line(
     data = df.data,
     aes_string(
       x = "date",
@@ -3057,6 +3155,13 @@ if (require_columns(df.data, lst_sym)) {
     ),
     na.rm = TRUE
   )
+  
+  print(my.plot)
+  
+  if( exists("my.plot")){
+    rm(my.plot)
+  }
+  
 }
 
 # Clean and tidy

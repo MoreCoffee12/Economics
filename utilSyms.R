@@ -188,3 +188,50 @@ require_columns <- function(df, cols ) {
   } 
 }
 
+#' Round up to a specified step size
+#'
+#' Rounds numeric input up to the nearest multiple of \code{step}
+#' (i.e., an engineering-style ceiling). Vectorized over \code{x}.
+#'
+#' @param x Numeric vector of values to round.
+#' @param step Positive, finite numeric scalar giving the step size
+#'   (e.g., 0.1, 0.5, 5). Must be > 0.
+#'
+#' @return A numeric vector with each element rounded up to the nearest
+#'   multiple of \code{step}. \code{NA} inputs return \code{NA}.
+#'
+#' @details
+#' Internally uses \code{ceiling(x / step) * step}. A small tolerance is
+#' subtracted before \code{ceiling()} to reduce floating-point artifacts
+#' when \code{x} is already an exact multiple of \code{step}.
+#'
+#' @examples
+#' round_up_to(29.53, 0.5)   # 30.0
+#' round_up_to(c(1.01, 1.00, NA), 0.1)
+#' round_up_to(13, 5)        # 15
+#' sprintf("%.2f", round_up_to(29.53, 1))  # "30.00"
+#'
+#' @export
+round_up_to <- function(x, step) {
+  # ---- validate inputs ------------------------------------------------------
+  if (length(step) != 1L || !is.finite(step) || step <= 0) {
+    stop("`step` must be a single positive, finite number.")
+  }
+  
+  # Coerce to numeric (propagates NA where coercion fails)
+  x_num <- as.numeric(x)
+  
+  # Tolerance helps avoid rounding up due to tiny FP errors when x is already
+  # an exact multiple of `step` (e.g., 10.0000000002).
+  tol <- sqrt(.Machine$double.eps)
+  
+  # Compute the quotient, nudge down by tol, then ceiling and rescale
+  q <- x_num / step
+  res <- ceiling(q - tol) * step
+  
+  # Preserve names if present
+  if (!is.null(names(x))) names(res) <- names(x)
+  
+  res
+}
+
