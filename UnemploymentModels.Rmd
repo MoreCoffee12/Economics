@@ -405,10 +405,10 @@ if ( require_columns(df.data, lst_syms ) ){
     )
   my_plot <- my_plot + geom_line(
     data = df.data,
-    aes_string(
-      x = "date",
-      y = lst_syms[[2]],
-      colour = shQuote(getPlotTitle(df.symbols, lst_syms[[2]]))
+    aes(
+      x = .data[["date"]],
+      y = .data[[lst_syms[[2]]]],
+      colour = getPlotTitle(df.symbols, lst_syms[[2]])
     ),
     na.rm = TRUE
   )
