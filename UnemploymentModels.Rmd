@@ -10,12 +10,13 @@ output:
 ---
 
 ```{r setup, echo=FALSE}
+
 knitr::opts_chunk$set(echo = TRUE)
 options("getSymbols.warning4.0"=FALSE)
+
 ```
 
 ```{r libraries, echo=FALSE, message=FALSE}
-
 
 library(tidyverse)
 library(tidyquant)
@@ -24,7 +25,6 @@ library(gridExtra)
 library(signal)
 library(caret)
 library(data.table)
-
 
 ```
 
@@ -73,7 +73,8 @@ df.symbols <- dplyr::filter(df.symbols,
                             string.symbol %in% c("USREC",
                                                  "GDP",
                                                  "GDPC1",
-                                                 "GDPNOW",
+                                                 "NPPTTL",
+                                                 "CCSA",
                                                  "PCE",
                                                  "U6RATE",
                                                  "UNRATE",
@@ -287,36 +288,50 @@ if( exists("str_symbol")){
 
 ```{r lf.lm.setup.plot, echo=FALSE, fig.width = 10, fig.asp = .62}
 
-str_symbol <- "CLF16OV__lm__POPTHM"
-datay.aux <- "CLF16OV.Value"
-ylim <- c(0, 200000)
-dt.end <- Sys.Date()
-my_plot <-
-  plotSingle(
-    dfRecession,
-    df.data,
-    "date",
-    datay = str_symbol,
-    "CLF16OV Compared to CLF16OV predicted using overall population, POPTHM",
-    "Date",
-    getPlotYLabel(df.symbols, str_symbol),
-    c(dt.start.prediction, dt.end),
-    ylim,
-    b.legend = TRUE,
-    b.percentile = FALSE,
-    b.long.legend = TRUE
-  )
-my_plot <- my_plot + geom_line(
-  data = df.data,
-  aes(
-    x = .data[["date"]],
-    y = .data[[datay.aux]],
-    colour = shQuote(getPlotTitle(df.symbols, datay.aux))
-  ),
-  na.rm = TRUE
-)
+# Define the symbols in the plot
+lst_syms <- c("CLF16OV__lm__POPTHM", "CLF16OV.Value")
 
-print(my_plot)
+# Do they exist in the data frame?
+if ( require_columns(df.data, lst_syms ) ){
+
+  my_plot <-
+    plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_syms[[1]],
+      "CLF16OV Compared to CLF16OV predicted using overall population, POPTHM",
+      "Date",
+      getPlotYLabel(df.symbols, lst_syms[[1]]),
+      c(dt.start.prediction, Sys.Date()),
+      ylim = c(50000, round_up_to(max(df.data[[lst_syms[[1]]]]),5000)),
+      b.legend = TRUE,
+      b.percentile = FALSE,
+      b.long.legend = TRUE
+    )
+  my_plot <- my_plot + geom_line(
+    data = df.data,
+    aes(
+      x = .data[["date"]],
+      y = .data[[lst_syms[[2]]]],
+      colour = getPlotTitle(df.symbols, lst_syms[[2]])
+    ),
+    na.rm = TRUE
+  )
+  
+  print(my_plot)
+  
+  # Free up memory
+  if( exists("my_plot")){
+    rm(my_plot)
+  }
+}
+
+
+# Free up memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
 
 
 ```
@@ -369,7 +384,6 @@ if( exists("lst_syms")){
 
 # Define the symbols in the plot
 lst_syms <- c("ICSA__by__CLF16OV__lm__POPTHM", "UNRATE.Value")
-#lst_syms <- c("UNRATE.Value", "U6RATE.Value")
 
 # Do they exist in the data frame?
 if ( require_columns(df.data, lst_syms ) ){
@@ -384,7 +398,7 @@ if ( require_columns(df.data, lst_syms ) ){
       "Date",
       getPlotYLabel(df.symbols, lst_syms[[1]]),
       c(index(ICSA[1]), Sys.Date()),
-      ylim =  c(0, 20),
+      ylim =  c(0, round_up_to(max(df.data[[lst_syms[[1]]]]),5)),
       b.legend = TRUE,
       b.percentile = FALSE,
       b.long.legend = TRUE
@@ -420,15 +434,18 @@ This section normalizes continued claims, CCSA, by the labor force estimated fro
 
 ```{r lf.lm.CCSA.norm, echo=FALSE, fig.width = 8, fig.asp = .52}
 
-# Add linear prediction to the dataframe
-str_symbol <- "CCSA.by.CLF16OV__lm__POPTHM"
-df.data[str_symbol] <- df.data$CCSA / df.data$CLF16OV__lm__POPTHM
+lst_syms <- c("CCSA.Value", "CLF16OV__lm__POPTHM")
+if ( require_columns(df.data, lst_syms ) ){
+  
+  # Add linear prediction to the data frame
+  str_symbol <- "CCSA__by__CLF16OV__lm__POPTHM"
+  df.data[str_symbol] <- 
+    df.data[[lst_syms[[1]]]] / df.data[[lst_syms[[2]]]]
 
-# Add the linear model prediction to the symbols table
-df.symbols <-
-  rbind(
+  # Add the CCSA normalization to the symbols table
+  df.symbols <- symbols_append_row(
     df.symbols,
-    data.frame(
+    list(
       string.symbol = str_symbol,
       string.source = "Predict",
       string.description = "CCSA normalized by\nlabor force from POPTHM",
@@ -437,61 +454,92 @@ df.symbols <-
       Max030 = FALSE,
       Max180 = FALSE,
       date.series.start = dt.start.prediction,
-      date.series.end = as.Date(Sys.Date())
+      date.series.end = as.Date(Sys.Date()),
+      string.symbol_safe = safe_symbol_name(str_symbol),
+      string.object_name = safe_symbol_name(str_symbol)
     )
   )
+  
+  # Clean and tidy memory
+  if( exists("str_symbol")){
+    rm(str_symbol)
+  }
 
+}
+
+# Free up memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
 
 ```
 
 
 ```{r lf.lm.CCSA.norm.plot, echo=FALSE, fig.width = 8, fig.asp = .52}
 
-datay <- "CCSA.by.CLF16OV__lm__POPTHM"
-datay.aux <- "UNRATE"
-ylim <- c(0, 50)
-dt.end <- Sys.Date()
-my_plot <-
-  plotSingle(
-    dfRecession,
-    df.data,
-    "date",
-    datay,
-    "UnRATE Compared to ICSA divided by labor force from POPTHM",
-    "Date",
-    getPlotYLabel(df.symbols, datay),
-    c(index(CCSA[1]), dt.end),
-    ylim,
-    b.legend = TRUE,
-    b.percentile = FALSE,
-    b.long.legend = TRUE
-  )
-my_plot <- my_plot + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay.aux,
-    colour = shQuote(getPlotTitle(df.symbols, datay.aux))
-  ),
-  na.rm = TRUE
-)
+# Define the symbols in the plot
+lst_syms <- c("CCSA__by__CLF16OV__lm__POPTHM", "UNRATE.Value")
 
-print(my_plot)
+# Do they exist in the data frame?
+if ( require_columns(df.data, lst_syms ) ){
+  
+  my_plot <-
+    plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_syms[[1]],
+      "UNRATE Compared to ICSA divided by labor force from POPTHM",
+      "Date",
+      getPlotYLabel(df.symbols, lst_syms[[1]]),
+      c(index(CCSA[1]), Sys.Date()),
+      ylim = c(0, round_up_to(max(df.data[[lst_syms[[1]]]]),5)),
+      b.legend = TRUE,
+      b.percentile = FALSE,
+      b.long.legend = TRUE
+    )
+  my_plot <- my_plot + geom_line(
+    data = df.data,
+    aes(
+      x = .data[["date"]],
+      y = .data[[lst_syms[[2]]]],
+      colour = shQuote(getPlotTitle(df.symbols, lst_syms[[2]]))
+    ),
+    na.rm = TRUE
+  )
+  
+  print(my_plot)
+  
+  # Free up memory
+  if( exists("my_plot")){
+    rm(my_plot)
+  }
+  
+}
+
+# Free up memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
+
 ```
 
 This section normalizes total non-farm payroll data provided by ADP and in the NPPTTL series on FRED. Unlike ICSA or CCSA the values here are thousands rather than numbers.
 
 ```{r lf.lm.NPPTTL.norm, echo=FALSE, fig.width = 8, fig.asp = .52}
 
-# Add linear prediction to the dataframe
-str_symbol <- "NPPTTL.by.CLF16OV__lm__POPTHM"
-df.data[str_symbol] <- 100 * ( 1 - (df.data$NPPTTL / df.data$CLF16OV__lm__POPTHM) )
+lst_syms <- c("NPPTTL.Value", "CLF16OV__lm__POPTHM")
+if ( require_columns(df.data, lst_syms ) ){
+  
+  # Add normalization to the data frame
+  str_symbol <- "NPPTTL__by__CLF16OV__lm__POPTHM"
+  df.data[str_symbol] <- 
+    ( 100.0 * ( 1.0 - (df.data[[lst_syms[[1]]]] / df.data[[lst_syms[[2]]]]) ) )
 
-# Add the linear model prediction to the symbols table
-df.symbols <-
-  rbind(
+  # Add the NPPTTL normalization to the symbols table
+  df.symbols <- symbols_append_row(
     df.symbols,
-    data.frame(
+    list(
       string.symbol = str_symbol,
       string.source = "Predict",
       string.description = "NPPTTL (ADP) normalized by\nlabor force from POPTHM",
@@ -500,18 +548,31 @@ df.symbols <-
       Max030 = FALSE,
       Max180 = FALSE,
       date.series.start = dt.start.prediction,
-      date.series.end = as.Date(Sys.Date())
+      date.series.end = as.Date(Sys.Date()),
+      string.symbol_safe = safe_symbol_name(str_symbol),
+      string.object_name = safe_symbol_name(str_symbol)
     )
   )
+  
+  # Clean and tidy memory
+  if( exists("str_symbol")){
+    rm(str_symbol)
+  }
 
+}
+
+# Free up memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
 
 ```
 
 
 ```{r lf.lm.NPPTTL.norm.plot, echo=FALSE, fig.width = 8, fig.asp = .52}
 
-datay <- "NPPTTL.by.CLF16OV__lm__POPTHM"
-datay.aux <- "UNRATE"
+datay <- "NPPTTL__by__CLF16OV__lm__POPTHM"
+datay.aux <- "UNRATE.Value"
 ylim <- c(0, 40)
 dt.end <- Sys.Date()
 dt.start <- index(NPPTTL[1])
@@ -550,7 +611,7 @@ Correlation across some of the series. This section checks that survey data is c
 ```{r EMP.cor.setup, echo=FALSE}
 
 # The U6 numbers do not have as much historical data as the U3 so valid data for fit
-# begins early. I also exluded the Covid 16 mess of data.
+# begins early. I also excluded the COVID 19 mess of data.
 dt.start.prediction <- as.Date("1994-01-01")
 dt.end.prediction <- as.Date("2020-01-01")
 df.emp.model <-
