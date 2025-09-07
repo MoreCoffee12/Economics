@@ -73,6 +73,7 @@ df.symbols <- dplyr::filter(df.symbols,
                             string.symbol %in% c("USREC",
                                                  "GDP",
                                                  "GDPC1",
+                                                 "^TNX",
                                                  "NPPTTL",
                                                  "CCSA",
                                                  "PCE",
@@ -140,6 +141,10 @@ if( exists("str_symbol.raw")){
 
 if( exists("ylimBackTest")){
   rm(ylimBackTest)
+}
+
+if( exists("df.farm.income")){
+  rm(df.farm.income)
 }
 
 ```
@@ -571,37 +576,51 @@ if( exists("lst_syms")){
 
 ```{r lf.lm.NPPTTL.norm.plot, echo=FALSE, fig.width = 8, fig.asp = .52}
 
-datay <- "NPPTTL__by__CLF16OV__lm__POPTHM"
-datay.aux <- "UNRATE.Value"
-ylim <- c(0, 40)
-dt.end <- Sys.Date()
-dt.start <- index(NPPTTL[1])
-my_plot <-
-  plotSingle(
-    dfRecession,
-    df.data,
-    "date",
-    datay,
-    "NPPTTL Compared to NPPTTL divided by labor force from POPTHM",
-    "Date",
-    getPlotYLabel(df.symbols, datay),
-    c(dt.start, dt.end),
-    ylim,
-    b.legend = TRUE,
-    b.percentile = FALSE,
-    b.long.legend = TRUE
+lst_syms <- c("NPPTTL__by__CLF16OV__lm__POPTHM", "UNRATE.Value")
+if ( require_columns(df.data, lst_syms ) ){
+  
+  ylim <- c(0, 40)
+  dt.end <- Sys.Date()
+  dt.start <- index(NPPTTL[1])
+  my_plot <-
+    plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_syms[[1]],
+      "NPPTTL Compared to NPPTTL divided by labor force from POPTHM",
+      "Date",
+      getPlotYLabel(df.symbols, lst_syms[[1]]),
+      c(dt.start, dt.end),
+      ylim,
+      b.legend = TRUE,
+      b.percentile = FALSE,
+      b.long.legend = TRUE
+    )
+  my_plot <- my_plot + geom_line(
+    data = df.data,
+    aes(
+      x = .data[["date"]],
+      y = .data[[lst_syms[[2]]]],
+      colour = getPlotTitle(df.symbols, lst_syms[[2]])
+    ),
+    na.rm = TRUE
   )
-my_plot <- my_plot + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay.aux,
-    colour = shQuote(getPlotTitle(df.symbols, datay.aux))
-  ),
-  na.rm = TRUE
-)
+  
+  print(my_plot)
+  
+  # Free up memory
+  if( exists("my_plot")){
+    rm(my_plot)
+  }
 
-print(my_plot)
+}
+
+# Free up memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
+
 ```
 
 ### Employment Correlation, U6 and U3
@@ -620,47 +639,72 @@ df.emp.model <-
 
 
 # I break the data into three sets: 50% for training, 25% for testing, and 25% for validation.
-set.seed(123456)
-in.train <- createDataPartition(y=df.emp.model$U6RATE, p = 0.50, list=FALSE)
-df.train <- df.emp.model[in.train,]
-df.data.rest <- df.emp.model[-in.train,]
-in.val <- createDataPartition(y = df.data.rest$U6RATE, p = 0.50, list = FALSE)
-df.val <- df.data.rest[in.val,]
-df.test <- df.data.rest[-in.val,]
-rm(df.data.rest)
+lst_syms <- c("UNRATE.Value")
+if ( require_columns(df.data, lst_syms ) ){
+  
+  set.seed(123456)
+  in.train <- createDataPartition(y=df.emp.model[[lst_syms[[1]]]], 
+                                  p = 0.50, 
+                                  list=FALSE)
+  df.train <- df.emp.model[in.train,]
+  df.data.rest <- df.emp.model[-in.train,]
+  in.val <- createDataPartition(y = df.data.rest[[lst_syms[[1]]]], 
+                                p = 0.50, 
+                                list = FALSE)
+  df.val <- df.data.rest[in.val,]
+  df.test <- df.data.rest[-in.val,]
+  rm(df.data.rest)
+}
+
+# Free up memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
 
 ```
 
 ```{r EMP.cor.fit, echo=FALSE}
+lst_syms <- c("U6RATE.Value", "UNRATE.Value")
+if ( require_columns(df.data, lst_syms ) ){
+  
+  # Define the equation
+  str_form <- as.formula(paste(lst_syms[[1]], "~", lst_syms[[2]]))
+  
+  # Perform the linear fit
+  list.fit.u3u6 <- train(
+    str_form,
+    data = df.train,
+    method = "lm",
+    preProcess = c('center', 'scale')
+  )
+  
+  # Perform the knn fit
+  list.fit.knn.u3u6 <- train(
+    str_form,
+    data = df.train,
+    method = "knn",
+    preProcess = c('center', 'scale')
+  )
+  
+  # Clean and tidy memory
+  if( exists("str_form")){
+    rm(str_form)
+  }
+  if( exists("df.emp.model")){
+    rm(df.emp.model)
+  }
+  if( exists("df.train")){
+    rm(df.train)
+  }
+  if( exists("df.val")){
+   rm(df.val)
+  }
+}
 
-# Perform the linear fit
-list.fit.u3u6 <- train(
-  U6RATE ~ UNRATE,
-  data = df.train,
-  method = "lm",
-  preProcess = c('center', 'scale')
-)
-
-# Perform the knn fit
-list.fit.knn.u3u6 <- train(
-  U6RATE ~ UNRATE,
-  data = df.train,
-  method = "knn",
-  preProcess = c('center', 'scale')
-)
-
-# Perform the neural net fit
-# list.fit.nnet.u3u6 <- train(
-#   U6RATE ~ UNRATE,
-#   data = df.train,
-#   method = "nnet",
-#   preProcess = c('center', 'scale'),
-#   trace = FALSE
-# )
-
-rm(df.emp.model)
-rm(df.train)
-rm(df.val)
+# Free up memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
 
 ```
 

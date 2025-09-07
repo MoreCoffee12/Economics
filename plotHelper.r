@@ -589,8 +589,10 @@ CalcYoY <- function (datadf, strCol, iPeriods){
 #'
 #' @examples
 getRootTickerSymbol <-function(datay){
+  
   str.search <- datay
-  if (grepl('.', datay)) {
+
+    if (grepl('.', datay)) {
     # Ticker symbols have .open, .close, etc. that are not in df.symbols. For
     # these symbols, search for the parent symbol
     str.search <- strsplit(datay, "[.]")[[1]][1]
@@ -599,30 +601,102 @@ getRootTickerSymbol <-function(datay){
   return(str.search)  
 } 
 
+#' Small helper function to safely look up the description for a symbol given
+#' the safe name
+#'
+#' Returns the corresponding description from a symbol dictionary given a
+#' key in \code{string.symbol_safe}. The function validates required columns,
+#' enforces a single unique match, and throws clear, actionable errors on
+#' missing/duplicate keys.
+#'
+#' @param df.symbols A data.frame/tibble containing at least the columns
+#'   \code{string.symbol_safe} and \code{string.description}.
+#' @param datay_safe Character (length 1). The "safe" symbol to look up.
+#'
+#' @return A length-1 character vector: the matched \code{string.description}.
+#' @examples
+#' df.symbols <- data.frame(
+#'   string.symbol_safe = c("PAYEMS.Value", "CPIAUCSL.Value"),
+#'   string.description = c("Nonfarm payrolls (BLS)", "CPI: All Urban Consumers"),
+#'   stringsAsFactors = FALSE
+#' )
+#' get_symbol_description(df.symbols, "PAYEMS.Value")
+#'
+#' @export
+get_symbol_description <- function(df.symbols, datay_safe) {
+  # ---- Validate inputs -----------------------------------------------------
+  if (!is.data.frame(df.symbols)) {
+    stop("`df.symbols` must be a data.frame (or tibble).")
+  }
+  required_cols <- c("string.symbol_safe", "string.description")
+  missing_cols  <- setdiff(required_cols, names(df.symbols))
+  if (length(missing_cols)) {
+    stop("`df.symbols` is missing required column(s): ",
+         paste(missing_cols, collapse = ", "))
+  }
+  if (length(datay_safe) != 1L) {
+    stop("`datay_safe` must be a character scalar (length 1).")
+  }
+  
+  # ---- Exact-match lookup (single, unique hit) -----------------------------
+  key <- as.character(datay_safe)
+  sym <- as.character(df.symbols[["string.symbol_safe"]])
+  
+  idx <- match(key, sym)  # first matching index or NA
+  
+  if (is.na(idx)) {
+    stop(sprintf("No description found for symbol '%s'.", key))
+  }
+  if (sum(sym == key, na.rm = TRUE) > 1L) {
+    stop(sprintf(
+      "Multiple descriptions found for symbol '%s'; keys must be unique.", key
+    ))
+  }
+  
+  # ---- Return description --------------------------------------------------
+  df.symbols[["string.description"]][idx]
+}
+
+
 #' Small helper function to get the symbol description
 #'
-#' @param df.symbols Dataframe with the symbols
-#' @param datay String describing the symbol
+#' @param df.symbols Defines the data frame with the symbols
+#' @param datay_safe Safe string describing the symbol (usually the value listed
+#'   in the string.symbol_safe column in the df.symbols data frame)
 #'
 #' @return string with plot title
 #' @export
 #'
 #' @examples
-getPlotTitle <- function(df.symbols, datay, str.sep = " | "){
+#' getPlotTitle(df.symbols = df.symbols, data_safe = "X_TNX")
+getPlotTitle <- function(df.symbols, datay_safe, str.sep = " | "){
 
   # Default ticker description
-  str.desc <- df.symbols[grep(paste("^", datay, "$", sep=""), df.symbols$string.symbol),]$string.description
-
-  # if it is empty, see if the root ticker has the info
-  if (length(str.desc) <= 0) {
-    # Find the search string
-    str.search <- getRootTickerSymbol(datay)
+  if( require_columns(df.symbols, c("string.description", "string.symbol"))){
     
-    # Search for the data
-    str.desc <- df.symbols[grep(paste("^", str.search, "$", sep=""), df.symbols$string.symbol),]$string.description
+    # Get the root value
+    if ( grep(".", datay_safe) ){
+      datay_safe <- getRootTickerSymbol(datay_safe)
+    }
+    
+    # Call the function to get the description
+    str.desc <- get_symbol_description(df.symbols, datay_safe)
+
+  }else{
+    
+    # In this case the "df.symbols" data frame does not have the columns we
+    # expect.
+    rlang::abort(
+      message = "df.symbols missing required column(s)",
+      class = "validate_missing_columns",
+      missing = missing,
+      have = names(df.symbols),
+      call = call
+    )   
   }
-  
-  strTitle <-  paste(datay, str.sep, str.desc, sep="" )
+
+  # Format the title
+  strTitle <-  paste(datay_safe, str.sep, str.desc, sep="" )
   strTitle <- gsub("\\| ", "\n", strTitle)
   
   return(strTitle)

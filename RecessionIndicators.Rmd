@@ -7225,55 +7225,71 @@ Close in, the trend towards inversion be more easily seen. I am also comparing d
 
 ```{r bond10.recent, echo=FALSE, fig.width = 9, fig.asp = 0.4 }
 
-datay <- "DGS10.Value"
-datay.aux <- "X_TNX.TNX.Open"
-datay.aux1 <- "DTB3.Value"
-datay.aux2 <- "X_IRX.IRX.Open"
-ylim <- c(-0.5, 6.0)
-dt.start = as.Date('2018-01-01')
-p1 <-
-  plotSingle(
-    dfRecession,
-    df.data,
-    "date",
-    datay,
-    getPlotTitle(df.symbols, datay),
-    "Date",
-    getPlotYLabel(df.symbols, datay),
-    c(dt.start, Sys.Date()),
-    ylim,
-    b.legend = TRUE,
-    b.long.legend = TRUE
-  )
-p1 <-
-  p1 + geom_line(
-    data = df.data,
-    aes_string(
-      x = "date",
-      y = datay.aux,
-      colour = shQuote(getPlotTitle(df.symbols, datay.aux, str.sep = "\n"))
-    ),
-    na.rm = TRUE
-  )
-p1 <-
-  p1 + geom_line(
-    data = df.data,
-    aes_string(
-      x = "date",
-      y = datay.aux1,
-      colour = shQuote(getPlotTitle(df.symbols, datay.aux1, str.sep = "\n"))
-    ),
-    na.rm = TRUE
-  )
-p1 + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay.aux2,
-    colour = shQuote(getPlotTitle(df.symbols, datay.aux2, str.sep = "\n"))
-  ),
-  na.rm = TRUE
-)
+
+lst_syms <- c("DGS10.Value",
+              "X_TNX.TNX.Open",
+              "DTB3.Value",
+              "X_IRX.IRX.Open")
+
+if (require_columns(df.data, lst_syms)) {
+  my_plot <-
+    plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_syms[[1]],
+      getPlotTitle(df.symbols, lst_syms[[1]]),
+      "Date",
+      getPlotYLabel(df.symbols, lst_syms[[1]]),
+      c(as.Date('2018-01-01'), Sys.Date()),
+      ylim = c(-0.5, 6.0),
+      b.legend = TRUE,
+      b.long.legend = TRUE
+    )
+  my_plot <-
+    my_plot + geom_line(
+      data = df.data,
+      aes_string(
+        x = "date",
+        y = lst_syms[[2]],
+        colour = shQuote(getPlotTitle(df.symbols, lst_syms[[2]], str.sep = "\n"))
+      ),
+      na.rm = TRUE
+    )
+  my_plot <-
+    my_plot + geom_line(
+      data = df.data,
+      aes_string(
+        x = "date",
+        y = lst_syms[[3]],
+        colour = shQuote(getPlotTitle(df.symbols, lst_syms[[3]], str.sep = "\n"))
+      ),
+      na.rm = TRUE
+    )
+  my_plot <-
+    my_plot + geom_line(
+      data = df.data,
+      aes_string(
+        x = "date",
+        y = lst_syms[[4]],
+        colour = shQuote(getPlotTitle(df.symbols, lst_syms[[4]], str.sep = "\n"))
+      ),
+      na.rm = TRUE
+    )
+  
+  print(my_plot)
+  
+  # Free up memory
+  if (exists("my_plot")) {
+    rm(my_plot)
+  }
+  
+}
+
+# Free up memory
+if (exists("lst_syms")) {
+  rm(lst_syms)
+}
 
 ```
 
