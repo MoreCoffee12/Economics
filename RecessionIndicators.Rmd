@@ -3172,6 +3172,74 @@ if( exists ("lst_sym")){
 
 ```
 
+### Energy Stocks
+
+This is a highly cyclical sector so it pays to watch for movements in this this
+sector.
+
+#### The Energy Select Sector SPDR Fund (XLE)
+
+In seeking to track the performance of the index, the fund employs a replication strategy. It generally invests substantially all, but at least 95%, of its total assets in the securities comprising the index. The index includes companies that have been identified as Energy companies by the GICS®, including securities of companies from the following industries: oil, gas and consumable fuels; and energy equipment and services. It is non-diversified.
+
+Suggested Citation:
+
+“Energy Select Sector SPDR Fund (XLE) Company Profile & Facts.” Yahoo Finance, https://finance.yahoo.com/quote/XLE/profile/
+. Accessed 8 Sept. 2025.
+
+```{r energy_stocks_xls, echo=FALSE, fig.width = 10, fig.asp = .62 }
+
+lst_sym <- c( "XLE.Close", "XLE.Close__mva050", "XLE.Close__mva200")
+
+if (require_columns(df.data, lst_sym)) {
+  
+  my.plot <-
+    plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_sym[[1]],
+      getPlotTitle(df.symbols, lst_sym[[1]]),
+      "Date",
+      getPlotYLabel(df.symbols, lst_sym[[1]]),
+      c(as.Date('2014-01-01'), Sys.Date()),
+      ylim =  c(10, round_up_to(max(df.data[[lst_sym[[1]]]]),1)),
+      b.legend = TRUE,
+      b.percentile = FALSE,
+      b.long.legend = TRUE
+    )
+
+  my.plot <- my.plot + geom_line(
+    data = df.data,
+    aes_string(
+      x = "date",
+      y = lst_sym[[2]],
+      colour = shQuote(getPlotTitle(df.symbols, lst_sym[[2]]))
+    ),
+    na.rm = TRUE
+  )
+  my.plot <- my.plot + geom_line(
+    data = df.data,
+    aes_string(
+      x = "date",
+      y = lst_sym[[3]],
+      colour = shQuote(getPlotTitle(df.symbols, lst_sym[[3]]))
+    ),
+    na.rm = TRUE
+  )
+  
+  print(my.plot)
+  
+  if( exists("my.plot")){
+    rm(my.plot)
+  }  
+}
+
+# Clean and tidy
+if( exists ("lst_sym")){
+  rm(lst_sym)
+}
+
+```
 
 ## Margin and option data
 

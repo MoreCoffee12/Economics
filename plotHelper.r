@@ -650,9 +650,10 @@ get_symbol_description <- function(df.symbols, datay_safe) {
     sym <- as.character(df.symbols[["string.symbol"]])
     idx <- match(key, sym)  # first matching index or NA
     
-    if (is.na(idx)) {
-      stop(sprintf("No description found for symbol '%s'.", key))
-    }
+    # I had to allow nas
+    #if (is.na(idx)) {
+    #  stop(sprintf("No description found for symbol '%s'.", key))
+    #}
   }
   if (sum(sym == key, na.rm = TRUE) > 1L) {
     stop(sprintf(
@@ -661,7 +662,11 @@ get_symbol_description <- function(df.symbols, datay_safe) {
   }
   
   # ---- Return description --------------------------------------------------
-  df.symbols[["string.description"]][idx]
+  if (is.na(idx)) {
+    ""
+  }else{
+    df.symbols[["string.description"]][idx]
+  }
 }
 
 
@@ -680,15 +685,19 @@ getPlotTitle <- function(df.symbols, datay_safe, str.sep = " | "){
 
   # Default ticker description
   if( require_columns(df.symbols, c("string.description", "string.symbol"))){
-    
-    # Get the root value
-    if ( grep(".", datay_safe) ){
-      datay_safe <- getRootTickerSymbol(datay_safe)
-    }
-    
-    # Call the function to get the description
+
+    # Call the function to get the description, assuming the symbol may be
+    # looked up directly.
     str.desc <- get_symbol_description(df.symbols, datay_safe)
 
+    # Get the root value, if we failed to find a value
+    if ( nchar(str.desc) < 1 ){
+      
+      datay_safe <- getRootTickerSymbol(datay_safe)
+      str.desc <- get_symbol_description(df.symbols, datay_safe)
+      
+    }
+    
   }else{
     
     # In this case the "df.symbols" data frame does not have the columns we
@@ -711,7 +720,7 @@ getPlotTitle <- function(df.symbols, datay_safe, str.sep = " | "){
 
 #' Get the formatted string for the y-axis plot
 #'
-#' @param df.symbols Dataframe with the symbols
+#' @param df.symbols The data frame with the symbols
 #' @param datay String describing the symbol
 #'
 #' @return
