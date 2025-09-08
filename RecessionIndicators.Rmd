@@ -3124,6 +3124,9 @@ if( exists ("lst_sym")){
 
 #### Dividend year-over-year growth
 
+This plot shows the year-over-year  growth of the NOBL and SCHD funds to see if
+there could be a buying opportunity.
+
 ```{r DivStocks_yoy, echo=FALSE, fig.width = 10, fig.asp = .62 }
 
 lst_sym <- c( "NOBL.Close__YoY", "SCHD.Close__YoY")
@@ -3232,6 +3235,129 @@ if (require_columns(df.data, lst_sym)) {
   if( exists("my.plot")){
     rm(my.plot)
   }  
+}
+
+# Clean and tidy
+if( exists ("lst_sym")){
+  rm(lst_sym)
+}
+
+```
+
+#### Invesco S&P 500 Equal Weight Energy ETF (RSPG)
+
+The fund generally will invest at least 90% of its total assets in securities
+that comprise the underlying index. The underlying index is composed of all of
+the components of the S&P 500® Energy Index, an index that contains the common
+stocks of all companies included in the S&P 500® Index that are classified as
+members of the energy sector, as defined according to the Global Industry
+Classification Standard ("GICS").
+
+Suggested Citation:
+
+“Invesco S&P 500 Equal Weight Growth ETF (RSPG) Company Profile & Facts.” Yahoo Finance, https://finance.yahoo.com/quote/RSPG/profile/
+. Accessed 8 Sept. 2025.
+
+```{r energy_stocks_rspg, echo=FALSE, fig.width = 10, fig.asp = .62 }
+
+lst_sym <- c( "RSPG.Close", "RSPG.Close__mva050", "RSPG.Close__mva200")
+
+if (require_columns(df.data, lst_sym)) {
+  
+  my.plot <-
+    plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_sym[[1]],
+      getPlotTitle(df.symbols, lst_sym[[1]]),
+      "Date",
+      getPlotYLabel(df.symbols, lst_sym[[1]]),
+      c(as.Date('2014-01-01'), Sys.Date()),
+      ylim =  c(10, round_up_to(max(df.data[[lst_sym[[1]]]]),1)),
+      b.legend = TRUE,
+      b.percentile = FALSE,
+      b.long.legend = TRUE
+    )
+
+  my.plot <- my.plot + geom_line(
+    data = df.data,
+    aes_string(
+      x = "date",
+      y = lst_sym[[2]],
+      colour = shQuote(getPlotTitle(df.symbols, lst_sym[[2]]))
+    ),
+    na.rm = TRUE
+  )
+  my.plot <- my.plot + geom_line(
+    data = df.data,
+    aes_string(
+      x = "date",
+      y = lst_sym[[3]],
+      colour = shQuote(getPlotTitle(df.symbols, lst_sym[[3]]))
+    ),
+    na.rm = TRUE
+  )
+  
+  print(my.plot)
+  
+  if( exists("my.plot")){
+    rm(my.plot)
+  }  
+}
+
+# Clean and tidy
+if( exists ("lst_sym")){
+  rm(lst_sym)
+}
+
+```
+
+
+#### Energy year-over-year growth
+
+This plot shows the year-over-year  growth of the XLE and RSPG funds to see if
+there could be a buying opportunity.
+
+```{r energy_stock_yoy, echo=FALSE, fig.width = 10, fig.asp = .62 }
+
+lst_sym <- c( "XLE.Close__YoY", "RSPG.Close__YoY")
+
+if (require_columns(df.data, lst_sym)) {
+  
+  my.plot <-
+    plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_sym[[1]],
+      getPlotTitle(df.symbols, lst_sym[[1]]),
+      "Date",
+      getPlotYLabel(df.symbols, lst_sym[[1]]),
+      c(as.Date('2014-01-01'), Sys.Date()),
+      ylim =  c(-50, 110),
+      b.legend = TRUE,
+      b.percentile = FALSE,
+      b.long.legend = TRUE
+    )
+
+
+  my.plot <- my.plot + geom_line(
+    data = df.data,
+    aes_string(
+      x = "date",
+      y = lst_sym[[2]],
+      colour = shQuote(getPlotTitle(df.symbols, lst_sym[[2]]))
+    ),
+    na.rm = TRUE
+  )
+  
+  print(my.plot)
+  
+  if( exists("my.plot")){
+    rm(my.plot)
+  }
+  
 }
 
 # Clean and tidy
