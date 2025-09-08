@@ -2074,7 +2074,8 @@ Look at moving average relationship by dividing the S&P 500 open price by the 20
 datay <- "GSPC__Open__mva200__Norm"
 ylim <- c(50, 125)
 dt.start = as.Date('2008-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
+plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start,
+                b.percentil = TRUE)
 
 # Tidy up memory
 rm(datay)

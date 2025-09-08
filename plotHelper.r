@@ -645,7 +645,14 @@ get_symbol_description <- function(df.symbols, datay_safe) {
   idx <- match(key, sym)  # first matching index or NA
   
   if (is.na(idx)) {
-    stop(sprintf("No description found for symbol '%s'.", key))
+    
+    # Try the unsafe name
+    sym <- as.character(df.symbols[["string.symbol"]])
+    idx <- match(key, sym)  # first matching index or NA
+    
+    if (is.na(idx)) {
+      stop(sprintf("No description found for symbol '%s'.", key))
+    }
   }
   if (sum(sym == key, na.rm = TRUE) > 1L) {
     stop(sprintf(
@@ -1110,8 +1117,12 @@ calcRollingCorr <-
     }
     
     # The calculation
-    corrName <- paste(datay1, "_CORR_", datay2, sep = "")
+    corrName <- paste(safe_symbol_name(datay1),
+                      "_CORR_",
+                      safe_symbol_name(datay2),
+                      sep = "")
     df.symbols <- df.symbols[!df.symbols$string.symbol == corrName,]
+    
     # Normalization
     data.1 <-
       datadf[, datay1] / (max(datadf[, datay1]) - min(datadf[, datay1]))
@@ -1133,7 +1144,7 @@ calcRollingCorr <-
       df.symbols[grep(paste("^", datay2, "$", sep = ""), df.symbols$string.symbol),]$date.series.end
     date.temp.end <- min(date.temp.1, date.temp.2)
 
-    # Update the symbols table    
+    # Update the symbols table
     df.symbols <- symbols_append_row(
       df.symbols,
       list(
@@ -1148,11 +1159,11 @@ calcRollingCorr <-
         date.series.end = date.temp.end,
         string.symbol_safe = safe_symbol_name(corrName),
         string.object_name = safe_symbol_name(corrName)
-        
       )
+    
     ) 
     
-    # Return the updated dataframes to the global enviro
+    # Return the updated data frames to the global environment
     assign('df.data', datadf, envir = .GlobalEnv)
     assign('df.symbols', df.symbols, envir = .GlobalEnv)
     
