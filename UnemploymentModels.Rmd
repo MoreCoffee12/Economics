@@ -710,37 +710,40 @@ if( exists("lst_syms")){
 
 ```{r EMP.cor, echo=FALSE}
 
-# Add prediction to the dataframe
-str_symbol <- "U6.lm.U3"
+# Add prediction to the data frame
+str_symbol <- "U6__lm__U3"
 df.data[str_symbol] <-
   predict(list.fit.u3u6, newdata = df.data)
 
 # Add the linear model prediction to the symbols table
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
-      string.symbol = str_symbol,
-      string.source = "Predict",
-      string.description = "Linear Model Prediction\nU6 given U3",
-      string.label.y = df.symbols[df.symbols$string.symbol=="UNRATE","string.label.y"],
-      float.expense.ratio = -1.00,
-      Max030 = FALSE,
-      Max180 = FALSE,
-      date.series.start = dt.start.prediction,
-      date.series.end = as.Date(Sys.Date())
-    )
+df.symbols <- symbols_append_row(
+  df.symbols,
+  list(
+    string.symbol = str_symbol,
+    string.source = "Predict",
+    string.description = "Linear Model Prediction\nU6 given U3",
+    string.label.y = df.symbols[df.symbols$string.symbol=="UNRATE","string.label.y"],
+    float.expense.ratio = -1.00,
+    Max030 = FALSE,
+    Max180 = FALSE,
+    date.series.start = dt.start.prediction,
+    date.series.end = as.Date(Sys.Date()),
+    string.symbol_safe = safe_symbol_name(str_symbol),
+    string.object_name = safe_symbol_name(str_symbol)
   )
+)
 
-# Document the residual as well
-str_symbol.res <- "U6.lm.U3.res"
-df.data[str_symbol.res] <- df.data$U6RATE - df.data[str_symbol]
-
-# Add the u6 linear model residual to the symbols table
-df.symbols <-
-  rbind(
+# Document the residual to the linear model as well
+lst_syms <- c("U6RATE.Value")
+if ( require_columns(df.data, lst_syms ) ){
+    
+  str_symbol.res <- "U6__lm__U3__res"
+  df.data[str_symbol.res] <- df.data[[lst_syms[[1]]]] - df.data[str_symbol]
+  
+  # Add the u6 linear model residual to the symbols table
+  df.symbols <- symbols_append_row(
     df.symbols,
-    data.frame(
+    list(
       string.symbol = str_symbol.res,
       string.source = "Predict Resid.",
       string.description = "Linear Model Residual\nU6 given U3",
@@ -749,96 +752,86 @@ df.symbols <-
       Max030 = FALSE,
       Max180 = FALSE,
       date.series.start = dt.start.prediction,
-      date.series.end = as.Date(Sys.Date())
+      date.series.end = as.Date(Sys.Date()),
+      string.symbol_safe = safe_symbol_name(str_symbol.res),
+      string.object_name = safe_symbol_name(str_symbol.res)
     )
   )
 
-# Add knn prediction to the dataframe
-str_symbol.knn <- "U6.knn.U3"
+}
+
+# Clean and tidy memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
+if( exists("str_symbol")){
+  rm(str_symbol)
+}
+if( exists("str_symbol.res")){
+  rm(str_symbol.res)
+}
+
+# Add KNN prediction to the data frame
+str_symbol.knn <- "U6__knn__U3"
 df.data[str_symbol.knn] <-
   predict(list.fit.knn.u3u6, newdata = df.data)
 
-# Add the knn prediction to the symbols table
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
-      string.symbol = str_symbol.knn,
-      string.source = "Predict",
-      string.description = "KNN Model Prediction\nU6 given U3",
-      string.label.y = df.symbols[df.symbols$string.symbol=="UNRATE","string.label.y"],
-      float.expense.ratio = -1.00,
-      Max030 = FALSE,
-      Max180 = FALSE,
-      date.series.start = dt.start.prediction,
-      date.series.end = as.Date(Sys.Date())
-    )
+# Add the KNN prediction to the symbols table
+df.symbols <- symbols_append_row(
+  df.symbols,
+  list(
+    string.symbol = str_symbol.knn,
+    string.source = "Predict",
+    string.description = "KNN Model Prediction\nU6 given U3",
+    string.label.y = df.symbols[df.symbols$string.symbol=="UNRATE","string.label.y"],
+    float.expense.ratio = -1.00,
+    Max030 = FALSE,
+    Max180 = FALSE,
+    date.series.start = dt.start.prediction,
+    date.series.end = as.Date(Sys.Date()),
+    string.symbol_safe = safe_symbol_name(str_symbol.knn),
+    string.object_name = safe_symbol_name(str_symbol.knn)
   )
+)
 
-# Document the residual as well
-str_symbol.res.knn <- "U6.knn.U3.res"
-df.data[str_symbol.res.knn] <- df.data$U6RATE - df.data[str_symbol.knn]
-
-# Add the u6 linear model residual to the symbols table
-df.symbols <-
-  rbind(
+# Document the residual to the KNN model as well
+lst_syms <- c("U6RATE.Value")
+if ( require_columns(df.data, lst_syms ) ){
+  
+  str_symbol.res.knn <- "U6__knn__U3__res"
+  df.data[str_symbol.res.knn] <- df.data[[lst_syms[[1]]]] - df.data[str_symbol.knn]
+  
+  # Add the u6 residual with respect to the KNN model to the symbols table
+  df.symbols <- symbols_append_row(
     df.symbols,
-    data.frame(
+    list(
       string.symbol = str_symbol.res.knn,
       string.source = "Predict Resid.",
       string.description = "KNN Model Residual\nU6 given U3",
-      string.label.y = df.symbols[df.symbols$string.symbol==str_symbol,"string.label.y"],
+      string.label.y = df.symbols[df.symbols$string.symbol==str_symbol.knn,"string.label.y"],
       float.expense.ratio = -1.00,
       Max030 = FALSE,
       Max180 = FALSE,
       date.series.start = dt.start.prediction,
-      date.series.end = as.Date(Sys.Date())
+      date.series.end = as.Date(Sys.Date()),
+      string.symbol_safe = safe_symbol_name(str_symbol.res.knn),
+      string.object_name = safe_symbol_name(str_symbol.res.knn)
     )
   )
 
+}
 
-# # Add nnet prediction to the dataframe
-# str_symbol.nnet <- "U6.nnet.U3"
-# df.data[str_symbol.nnet] <-
-#   predict(list.fit.nnet.u3u6, newdata = df.data)
-# 
-# # Add the nnet prediction to the symbols table
-# df.symbols <-
-#   rbind(
-#     df.symbols,
-#     data.frame(
-#       string.symbol = str_symbol.nnet,
-#       string.source = "Predict",
-#       string.description = "NN Model Prediction\nU6 given U3",
-#       string.label.y = df.symbols[df.symbols$string.symbol=="UNRATE","string.label.y"],
-#       float.expense.ratio = -1.00,
-#       Max030 = FALSE,
-#       Max180 = FALSE,
-#       date.series.start = dt.start.prediction,
-#       date.series.end = as.Date(Sys.Date())
-#     )
-#   )
-# 
-# # Document the residual as well
-# str_symbol.res.nnet <- "U6.nnet.U3.res"
-# df.data[str_symbol.res.nnet] <- df.data$U6RATE - df.data[str_symbol.nnet]
-# 
-# # Add the u6 nnet model residual to the symbols table
-# df.symbols <-
-#   rbind(
-#     df.symbols,
-#     data.frame(
-#       string.symbol = str_symbol.res.nnet,
-#       string.source = "Predict Resid.",
-#       string.description = "NN Model Residual\nU6 given U3",
-#       string.label.y = df.symbols[df.symbols$string.symbol==str_symbol,"string.label.y"],
-#       float.expense.ratio = -1.00,
-#       Max030 = FALSE,
-#       Max180 = FALSE,
-#       date.series.start = dt.start.prediction,
-#       date.series.end = as.Date(Sys.Date())
-#     )
-#   )
+# Clean and tidy memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
+if( exists("str_symbol.knn")){
+  rm(str_symbol.knn)
+}
+if( exists("str_symbol.res.knn")){
+  rm(str_symbol.res.knn)
+}
+
 
 ```
 
@@ -848,18 +841,45 @@ Look at how the fits performed on the test data partition
 
 ```{r U3.EMP.cor.perf, echo=FALSE}
 
-d.test.resid = (df.test$U6RATE - predict(list.fit.u3u6, newdata = df.test))
-hist(d.test.resid, main=paste("Residual For", str_symbol.res, sep=" "))
-sd.fit.u3u6 = sd(d.test.resid)
+lst_syms <- c("U6RATE.Value")
+if ( require_columns(df.data, lst_syms ) ){
+  d.test.resid = (df.test[[lst_syms]] - predict(list.fit.u3u6, newdata = df.test))
+  hist(d.test.resid, main=paste("Residual for ", 
+                                "U6__lm__U3__res", 
+                                " on the Test Partition", sep=" "))
+  sd.fit.u3u6 = sd(d.test.resid)
+  
+  # Clean up memory
+  if( exists("d.test.resid")){
+    rm(d.test.resid)
+  }
+  
+}
 
+# Clean and tidy memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
 
-d.test.resid.knn = (df.test$U6RATE - predict(list.fit.knn.u3u6, newdata = df.test))
-hist(d.test.resid.knn, main=paste("Residual For", str_symbol.res.knn, sep=" "))
-sd.fit.knn.u3u6 = sd(d.test.resid.knn)
+lst_syms <- c("U6RATE.Value")
+if ( require_columns(df.data, lst_syms ) ){
+  d.test.resid.knn = (df.test[[lst_syms[[1]]]] - predict(list.fit.knn.u3u6, newdata = df.test))
+  hist(d.test.resid.knn, main=paste("Residual for ", 
+                                    "U6__knn__U3__res",
+                                    " on the Test Partition", sep=" "))
+  sd.fit.knn.u3u6 = sd(d.test.resid.knn)
+  
+  # Clean up memory
+  if( exists("d.test.resid.knn")){
+    rm(d.test.resid.knn)
+  }  
+  
+}
 
-# d.test.resid.nnet = (df.test$U6RATE - predict(list.fit.nnet.u3u6, newdata = df.test))
-# hist(d.test.resid.nnet, main=paste("Residual For", str_symbol.res.nnet, sep=" "))
-# sd.fit.nnet.u3u6 = sd(d.test.resid.nnet)
+# Clean and tidy memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
 
 ```
 
@@ -867,108 +887,101 @@ Plot the measured U6 (U6RATE) to U6 predicted by a linear fit to U3.
 
 ```{r EMP.cor.plot, echo=FALSE, fig.width = 10, fig.asp = .62}
 
-datay <- "U6.lm.U3"
-# datay.aux <- str_symbol.nnet
-datay.aux <- "U6RATE"
-# datay.aux.1 <- "U6RATE"
-ylim <- c(0, 25)
-my_plot <-
-  plotSingle(
-    dfRecession,
-    df.data,
-    "date",
-    datay,
-    "U6 Compared to U6 predicted using U3 (UNRATE)",
-    "Date",
-    getPlotYLabel(df.symbols, datay),
-    c(as.Date("1jan1994", "%d%b%Y"), Sys.Date()),
-    ylim,
-    b.legend = TRUE,
-    b.percentile = FALSE,
-    b.long.legend = TRUE
+lst_syms <- c("U6RATE.Value", "U6__lm__U3")
+if ( require_columns(df.data, lst_syms ) ){
+    
+  my_plot <-
+    plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_syms[[1]],
+      "U6 Compared to U6 predicted using U3 (UNRATE)",
+      "Date",
+      getPlotYLabel(df.symbols, lst_syms[[1]]),
+      c(as.Date("1jan1994", "%d%b%Y"), Sys.Date()),
+      ylim = c(0, 25),
+      b.legend = TRUE,
+      b.percentile = FALSE,
+      b.long.legend = TRUE
+    )
+  my_plot <- my_plot + geom_line(
+    data = df.data,
+    aes(
+      x = .data[["date"]],
+      y = .data[[lst_syms[[2]]]],
+      colour = getPlotTitle(df.symbols, lst_syms[[2]])
+    ),
+    na.rm = TRUE
   )
-my_plot <- my_plot + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay.aux,
-    colour = shQuote(getPlotTitle(df.symbols, datay.aux))
-  ),
-  na.rm = TRUE
-)
 
-# my_plot <- my_plot + geom_line(
-#   data = df.data,
-#   aes_string(
-#     x = "date",
-#     y = datay.aux.1,
-#     colour = shQuote(getPlotTitle(df.symbols, datay.aux.1))
-#   ),
-#   na.rm = TRUE
-# )
+  print(my_plot)
+  
+  # Clean memory
+  if( exists("my_plot")){
+    rm(my_plot)
+  }
 
-# my_plot <- my_plot + geom_line(
-#   data = df.data,
-#   aes_string(
-#     x = "date",
-#     y = datay.aux.2,
-#     colour = shQuote(getPlotTitle(df.symbols, datay.aux.2))
-#   ),
-#   na.rm = TRUE
-# )
+}
 
-print(my_plot)
+# Clean and tidy memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
 
 ```
 
 ```{r EMP.cor.plot.close, echo=FALSE, fig.width = 10, fig.asp = .62}
 
-datay <- "U6.lm.U3"
-datay.aux <- "U6RATE"
-# datay.aux.1 <- "U6RATE"
-ylim <- c(0, 30)
-dt.start <- as.Date('2020-01-02')
-my_plot <-
-  plotSingle(
-    dfRecession,
-    df.data,
-    "date",
-    datay,
-    "U6 Compared to U6 predicted using U3 (UNRATE)",
-    "Date",
-    getPlotYLabel(df.symbols, datay),
-    c(dt.start, Sys.Date()),
-    ylim,
-    b.legend = TRUE,
-    b.percentile = FALSE,
-    b.long.legend = TRUE
+lst_syms <- c("U6RATE.Value", "U6__lm__U3")
+if ( require_columns(df.data, lst_syms ) ){
+
+  my_plot <-
+    plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_syms[[1]],
+      "U6 Compared to U6 predicted using U3 (UNRATE)",
+      "Date",
+      getPlotYLabel(df.symbols, lst_syms[[1]]),
+      c(as.Date('2020-01-02'), Sys.Date()),
+      ylim = c(0, 25),
+      b.legend = TRUE,
+      b.percentile = FALSE,
+      b.long.legend = TRUE
+    )
+  my_plot <- my_plot + geom_line(
+    data = df.data,
+    aes(
+      x = .data[["date"]],
+      y = .data[[lst_syms[[2]]]],
+      colour = getPlotTitle(df.symbols, lst_syms[[2]])
+    ),
+    na.rm = TRUE
   )
-my_plot <- my_plot + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay.aux,
-    colour = shQuote(getPlotTitle(df.symbols, datay.aux))
-  ),
-  na.rm = TRUE
-)
-# my_plot <- my_plot + geom_line(
-#   data = df.data,
-#   aes_string(
-#     x = "date",
-#     y = datay.aux.1,
-#     colour = shQuote(getPlotTitle(df.symbols, datay.aux.1))
-#   ),
-#   na.rm = TRUE
-# )
 
+  print(my_plot)
 
-print(my_plot)
+  # Clean memory
+  if( exists("my_plot")){
+    rm(my_plot)
+  }
 
+}
+
+# Clean and tidy memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
+
+  
 ```
 
 
-Plot the residual for the U6 linear fit. The residuals decrease quite a bit during the Covid numbers, at least as of Jun 2020. Probably indicates uncertainty in the numbers.
+Plot the residual for the U6 linear fit. The residuals decrease quite a bit
+during the COVID-19 numbers, at least as of Jun 2020. Probably indicates
+uncertainty in the numbers.
 
 ```{r EMP.cor.resid, echo=FALSE,, fig.width = 6, fig.asp = .82}
 
