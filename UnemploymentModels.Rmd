@@ -115,6 +115,10 @@ if( exists("idx")){
   rm(idx)
 }
 
+if( exists("iDays")){
+  rm(iDays)
+}
+
 if( exists("list.margin.names")){
   rm(list.margin.names)
 }
@@ -133,6 +137,18 @@ if( exists("str.safe.name")){
 
 if( exists("str_symbol")){
   rm(str_symbol)
+}
+
+if( exists("str.symbol")){
+  rm(str.symbol)
+}
+
+if( exists("str_out")){
+  rm(str_out)
+}
+
+if( exists("str.symbol.raw")){
+  rm(str.symbol.raw)
 }
 
 if( exists("str_symbol.raw")){
@@ -975,7 +991,6 @@ if( exists("lst_syms")){
   rm(lst_syms)
 }
 
-  
 ```
 
 
@@ -985,120 +1000,253 @@ uncertainty in the numbers.
 
 ```{r EMP.cor.resid, echo=FALSE,, fig.width = 6, fig.asp = .82}
 
-datay <- str_symbol.res
-datay.aux <- str_symbol.res.knn
-ylim <- c(-4, 4)
-my_plot <- plotSingle(
-  dfRecession,
-  df.data,
-  "date",
-  datay,
-  getPlotTitle(df.symbols, datay),
-  "Date",
-  getPlotYLabel(df.symbols, datay),
-  c(as.Date("1jan1994", "%d%b%Y"), Sys.Date()),
-  ylim,
-  b.legend = TRUE,
-  b.percentile = TRUE,
-  b.long.legend = FALSE
-)
+lst_syms <- c("U6__lm__U3__res", "U6__knn__U3__res")
+if ( require_columns(df.data, lst_syms ) ){
+  
+  ylim <- c(-4, 4)
+  my_plot <- plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay = lst_syms[[1]],
+    getPlotTitle(df.symbols, lst_syms[[1]]),
+    "Date",
+    getPlotYLabel(df.symbols, lst_syms[[1]]),
+    c(as.Date("1jan1994", "%d%b%Y"), Sys.Date()),
+    ylim,
+    b.legend = TRUE,
+    b.percentile = TRUE,
+    b.long.legend = FALSE
+  )
 
-my_plot <- my_plot + geom_hline(yintercept=(6*sd.fit.u3u6), color = "red", linetype="dashed")
-my_plot <- my_plot + geom_hline(yintercept=(-6*sd.fit.u3u6), color = "red", linetype="dashed")
+  my_plot <- my_plot + geom_line(
+    data = df.data,
+    aes(
+      x = .data[["date"]],
+      y = .data[[lst_syms[[2]]]],
+      colour = getPlotTitle(df.symbols, lst_syms[[2]])
+    ),
+    na.rm = TRUE
+  )
 
-print(my_plot)
+  
+  my_plot <- my_plot + geom_hline(yintercept=(6*sd.fit.u3u6), color = "red", linetype="dashed")
+  my_plot <- my_plot + geom_hline(yintercept=(-6*sd.fit.u3u6), color = "red", linetype="dashed")
+
+  print(my_plot)
+
+  # Clean memory
+  if( exists("my_plot")){
+    rm(my_plot)
+  }
+}
+
+# Clean and tidy memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
 
 ```
 
 ### Employment Correlation, U3 (UNRATE) and ICSA by labor force 
 
-Calculate linear model fit across the series. ISCA only records those claiming benefits. Presumably, only a subset of those claiming benefits will prove out to be eligible to receive benefits. It should always be greater than the contining claim numbers.
+Calculate linear model fit across the series. ISCA only records those claiming
+benefits. Presumably, only a subset of those claiming benefits will prove out to
+be eligible to receive benefits. It should always be greater than the continuing
+claim numbers.
 
 https://fredblog.stlouisfed.org/2020/04/things-to-know-about-initial-claims-data/
 
-ICSA is normalized by the labor force value estimated from the U.S. population, POPTHM.
+ICSA is normalized by the labor force value estimated from the U.S. population,
+POPTHM.
 
 The linear fit for this series will not likely be as accurate as the CCSA prediction
 
-```{r U3.pred.ICSA.setup, echo=FALSE}
+```{r U3_pred_ICSA_setup, echo=FALSE}
 
-# The U6 numbers do not have as much historical data as the U3 so valid data for fit
-# begins early. I also exluded the Covid 16 mess of data.
+# The U6 numbers do not have as much historical data as the U3 so valid data for
+# fit begins early. I also excluded the COVID-19 mess of data.
 dt.start.prediction <- as.Date("1967-01-07")
 dt.end.prediction <- as.Date("2020-01-01")
 df.emp.model <-
   df.data[df.data$date >= dt.start.prediction &
             df.data$date <= dt.end.prediction,]
 
-# I break the data into three sets: 50% for training, 25% for testing, and 25% for validation.
+# I break the data into three sets: 50% for training, 25% for testing, and 25%
+# for validation using the parent data series (ICSA) as the baseline.
 set.seed(123456)
-in.train <- createDataPartition(y=df.emp.model$ICSA, p = 0.50, list=FALSE)
-df.train <- df.emp.model[in.train,]
-df.data.rest <- df.emp.model[-in.train,]
-in.val <- createDataPartition(y = df.data.rest$ICSA, p = 0.50, list = FALSE)
-df.val <- df.data.rest[in.val,]
-df.test <- df.data.rest[-in.val,]
-rm(df.data.rest)
+lst_syms <- c("ICSA.Value")
+if ( require_columns(df.data, lst_syms ) ){
+  
+  in.train <- createDataPartition(y=df.emp.model[[lst_syms[[1]]]], p = 0.50, list=FALSE)
+  df.train <- df.emp.model[in.train,]
+  df.data.rest <- df.emp.model[-in.train,]
+  in.val <- createDataPartition(y = df.data.rest[[lst_syms[[1]]]], p = 0.50, list = FALSE)
+  df.val <- df.data.rest[in.val,]
+  df.test <- df.data.rest[-in.val,]
+  rm(df.data.rest)
+}
+
+# Clean and tidy memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
 
 ```
 
-```{r U3.pred.ICSA.fit, echo=FALSE}
-# Perform the fit
-list.fit.u3icsapaynsa <- train(
-  UNRATE ~ ICSA.by.CLF16OV__lm__POPTHM,
-  data = df.train,
-  method = "lm",
-  preProcess = c('center', 'scale')
-)
+```{r U3_pred_ICSA_fit, echo=FALSE}
 
-list.fit.knn.u3icsapaynsa <- train(
-  UNRATE ~ ICSA.by.CLF16OV__lm__POPTHM,
-  data = df.train,
-  method = "knn",
-  preProcess = c('center', 'scale')
-)
+lst_syms <- c("UNRATE.Value",
+              "ICSA__by__CLF16OV__lm__POPTHM",
+              "CCSA__by__CLF16OV__lm__POPTHM")
 
-rm(df.emp.model)
-rm(df.train)
-rm(df.val)
+if ( require_columns(df.data, lst_syms ) ){
+  
+  # Define the equation
+  str_form <- as.formula(paste(lst_syms[[1]], "~", 
+                               lst_syms[[2]], " + ",
+                               lst_syms[[3]]))
+  
+  # Perform the linear fit
+  list.fit.u3icsapaynsa <- train(
+    str_form,
+    data = df.train,
+    method = "lm",
+    preProcess = c('center', 'scale')
+  )
+
+  # Perform the KNN fit    
+  list.fit.knn.u3icsapaynsa <- train(
+    str_form,
+    data = df.train,
+    method = "knn",
+    preProcess = c('center', 'scale')
+  )
+  
+  # ---- Extract LM weights (coefficients) -----------------------------------
+  lm_mod <- list.fit.u3icsapaynsa$finalModel       # plain 'lm' object
+  coefs_scaled <- stats::coef(lm_mod)              # intercept + betas on standardized X
+
+  # Preprocess info for unscaling to original units
+  pp <- list.fit.u3icsapaynsa$preProcess
+  mu <- pp$mean[names(coefs_scaled)[-1]]           # means of predictors
+  sd <- pp$std [names(coefs_scaled)[-1]]           # std devs of predictors
+
+  # Convert: y = a + sum b_k * (x_k - mu_k) / sd_k
+  # => intercept_orig = a - sum(b_k * mu_k / sd_k)
+  #    beta_orig      = b_k / sd_k
+  intercept_scaled <- coefs_scaled[[1]]
+  betas_scaled     <- coefs_scaled[-1]
+
+  betas_orig       <- betas_scaled / sd
+  intercept_orig   <- intercept_scaled - sum(betas_scaled * (mu / sd))
+  coefs_orig       <- c("(Intercept)" = intercept_orig, betas_orig)
+
+  # ---- Report --------------------------------------------------------------
+  cat("\n== Linear Model (caret::train(method = 'lm')) ==\n")
+  print(summary(lm_mod))     # full lm summary on standardized predictors
+
+  cat("\n-- Weights on standardized predictors (as trained) --\n")
+  print(round(coefs_scaled, 6))
+
+  cat("\n-- Weights transformed to ORIGINAL data scale --\n")
+  print(round(coefs_orig, 6))
+
+  if( exists("pp")){
+    rm(pp)
+  } 
+  if( exists("mu")){
+    rm(mu)
+  }  
+  if( exists("sd")){
+    rm(sd)
+  }
+  if( exists("lm_mod")){
+    rm(lm_mod)
+  }
+  if( exists("coefs_scaled")){
+    rm(coefs_scaled)
+  }
+  if( exists("intercept_scaled")){
+    rm(intercept_scaled)
+  }
+  if( exists("betas_scaled")){
+    rm(betas_scaled)
+  }
+  if( exists("betas_orig")){
+    rm(betas_orig)
+  }  
+  if( exists("intercept_orig")){
+    rm(intercept_orig)
+  }    
+  if( exists("coefs_orig")){
+    rm(coefs_orig)
+  }    
+  if( exists("df.emp.model")){
+    rm(df.emp.model)
+  }
+  if( exists("str_form")){
+    rm(str_form)
+  }
+  if( exists("df.train")){
+    rm(df.train)
+  }
+  if( exists("df.val")){
+    rm(df.val)
+  }
+}
+
+# Clean and tidy memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
 
 ```
 
 
 
-```{r U3.pred.ICSA, echo=FALSE}
+```{r U3_pred_ICSA, echo=FALSE}
 
-# Add linear prediction to the dataframe
-str_symbol <- "U3.lm.ICSA.by.CLF16OV__lm__POPTHM"
+# Add linear prediction to the data frame
+str_symbol <- "U3__lm__ICSA__by__CLF16OV__lm__POPTHM"
 df.data[str_symbol] <-
   predict(list.fit.u3icsapaynsa, newdata = df.data)
 
 # Add the linear model prediction to the symbols table
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
-      string.symbol = str_symbol,
-      string.source = "Predict",
-      string.description = "Linear Model Prediction\nU3 given ICSA",
-      string.label.y = df.symbols[df.symbols$string.symbol=="UNRATE","string.label.y"],
-      float.expense.ratio = -1.00,
-      Max030 = FALSE,
-      Max180 = FALSE,
-      date.series.start = dt.start.prediction,
-      date.series.end = as.Date(Sys.Date())
-    )
+df.symbols <- symbols_append_row(
+  df.symbols,
+  list(
+    string.symbol = str_symbol,
+    string.source = "Predict",
+    string.description = "Linear Model Prediction\nU3 given ICSA",
+    string.label.y = df.symbols[df.symbols$string.symbol=="UNRATE","string.label.y"],
+    float.expense.ratio = -1.00,
+    Max030 = FALSE,
+    Max180 = FALSE,
+    date.series.start = dt.start.prediction,
+    date.series.end = as.Date(Sys.Date()),
+    string.symbol_safe = safe_symbol_name(str_symbol),
+    string.object_name = safe_symbol_name(str_symbol)
   )
+)
 
-# Document the residual as well
-str_symbol.res <- "U3.lm.ICSA.by.CLF16OV__lm__POPTHM.res"
-df.data[str_symbol.res] <- df.data$UNRATE - df.data[str_symbol]
+# Clean and tidy memory
+if( exists ("str_symbol")){
+  rm(str_symbol)
+}
 
-# Add the U3 linear model prediction residual to the symbols table
-df.symbols <-
-  rbind(
+# Document the linear model residual as well
+lst_syms <- c("UNRate.Value", "U3__lm__ICSA__by__CLF16OV__lm__POPTHM")
+if ( require_columns(df.data, lst_syms ) ){
+  
+  str_symbol.res <- "U3__lm__ICSA__by__CLF16OV__lm__POPTHM__res"
+  df.data[str_symbol.res] <- 
+    df.data[[lst_syms[[1]]]] - df.data[[lst_syms[[2]]]]
+  
+  # Add the U3 linear model prediction residual to the symbols table
+  df.symbols <- symbols_append_row(
     df.symbols,
-    data.frame(
+    list(
       string.symbol = str_symbol.res,
       string.source = "Predict Resid.",
       string.description = "Linear Model Residual\nU3 given ICSA",
@@ -1107,41 +1255,53 @@ df.symbols <-
       Max030 = FALSE,
       Max180 = FALSE,
       date.series.start = dt.start.prediction,
-      date.series.end = as.Date(Sys.Date())
+      date.series.end = as.Date(Sys.Date()),
+      string.symbol_safe = safe_symbol_name(str_symbol.res),
+      string.object_name = safe_symbol_name(str_symbol.res)
     )
   )
+}
 
-# Add knn prediction to the dataframe
-str_symbol.knn <- "U3.knn.ICSA.by.CLF16OV__lm__POPTHM"
+# Add the KNN prediction to the data frame
+str_symbol.knn <- "U3__knn__ICSA__by__CLF16OV__lm__POPTHM"
 df.data[str_symbol.knn] <-
   predict(list.fit.knn.u3icsapaynsa, newdata = df.data)
 
 # Add the nearest neighbors prediction to the symbols table
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
-      string.symbol = str_symbol.knn,
-      string.source = "Predict",
-      string.description = "KNN Model Prediction\nU3 given ICSA",
-      string.label.y = df.symbols[df.symbols$string.symbol=="UNRATE","string.label.y"],
-      float.expense.ratio = -1.00,
-      Max030 = FALSE,
-      Max180 = FALSE,
-      date.series.start = dt.start.prediction,
-      date.series.end = as.Date(Sys.Date())
-    )
+df.symbols <- symbols_append_row(
+  df.symbols,
+  list(
+    string.symbol = str_symbol.knn,
+    string.source = "Predict",
+    string.description = "KNN Model Prediction\nU3 given ICSA",
+    string.label.y = df.symbols[df.symbols$string.symbol=="UNRATE","string.label.y"],
+    float.expense.ratio = -1.00,
+    Max030 = FALSE,
+    Max180 = FALSE,
+    date.series.start = dt.start.prediction,
+    date.series.end = as.Date(Sys.Date()),
+    string.symbol_safe = safe_symbol_name(str_symbol.knn),
+    string.object_name = safe_symbol_name(str_symbol.knn)
   )
+)
 
-# Document the residual as well
-str_symbol.res.knn <- "U3.knn.ICSA.by.CLF16OV__lm__POPTHM.res"
-df.data[str_symbol.res.knn] <- df.data$UNRATE - df.data[str_symbol.knn]
+# Clean and tidy memory
+if( exists("str_symbol.knn")){
+  rm(str_symbol.knn)
+}
 
-# Add the U3 nearest neighbor prediction residual to the symbols table
-df.symbols <-
-  rbind(
+# Document the KNN residual as well
+lst_syms <- c("UNRate.Value", "U3__knn__ICSA__by__CLF16OV__lm__POPTHM")
+if ( require_columns(df.data, lst_syms ) ){
+  
+  str_symbol.res.knn <- "U3__knn__ICSA__by__CLF16OV__lm__POPTHM__res"
+  df.data[str_symbol.res.knn] <- 
+    df.data[[lst_syms[[1]]]] - df.data[[lst_syms[[2]]]]
+  
+  # Add the U3 nearest neighbor prediction residual to the symbols table
+  df.symbols <- symbols_append_row(
     df.symbols,
-    data.frame(
+    list(
       string.symbol = str_symbol.res.knn,
       string.source = "Predict Resid.",
       string.description = "KNN Model Residual\nU3 given ICSA",
@@ -1150,36 +1310,78 @@ df.symbols <-
       Max030 = FALSE,
       Max180 = FALSE,
       date.series.start = dt.start.prediction,
-      date.series.end = as.Date(Sys.Date())
+      date.series.end = as.Date(Sys.Date()),
+      string.symbol_safe = safe_symbol_name(str_symbol.res.knn),
+      string.object_name = safe_symbol_name(str_symbol.res.knn)
     )
   )
+  
+  # Clean and tidy memory
+  if( exists("str_symbol.res.knn")){
+    rm(str_symbol.res.knn)
+  }  
+
+}
+
+# Clean and tidy memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
 
 ```
 
-Look at how the fits performed on the test data partition
+Look at how the fits for U3 performed on the test data partition
 
-```{r U3.pred.ICSA.perf, echo=FALSE}
+```{r U3_pred_ICSA_CCSA_perf, echo=FALSE}
 
-d.test.resid = (df.test$UNRATE - predict(list.fit.u3icsapaynsa, newdata = df.test))
-hist(d.test.resid, main=paste("Residual For", str_symbol.res, sep=" "))
-sd.fit.u3icsapaynsa = sd(d.test.resid)
+lst_syms <- c("UNRATE.Value")
+if ( require_columns(df.data, lst_syms ) ){
+  
+  d.test.resid = (df.test[[lst_syms[[1]]]] -
+                    predict(list.fit.u3icsapaynsa, newdata = df.test))
+  hist(d.test.resid, main=paste("Residual for ", 
+                                "U3__lm__ICSA__by__CLF16OV__lm__POPTHM",
+                                " on the Test Partition",
+                                sep=" "))
+  sd.fit.u3icsapaynsa = sd(d.test.resid)
+  
+  # Last use of the fit model so remove it from memory
+  if( exists("list.fit.u3icsapaynsa")){
+    rm(list.fit.u3icsapaynsa)
+  }
+  
+}
 
+# Clean and tidy memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
 
-d.test.resid.knn = (df.test$UNRATE - predict(list.fit.knn.u3icsapaynsa, newdata = df.test))
-hist(d.test.resid.knn, main=paste("Residual For", str_symbol.res.knn, sep=" "))
-sd.fit.knn.u3icsapaynsa = sd(d.test.resid.knn)
-rm(list.fit.knn.u3icsapaynsa)
+lst_syms <- c("UNRATE.Value")
+if ( require_columns(df.data, lst_syms ) ){
+  
+  d.test.resid.knn = (df.test[[lst_syms[[1]]]] - 
+                        predict(list.fit.knn.u3icsapaynsa, newdata = df.test))
+  hist(d.test.resid.knn, main=paste("Residual for ", 
+                                    "U3__knn__ICSA__by__CLF16OV__lm__POPTHM", 
+                                    " on the Test Partition",
+                                    sep=" "))
+  sd.fit.knn.u3icsapaynsa = sd(d.test.resid.knn)
+  
+  if( exists("list.fit.knn.u3icsapaynsa")){
+    rm(list.fit.knn.u3icsapaynsa)
+  }
 
-
+}
 ```
 
 Plot the measured U3 (UNRATE) to U3 predicted by a linear fit to ICSA.
 
-```{r U3.pred.ICSA.plot, echo=FALSE, fig.width = 8, fig.asp = .62}
+```{r U3_pred_ICSA_CCSA_plot, echo=FALSE, fig.width = 8, fig.asp = .62}
 
 
-datay <- "U3.lm.ICSA.by.CLF16OV__lm__POPTHM"
-datay.aux <- "UNRATE"
+datay <- "U3__lm__ICSA__by__CLF16OV__lm__POPTHM"
+datay.aux <- "UNRATE.Value"
 # datay.aux.1 <- "UNRATE"
 ylim <- c(0, 15)
 dt.end <- Sys.Date()

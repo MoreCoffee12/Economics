@@ -2324,7 +2324,6 @@ if ( require_columns(df.data, c("GSG.Close", "X_GSPC.GSPC.Close") ) ){
   
 }
 
-
 # GDP divided by population
 if ( require_columns(df.data, c("GDP.Value", "POPTHM.Value") ) ){
   
@@ -2802,3 +2801,134 @@ if ( require_columns(df.data, lst.sym ) ){
   
 }
 
+# Initial claims (ICSA) divided by population
+if ( require_columns(df.data, c("ICSA.Value", "POPTHM.Value") ) ){
+  
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "ICSA__by__POPTHM"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data$GDP.Value * 1e9) / ( df.data$POPTHM.Value * 1e3 ) )
+  
+  # Update the symbols table    
+  df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = str.symbol.new,
+      string.source = "Calc",
+      string.description = "GDP/Population",
+      string.label.y = "$/person",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(c(
+        index(GDP[1]), index(POPTHM[1])
+      ))) ,
+      date.series.end = as.Date(min(c(
+        index(tail(GDP, 1)), index(tail(POPTHM, 1))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
+    )
+  )
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
+}
+
+# continuing claims (CCSA) divided by population
+if ( require_columns(df.data, c("CCSA.Value", "POPTHM.Value") ) ){
+  
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "CCSA__by__POPTHM"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data$GDP.Value * 1e9) / ( df.data$POPTHM.Value * 1e3 ) )
+  
+  # Update the symbols table    
+  df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = str.symbol.new,
+      string.source = "Calc",
+      string.description = "GDP/Population",
+      string.label.y = "$/person",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(c(
+        index(GDP[1]), index(POPTHM[1])
+      ))) ,
+      date.series.end = as.Date(min(c(
+        index(tail(GDP, 1)), index(tail(POPTHM, 1))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
+    )
+  )
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
+}
+
+# Initial claims (ICSA) divided by civilian working population
+if ( require_columns(df.data, c("ICSA.Value", "CLF16OV.Value") ) ){
+  
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "ICSA__by__CLF16OV"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data$GDP.Value * 1e9) / ( df.data$POPTHM.Value * 1e3 ) )
+  
+  # Update the symbols table    
+  df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = str.symbol.new,
+      string.source = "Calc",
+      string.description = "GDP/Population",
+      string.label.y = "$/person",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(c(
+        index(GDP[1]), index(POPTHM[1])
+      ))) ,
+      date.series.end = as.Date(min(c(
+        index(tail(GDP, 1)), index(tail(POPTHM, 1))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
+    )
+  )
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
+}
+
+# continuing claims (CCSA) divided by population
+if ( require_columns(df.data, c("CCSA.Value", "CLF16OV.Value") ) ){
+  
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "CCSA__by__CLF16OV"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data$GDP.Value * 1e9) / ( df.data$POPTHM.Value * 1e3 ) )
+  
+  # Update the symbols table    
+  df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = str.symbol.new,
+      string.source = "Calc",
+      string.description = "GDP/Population",
+      string.label.y = "$/person",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(c(
+        index(GDP[1]), index(POPTHM[1])
+      ))) ,
+      date.series.end = as.Date(min(c(
+        index(tail(GDP, 1)), index(tail(POPTHM, 1))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
+    )
+  )
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
+}
