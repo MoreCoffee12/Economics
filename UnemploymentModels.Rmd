@@ -33,6 +33,7 @@ library(lubridate)
 
 # Call helper functions
 source("plotHelper.r")
+source("modelHelper.r")
 
 ```
 
@@ -76,6 +77,7 @@ df.symbols <- dplyr::filter(df.symbols,
                                                  "GDPC1",
                                                  "^TNX",
                                                  "NPPTTL",
+                                                 "ADPWNUSNERSA",
                                                  "CCSA",
                                                  "PCE",
                                                  "U6RATE",
@@ -262,8 +264,15 @@ if ( require_columns(df.data, lst_syms ) ){
     preProcess = c('center', 'scale')
   )
   
+  # Call the function to create the fit description
+  res <- extract_lm_weights(list.fit.clf16ovpopthm)
+  res$table
+  
   if( exists("str_form")){
     rm(str_form)
+  }
+  if( exists("res")){
+    rm(res)
   }
 
 }
@@ -360,7 +369,7 @@ if( exists("lst_syms")){
 
 This section normalizes initial claims, ICSA, by the labor force estimated from the U.S. population, POPTHM.
 
-```{r lf.lm.ICSA.norm, echo=FALSE, fig.width = 8, fig.asp = .52}
+```{r lf.lm.ICSA.norm, echo=FALSE, fig.width = 10, fig.asp = .62}
 
 lst_syms <- c("ICSA.Value", "CLF16OV__lm__POPTHM")
 if ( require_columns(df.data, lst_syms ) ){
@@ -402,7 +411,7 @@ if( exists("lst_syms")){
 ```
 
 
-```{r lf.lm.ICSA.norm.plot, echo=FALSE, fig.width = 8, fig.asp = .52}
+```{r lf.lm.ICSA.norm.plot, echo=FALSE, fig.width = 10, fig.asp = .62}
 
 # Define the symbols in the plot
 lst_syms <- c("ICSA__by__CLF16OV__lm__POPTHM", "UNRATE.Value")
@@ -454,7 +463,7 @@ if( exists("lst_syms")){
 
 This section normalizes continued claims, CCSA, by the labor force estimated from the U.S. population, POPTHM.
 
-```{r lf.lm.CCSA.norm, echo=FALSE, fig.width = 8, fig.asp = .52}
+```{r lf.lm.CCSA.norm, echo=FALSE, fig.width = 10, fig.asp = .62}
 
 lst_syms <- c("CCSA.Value", "CLF16OV__lm__POPTHM")
 if ( require_columns(df.data, lst_syms ) ){
@@ -497,7 +506,7 @@ if( exists("lst_syms")){
 ```
 
 
-```{r lf.lm.CCSA.norm.plot, echo=FALSE, fig.width = 8, fig.asp = .52}
+```{r lf.lm.CCSA.norm.plot, echo=FALSE, fig.width = 10, fig.asp = .62}
 
 # Define the symbols in the plot
 lst_syms <- c("CCSA__by__CLF16OV__lm__POPTHM", "UNRATE.Value")
@@ -546,9 +555,11 @@ if( exists("lst_syms")){
 
 ```
 
-This section normalizes total non-farm payroll data provided by ADP and in the NPPTTL series on FRED. Unlike ICSA or CCSA the values here are thousands rather than numbers.
+This section normalizes total non-farm payroll data provided by ADP and in the
+NPPTTL series on FRED. Unlike ICSA or CCSA the values here are thousands rather
+than numbers. This series was discontinued in 2021.
 
-```{r lf.lm.NPPTTL.norm, echo=FALSE, fig.width = 8, fig.asp = .52}
+```{r lf_lm_NPPTTL_norm, echo=FALSE, fig.width = 10, fig.asp = .62}
 
 lst_syms <- c("NPPTTL.Value", "CLF16OV__lm__POPTHM")
 if ( require_columns(df.data, lst_syms ) ){
@@ -590,10 +601,58 @@ if( exists("lst_syms")){
 
 ```
 
+This section normalizes total non-farm payroll data provided by ADP and in the
+ADPWNUSNERSA series on FRED. 
 
-```{r lf.lm.NPPTTL.norm.plot, echo=FALSE, fig.width = 8, fig.asp = .52}
+```{r lf_lm_NPPTTL_norm, echo=FALSE, fig.width = 10, fig.asp = .62}
 
-lst_syms <- c("NPPTTL__by__CLF16OV__lm__POPTHM", "UNRATE.Value")
+lst_syms <- c("ADPWNUSNERSA.Value", "CLF16OV__lm__POPTHM")
+if ( require_columns(df.data, lst_syms ) ){
+  
+  # Add normalization to the data frame
+  str_symbol <- "ADPWNUSNERSA__by__CLF16OV__lm__POPTHM"
+  df.data[str_symbol] <- 
+    ( 100.0 * ( 1.0 - (df.data[[lst_syms[[1]]]] / df.data[[lst_syms[[2]]]]) ) )
+
+  # Add the NPPTTL normalization to the symbols table
+  df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = str_symbol,
+      string.source = "Predict",
+      string.description = "NPPTTL (ADP) normalized by\nlabor force from POPTHM",
+      string.label.y = "Percent",
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = dt.start.prediction,
+      date.series.end = as.Date(Sys.Date()),
+      string.symbol_safe = safe_symbol_name(str_symbol),
+      string.object_name = safe_symbol_name(str_symbol)
+    )
+  )
+  
+  # Clean and tidy memory
+  if( exists("str_symbol")){
+    rm(str_symbol)
+  }
+
+}
+
+# Free up memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
+
+```
+
+Plot out the normalized ADP numbers
+
+```{r lf_lm_NPPTTL_norm_plot, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+lst_syms <- c("UNRATE.Value",
+              "NPPTTL__by__CLF16OV__lm__POPTHM", 
+              "ADPWNUSNERSA__by__CLF16OV__lm__POPTHM")
 if ( require_columns(df.data, lst_syms ) ){
   
   ylim <- c(0, 40)
@@ -614,6 +673,7 @@ if ( require_columns(df.data, lst_syms ) ){
       b.percentile = FALSE,
       b.long.legend = TRUE
     )
+
   my_plot <- my_plot + geom_line(
     data = df.data,
     aes(
@@ -624,6 +684,16 @@ if ( require_columns(df.data, lst_syms ) ){
     na.rm = TRUE
   )
   
+  my_plot <- my_plot + geom_line(
+    data = df.data,
+    aes(
+      x = .data[["date"]],
+      y = .data[[lst_syms[[3]]]],
+      colour = getPlotTitle(df.symbols, lst_syms[[3]])
+    ),
+    na.rm = TRUE
+  )
+
   print(my_plot)
   
   # Free up memory
@@ -644,7 +714,7 @@ if( exists("lst_syms")){
 
 Correlation across some of the series. This section checks that survey data is coherent within itself. Do the U3 and U6 series generally agree?
 
-```{r EMP.cor.setup, echo=FALSE}
+```{r EMP.cor.setup, echo=FALSE, fig.width = 10, fig.asp = .62}
 
 # The U6 numbers do not have as much historical data as the U3 so valid data for fit
 # begins early. I also excluded the COVID 19 mess of data.
@@ -680,7 +750,7 @@ if( exists("lst_syms")){
 
 ```
 
-```{r EMP.cor.fit, echo=FALSE}
+```{r EMP.cor.fit, echo=FALSE, fig.width = 10, fig.asp = .62}
 lst_syms <- c("U6RATE.Value", "UNRATE.Value")
 if ( require_columns(df.data, lst_syms ) ){
   
@@ -725,7 +795,7 @@ if( exists("lst_syms")){
 
 ```
 
-```{r EMP.cor, echo=FALSE}
+```{r EMP.cor, echo=FALSE, fig.width = 10, fig.asp = .62}
 
 # Add prediction to the data frame
 str_symbol <- "U6__lm__U3"
@@ -1123,65 +1193,13 @@ if ( require_columns(df.data, lst_syms ) ){
     preProcess = c('center', 'scale')
   )
   
-  # ---- Extract LM weights (coefficients) -----------------------------------
-  lm_mod <- list.fit.u3icsapaynsa$finalModel       # plain 'lm' object
-  coefs_scaled <- stats::coef(lm_mod)              # intercept + betas on standardized X
+  # Call the function to create the fit description
+  res <- extract_lm_weights(list.fit.clf16ovpopthm)
+  res$table
 
-  # Preprocess info for unscaling to original units
-  pp <- list.fit.u3icsapaynsa$preProcess
-  mu <- pp$mean[names(coefs_scaled)[-1]]           # means of predictors
-  sd <- pp$std [names(coefs_scaled)[-1]]           # std devs of predictors
-
-  # Convert: y = a + sum b_k * (x_k - mu_k) / sd_k
-  # => intercept_orig = a - sum(b_k * mu_k / sd_k)
-  #    beta_orig      = b_k / sd_k
-  intercept_scaled <- coefs_scaled[[1]]
-  betas_scaled     <- coefs_scaled[-1]
-
-  betas_orig       <- betas_scaled / sd
-  intercept_orig   <- intercept_scaled - sum(betas_scaled * (mu / sd))
-  coefs_orig       <- c("(Intercept)" = intercept_orig, betas_orig)
-
-  # ---- Report --------------------------------------------------------------
-  cat("\n== Linear Model (caret::train(method = 'lm')) ==\n")
-  print(summary(lm_mod))     # full lm summary on standardized predictors
-
-  cat("\n-- Weights on standardized predictors (as trained) --\n")
-  print(round(coefs_scaled, 6))
-
-  cat("\n-- Weights transformed to ORIGINAL data scale --\n")
-  print(round(coefs_orig, 6))
-
-  if( exists("pp")){
-    rm(pp)
-  } 
-  if( exists("mu")){
-    rm(mu)
-  }  
-  if( exists("sd")){
-    rm(sd)
+  if( exists("res")){
+    rm(res)
   }
-  if( exists("lm_mod")){
-    rm(lm_mod)
-  }
-  if( exists("coefs_scaled")){
-    rm(coefs_scaled)
-  }
-  if( exists("intercept_scaled")){
-    rm(intercept_scaled)
-  }
-  if( exists("betas_scaled")){
-    rm(betas_scaled)
-  }
-  if( exists("betas_orig")){
-    rm(betas_orig)
-  }  
-  if( exists("intercept_orig")){
-    rm(intercept_orig)
-  }    
-  if( exists("coefs_orig")){
-    rm(coefs_orig)
-  }    
   if( exists("df.emp.model")){
     rm(df.emp.model)
   }
@@ -1546,65 +1564,106 @@ if ( require_columns(df.data, lst_syms ) ){
   }
 }
 
+# Clean and tidy memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
 
 ```
 
-### Employment Correlation, U3 (UNRATE) and NPPTTL (ADP) normalized  
+### Employment Correlation, U3 (UNRATE) and ADPWNUSNERSA (ADP) normalized  
 
-Calculate linear model fit across the series. NPPTTL should be an accurate esimate of the actual number of people on payrolls.
+Calculate linear model fit across the series. NPPTTL should be an accurate
+esimate of the actual number of people on payrolls.
 
 
-```{r U3.pred.NPPTTL.setup, echo=FALSE}
+```{r U3_pred_NPPTTL_setup, echo=FALSE}
 
-# The U6 numbers do not have as much historical data as the U3 so valid data for fit
-# begins early. I also exluded the Covid 16 mess of data.
-dt.start.prediction <- as.Date("2002-04-01")
+# The U6 numbers do not have as much historical data as the U3 so valid data for
+# fit begins early. I also exluded the Covid 16 mess of data.
+dt.start.prediction <- as.Date("2010-01-01")
 dt.end.prediction <- as.Date("2020-01-01")
 df.emp.model <-
   df.data[df.data$date >= dt.start.prediction &
             df.data$date <= dt.end.prediction,]
 
-# I break the data into three sets: 50% for training, 25% for testing, and 25% for validation.
-set.seed(123456)
-in.train <- createDataPartition(y=df.emp.model$ICSA, p = 0.50, list=FALSE)
-df.train <- df.emp.model[in.train,]
-df.data.rest <- df.emp.model[-in.train,]
-in.val <- createDataPartition(y = df.data.rest$ICSA, p = 0.50, list = FALSE)
-df.val <- df.data.rest[in.val,]
-df.test <- df.data.rest[-in.val,]
-rm(df.data.rest)
+lst_syms <- c("ICSA.Value")
+if ( require_columns(df.data, lst_syms ) ){
+  
+  # I break the data into three sets: 50% for training, 25% for testing, and 25% for validation.
+  set.seed(123456)
+  in.train <- createDataPartition(y=df.emp.model[[lst_syms[[1]]]], p = 0.50, list=FALSE)
+  df.train <- df.emp.model[in.train,]
+  df.data.rest <- df.emp.model[-in.train,]
+  in.val <- createDataPartition(y = df.data.rest[[lst_syms[[1]]]], p = 0.50, list = FALSE)
+  df.val <- df.data.rest[in.val,]
+  df.test <- df.data.rest[-in.val,]
+  rm(df.data.rest)
+}
 
+# Clean and tidy memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
 
 ```
 
 ```{r U3.pred.NPPTTL.fit, echo=FALSE}
 
-# Perform the fit
-list.fit.u3nppttl <- train(
-  UNRATE ~ NPPTTL.by.CLF16OV__lm__POPTHM,
-  data = df.emp.model,
-  method = "lm",
-  preProcess = c('center', 'scale')
-)
+lst_syms <- c("UNRATE.Value",
+              "ADPWNUSNERSA__by__CLF16OV__lm__POPTHM")
 
-list.fit.knn.u3nppttl <- train(
-  UNRATE ~ NPPTTL.by.CLF16OV__lm__POPTHM,
-  data = df.train,
-  method = "knn",
-  preProcess = c('center', 'scale')
-)
+if ( require_columns(df.data, lst_syms ) ){
 
-rm(df.train)
-rm(df.val)
+  # Define the equation
+  str_form <- as.formula(paste(lst_syms[[1]], "~", 
+                               lst_syms[[2]]))
+  
+  # Perform the fit
+  list.fit.adpwnusnersa <- train(
+    str_form,
+    data = df.emp.model,
+    method = "lm",
+    preProcess = c('center', 'scale')
+  )
+  
+  list.fit.knn.u3nppttl <- train(
+    str_form,
+    data = df.train,
+    method = "knn",
+    preProcess = c('center', 'scale')
+  )
+  
+  # Call the function to create the fit description
+  res <- extract_lm_weights(list.fit.clf16ovpopthm)
+  res$table
+  
+  if( exists("res")){
+    rm(res)
+  }
+  if( exists("df.emp.model")){
+    rm(df.emp.model)
+  }
+  if( exists("str_form")){
+    rm(str_form)
+  }
+  if( exists("df.train")){
+    rm(df.train)
+  }
+  if( exists("df.val")){
+    rm(df.val)
+  }
+  
+}
 
 ```
 
-```{r U3.pred.NPPTTL, echo=FALSE}
+```{r U3_pred_NPPTTL, echo=FALSE}
 
 # Add linear model prediction to the dataframe
 str_symbol <- "U3.lm.NPPTTL.by.CLF16OV__lm__POPTHM"
 df.data[str_symbol] <-
-  predict(list.fit.u3nppttl, newdata = df.data)
+  predict(list.fit.adpwnusnersa, newdata = df.data)
 
 # Add the linear model prediction to the symbols table
 df.symbols <-
@@ -1692,7 +1751,7 @@ Look at how the fits performed on the test data partition
 
 ```{r U3.pred.NPPTTL.perf, echo=FALSE}
 
-d.test.resid = (df.test$UNRATE - predict(list.fit.u3nppttl, newdata = df.test))
+d.test.resid = (df.test$UNRATE - predict(list.fit.adpwnusnersa, newdata = df.test))
 hist(d.test.resid, main=paste("Residual For", str_symbol.res, sep=" "))
 sd.fit.u3nppttl = sd(d.test.resid)
 
@@ -1831,18 +1890,4 @@ print(my_plot)
 ```
 
 
-### Correlation Summary
-
-```{r cor.summ, echo=FALSE}
-
-str.name <- c('U6 from U3','U3 from ICSA', 'U3 from CCSA', 'U3 from NPPTTL')
-dt.list.start <- c(index(U6RATE[1]), index(ICSA[1]), index(CCSA[1]), index(NPPTTL[1]))
-df.emp.cor <- data.frame("Relationship"=str.name, "Start Date"=as.Date(dt.list.start))
-
-kable(df.emp.cor) %>%
-  kable_styling(bootstrap_options = c("striped", "hover")) %>%
-  column_spec(column = 1, width = "1.5in; display: inline-block;") %>%
-  column_spec(2, width = "10em")
-
-```
 
