@@ -604,7 +604,7 @@ if( exists("lst_syms")){
 This section normalizes total non-farm payroll data provided by ADP and in the
 ADPWNUSNERSA series on FRED. 
 
-```{r lf_lm_NPPTTL_norm, echo=FALSE, fig.width = 10, fig.asp = .62}
+```{r lf_lm_ADPWNUSNERSA_norm, echo=FALSE, fig.width = 10, fig.asp = .62}
 
 lst_syms <- c("ADPWNUSNERSA.Value", "CLF16OV__lm__POPTHM")
 if ( require_columns(df.data, lst_syms ) ){
@@ -1069,7 +1069,7 @@ Plot the residual for the U6 linear fit. The residuals decrease quite a bit
 during the COVID-19 numbers, at least as of Jun 2020. Probably indicates
 uncertainty in the numbers.
 
-```{r EMP.cor.resid, echo=FALSE,, fig.width = 6, fig.asp = .82}
+```{r EMP.cor.resid, echo=FALSE, fig.width = 10, fig.asp = .62}
 
 lst_syms <- c("U6__lm__U3__res", "U6__knn__U3__res")
 if ( require_columns(df.data, lst_syms ) ){
@@ -1223,7 +1223,7 @@ if( exists("lst_syms")){
 
 
 
-```{r U3_pred_ICSA, echo=FALSE}
+```{r U3_pred_ICSA_CCSA, echo=FALSE}
 
 # Add linear prediction to the data frame
 str_symbol <- "U3__lm__ICSA__CCSA__by__CLF16OV__lm__POPTHM"
@@ -1287,10 +1287,20 @@ if ( require_columns(df.data, lst_syms ) ){
   print(paste("Failed to find: ", lst_syms))
 }
 
-# Add the KNN prediction to the data frame
+#-------------- Add the KNN prediction to the data frame -----------------------
 str_symbol.knn <- "U3__knn__ICSA__CCSA__by__CLF16OV__lm__POPTHM"
 df.data[str_symbol.knn] <-
   predict(list.fit.knn.u3icsapaynsa, newdata = df.data)
+
+# Smooth the series, kernel of 31 days 
+df.data[[str_symbol.knn]] <-
+  sgolayfilt(
+    df.data[[str_symbol.knn]],
+    p = 3,
+    n = 31,
+    m = 0,
+    ts = 1
+  )
 
 # Add the nearest neighbors prediction to the symbols table
 df.symbols <- symbols_append_row(
@@ -1577,15 +1587,17 @@ Calculate linear model fit across the series. NPPTTL should be an accurate
 esimate of the actual number of people on payrolls.
 
 
-```{r U3_pred_NPPTTL_setup, echo=FALSE}
+```{r U3_pred_ADPWNUSNERSA_setup, echo=FALSE}
 
 # The U6 numbers do not have as much historical data as the U3 so valid data for
-# fit begins early. I also exluded the Covid 16 mess of data.
+# fit begins early. I also excluded the COVID-19 mess of data.
 dt.start.prediction <- as.Date("2010-01-01")
 dt.end.prediction <- as.Date("2020-01-01")
+dt.post_covid <- as.Date("2022-01-01") 
 df.emp.model <-
-  df.data[df.data$date >= dt.start.prediction &
-            df.data$date <= dt.end.prediction,]
+  df.data[( df.data$date >= dt.start.prediction &
+            df.data$date <= dt.end.prediction)  | 
+            df.data$date >= dt.post_covid,]
 
 lst_syms <- c("ICSA.Value")
 if ( require_columns(df.data, lst_syms ) ){
@@ -1658,39 +1670,43 @@ if ( require_columns(df.data, lst_syms ) ){
 
 ```
 
-```{r U3_pred_NPPTTL, echo=FALSE}
+```{r U3_pred_ADPWNUSNERSA_build_models, echo=FALSE, fig.width = 10, fig.asp = .62}
 
-# Add linear model prediction to the dataframe
-str_symbol <- "U3.lm.NPPTTL.by.CLF16OV__lm__POPTHM"
+#--------  Add linear model prediction to the data frame -----------------------
+str_symbol <- "U3__lm__ADPWNUSNERSA__by__CLF16OV__lm__POPTHM"
 df.data[str_symbol] <-
   predict(list.fit.adpwnusnersa, newdata = df.data)
 
 # Add the linear model prediction to the symbols table
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
-      string.symbol = str_symbol,
-      string.source = "Predict",
-      string.description = "Linear Model Prediction\nU3 given NPPTTL by POPTH",
-      string.label.y = df.symbols[df.symbols$string.symbol=="UNRATE","string.label.y"],
-      float.expense.ratio = -1.00,
-      Max030 = FALSE,
-      Max180 = FALSE,
-      date.series.start = dt.start.prediction,
-      date.series.end = as.Date(Sys.Date())
-    )
+df.symbols <- symbols_append_row(
+  df.symbols,
+  list(
+    string.symbol = str_symbol,
+    string.source = "Predict",
+    string.description = "Linear Model Prediction\nU3 given NPPTTL by POPTH",
+    string.label.y = df.symbols[df.symbols$string.symbol=="UNRATE","string.label.y"],
+    float.expense.ratio = -1.00,
+    Max030 = FALSE,
+    Max180 = FALSE,
+    date.series.start = dt.start.prediction,
+    date.series.end = as.Date(Sys.Date()),
+    string.symbol_safe = safe_symbol_name(str_symbol),
+    string.object_name = safe_symbol_name(str_symbol)
   )
+)
 
-# Document the residual as well
-str_symbol.res <- "U3.lm.NPPTTL.by.CLF16OV__lm__POPTHM.res"
-df.data[str_symbol.res] <- df.data$UNRATE - df.data[str_symbol]
-
-# Add the U3 linear model model prediction residual to the symbols table
-df.symbols <-
-  rbind(
+# Prepare for the linear model residual calculation
+lst_syms <- c("UNRATE.Value")
+if ( require_columns(df.data, lst_syms ) ){
+  
+  # Document the residual as well
+  str_symbol.res <- "U3__lm__ADPWNUSNERSA__by__CLF16OV__lm__POPTHM__res"
+  df.data[str_symbol.res] <- df.data[[lst_syms]] - df.data[str_symbol]
+  
+  # Add the U3 linear model model prediction residual to the symbols table
+  df.symbols <- symbols_append_row(
     df.symbols,
-    data.frame(
+    list(
       string.symbol = str_symbol.res,
       string.source = "Predict Resid.",
       string.description = "Linear Model Residual\nU3 given NPPTTL by POPTHM",
@@ -1699,170 +1715,223 @@ df.symbols <-
       Max030 = FALSE,
       Max180 = FALSE,
       date.series.start = dt.start.prediction,
-      date.series.end = as.Date(Sys.Date())
+      date.series.end = as.Date(Sys.Date()),
+      string.symbol_safe = safe_symbol_name(str_symbol.res),
+      string.object_name = safe_symbol_name(str_symbol.res)
     )
   )
+  
+  # Clean and tidy memory
+  if( exists("str_symbol.res")){
+    rm(str_symbol.res)
+  }
 
-# Add KNN model prediction to the dataframe
-str_symbol <- "U3.knn.NPPTTL.by.CLF16OV__lm__POPTHM"
+}
+
+# Clean and tidy memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
+if( exists("str_symbol")){
+  rm(str_symbol)
+}
+
+
+
+#-------------- Add KNN model prediction to the data frame ---------------------
+str_symbol <- "U3__knn__ADPWNUSNERSA__by__CLF16OV__lm__POPTHM"
 df.data[str_symbol] <-
   predict(list.fit.knn.u3nppttl, newdata = df.data)
 
-# Add the knn model prediction to the symbols table
-df.symbols <-
-  rbind(
-    df.symbols,
-    data.frame(
-      string.symbol = str_symbol,
-      string.source = "Predict",
-      string.description = "KNN Prediction\nU3 given NPPTTL by POPTHM",
-      string.label.y = df.symbols[df.symbols$string.symbol=="UNRATE","string.label.y"],
-      float.expense.ratio = -1.00,
-      Max030 = FALSE,
-      Max180 = FALSE,
-      date.series.start = dt.start.prediction,
-      date.series.end = as.Date(Sys.Date())
-    )
+# Smooth the series, kernel of 31 days 
+df.data[[str_symbol]] <-
+  sgolayfilt(
+    df.data[[str_symbol]],
+    p = 3,
+    n = 31,
+    m = 0,
+    ts = 1
   )
 
-# Document the residual as well
-str_symbol.res.knn <- "U3.knn.NPPTTL.by.CLF16OV__lm__POPTHM.res"
-df.data[str_symbol.res.knn] <- df.data$UNRATE - df.data[str_symbol]
+# Add the KNN model prediction to the symbols table
+df.symbols <- symbols_append_row(
+  df.symbols,
+  list(
+    string.symbol = str_symbol,
+    string.source = "Predict",
+    string.description = "KNN Prediction\nU3 given ADPWNUSNERSA by POPTHM",
+    string.label.y = df.symbols[df.symbols$string.symbol=="UNRATE","string.label.y"],
+    float.expense.ratio = -1.00,
+    Max030 = FALSE,
+    Max180 = FALSE,
+    date.series.start = dt.start.prediction,
+    date.series.end = as.Date(Sys.Date()),
+    string.symbol_safe = safe_symbol_name(str_symbol),
+    string.object_name = safe_symbol_name(str_symbol)
+  )
+)
 
-# Add the U3 knn model prediction residual to the symbols table
-df.symbols <-
-  rbind(
+# Document the KNN residual as well
+lst_syms <- c("UNRATE.Value")
+if ( require_columns(df.data, lst_syms ) ){
+
+  str_symbol.res.knn <- "U3__knn__ADPWNUSNERSA__by__CLF16OV__lm__POPTHM__res"
+  df.data[str_symbol.res.knn] <- df.data[[lst_syms[[1]]]] - df.data[str_symbol]
+  
+  # Add the U3 KNN model prediction residual to the symbols table
+  df.symbols <- symbols_append_row(
     df.symbols,
-    data.frame(
+    list(
       string.symbol = str_symbol.res.knn,
       string.source = "Predict Resid.",
-      string.description = "KNN Residual\nU3 given NPPTTL by POPTHM",
+      string.description = "KNN Residual\nU3 given ADPWNUSNERSA by POPTHM",
       string.label.y = df.symbols[df.symbols$string.symbol==str_symbol,"string.label.y"],
       float.expense.ratio = -1.00,
       Max030 = FALSE,
       Max180 = FALSE,
       date.series.start = dt.start.prediction,
-      date.series.end = as.Date(Sys.Date())
+      date.series.end = as.Date(Sys.Date()),
+      string.symbol_safe = safe_symbol_name(str_symbol.res.knn),
+      string.object_name = safe_symbol_name(str_symbol.res.knn)
     )
   )
+  
+  # Clean and tidy memory
+  if( exists("str_symbol.res.knn")){
+    rm(str_symbol.res.knn)
+  }
+
+}
+
+# Clean and tidy memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
+if( exists("str_symbol")){
+  rm(str_symbol)
+}
+
 ```
 
 Look at how the fits performed on the test data partition
 
-```{r U3.pred.NPPTTL.perf, echo=FALSE}
+```{r U3_pred_ADPWNUSNERSA_perf, echo=FALSE, fig.width = 10, fig.asp = .62}
 
-d.test.resid = (df.test$UNRATE - predict(list.fit.adpwnusnersa, newdata = df.test))
-hist(d.test.resid, main=paste("Residual For", str_symbol.res, sep=" "))
-sd.fit.u3nppttl = sd(d.test.resid)
+lst_syms <- c("UNRATE.Value")
+if ( require_columns(df.data, lst_syms ) ){
+  d.test.resid = 
+    (df.test[[lst_syms[[1]]]] - predict(list.fit.adpwnusnersa, newdata = df.test))
+  hist(d.test.resid, main=paste("Residual for ",
+                                "U3__lm__ADPWNUSNERSA__by__CLF16OV__lm__POPTHM__res", sep=" "))
+  sd.fit.u3nppttl = sd(d.test.resid)
 
+  d.test.resid.knn = 
+    (df.test[[lst_syms[[1]]]] - predict(list.fit.knn.u3nppttl, newdata = df.test))
+  hist(d.test.resid.knn, main=paste("Residual for ",
+                                    "U3__knn__ADPWNUSNERSA__by__CLF16OV__lm__POPTHM__res", sep=" "))
+  sd.fit.knn.u3nppttl = sd(d.test.resid.knn)
+  rm(list.fit.knn.u3nppttl)
 
-d.test.resid.knn = (df.test$UNRATE - predict(list.fit.knn.u3nppttl, newdata = df.test))
-hist(d.test.resid.knn, main=paste("Residual For", str_symbol.res.knn, sep=" "))
-sd.fit.knn.u3nppttl = sd(d.test.resid.knn)
-rm(list.fit.knn.u3nppttl)
+}
+
+# Clean and tidy memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
 
 
 ```
 
-The problem with ADP data is that it only goes back a few years so there really is not enough data. What there is does not have a linear relationship with the ADP numbers.
+The problem with ADP data is that it only goes back a few years so there really
+is not enough data. What there is does not have a linear relationship with the
+ADP numbers.
 
-```{r U3.pred.NPPTTL.outlier, fig.width = 6, fig.asp = 1.0}
+```{r U3_pred_ADPWNUSNERSA_outlier, fig.width = 10, fig.asp = .62}
 
-plot(df.emp.model$NPPTTL,
-     df.emp.model$UNRATE,
-     main = "ADP v. U3",
-     xlab = "NPPTTL (ADP), Thousands",
-     ylab = "UNRATE (U3), Percent")
-
-
-plot( 100*( df.emp.model$CLF16OV__lm__POPTHM -  df.emp.model$NPPTTL ) / df.emp.model$CLF16OV__lm__POPTHM,
-     df.emp.model$UNRATE,
-     main = "ADP v. U3",
-     xlab = "NPPTTL (ADP) normalized by labor force, Percent",
-     ylab = "UNRATE (U3), Percent")
-
-rm(df.emp.model)
+# plot(df.emp.model$NPPTTL,
+#      df.emp.model$UNRATE,
+#      main = "ADP v. U3",
+#      xlab = "NPPTTL (ADP), Thousands",
+#      ylab = "UNRATE (U3), Percent")
+# 
+# 
+# plot( 100*( df.emp.model$CLF16OV__lm__POPTHM -  df.emp.model$NPPTTL ) / df.emp.model$CLF16OV__lm__POPTHM,
+#      df.emp.model$UNRATE,
+#      main = "ADP v. U3",
+#      xlab = "NPPTTL (ADP) normalized by labor force, Percent",
+#      ylab = "UNRATE (U3), Percent")
+# 
+# rm(df.emp.model)
 
 ```
 
 
-Plot the measured U3 (UNRATE) to U3 predicted by a linear fit to NPPTTL normalized by labor force from POPTHM.
+Plot the measured U3 (UNRATE) to U3 predicted by a linear fit to NPPTTL
+normalized by labor force from POPTHM.
 
-```{r U3.pred.NPPTTL.plot, echo=FALSE, fig.width = 10, fig.asp = .62}
+```{r U3_pred_ADPWNUSNERSA_plot, echo=FALSE, fig.width = 10, fig.asp = .62}
 
 
-datay <- "UNRATE"
-datay_aux <- "U3.lm.NPPTTL.by.CLF16OV__lm__POPTHM"
-ylim <- c(0, 15)
-dt.end <- Sys.Date()
-my_plot <-
-  plotSingle(
-    dfRecession,
-    df.data,
-    "date",
-    datay,
-    "U3 Compared to U3 predicted using NPPTTL by POPTHM",
-    "Date",
-    getPlotYLabel(df.symbols, datay),
-    c(dt.start.prediction, dt.end),
-    ylim,
-    b.legend = TRUE,
-    b.percentile = FALSE,
-    b.long.legend = TRUE
+lst_syms <- c("UNRATE.Value",
+              "U3__lm__ADPWNUSNERSA__by__CLF16OV__lm__POPTHM",
+              "U3__knn__ADPWNUSNERSA__by__CLF16OV__lm__POPTHM")
+if ( require_columns(df.data, lst_syms ) ){
+    
+  my_plot <-
+    plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_syms [[1]],
+      "U3 Compared to U3 predicted using ADPWNUSNERSA",
+      "Date",
+      getPlotYLabel(df.symbols, lst_syms [[1]]),
+      c(dt.start.prediction, Sys.Date()),
+      ylim = c(2.5, 15),
+      b.legend = TRUE,
+      b.percentile = FALSE,
+      b.long.legend = TRUE
+    )
+
+  my_plot <- my_plot + geom_line(
+    data = df.data,
+    aes(
+      x = .data[["date"]],
+      y = .data[[lst_syms [[2]]]],
+      colour = getPlotTitle(df.symbols, lst_syms [[2]])
+    ),
+    na.rm = TRUE
   )
-my_plot + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay_aux,
-    colour = shQuote(getPlotTitle(df.symbols, datay_aux))
-  ),
-  na.rm = TRUE
-)
-
-```
-
-Zoom in a little. There is a lot of discussion about how valid the latest U3 numbers are.
-
-```{r U3.pred.NPPTTL.plot.recent, echo=FALSE,, fig.width = 10, fig.asp = .62}
-
-
-datay <- "UNRATE"
-datay_aux <- "U3.lm.NPPTTL.by.CLF16OV__lm__POPTHM"
-ylim <- c(0, 20)
-dt.end <- Sys.Date()
-dt.start <- as.Date("2020-01-01")
-my_plot <-
-  plotSingle(
-    dfRecession,
-    df.data,
-    "date",
-    datay,
-    "U3 Compared to U3 predicted using NPPTTL by POPTHM",
-    "Date",
-    getPlotYLabel(df.symbols, datay),
-    c(dt.start, dt.end),
-    ylim,
-    b.legend = TRUE,
-    b.percentile = FALSE,
-    b.long.legend = TRUE
+  
+  my_plot <- my_plot + geom_line(
+    data = df.data,
+    aes(
+      x = .data[["date"]],
+      y = .data[[lst_syms [[3]]]],
+      colour = getPlotTitle(df.symbols, lst_syms [[3]])
+    ),
+    na.rm = TRUE
   )
-my_plot + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay_aux,
-    colour = shQuote(getPlotTitle(df.symbols, datay_aux))
-  ),
-  na.rm = TRUE
-)
+  
+  print(my_plot)
+  
+  # Clean and tidy memory
+  if( exists("my_plot")){
+    rm(my_plot)  
+  }
+  
+}
+
+# Clean and tidy memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
 
 ```
-
 
 Plot the residual for the U3 linear fit. The residuals decrease quite a bit during the Covid numbers, at least as of Jun 2020. Probably indicates uncertainty in the numbers.
 
-```{r U3.pred.NPPTTL.resid, echo=FALSE,, fig.width = 6, fig.asp = .82}
+```{r U3.pred.NPPTTL.resid, echo=FALSE, fig.width = 10, fig.asp = .62}
 
 datay <- "U3.lm.NPPTTL.by.CLF16OV__lm__POPTHM.res"
 ylim <- c(-10, 10)
