@@ -1931,30 +1931,53 @@ if( exists("lst_syms")){
 
 Plot the residual for the U3 linear fit. The residuals decrease quite a bit during the Covid numbers, at least as of Jun 2020. Probably indicates uncertainty in the numbers.
 
-```{r U3.pred.NPPTTL.resid, echo=FALSE, fig.width = 10, fig.asp = .62}
+```{r U3_pred_ADPWNUSNERSAL_resid, echo=FALSE, fig.width = 10, fig.asp = .62}
 
-datay <- "U3.lm.NPPTTL.by.CLF16OV__lm__POPTHM.res"
-ylim <- c(-10, 10)
-my_plot <- plotSingle(
-  dfRecession,
-  df.data,
-  "date",
-  datay,
-  getPlotTitle(df.symbols, datay),
-  "Date",
-  getPlotYLabel(df.symbols, datay),
-  c(dt.start.prediction, Sys.Date()),
-  ylim,
-  b.legend = TRUE,
-  b.percentile = TRUE,
-  b.long.legend = FALSE
-)
+lst_syms <- c("U3__lm__ADPWNUSNERSA__by__CLF16OV__lm__POPTHM__res",
+              "U3__knn__ADPWNUSNERSA__by__CLF16OV__lm__POPTHM__res")
+if ( require_columns(df.data, lst_syms ) ){
+  
+  my_plot <- plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay = lst_syms[[1]],
+    getPlotTitle(df.symbols, lst_syms[[1]]),
+    "Date",
+    getPlotYLabel(df.symbols, lst_syms[[1]]),
+    c(dt.start.prediction, Sys.Date()),
+    ylim = c(-10, 10),
+    b.legend = TRUE,
+    b.percentile = TRUE,
+    b.long.legend = FALSE
+  )
+  
+  my_plot <- my_plot + geom_line(
+    data = df.data,
+    aes(
+      x = .data[["date"]],
+      y = .data[[lst_syms [[2]]]],
+      colour = getPlotTitle(df.symbols, lst_syms [[2]])
+    ),
+    na.rm = TRUE
+  )
+  
+  my_plot <- my_plot + geom_hline(yintercept=(6*sd.fit.u3nppttl), color = "red", linetype="dashed")
+  my_plot <- my_plot + geom_hline(yintercept=(-6*sd.fit.u3nppttl), color = "red", linetype="dashed")
+  
+  print(my_plot)
 
-my_plot <- my_plot + geom_hline(yintercept=(6*sd.fit.u3nppttl), color = "red", linetype="dashed")
-my_plot <- my_plot + geom_hline(yintercept=(-6*sd.fit.u3nppttl), color = "red", linetype="dashed")
+  # Clean and tidy memory
+  if( exists("my_plot")){
+    rm(my_plot)  
+  }
+  
+}
 
-print(my_plot)
-
+# Clean and tidy memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
 
 ```
 
