@@ -5175,18 +5175,149 @@ rm(b.percentile)
 
 As risks increase investors often flock to safe haven assets like gold. An up-tick in prices can indicate investor uncertainty. This can be seen in the nominal price plot around 1980 and again in 2007.
 
+```{r gold_plot_fun, echo=FALSE, fig.width = 10, fig.asp = .62}
 
-```{r gold.nominal.price, echo=FALSE}
+#' Plot COMEX gold futures with 50/200-day moving averages
+#'
+#' Builds a time-series chart of front-month COMEX gold futures and overlays
+#' the 50-day and 200-day moving averages using your existing
+#' \code{plotSingle()} helper. The x-axis spans from \code{start_date} to
+#' \code{Sys.Date()}, the y-axis runs from 0 to the next rounded-up maximum of
+#' the price series (via \code{round_up_to()}), and recession shading is shown
+#' if your \code{plotSingle()} uses \code{dfRecession}.
+#'
+#' @param start_date A \code{Date} (or character coercible to \code{Date})
+#'   used as the left x-axis bound. Default \code{"2020-01-01"}.
+#'
+#' @details
+#' This function expects the following to exist in the calling environment:
+#' \itemize{
+#'   \item \code{df.data}: data.frame with a \code{date} column and columns
+#'         \code{"GC_F.Close"}, \code{"GC_F.Close__mva050"},
+#'         \code{"GC_F.Close__mva200"}.
+#'   \item \code{dfRecession}: data.frame with \code{start}, \code{end} (dates)
+#'         for recession shading.
+#'   \item \code{df.symbols}: lookup used by \code{getPlotTitle()} and
+#'         \code{getPlotYLabel()}.
+#'   \item Helpers: \code{plotSingle()}, \code{getPlotTitle()},
+#'         \code{getPlotYLabel()}, \code{round_up_to()}.
+#'   \item Optional: \code{require_columns()}; if absent, a simple presence
+#'         check is used.
+#' }
+#'
+#' @return A \code{ggplot} object (invisibly). The plot is also printed.
+#'
+#' @examples
+#' \dontrun{
+#' p <- plot_gold_with_mas(start_date = "2020-01-01")
+#' }
+#'
+#' @export
+plot_gold_with_mas <- function(start_date = as.Date("2020-01-01")) {
+  # --- Inputs & environment checks -----------------------------------------
+  if (!inherits(start_date, "Date")) start_date <- as.Date(start_date)
+  if (!exists("df.data", inherits = TRUE)) {
+    stop("`df.data` not found in the calling environment.")
+  }
+  if (!("date" %in% names(df.data))) {
+    stop("`df.data` must contain a 'date' column.")
+  }
+  if (!exists("dfRecession", inherits = TRUE)) {
+    stop("`dfRecession` not found in the calling environment.")
+  }
+  if (!exists("df.symbols", inherits = TRUE)) {
+    stop("`df.symbols` not found in the calling environment.")
+  }
+  if (!exists("plotSingle", mode = "function")) {
+    stop("`plotSingle()` not found. Please load/define it before calling.")
+  }
+  if (!exists("getPlotTitle", mode = "function") ||
+      !exists("getPlotYLabel", mode = "function")) {
+    stop("`getPlotTitle()` and `getPlotYLabel()` are required.")
+  }
+  if (!exists("round_up_to", mode = "function")) {
+    stop("`round_up_to()` is required to compute the y-axis upper bound.")
+  }
 
-datay <- "GC_F.Close"
-ylim <- c(0, 4000)
-dt.start = as.Date('1970-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
+  # Symbols to plot
+  lst_sym <- c("GC_F.Close", "GC_F.Close__mva050", "GC_F.Close__mva200")
 
-# Tidy up memory
-rm(datay)
-rm(ylim)
-rm(dt.start)
+  # Column presence check
+  has_cols <- if (exists("require_columns", mode = "function")) {
+    require_columns(df.data, lst_sym)
+  } else {
+    all(lst_sym %in% names(df.data))
+  }
+  if (!has_cols) {
+    missing_cols <- setdiff(lst_sym, names(df.data))
+    stop(sprintf("Missing required columns in df.data: %s",
+                 paste(missing_cols, collapse = ", ")))
+  }
+
+  # Coerce x columns to Date to satisfy scale_x_date inside plotSingle
+  dd  <- df.data
+  rec <- dfRecession
+  if (!inherits(dd$date, "Date"))    dd$date    <- as.Date(dd$date)
+  if (!inherits(rec$start, "Date"))  rec$start  <- as.Date(rec$start)
+  if (!inherits(rec$end,   "Date"))  rec$end    <- as.Date(rec$end)
+
+  # y-axis upper bound: round up to the next step (step = 1 by default)
+  y_top <- round_up_to(max(dd[[lst_sym[[1]]]], na.rm = TRUE), 1)
+
+  # --- Base plot ------------------------------------------------------------
+  my.plot <- plotSingle(
+    datadf_rec = rec,
+    datadf     = dd,
+    datax      = "date",
+    datay      = lst_sym[[1]],
+    titlelabel = getPlotTitle(df.symbols, lst_sym[[1]]),
+    xlabel     = "Date",
+    ylabel     = getPlotYLabel(df.symbols, lst_sym[[1]]),
+    xlim       = c(start_date, Sys.Date()),
+    ylim       = c(1000, y_top),
+    b.legend   = TRUE,
+    b.percentile = FALSE,
+    b.long.legend = TRUE
+  )
+
+  # --- Overlays: 50d & 200d MAs --------------------------------------------
+  my.plot <- my.plot + ggplot2::geom_line(
+    data = dd,
+    ggplot2::aes_string(
+      x = "date",
+      y = lst_sym[[2]],
+      colour = shQuote(getPlotTitle(df.symbols, lst_sym[[2]]))
+    ),
+    na.rm = TRUE
+  )
+
+  my.plot <- my.plot + ggplot2::geom_line(
+    data = dd,
+    ggplot2::aes_string(
+      x = "date",
+      y = lst_sym[[3]],
+      colour = shQuote(getPlotTitle(df.symbols, lst_sym[[3]]))
+    ),
+    na.rm = TRUE
+  )
+
+  print(my.plot)
+  invisible(my.plot)
+  
+}
+
+```
+
+```{r gold_nominal_price, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+p <- plot_gold_with_mas(start_date = "2020-01-01")
+
+```
+What has gold done over the last year?
+
+```{r gold_nominal_price_near, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+p <- plot_gold_with_mas(start_date = Sys.Date() %m-% years(1))
 
 ```
 
