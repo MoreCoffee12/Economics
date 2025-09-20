@@ -661,8 +661,6 @@ if (bRefresh){
   # key <- "7a2672468131c5a95dffc487d741edf6"
   Sys.setenv(EIA_KEY = "7a2672468131c5a95dffc487d741edf6")
 
-
-
   # Refiner Motor Gasoline Sales Volumes
     str.symbol.raw = "PET.A103600001.M"
     df.symbols <-

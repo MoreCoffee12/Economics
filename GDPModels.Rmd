@@ -413,26 +413,6 @@ df.symbols <- symbols_append_row(
     )
 )
 
-
-str.description <- "Linear Model Prediction\nPCE given GSG,\nPKG, UPS, and FDX"
-# Update the symbols table    
-df.symbols <- symbols_append_row(
-    df.symbols,
-    list(
-      string.symbol = str.symbol,
-      string.source = "Predict",
-      string.description = str.description,
-      string.label.y = getPlotYLabel(df.symbols, "PCE")[1],
-      float.expense.ratio = -1.00,
-      Max030 = FALSE,
-      Max180 = FALSE,
-      date.series.start = dt.start.prediction,
-      date.series.end = as.Date(Sys.Date()),
-      string.symbol_safe = safe_symbol_name(str.symbol),
-      string.object_name = safe_symbol_name(str.symbol)
-  )
-)
-
 ```
 
 #### Create the year-over-year values
@@ -441,9 +421,14 @@ Add the linear prediction year-over-year growth
 
 ```{r pce_model_sym_yoy, echo=FALSE, fig.width = 10, fig.asp = .62}
 
-# The YoY calculation for the linear model
+# The year-over-year calculation for the linear model
 str.symbolYoY <- paste(str.symbol, "__YoY", sep = "")
 df.data[str.symbolYoY] <- CalcYoY(df.data, str.symbol, 365)
+
+# Should be done with this
+if ( exists("str.symbol")){
+  rm(str.symbol)
+}
 
 # Update the symbols table    
 df.symbols <- symbols_append_row(
