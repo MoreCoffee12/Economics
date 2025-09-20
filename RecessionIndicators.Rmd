@@ -8141,106 +8141,142 @@ plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, yl
 
 ```
 
-<!-- ## EIA Information -->
+## EIA Information
 
-<!-- ### Petroleum -->
+### Petroleum
 
-<!-- #### Consumption/Sales > Refiner Motor Gasoline Sales Volumes > by Product > Motor Gasoline > by Area > U.S. -->
+#### Consumption/Sales > Refiner Motor Gasoline Sales Volumes > by Product > Motor Gasoline > by Area > U.S.
 
-<!-- ```{r petro.gasoline.us, echo=FALSE, fig.width = 9, fig.asp = 0.4 } -->
+```{r petro_gasoline_us, echo=FALSE, , fig.width = 10, fig.asp = .62 }
 
-<!-- datay <- "PETA103600001M" -->
-<!-- datay.aux.1 <- "PETA123600001M" -->
-<!-- datay.aux.2 <- "PETA143B00001M" -->
-<!-- datay.aux.3 <- "PETA133B00001M" -->
-<!-- ylim <- c(7.5, 100000) -->
-<!-- dt.start = as.Date('1983-01-01') -->
-<!-- p1 <- -->
-<!--   plotSingleQuick( -->
-<!--     dfRecession, -->
-<!--     df.data, -->
-<!--     datay, -->
-<!--     ylim, -->
-<!--     dt.start, -->
-<!--     b.legend = TRUE, -->
-<!--     b.percentile = FALSE, -->
-<!--     b.long.legend = TRUE -->
-<!--   ) -->
-<!-- p1 <- p1 + geom_line( -->
-<!--   data = df.data, -->
-<!--   aes_string( -->
-<!--     x = "date", -->
-<!--     y = datay.aux.1, -->
-<!--     colour = shQuote(getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n")) -->
-<!--   ), -->
-<!--   na.rm = TRUE -->
-<!-- ) -->
-<!-- p1 <- p1 + geom_line( -->
-<!--   data = df.data, -->
-<!--   aes_string( -->
-<!--     x = "date", -->
-<!--     y = datay.aux.2, -->
-<!--     colour = shQuote(getPlotTitle(df.symbols, datay.aux.2, str.sep = "\n")) -->
-<!--   ), -->
-<!--   na.rm = TRUE -->
-<!-- ) -->
+lst_syms <- c("PET_A103600001_M",
+              "PET_A123600001_M",
+              "PET_A143B00001_M",
+              "PET_A133B00001_M")
 
-<!-- p1 + geom_line( -->
-<!--   data = df.data, -->
-<!--   aes_string( -->
-<!--     x = "date", -->
-<!--     y = datay.aux.3, -->
-<!--     colour = shQuote(getPlotTitle(df.symbols, datay.aux.3, str.sep = "\n")) -->
-<!--   ), -->
-<!--   na.rm = TRUE -->
-<!-- ) -->
+if (require_columns(df.data, lst_syms)) {
+  my_plot <-
+    plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_syms[[1]],
+      getPlotTitle(df.symbols, lst_syms[[1]]),
+      "Date",
+      getPlotYLabel(df.symbols, lst_syms[[1]]),
+      c(as.Date('1983-01-01'), Sys.Date()),
+      ylim =c(7.5, 100000),
+      b.legend = TRUE,
+      b.long.legend = TRUE
+    )
+  my_plot <-
+    my_plot + geom_line(
+      data = df.data,
+      aes_string(
+        x = "date",
+        y = lst_syms[[2]],
+        colour = shQuote(getPlotTitle(df.symbols, lst_syms[[2]], str.sep = "\n"))
+      ),
+      na.rm = TRUE
+    )
+  my_plot <-
+    my_plot + geom_line(
+      data = df.data,
+      aes_string(
+        x = "date",
+        y = lst_syms[[3]],
+        colour = shQuote(getPlotTitle(df.symbols, lst_syms[[3]], str.sep = "\n"))
+      ),
+      na.rm = TRUE
+    )
+  my_plot <-
+    my_plot + geom_line(
+      data = df.data,
+      aes_string(
+        x = "date",
+        y = lst_syms[[4]],
+        colour = shQuote(getPlotTitle(df.symbols, lst_syms[[4]], str.sep = "\n"))
+      ),
+      na.rm = TRUE
+    )
+  
+  print(my_plot)
+  
+  # Free up memory
+  if (exists("my_plot")) {
+    rm(my_plot)
+  }
+  
+}
 
-<!-- ``` -->
+# Free up memory
+if (exists("lst_syms")) {
+  rm(lst_syms)
+}
 
-<!-- ### Total Energy -->
+```
 
-<!-- #### Crude Oil and Natural Gas Resource Development > Crude Oil and Natural Gas Drilling Activity Measurements -->
+### Total Energy
 
-<!-- ```{r eia.total.Oilgasdrilling, echo=FALSE, fig.width = 9, fig.asp = 0.4 } -->
+#### Crude Oil and Natural Gas Resource Development > Crude Oil and Natural Gas Drilling Activity Measurements
 
-<!-- datay <- "TOTALPANRPUSM" -->
-<!-- datay.aux.1 <- "TOTALOGNRPUSM" -->
-<!-- datay.aux.2 <- "TOTALNGNRPUSM" -->
-<!-- ylim <- c(7.5, 2500) -->
-<!-- dt.start = as.Date('1983-01-01') -->
-<!-- p1 <- -->
-<!--   plotSingleQuick( -->
-<!--     dfRecession, -->
-<!--     df.data, -->
-<!--     datay, -->
-<!--     ylim, -->
-<!--     dt.start, -->
-<!--     b.legend = TRUE, -->
-<!--     b.percentile = FALSE, -->
-<!--     b.long.legend = TRUE -->
-<!--   ) -->
-<!-- p1 <- p1 + geom_line( -->
-<!--   data = df.data, -->
-<!--   aes_string( -->
-<!--     x = "date", -->
-<!--     y = datay.aux.1, -->
-<!--     colour = shQuote(getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n")) -->
-<!--   ), -->
-<!--   na.rm = TRUE -->
-<!-- ) -->
-<!-- p1 <- p1 + geom_line( -->
-<!--   data = df.data, -->
-<!--   aes_string( -->
-<!--     x = "date", -->
-<!--     y = datay.aux.2, -->
-<!--     colour = shQuote(getPlotTitle(df.symbols, datay.aux.2, str.sep = "\n")) -->
-<!--   ), -->
-<!--   na.rm = TRUE -->
-<!-- ) -->
-<!-- p1 -->
+```{r eia.total.Oilgasdrilling, echo=FALSE, , fig.width = 10, fig.asp = .62 }
 
+lst_syms <- c("TOTAL_NGNRPUS_M",
+              "TOTAL_OGNRPUS_M",
+              "TOTAL_NGNRPUS_M")
 
-<!-- ``` -->
+if (require_columns(df.data, lst_syms)) {
+  my_plot <-
+    plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_syms[[1]],
+      getPlotTitle(df.symbols, lst_syms[[1]]),
+      "Date",
+      getPlotYLabel(df.symbols, lst_syms[[1]]),
+      c(as.Date('1983-01-01'), Sys.Date()),
+      ylim = c(7.5, 2500),
+      b.legend = TRUE,
+      b.long.legend = TRUE
+    )
+  my_plot <-
+    my_plot + geom_line(
+      data = df.data,
+      aes_string(
+        x = "date",
+        y = lst_syms[[2]],
+        colour = shQuote(getPlotTitle(df.symbols, lst_syms[[2]], str.sep = "\n"))
+      ),
+      na.rm = TRUE
+    )
+  my_plot <-
+    my_plot + geom_line(
+      data = df.data,
+      aes_string(
+        x = "date",
+        y = lst_syms[[3]],
+        colour = shQuote(getPlotTitle(df.symbols, lst_syms[[3]], str.sep = "\n"))
+      ),
+      na.rm = TRUE
+    )
+
+  print(my_plot)
+  
+  # Free up memory
+  if (exists("my_plot")) {
+    rm(my_plot)
+  }
+  
+}
+
+# Free up memory
+if (exists("lst_syms")) {
+  rm(lst_syms)
+}
+
+```
 
 
 ## Baker Hughes Rig Count
