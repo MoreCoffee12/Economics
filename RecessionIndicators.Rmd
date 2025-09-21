@@ -10,15 +10,6 @@ output:
 ---
 
 ```{r}
-```
-
-
-```{r}
-```
-
-
-
-```{r}
 
 # ------------- Naming conventions ---------------------------------------------
 # Minimal change (keep . for field, use __ for operations)
@@ -1029,18 +1020,18 @@ Loading in farm data
 
 if(bRefresh){
   
-  # Get farm income data. From USDA website:
-  # https://www.ers.usda.gov/data-products/farm-income-and-wealth-statistics/data-files-us-and-state-level-farm-income-and-wealth-statistics/
-  
-  # Read in th Excel file
-  df.farm.income <- data.frame(read_excel('farmsectorindicators.xlsx', range='Sheet1!A2:I28'))
+  # Get farm income data by Reading in the Excel file
+  df.farm.income <- 
+    data.frame(read_excel(file.path(str.data.dir, "Farm Data/farmsectorindicators.xlsx"),
+                          range='Sheet1!A2:O27'))
   
   # Extract the income and dates
   i.cols <- ncol(df.farm.income)
   d.income <- as.numeric(tail(df.farm.income,1)[2:i.cols])
   
-  dt.date <- as.numeric(df.farm.income[3,2:i.cols])
+  dt.date <- as.numeric(df.farm.income[2,2:i.cols])
   dt.date[(i.cols-1)] <- dt.date[i.cols-2] + 1
+  
   # Have to append the day, otherwise it crashes on leap year.
   dt.date.c <- paste(as.character(dt.date), "-01-01", sep="")
   dt.date <- as.Date(dt.date.c)
@@ -1049,11 +1040,11 @@ if(bRefresh){
   str.symbol <- 'FARMINCOME'
   assign(str.symbol, xts(x=d.income, order.by=dt.date))
   colnames(FARMINCOME) <- "FARMINCOME"
-  
-  df.symbols <-
-    rbind(
+
+  # Update the symbols table    
+  df.symbols <- symbols_append_row(
       df.symbols,
-      data.frame(
+      list(
         string.symbol = str.symbol,
         string.source = "USDA",
         string.description =  "Net Farm Income",
@@ -1062,14 +1053,29 @@ if(bRefresh){
         date.series.start = dt.date[1],
         date.series.end = tail(dt.date,1),
         string.symbol_safe = safe_symbol_name(str.symbol),
-        string.object_name = safe_symbol_name(str.symbol),
-        status = "ok",
-        error = NA,
-        nrows = 0,
-        first_date = as.Date("1900-01-01"),
-        last_date = as.Date("1900-01-01")
-      )
+        string.object_name = safe_symbol_name(str.symbol)
     )
+  )
+  
+  # Clean and tidy memory
+  if( exists ("df.farm.income")){
+    rm(df.farm.income)
+  }
+  if( exists ("i.cols")){
+    rm(i.cols)
+  }
+  if( exists ("d.income")){
+    rm(d.income)
+  } 
+  if( exists ("dt.date")){
+    rm(dt.date)
+  }  
+  if( exists ("dt.date.c")){
+    rm(dt.date.c)
+  } 
+  if( exists ("str.symbol")){
+    rm(str.symbol)
+  }  
 }
 
 ```
