@@ -946,51 +946,64 @@ print(myPlot)
 ```
   
   
-  Looking at some more recent data points
+Looking at some more recent data points
 
 ```{r gdp_pred_plot_near, echo=FALSE, fig.width = 10, fig.asp = .62}
 
-datay <- "GDP.lm"
-datay.aux <- "GDP.pcr"
-datay.aux.1 <- "GDP.Value"
-ylim <- c(10000, 35000)
-dt.end <- Sys.Date()
-dt.start <- as.Date("2015-01-01")
-myPlot <-
-  plotSingle(
-    dfRecession,
-    df.data,
-    "date",
-    datay,
-    "GDP Compared to GDP predicted using linear model",
-    "Date",
-    getPlotYLabel(df.symbols, datay),
-    c(dt.start, dt.end),
-    ylim,
-    b.legend = TRUE,
-    b.percentile = FALSE,
-    b.long.legend = TRUE
+lst_syms <- c("GDP.Value",
+              "GDP.lm",
+              "GDP.pcr")
+if ( require_columns(df.data, lst_syms ) ){
+    
+  dt.end <- Sys.Date()
+  dt.start <- as.Date("2015-01-01")
+  myPlot <-
+    plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_syms[[1]],
+      "GDP Compared to GDP predicted values",
+      "Date",
+      getPlotYLabel(df.symbols, lst_syms[[1]]),
+      c(dt.start, dt.end),
+      ylim =  c(10000, round_up_to(max(df.data[[lst_syms[[1]]]]),1)),
+      b.legend = TRUE,
+      b.percentile = FALSE,
+      b.long.legend = TRUE
+    )
+  myPlot <- myPlot + geom_line(
+    data = df.data,
+    aes(
+      x = .data[["date"]],
+      y = .data[[lst_syms[[2]]]],
+      colour = getPlotTitle(df.symbols, lst_syms[[2]])
+    ),
+    na.rm = TRUE
   )
-myPlot <- myPlot + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay.aux,
-    colour = shQuote(getPlotTitle(df.symbols, datay.aux))
-  ),
-  na.rm = TRUE
-)
-myPlot <- myPlot + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay.aux.1,
-    colour = shQuote(getPlotTitle(df.symbols, datay.aux.1))
-  ),
-  na.rm = TRUE
-)
+  myPlot <- myPlot + geom_line(
+    data = df.data,
+    aes(
+      x = .data[["date"]],
+      y = .data[[lst_syms[[3]]]],
+      colour = getPlotTitle(df.symbols, lst_syms[[3]])
+    ),
+    na.rm = TRUE
+  )
+  
+  print(myPlot)
 
-print(myPlot)
+  # Clean and tidy memory
+  if( exists("my_plot")){
+    rm(my_plot)  
+  }
+  
+}
+
+# Clean and tidy memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
 
 ```  
 
@@ -998,7 +1011,7 @@ print(myPlot)
 
 datay <- "GDP.Value__YoY"
 datay.aux <- "GDP.lm_YoY"
-datay.aux.2 <- "GDP.pcr_YoY"
+datay.aux.1 <- "GDP.pcr_YoY"
 ylim <- c(-50, 50)
 dt.end <- Sys.Date()
 dt.start <- as.Date("2015-01-01")
@@ -1032,16 +1045,6 @@ p1 <- p1 + geom_line(
     x = "date",
     y = datay.aux.1,
     colour = shQuote(getPlotTitle(df.symbols, datay.aux.1))
-  ),
-  na.rm = TRUE
-)
-
-p1 <- p1 + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay.aux.2,
-    colour = shQuote(getPlotTitle(df.symbols, datay.aux.2))
   ),
   na.rm = TRUE
 )
