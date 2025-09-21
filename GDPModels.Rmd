@@ -152,7 +152,12 @@ if( exists("ylimBackTest")){
 
 ```
 
-## Feature Extraction
+# Open items
+I also wonder what a deep stateful. LSTM is. That seems like a typo. Ohh they
+use it twice so maybe it isn't. We might need to look at that. It might work
+here, we will see.
+
+# Feature Extraction
 
 With the raw data downloaded, some of the interesting features can be extracted.
 The first step is reconcile the time intervals. Some of the data is released
@@ -173,7 +178,7 @@ df.data <- df.data[as.Date(rownames(df.data)) > as.Date("1940-01-01"),]
 
 ```
 
-## Create aggregate series
+# Create aggregate series
 
 Some analysis requires that two or more series be combined. For example, normallizing debt by GDP to get a sense of the proportion of debt to the total economy helps understand the debt cycle.
 
@@ -674,12 +679,32 @@ rm(df.data.rest)
 
 ```{r gdp_fit_lm, echo=FALSE, fig.width = 10, fig.asp = .62}
 
-list.fit.reg <- train(
-  GDP.Value ~ INDPRO.Value + PCE.Value + RSALESAGG + ALTSALES.Value + MSPUS__times__HOUST,
-  data = df.train,
-  method = "lm",
-  preProcess = c('center', 'scale')
-)
+lst_syms <- c("GDP.Value", 
+              "INDPRO.Value",
+              "PCE.Value",
+              "RSALESAGG",
+              "ALTSALES.Value",
+              "MSPUS__times__HOUST")
+
+if ( require_columns(df.data, lst_syms ) ){
+
+  # Define the equation
+  str_form <- as.formula(paste(lst_syms[[1]], "~", 
+                               lst_syms[[2]], " + ",
+                               lst_syms[[3]], " + ",
+                               lst_syms[[4]], " + ",
+                               lst_syms[[5]], " + ",
+                               lst_syms[[6]]))
+  
+  list.fit.reg <- train(
+    str_form,
+    data = df.train,
+    method = "lm",
+    preProcess = c('center', 'scale')
+  )
+
+}
+
 
 ```
 
@@ -687,12 +712,26 @@ list.fit.reg <- train(
 
 ```{r gdp_fit_pca, echo=FALSE, fig.width = 10, fig.asp = .62}
 
-list.fit.pcr <- train(
-  GDP.Value ~ INDPRO.Value + PCE.Value + RSALESAGG + ALTSALES.Value + MSPUS__times__HOUST,
-  data = df.train,
-  method = "pcr",
-  preProcess = c('center', 'scale')
-)
+if ( require_columns(df.data, lst_syms ) ){
+
+  if( exists("str_form")){
+    
+    list.fit.pcr <- train(
+      str_form,
+      data = df.train,
+      method = "pcr",
+      preProcess = c('center', 'scale')
+    )
+  }
+}  
+
+# Clean and tidy
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
+if( exists("str_form")){
+  rm(str_form)
+}
 
 ```
 
