@@ -220,34 +220,80 @@ source("calcRecession.r")
 
 ### Validate GDP Series
 
-I was confused about what was in the GDPNow series. I created this series of plots to be sure nominal and real GDP were correct.
+I was confused about what was in the GDPNow series. I created this series of
+plots to be sure nominal and real GDP were correct.
 
 ```{r validate_gdp_series, echo=FALSE, fig.width = 10, fig.asp = .62}
 
-datay <- "GDP.Value__YoY"
-ylim <- c(-10, 20)
-dtStart = as.Date('2000-01-01')
-p1 <-
-  plotSingleQuick(dfRecession, df.data, datay, ylim, dtStart, b.percentile = FALSE)
+lst_sym <- c( "GDP.Value__YoY", "GDPC1.Value__YoY", "GDPNOW.Value")
 
-
-datay.1 <- "GDPC1.Value__YoY"
-datay.aux.1 <- "GDPNOW.Value"
-ylim.1 <- c(-10, 20)
-p2 <- plotSingleQuick(dfRecession, df.data, datay.1, ylim.1, dtStart, b.percentile = FALSE, b.legend = TRUE)
-p2 <- p2 + geom_line(
+if (require_columns(df.data, lst_sym)) {
+  
+  # Define common parameters for the 2 plots  
+  ylim_gpd <- c(-10, 20)
+  dt_start_gdp = as.Date('2000-01-01')
+  
+  # Create the nominal GDP series
+  p1 <- plotSingleQuick(
+    dfRecession, 
+    df.data, 
+    lst_sym[[1]], 
+    ylim = ylim_gpd, 
+    dt.start = dt_start_gdp, 
+    b.percentile = FALSE)
+  p1 <- p1 + geom_line(
     data = df.data,
-    aes_string(x = "date",
-      y = datay.aux.1,
-      colour = shQuote(datay.aux.1)
+    aes(
+      x = .data[["date"]],
+      y = .data[[lst_sym[[3]]]],
+      colour = lst_sym[[3]]
     ),
     na.rm = TRUE
   )
+  
+  # Create the real GDP series
+  p2 <- plotSingleQuick(
+    dfRecession,
+    df.data,
+    lst_sym[[2]],
+    ylim = ylim_gpd,
+    dt.start = dt_start_gdp,
+    b.percentile = FALSE,
+    b.legend = TRUE
+  )
+  p2 <- p2 + geom_line(
+    data = df.data,
+    aes(
+      x = .data[["date"]],
+      y = .data[[lst_sym[[3]]]],
+      colour = lst_sym[[3]]
+    ),
+    na.rm = TRUE
+  )
+  
+  grid.arrange(p1,
+               p2,
+               ncol = 1,
+               top = "Nominal and real GDP")
 
-grid.arrange(p1,
-             p2,
-             ncol = 1,
-             top = "Nominal and real GDP")
+  
+  # Clean and tidy memory
+  if( exists ("p1")){
+    rm(p1)
+  }
+  if( exists ("p2")){
+    rm(p2)
+  }  
+  if( exists ("ylim_gpd")){
+    rm(ylim_gpd)
+  }  
+  
+}
+
+# Clean and tidy
+if( exists ("lst_sym")){
+  rm(lst_sym)
+}
 
 ```
 
