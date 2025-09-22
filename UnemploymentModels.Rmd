@@ -414,7 +414,7 @@ if( exists("lst_syms")){
 ```{r lf.lm.ICSA.norm.plot, echo=FALSE, fig.width = 10, fig.asp = .62}
 
 # Define the symbols in the plot
-lst_syms <- c("ICSA__by__CLF16OV__lm__POPTHM", "UNRATE.Value")
+lst_syms <- c("UNRATE.Value", "ICSA__by__CLF16OV__lm__POPTHM")
 
 # Do they exist in the data frame?
 if ( require_columns(df.data, lst_syms ) ){
@@ -509,7 +509,7 @@ if( exists("lst_syms")){
 ```{r lf.lm.CCSA.norm.plot, echo=FALSE, fig.width = 10, fig.asp = .62}
 
 # Define the symbols in the plot
-lst_syms <- c("CCSA__by__CLF16OV__lm__POPTHM", "UNRATE.Value")
+lst_syms <- c("UNRATE.Value", "CCSA__by__CLF16OV__lm__POPTHM")
 
 # Do they exist in the data frame?
 if ( require_columns(df.data, lst_syms ) ){
@@ -534,7 +534,7 @@ if ( require_columns(df.data, lst_syms ) ){
     aes(
       x = .data[["date"]],
       y = .data[[lst_syms[[2]]]],
-      colour = shQuote(getPlotTitle(df.symbols, lst_syms[[2]]))
+      colour = getPlotTitle(df.symbols, lst_syms[[2]])
     ),
     na.rm = TRUE
   )
