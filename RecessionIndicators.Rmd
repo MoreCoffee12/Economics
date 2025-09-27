@@ -4553,12 +4553,81 @@ my.plot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuo
 
 ```{r PAYNSA_YoY, echo=FALSE}
 
-datay <- "PAYNSA.Value__YoY"
-ylim <- c(-17.5, 7.5)
-b.legend <- TRUE
-b.percentile <- TRUE
-plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
-            getPlotYLabel(df.symbols, datay), c(as.Date("1jan1950","%d%b%Y"), Sys.Date()), ylim, b.legend, b.percentile)
+
+# Define the symbols in the plot
+lst_syms <- c("PAYNSA.Value__YoY")
+
+# Do they exist in the data frame?
+if ( require_columns(df.data, lst_syms ) ){
+  
+  plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay = lst_syms[[1]],
+    getPlotTitle(df.symbols, lst_syms[[1]]),
+    "Date",
+    getPlotYLabel(df.symbols, lst_syms[[1]]),
+    c(as.Date("1jan1950", "%d%b%Y"), Sys.Date()),
+    ylim = c(-17.5, 7.5),
+    b.legend = TRUE,
+    b.percentile = TRUE
+  )
+}
+
+# Free up memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
+
+```
+
+```{r PAYNSA_GDP_YoY, echo=FALSE}
+
+
+# Define the symbols in the plot
+lst_syms <- c("PAYNSA.Value__YoY", "GDP.Value__YoY")
+
+# Do they exist in the data frame?
+if ( require_columns(df.data, lst_syms ) ){
+  
+  my_plot <- plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay = lst_syms[[1]],
+    getPlotTitle(df.symbols, lst_syms[[1]]),
+    "Date",
+    getPlotYLabel(df.symbols, lst_syms[[1]]),
+    c(as.Date("1jan1950", "%d%b%Y"), Sys.Date()),
+    ylim = c(-17.5, 17.5),
+    b.legend = TRUE,
+    b.percentile = TRUE
+  )
+  
+  my_plot <- my_plot + geom_line(
+    data = df.data,
+    aes(
+      x = .data[["date"]],
+      y = .data[[lst_syms[[2]]]],
+      colour = shQuote(lst_syms[[2]])
+    ),
+    na.rm = TRUE
+  )
+  
+  print(my_plot)
+  
+  # Free up memory
+  if( exists("my_plot")){
+    rm(my_plot)
+  }
+  
+}
+
+# Free up memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
 
 ```
 

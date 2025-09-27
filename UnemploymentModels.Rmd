@@ -424,11 +424,11 @@ if ( require_columns(df.data, lst_syms ) ){
     datadf = df.data,
     datay  = lst_syms[[1]],
     starts = as.Date(c(
-      "2023-04-01", "1989-06-01", "2000-07-01", "2007-12-01"
+      "1969-05-01","1979-05-01", "1989-06-01", "2000-07-01", "2007-12-01", "2023-02-01"
     )),
-    window_days = 365*2,
+    window_days = 365*3,
     index_base = 100,
-    ylim = c(3, round_up_to(max(df.data[[lst_syms[[1]]]]),1))
+    ylim = c(3, 10)
   )
 
   #print(my_plot)
