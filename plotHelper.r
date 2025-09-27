@@ -86,175 +86,6 @@ getTrendString <- function(df.data, datay, days) {
   
 }
 
-
-
-
-#' This function provides a common format for the plots
-#'
-#' @param datadf_rec Dataframe with recession indicator 
-#' @param datadf Datafrom with the data  
-#' @param datax Horizontal axis column name. Almost always a date
-#' @param datay Vertical axis column name.
-#' @param titlelabel String describing the plot title
-#' @param xlabel String for the horizontal axis label
-#' @param ylabel String for the vertical axis label
-#' @param xlim Plotting limits for the vertical axis
-#' @param ylim Plotting limits for the horizontal axis
-#' @param b.legend If true then plot includes a legend
-#' @param b.percentile If true then 5%/95% percentile lines are displayed
-#' @param b.long.legend Defaults to FASLE. If set to TRUE then legend entries include symbol description.
-#'
-#' @return Handle to the plot
-#' @export
-#'
-#' @examples
-plotSingle <-
-  function(datadf_rec,
-           datadf,
-           datax,
-           datay,
-           titlelabel,
-           xlabel,
-           ylabel,
-           xlim,
-           ylim,
-           b.legend,
-           b.percentile,
-           b.long.legend = FALSE) {
-    
-  # From http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/#a-colorblind-friendly-palette
-  # The palette with black:
-  cbbPalette <-
-    c(
-      "#000000",
-      "#E69F00",
-      "#56B4E9",
-      "#009E73",
-      "#F0E442",
-      "#0072B2",
-      "#D55E00",
-      "#CC79A7"
-    )
-  # The palette with grey:
-  cbPalette <-
-    c(
-      "#999999",
-      "#E69F00",
-      "#56B4E9",
-      "#009E73",
-      "#F0E442",
-      "#0072B2",
-      "#D55E00",
-      "#CC79A7"
-    )  
-  
-  # Create the start date string
-  str.start = getMostRecentDateString(df.symbols, datay)
-  
-  # Create the legend entry
-  str.legend <- datay
-  if (b.long.legend){
-    str.legend <- getPlotTitle(df.symbols, datay, str.sep = "\n")
-    
-  }
-  
-  # Construct the plot itself
-  my.plot <- ggplot()+
-    theme(plot.background = element_rect(fill = 'white', colour = 'white')) +
-    theme(panel.background = element_rect(fill = 'white', colour = 'grey')) +
-    theme(panel.grid.major.x = element_blank()) +
-    theme(panel.grid.major.y = element_line(colour = "grey", linewidth = 0.5)) +
-    geom_line(
-      data = datadf,
-      aes(
-        x = .data[[datax]],
-        y = .data[[datay]],
-        colour = factor(.env$str.legend)
-      ),
-      na.rm = TRUE,
-      linewidth = 0.7
-    ) +
-    scale_colour_manual(values = cbbPalette) +
-    guides(
-      colour = guide_legend("Series"),
-      size = guide_legend("Series"),
-      shape = guide_legend("Series")
-    ) +
-    geom_rect(
-      data = datadf_rec,
-      aes(
-        xmin = start,
-        xmax = end,
-        ymin = -Inf,
-        ymax = Inf
-      ),
-      fill = "grey",
-      alpha = 0.3,
-      na.rm = TRUE
-    ) +
-    scale_fill_continuous(name = "V") +
-    #geom_smooth(method = "lm") +
-    ggtitle(titlelabel) +
-    labs(x = paste(xlabel, " (", str.start, ")", sep = ""), y = ylabel) +
-    scale_x_date(limits = xlim) +
-    scale_y_continuous(limits = ylim) +
-    if (b.legend) {
-      if (b.long.legend) {
-        theme(legend.position = "right",
-              legend.key.size = unit(1.5, "cm"),
-        )
-      } else{
-        theme(legend.position = "top")
-      }
-    } else{
-      theme(legend.position = "none")
-    }
-  
-  # Apply percentile markers
-  if (!missing(b.percentile)) {
-    # It is present, should it be included?
-    if (b.percentile) {
-      data.stats <-
-        datadf[datadf$date > as.Date(xlim[1]) &
-                 datadf$date < as.Date(xlim[2]), datay]
-      d.quant <- quantile(data.stats, c(0.05, 0.95))
-      my.plot <-
-        my.plot + annotate(
-          "text",
-          label = "5%",
-          x = xlim[1],
-          y = (d.quant[[1]] - abs(d.quant[[1]] * 0.05)),
-          colour = "black",
-          vjust = 1,
-          hjust = 1,
-          size = 3.5
-        )
-      my.plot <-
-        my.plot + geom_hline(yintercept = d.quant[[1]],
-                             linetype = "dashed",
-                             color = "grey")
-      my.plot <-
-        my.plot + annotate(
-          "text",
-          label = "95%",
-          x = xlim[1],
-          y = (d.quant[[2]] + abs(d.quant[[1]] * 0.05)),
-          colour = "black",
-          vjust = 0,
-          hjust = 1,
-          size = 3.5
-        )
-      my.plot <-
-        my.plot + geom_hline(yintercept = d.quant[[2]],
-                             linetype = "dashed",
-                             color = "grey")
-    }
-  }
-  
-  return(my.plot)
-  }
-
-
 #' Return color-blind friendly pallette with black
 #'
 #' @return Vector with colors
@@ -304,6 +135,155 @@ getPaletteGrey <- function() {
   return(cbPalette)
   
 }
+
+
+
+
+#' This function provides a common format for the plots
+#'
+#' @param datadf_rec Dataframe with recession indicator 
+#' @param datadf Datafrom with the data  
+#' @param datax Horizontal axis column name. Almost always a date
+#' @param datay Vertical axis column name.
+#' @param titlelabel String describing the plot title
+#' @param xlabel String for the horizontal axis label
+#' @param ylabel String for the vertical axis label
+#' @param xlim Plotting limits for the vertical axis
+#' @param ylim Plotting limits for the horizontal axis
+#' @param b.legend If true then plot includes a legend
+#' @param b.percentile If true then 5%/95% percentile lines are displayed
+#' @param b.long.legend Defaults to FASLE. If set to TRUE then legend entries include symbol description.
+#'
+#' @return Handle to the plot
+#' @export
+#'
+#' @examples
+plotSingle <-
+  function(datadf_rec,
+           datadf,
+           datax,
+           datay,
+           titlelabel,
+           xlabel,
+           ylabel,
+           xlim,
+           ylim,
+           b.legend,
+           b.percentile,
+           b.long.legend = FALSE) {
+    # Get the palettes:
+    cbbPalette <- getPaletteBlack()
+    cbPalette <- getPaletteGrey()
+    
+    # Create the start date string
+    str.start = getMostRecentDateString(df.symbols, datay)
+    
+    # Create the legend entry
+    str.legend <- datay
+    if (b.long.legend) {
+      str.legend <- getPlotTitle(df.symbols, datay, str.sep = "\n")
+      
+    }
+    
+    # Construct the plot itself
+    my.plot <- ggplot() +
+      theme(plot.background = element_rect(fill = 'white', colour = 'white')) +
+      theme(panel.background = element_rect(fill = 'white', colour = 'grey')) +
+      theme(panel.grid.major.x = element_blank()) +
+      theme(panel.grid.major.y = element_line(colour = "grey", linewidth = 0.5)) +
+      geom_line(
+        data = datadf,
+        aes(
+          x = .data[[datax]],
+          y = .data[[datay]],
+          colour = factor(.env$str.legend)
+        ),
+        na.rm = TRUE,
+        linewidth = 0.7
+      ) +
+      scale_colour_manual(values = cbbPalette) +
+      guides(
+        colour = guide_legend("Series"),
+        size = guide_legend("Series"),
+        shape = guide_legend("Series")
+      ) +
+      geom_rect(
+        data = datadf_rec,
+        aes(
+          xmin = start,
+          xmax = end,
+          ymin = -Inf,
+          ymax = Inf
+        ),
+        fill = "grey",
+        alpha = 0.3,
+        na.rm = TRUE
+      ) +
+      scale_fill_continuous(name = "V") +
+      #geom_smooth(method = "lm") +
+      ggtitle(titlelabel) +
+      labs(x = paste(xlabel, " (", str.start, ")", sep = ""),
+           y = ylabel) +
+      scale_x_date(limits = xlim) +
+      scale_y_continuous(limits = ylim) +
+      if (b.legend) {
+        if (b.long.legend) {
+          theme(legend.position = "right",
+                legend.key.size = unit(1.5, "cm"),)
+        } else{
+          theme(legend.position = "top")
+        }
+      } else{
+        theme(legend.position = "none")
+      }
+    
+    # Apply percentile markers
+    if (!missing(b.percentile)) {
+      # It is present, should it be included?
+      if (b.percentile) {
+        data.stats <-
+          datadf[datadf$date > as.Date(xlim[1]) &
+                   datadf$date < as.Date(xlim[2]), datay]
+        d.quant <- quantile(data.stats, c(0.05, 0.95))
+        my.plot <-
+          my.plot + annotate(
+            "text",
+            label = "5%",
+            x = xlim[1],
+            y = (d.quant[[1]] - abs(d.quant[[1]] * 0.05)),
+            colour = "black",
+            vjust = 1,
+            hjust = 1,
+            size = 3.5
+          )
+        my.plot <-
+          my.plot + geom_hline(
+            yintercept = d.quant[[1]],
+            linetype = "dashed",
+            color = "grey"
+          )
+        my.plot <-
+          my.plot + annotate(
+            "text",
+            label = "95%",
+            x = xlim[1],
+            y = (d.quant[[2]] + abs(d.quant[[1]] * 0.05)),
+            colour = "black",
+            vjust = 0,
+            hjust = 1,
+            size = 3.5
+          )
+        my.plot <-
+          my.plot + geom_hline(
+            yintercept = d.quant[[2]],
+            linetype = "dashed",
+            color = "grey"
+          )
+      }
+    }
+    
+    return(my.plot)
+  }
 
 
 #' Plot a single series bench mark
@@ -1711,3 +1691,148 @@ plot_three_series_sec_axis <- function(
   if (print_plot) print(my.plot)
   invisible(my.plot)
 }
+
+#' Overlay aligned segments of a time series by start date
+#'
+#' Slice a single series into multiple segments that begin at user–specified
+#' start dates, align those segments so that each begins at \eqn{t = 0} (months
+#' since start), and overlay them on a single chart. Optionally index-normalize
+#' each segment so their values are comparable (e.g., all start at 100).
+#'
+#' @param datadf A data.frame with a \code{date} column (class \code{Date})
+#'   and the series column indicated by \code{datay}.
+#' @param datay Character scalar. Name of the numeric column in \code{datadf}
+#'   to plot (e.g., \code{"UNRATE.Value"}).
+#' @param starts Vector of start dates (Date or coercible) — one for each
+#'   segment to overlay.
+#' @param window_days Integer; number of **days** to include per segment
+#'   (default 365).
+#' @param index_base Numeric or \code{NULL}. If not \code{NULL}, each segment
+#'   is rescaled so that its value at \eqn{t=0} equals \code{index_base}
+#'   (e.g., \code{100}). Default \code{NULL} (no rescaling).
+#' @param ylim Optional numeric length-2 vector giving y-axis limits.
+#' @param title Optional plot title. If \code{NULL}, a title is composed
+#'   from \code{datay}.
+#' @param ylabel Optional y-axis label. If \code{NULL}, uses \code{datay};
+#'   if a helper \code{getPlotYLabel(df.symbols, datay)} exists in the calling
+#'   environment, that will be used instead.
+#' @param bindex Optional boolean for index. If \code{NULL} data is overlaid 
+#'   without indexing
+#'
+#' @return A \code{ggplot} object (invisibly). The plot is also printed.
+#'
+#' @examples
+#' \dontrun{
+#' p <- plotOverlay(
+#'   datadf = df.data,
+#'   datay  = "UNRATE.Value",
+#'   starts = as.Date(c("2001-03-01","2007-12-01","2020-02-01","2022-03-01")),
+#'   window_days = 365L,
+#'   index_base = 100
+#' )
+#' }
+#' @export
+#' Overlay aligned segments of a time series by start date (daily)
+#'
+#' @export
+plotOverlay <- function(datadf,
+                        datay,
+                        starts,
+                        window_days = 365L,
+                        index_base = NULL,
+                        ylim = NULL,
+                        title = NULL,
+                        ylabel = NULL,
+                        bindex = FALSE) {
+  # ---- Validation ----
+  if (!is.data.frame(datadf)) stop("`datadf` must be a data.frame/tibble.")
+  if (!("date" %in% names(datadf))) stop("`datadf` must contain a 'date' column.")
+  if (!is.character(datay) || length(datay) != 1L)
+    stop("`datay` must be a character scalar naming the series column.")
+  if (!(datay %in% names(datadf)))
+    stop(sprintf("Column '%s' not found in `datadf`.", datay))
+  if (!inherits(datadf$date, "Date")) datadf$date <- as.Date(datadf$date)
+  if (anyNA(datadf$date)) stop("`datadf$date` could not be coerced to Date cleanly.")
+  
+  starts <- as.Date(starts)
+  if (anyNA(starts)) stop("`starts` must be Date or coercible to Date (no NA).")
+  if (!is.numeric(window_days) || length(window_days) != 1L || window_days < 1)
+    stop("`window_days` must be a positive integer.")
+  if (!is.null(index_base) && (!is.numeric(index_base) || length(index_base) != 1L))
+    stop("`index_base` must be NULL or a numeric scalar.")
+  
+  if (is.null(ylabel)) ylabel <- datay
+  if (is.null(title))  title  <- paste0(datay, " — Daily Overlayed Segments")
+  
+  # ---- Build long data for plotting ----
+  datadf <- datadf[order(datadf$date), , drop = FALSE]
+  out_list <- vector("list", length(starts))
+  
+  for (i in seq_along(starts)) {
+    s <- starts[i]
+    e <- s + window_days                 # exclusive end
+    seg <- datadf[datadf$date >= s & datadf$date < e, c("date", datay), drop = FALSE]
+    if (!nrow(seg)) next
+    
+    seg$t_days <- as.integer(seg$date - s)
+    
+    # base at day 0 (or first non-NA)
+    base_row <- seg[seg$t_days == 0L & !is.na(seg[[datay]]), , drop = FALSE]
+    if (!nrow(base_row)) {
+      idx <- which(!is.na(seg[[datay]]))
+      if (!length(idx)) next
+      base_row <- seg[idx[1], , drop = FALSE]
+    }
+    base_val <- as.numeric(base_row[[datay]])
+    
+    # Should the data be indexed?
+    if (!is.null(index_base) & bindex ) {
+      seg$value_plot <- (seg[[datay]] / base_val) * index_base
+      ylab_final <- paste0(ylabel, " (Indexed, base=", index_base, ")")
+    } else {
+      seg$value_plot <- seg[[datay]]
+      ylab_final <- ylabel
+    }
+    
+    seg$start_label <- format(s, "%Y-%m-%d")   # <- plain name, no dots
+    out_list[[i]] <- seg[, c("t_days", "value_plot", "start_label")]  # <- write to out_list
+  }
+  
+  df_long <- do.call(rbind, out_list)
+  if (is.null(df_long) || !nrow(df_long))
+    stop("No data found for the provided start dates within the requested window.")
+  
+  # (names already correct: t_days, value_plot, start_label)
+  
+  # ---- Plot ----
+  
+  # Get the palettes:
+  cbbPalette <- getPaletteBlack()
+  cbPalette <- getPaletteGrey()
+
+  # Create the plot  
+  p <- ggplot2::ggplot(
+    df_long,
+    ggplot2::aes(
+      x = t_days,
+      y = value_plot,
+      colour = start_label,
+      group = start_label)
+      ) +
+    ggplot2::geom_line(linewidth = 0.7, na.rm = TRUE) +
+    scale_colour_manual(values = cbbPalette) +
+    ggplot2::scale_x_continuous(name = "Days since start",
+                                breaks = scales::pretty_breaks()) +
+    ggplot2::labs(y = ylab_final, title = title, colour = "Start date") +
+    ggplot2::theme_minimal(base_size = 12) +
+    ggplot2::theme(legend.position = "right")
+  
+  if (!is.null(ylim) && is.numeric(ylim) && length(ylim) == 2L) {
+    p <- p + ggplot2::coord_cartesian(ylim = ylim)
+  }
+  
+  print(p)
+  invisible(p)
+}
+
+
