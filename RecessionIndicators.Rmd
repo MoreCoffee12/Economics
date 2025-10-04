@@ -4581,6 +4581,7 @@ if( exists("lst_syms")){
 }
 
 ```
+GDP should lag payrolls, check out the relationship
 
 ```{r PAYNSA_GDP_YoY, echo=FALSE}
 
