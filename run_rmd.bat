@@ -19,7 +19,7 @@ echo %OUT_DIR%
 REM Run Rmarkdown renderings relative to repo path
 rscript -e "str_out <- '%OUT_DIR%'; rmarkdown::render('%SCRIPT_DIR_F%RecessionIndicators.Rmd', output_dir = str_out)"
 rscript -e "str_out <- '%OUT_DIR%'; rmarkdown::render('%SCRIPT_DIR_F%GDPModels.Rmd', output_dir = str_out)"
-rscript -e "str_out <- '%OUT_DIR%'; rmarkdown::render('%SCRIPT_DIR_F%Historical Relationships.Rm', output_dir = str_out)"
+rscript -e "str_out <- '%OUT_DIR%'; rmarkdown::render('%SCRIPT_DIR_F%Historical Relationships.Rmd', output_dir = str_out)"
 rscript -e "str_out <- '%OUT_DIR%'; rmarkdown::render('%SCRIPT_DIR_F%UnemploymentModels.Rmd', output_dir = str_out)"
 
 REM rscript -e "str_out <- 'C:/Users/Rainy/OneDrive/Documents/IssaquahDynamical/Datasets/2529RS0082_HistEconData'; rmarkdown::render('C:/Users/Rainy/Documents/GitHub/Economics/RecessionIndicators.Rmd', output_dir = str_out)"
