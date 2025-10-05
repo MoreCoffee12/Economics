@@ -7,6 +7,7 @@ output:
     toc: true
     toc_depth: 4
     smart: false
+output_file: "Historical-Relationships.html"
 ---
 
 ```{r setup, echo=FALSE}

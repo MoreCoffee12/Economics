@@ -19,7 +19,6 @@ echo %OUT_DIR%
 REM Run Rmarkdown renderings relative to repo path
 rscript -e "str_out <- '%OUT_DIR%'; rmarkdown::render('%SCRIPT_DIR_F%RecessionIndicators.Rmd', output_dir = str_out)"
 rscript -e "str_out <- '%OUT_DIR%'; rmarkdown::render('%SCRIPT_DIR_F%GDPModels.Rmd', output_dir = str_out)"
-rscript -e "str_out <- '%OUT_DIR%'; rmarkdown::render('%SCRIPT_DIR_F%Historical Relationships.Rmd', output_dir = str_out)"
 rscript -e "str_out <- '%OUT_DIR%'; rmarkdown::render('%SCRIPT_DIR_F%UnemploymentModels.Rmd', output_dir = str_out)"
+rscript -e "str_out <- '%OUT_DIR%'; rmarkdown::render('%SCRIPT_DIR_F%Historical Relationships.Rmd', output_dir = str_out)"
 
-pause
