@@ -30,6 +30,7 @@ library(data.table)
 
 # Call helper functions
 source("plotHelper.r")
+source("modelHelper.r")
 
 ```
 
@@ -700,13 +701,17 @@ training.cor <-
 
 ```{r gdp_define_dates, echo=FALSE, fig.width = 10, fig.asp = .62}
 
+dt_start_prediction_gdp <- as.Date("1976-01-01")
+
 df.gdp.model <-
-  df.data[df.data$date >= dt.start.prediction &
+  df.data[df.data$date >= dt_start_prediction_gdp &
             df.data$date <= dt.end.prediction,]
 
 ```
 
-#### I break the data into three sets: 50% for training, 25% for testing, and 25% for validation.
+#### Partition data for GDP models
+
+I break the data into three sets: 50% for training, 25% for testing, and 25% for validation.
 
 ```{r gdp_partition_data, echo=FALSE, fig.width = 10, fig.asp = .62}
 
@@ -749,14 +754,25 @@ if ( require_columns(df.data, lst_syms ) ){
     preProcess = c('center', 'scale')
   )
 
+  # Call the function to create the fit description
+  res <- extract_lm_weights(list.fit.reg)
+  res$table
+  
+  if( exists("res")){
+    rm(res)
+  }
+
 }
 
 
 ```
 
-#### Perform the pca fit
+#### Perform the principal component regression (PCR) fit
 
-```{r gdp_fit_pca, echo=FALSE, fig.width = 10, fig.asp = .62}
+PCR, or Principal Component Regression, is a two-stage regression technique used
+to handle multicollinearity and high-dimensional data in model training.
+
+```{r gdp_fit_pcr, echo=FALSE, fig.width = 10, fig.asp = .62}
 
 if ( require_columns(df.data, lst_syms ) ){
 
@@ -806,7 +822,7 @@ df.symbols <- symbols_append_row(
       float.expense.ratio = -1.00,
       Max030 = FALSE,
       Max180 = FALSE,
-      date.series.start = dt.start.prediction,
+      date.series.start = dt_start_prediction_gdp,
       date.series.end = as.Date(Sys.Date()),
       string.symbol_safe = safe_symbol_name(str.symbol),
       string.object_name = safe_symbol_name(str.symbol)
@@ -833,7 +849,7 @@ df.symbols <- symbols_append_row(
       float.expense.ratio = -1.00,
       Max030 = FALSE,
       Max180 = FALSE,
-      date.series.start = dt.start.prediction,
+      date.series.start = dt_start_prediction_gdp,
       date.series.end = as.Date(Sys.Date()),
       string.symbol_safe = safe_symbol_name(str.symbolYoY),
       string.object_name = safe_symbol_name(str.symbolYoY)
@@ -925,7 +941,6 @@ df.data[str.symbol.pcr] <-
 
 ```{r gdp_pred_pcr_describe, echo=FALSE, fig.width = 10, fig.asp = .62}
 
-
 list.fit.pcr  
 
 ```
@@ -946,7 +961,7 @@ df.symbols <- symbols_append_row(
       float.expense.ratio = -1.00,
       Max030 = FALSE,
       Max180 = FALSE,
-      date.series.start = dt.start.prediction,
+      date.series.start = dt_start_prediction_gdp,
       date.series.end = as.Date(Sys.Date())
   )
 )
@@ -972,7 +987,7 @@ df.symbols <- symbols_append_row(
       float.expense.ratio = -1.00,
       Max030 = FALSE,
       Max180 = FALSE,
-      date.series.start = dt.start.prediction,
+      date.series.start = dt_start_prediction_gdp,
       date.series.end = as.Date(Sys.Date())
   )
 )
@@ -982,6 +997,8 @@ if( exists("str.description.pcr")){
   rm(str.description.pcr)
 }
 ```
+
+#### Plot GDP predictions
 
 Plot the predicted and actual values
 
@@ -1001,7 +1018,7 @@ myPlot <-
     "GDP Compared to GDP predicted using linear model",
     "Date",
     getPlotYLabel(df.symbols, datay),
-    c(dt.start.prediction, dt.end),
+    c(dt_start_prediction_gdp, dt.end),
     ylim,
     b.legend = TRUE,
     b.percentile = FALSE,
@@ -1092,70 +1109,180 @@ if( exists("lst_syms")){
 
 ```  
 
+
+```{r gdp_pred_plot_long_yoy_fun, echo=FALSE, fig.width = 10, fig.asp = .62} 
+
+#' Plot Nominal and Real GDP Against Model Predictions
+#'
+#' This function generates two vertically stacked ggplot2 plots comparing actual GDP 
+#' and related model predictions over a specified date range. The top plot shows 
+#' year-over-year GDP versus its linear model and PCR-predicted values. 
+#' The bottom plot compares GDPNOW and a linear model based on GDP deflator.
+#'
+#' @param df.data A data frame containing the GDP and model prediction series.
+#' @param df.symbols A data frame or list used to resolve display titles and labels 
+#'        for plotted variables.
+#' @param dfRecession A data frame with recession period shading, passed to `plotSingle()`.
+#' @param dt.start The start date for the plotted time range (as Date).
+#' @param ylim.both A numeric vector of length 2 specifying y-axis limits for both
+#         plots.
+#'
+#' @return A combined grid of two ggplot objects arranged vertically.
+#' @examples
+#' \dontrun{
+#' plot_gdp_models(
+#'   df.data = df.data,
+#'   df.symbols = df.symbols,
+#'   dfRecession = dfRecession,
+#'   dt.start = as.Date("2015-01-01"),
+#'   ylim.both = c(-25, 25)
+#' )
+#' }
+#' @export
+#'
+#' @author Brian Howard
+#' @date 2025-10-05
+plot_gdp_models <- function(df.data,
+                            df.symbols,
+                            dfRecession,
+                            dt.start = as.Date("2015-01-01"),
+                            ylim.both = c(-25, 25)) {
+  dt.end <- Sys.Date()
+
+  #----------------------------#
+  #   Top Plot: GDP YoY Models
+  #----------------------------#
+  lst_syms <- c("GDP.Value__YoY", "GDP.lm_YoY", "GDP.pcr_YoY")
+
+  if (require_columns(df.data, lst_syms)) {
+    p1 <- plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_syms[[1]],
+      "GDP Compared to GDP predicted using linear model",
+      "Date",
+      getPlotYLabel(df.symbols, lst_syms[[1]]),
+      c(dt.start, dt.end),
+      ylim = ylim.both,
+      b.legend = TRUE,
+      b.percentile = FALSE,
+      b.long.legend = TRUE
+    )
+
+    p1 <- p1 +
+      geom_line(
+        data = df.data,
+        aes(
+          x = .data[["date"]],
+          y = .data[[lst_syms[[2]]]],
+          colour = getPlotTitle(df.symbols, lst_syms[[2]])
+        ),
+        na.rm = TRUE
+      ) +
+      geom_line(
+        data = df.data,
+        aes(
+          x = .data[["date"]],
+          y = .data[[lst_syms[[3]]]],
+          colour = getPlotTitle(df.symbols, lst_syms[[3]])
+        ),
+        na.rm = TRUE
+      )
+  }
+
+  #----------------------------------------#
+  #   Bottom Plot: GDPNOW vs Deflator Model
+  #----------------------------------------#
+  lst_syms_bottom <- c("GDPNOW.Value", "GDP.lm.by.GDPDEF_YoY")
+
+  if (require_columns(df.data, lst_syms_bottom)) {
+    p2 <- plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_syms_bottom[[1]],
+      "GDP Compared to GDP predicted using linear model",
+      "Date",
+      getPlotYLabel(df.symbols, lst_syms_bottom[[1]]),
+      c(dt.start, dt.end),
+      ylim = ylim.both,
+      b.legend = TRUE,
+      b.percentile = FALSE,
+      b.long.legend = TRUE
+    )
+
+    p2 <- p2 +
+      geom_line(
+        data = df.data,
+        aes(
+          x = .data[["date"]],
+          y = .data[[lst_syms_bottom[[2]]]],
+          colour = getPlotTitle(df.symbols, lst_syms_bottom[[2]])
+        ),
+        na.rm = TRUE
+      )
+  }
+
+  #----------------------------#
+  #   Combine and Return Plots
+  #----------------------------#
+  if (exists("p1") && exists("p2")) {
+    grid.arrange(p1, p2, ncol = 1, top = "Nominal and Real GDP")
+  } else if (exists("p1")) {
+    print(p1)
+  } else if (exists("p2")) {
+    print(p2)
+  } else {
+    warning("Neither plot could be created — required columns missing.")
+  }
+}
+
+```
+
+This plot exists to show how the regression performs over the full range of data
+considered in the fit.
+
 ```{r gdp_pred_plot_long_yoy, echo=FALSE, fig.width = 10, fig.asp = .62}
 
-datay <- "GDP.Value__YoY"
-datay.aux <- "GDP.lm_YoY"
-datay.aux.1 <- "GDP.pcr_YoY"
-ylim <- c(-50, 50)
-dt.end <- Sys.Date()
-dt.start <- as.Date("2015-01-01")
-p1 <-
-  plotSingle(
-    dfRecession,
-    df.data,
-    "date",
-    datay,
-    "GDP Compared to GDP predicted using linear model",
-    "Date",
-    getPlotYLabel(df.symbols, datay),
-    c(dt.start, dt.end),
-    ylim,
-    b.legend = TRUE,
-    b.percentile = FALSE,
-    b.long.legend = TRUE
-  )
-p1 <- p1 + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay.aux,
-    colour = shQuote(getPlotTitle(df.symbols, datay.aux))
-  ),
-  na.rm = TRUE
-)
-p1 <- p1 + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay.aux.1,
-    colour = shQuote(getPlotTitle(df.symbols, datay.aux.1))
-  ),
-  na.rm = TRUE
+# Define the date range for both plots
+dt_start_plot <- dt_start_prediction_gdp
+
+# Call the function that creates the plot
+plot_gdp_models(
+   df.data = df.data,
+   df.symbols = df.symbols,
+   dfRecession = dfRecession,
+   dt.start = dt_start_plot,
+   ylim.both = c(-20, 20)
 )
 
-datay.1 <- "GDP.lm.by.GDPDEF_YoY"
-datay.aux.1 <- "GDPNOW.Value"
-ylim.1 <- c(-10, 20)
-p2 <- plotSingleQuick(dfRecession, 
-                      df.data, datay.1, 
-                      ylim.1, dt.start = c(dt.start, dt.end), 
-                      b.percentile = FALSE, 
-                      b.legend = TRUE,
-                      b.long.legend = TRUE)
-p2 <- p2 + geom_line(
-    data = df.data,
-    aes_string(x = "date",
-      y = datay.aux.1,
-      colour = shQuote(datay.aux.1)
-    ),
-    na.rm = TRUE
-  )
+if( exists("dt_start_plot")){
+  rm(dt_start_plot)
+}
 
-grid.arrange(p1,
-             p2,
-             ncol = 1,
-             top = "Nominal and real GDP")  
+```
+
+Take a look at the data over the last year
+
+```{r gdp_pred_plot_long_yoy, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+# Define the date range for both plots
+dt_start_plot <- Sys.Date()
+dt_start_plot <- seq(dt.start, length = 2, by = "-1 year")[2]
+
+# Call the function that creates the plot
+plot_gdp_models(
+   df.data = df.data,
+   df.symbols = df.symbols,
+   dfRecession = dfRecession,
+   dt.start = dt_start_plot,
+   ylim.both = c(-20, 20)
+)
+
+if( exists("dt_start_plot")){
+  rm(dt_start_plot)
+}
 
 ```
 
@@ -1170,14 +1297,7 @@ sd.fit.gdp.m = sd(d.test.resid)
 
 ```
 
-Print out the coefficients to see how the linear weights the input values
-
-```{r gdp_lm_resid_calc_desc, echo=FALSE, fig.width = 10, fig.asp = .62}
-
-list.fit.reg$finalModel
-
-```
-
+Look at a histogram of the residual
 
 ```{r gdp_pcr_resid_calc, echo=FALSE, fig.width = 10, fig.asp = .62}
 
@@ -1212,7 +1332,7 @@ df.symbols <- symbols_append_row(
       float.expense.ratio = -1.00,
       Max030 = FALSE,
       Max180 = FALSE,
-      date.series.start = dt.start.prediction,
+      date.series.start = dt_start_prediction_gdp,
       date.series.end = as.Date(Sys.Date()),
       string.symbol_safe = safe_symbol_name(str.symbolYoY),
       string.object_name = safe_symbol_name(str.symbolYoY)
@@ -1247,7 +1367,7 @@ df.symbols <- symbols_append_row(
       float.expense.ratio = -1.00,
       Max030 = FALSE,
       Max180 = FALSE,
-      date.series.start = dt.start.prediction,
+      date.series.start = dt_start_prediction_gdp,
       date.series.end = as.Date(Sys.Date()),
       string.symbol_safe = safe_symbol_name(str.symbolYoY),
       string.object_name = safe_symbol_name(str.symbolYoY)
@@ -1262,7 +1382,7 @@ if( exists("str.symbol.pcr.res")){
 ```
 
 
-Plot the residual  GDP to the linear fit prediction. 
+Plot the residual GDP to the linear fit prediction. 
 
 The residuals decrease quite a bit during the Covid numbers, at least as of Jun 2020. Probably indicates uncertainty in the numbers.
 
