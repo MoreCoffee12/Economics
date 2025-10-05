@@ -784,6 +784,31 @@ if ( require_columns(df.data, lst_syms ) ){
       method = "pcr",
       preProcess = c('center', 'scale')
     )
+    
+    list.fit.pcr  
+  }
+}  
+
+```
+
+
+#### Perform PLS Fit
+If you find that PCR loses predictive power because it ignores the target variable during dimensionality reduction, switch to PLS, which optimizes components to maximize covariance between X and y.
+
+```{r gdp_fit_pls, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+if ( require_columns(df.data, lst_syms ) ){
+
+  if( exists("str_form")){
+    
+    list.fit.pls <- train(
+      str_form,
+      data = df.train,
+      method = "pls",
+      preProcess = c('center', 'scale')
+    )
+    
+    list.fit.pls
   }
 }  
 
@@ -929,6 +954,8 @@ df.symbols <- symbols_append_row(
 
 ### Add linear prediction by PCA to the dataframe
 
+Add the PCA to the main data frame
+
 ```{r gdp_pred_pcr_calc, echo=FALSE, fig.width = 10, fig.asp = .62}
 
 str.symbol.pcr <- "GDP.pcr"
@@ -939,13 +966,7 @@ df.data[str.symbol.pcr] <-
 ```
 
 
-```{r gdp_pred_pcr_describe, echo=FALSE, fig.width = 10, fig.asp = .62}
-
-list.fit.pcr  
-
-```
-
-#### Add the linear model prediction to the symbols table
+#### Add the PCR model prediction to the symbols table
 
 ```{r gdp_pred_add_to_syms, echo=FALSE, fig.width = 10, fig.asp = .62}
 
@@ -968,7 +989,7 @@ df.symbols <- symbols_append_row(
 
 ```
 
-Add the PCA prediction year-over-year growth
+Add the PCR prediction year-over-year growth
 
 ```{r gdp_pred_pcr_yoy, echo=FALSE, fig.width = 10, fig.asp = .62}
 
@@ -998,82 +1019,143 @@ if( exists("str.description.pcr")){
 }
 ```
 
+
+### Add PLS prediction to the dataframe
+
+Add the PLS to the main data frame
+
+```{r gdp_pred_pls_calc, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+str.symbol.pls <- "GDP.pls"
+df.data[str.symbol.pls] <-
+  predict(list.fit.pls, newdata = df.data, ncomp = 1)
+
+```
+
+
+#### Add the PLS model prediction to the symbols table
+
+```{r gdp_pred_add_pls_to_syms, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+str.description.pls <- "PLS regression\nGDP given INDPRO,\nPCE, RSALESAGG, ALTSALES,\nand housing"  
+
+df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = str.symbol.pls,
+      string.source = "Predict",
+      string.description = str.description.pls,
+      string.label.y = getPlotYLabel(df.symbols, "PCE")[1],
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = dt_start_prediction_gdp,
+      date.series.end = as.Date(Sys.Date())
+  )
+)
+
+```
+
+Add the PLS prediction year-over-year growth
+
+```{r gdp_pred_pls_yoy, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+# The YoY calculation for PLS
+str.symbolYoY <- paste(str.symbol.pls, "_YoY", sep = "")
+df.data[str.symbolYoY] <- CalcYoY(df.data, str.symbol.pls, 365)
+
+df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = str.symbolYoY,
+      string.source = "Calc",
+      string.description = paste(str.description.pls, "\nYear over Year", sep =
+                                   ""),
+      string.label.y = "Percent",
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = dt_start_prediction_gdp,
+      date.series.end = as.Date(Sys.Date())
+  )
+)
+
+# Clean and tidy memory  
+if( exists("str.description.pcr")){
+  rm(str.description.pcr)
+}
+```
+
 #### Plot GDP predictions
 
-Plot the predicted and actual values
 
-```{r gdp_pred_plot_long, echo=FALSE, fig.width = 10, fig.asp = .62}
 
-datay <- "GDP.lm"
-datay.aux <- "GDP.pcr"
-datay.aux.1 <- "GDP.Value"
-ylim <- c(0, 35000)
-dt.end <- Sys.Date()
-myPlot <- 
-  plotSingle(
+```{r gdp_pred_plot_fun, echo=FALSE, fig.width = 10, fig.asp = .62} 
+
+#' Plot GDP and Model Predictions
+#'
+#' This function generates a time series plot comparing actual GDP to its 
+#' predicted values from linear, PCR, and PLS regression models.
+#'
+#' @param df.data A data frame containing GDP and model prediction variables.
+#' @param df.symbols A data frame or list used to resolve plot titles and labels.
+#' @param dfRecession A data frame used for shading recession periods in the plot.
+#' @param dt.start The start date of the plotted range (as Date).
+#' @param y_lim_lower define the lower y limit valve (upper is determined from the data).
+#'
+#' @return A ggplot object showing GDP and model comparisons.
+#' @examples
+#' \dontrun{
+#' plot_gdp_predictions(
+#'   df.data = df.data,
+#'   df.symbols = df.symbols,
+#'   dfRecession = dfRecession,
+#'   dt.start = as.Date("2015-01-01"),
+#'   ylim = c(10000, 25000)
+#' )
+#' }
+#' @export
+#'
+#' @author Brian Howard
+#' @date 2025-10-05
+plot_gdp_predictions <- function(df.data,
+                                 df.symbols,
+                                 dfRecession,
+                                 dt.start = as.Date("2015-01-01"),
+                                 y_lim_lower = 10000) {
+
+  # Define series to plot
+  lst_syms <- c("GDP.Value", "GDP.lm", "GDP.pcr", "GDP.pls")
+
+  # Ensure required columns exist
+  if (!require_columns(df.data, lst_syms)) {
+    warning("Required GDP columns are missing from df.data.")
+    return(invisible(NULL))
+  }
+
+  # Define date range
+  dt.end <- Sys.Date()
+  
+  # Define the limits
+  ylim_plot = c(y_lim_lower,  round_up_to(max(df.data[[lst_syms[[1]]]]),1))
+
+  # Create base plot using the first series
+  myPlot <- plotSingle(
     dfRecession,
     df.data,
     "date",
-    datay,
-    "GDP Compared to GDP predicted using linear model",
+    datay = lst_syms[[1]],
+    "GDP Compared to GDP predicted values",
     "Date",
-    getPlotYLabel(df.symbols, datay),
-    c(dt_start_prediction_gdp, dt.end),
-    ylim,
+    getPlotYLabel(df.symbols, lst_syms[[1]]),
+    c(dt.start, dt.end),
+    ylim = ylim_plot,
     b.legend = TRUE,
     b.percentile = FALSE,
     b.long.legend = TRUE
   )
-myPlot <- myPlot + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay.aux,
-    colour = shQuote(getPlotTitle(df.symbols, datay.aux))
-  ),
-  na.rm = TRUE
-)
-myPlot <- myPlot + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay.aux.1,
-    colour = shQuote(getPlotTitle(df.symbols, datay.aux.1))
-  ),
-  na.rm = TRUE
-)
 
-print(myPlot)
-
-```
-  
-  
-Looking at some more recent data points
-
-```{r gdp_pred_plot_near, echo=FALSE, fig.width = 10, fig.asp = .62}
-
-lst_syms <- c("GDP.Value",
-              "GDP.lm",
-              "GDP.pcr")
-if ( require_columns(df.data, lst_syms ) ){
-    
-  dt.end <- Sys.Date()
-  dt.start <- as.Date("2015-01-01")
-  myPlot <-
-    plotSingle(
-      dfRecession,
-      df.data,
-      "date",
-      datay = lst_syms[[1]],
-      "GDP Compared to GDP predicted values",
-      "Date",
-      getPlotYLabel(df.symbols, lst_syms[[1]]),
-      c(dt.start, dt.end),
-      ylim =  c(10000, round_up_to(max(df.data[[lst_syms[[1]]]]),1)),
-      b.legend = TRUE,
-      b.percentile = FALSE,
-      b.long.legend = TRUE
-    )
+  # Add lines for each modeled GDP series
   myPlot <- myPlot + geom_line(
     data = df.data,
     aes(
@@ -1092,20 +1174,53 @@ if ( require_columns(df.data, lst_syms ) ){
     ),
     na.rm = TRUE
   )
-  
+  myPlot <- myPlot + geom_line(
+    data = df.data,
+    aes(
+      x = .data[["date"]],
+      y = .data[[lst_syms[[4]]]],
+      colour = getPlotTitle(df.symbols, lst_syms[[4]])
+    ),
+    na.rm = TRUE
+  )  
+
+  # Display the plot
   print(myPlot)
 
-  # Clean and tidy memory
-  if( exists("my_plot")){
-    rm(my_plot)  
-  }
-  
+  # Return the plot object for reuse or saving
+  invisible(myPlot)
 }
 
-# Clean and tidy memory
-if( exists("lst_syms")){
-  rm(lst_syms)
-}
+
+```
+
+
+Plot out the results across the entire range of fit.
+
+```{r gdp_pred_plot_long, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+plot_gdp_predictions(
+   df.data = df.data,
+   df.symbols = df.symbols,
+   dfRecession = dfRecession,
+   dt.start = dt_start_prediction_gdp,
+   y_lim_lower = 0
+)
+
+```
+  
+  
+Looking at some more recent data points
+
+```{r gdp_pred_plot_near, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+plot_gdp_predictions(
+   df.data = df.data,
+   df.symbols = df.symbols,
+   dfRecession = dfRecession,
+   dt.start = as.Date("2015-01-01"),
+   y_lim_lower = 10000
+)
 
 ```  
 
@@ -1265,11 +1380,11 @@ if( exists("dt_start_plot")){
 
 Take a look at the data over the last year
 
-```{r gdp_pred_plot_long_yoy, echo=FALSE, fig.width = 10, fig.asp = .62}
+```{r gdp_pred_plot_short_yoy, echo=FALSE, fig.width = 10, fig.asp = .62}
 
 # Define the date range for both plots
 dt_start_plot <- Sys.Date()
-dt_start_plot <- seq(dt.start, length = 2, by = "-1 year")[2]
+dt_start_plot <- seq(dt_start_plot, length = 2, by = "-1 year")[2]
 
 # Call the function that creates the plot
 plot_gdp_models(
