@@ -1692,58 +1692,42 @@ plot_three_series_sec_axis <- function(
   invisible(my.plot)
 }
 
-#' Overlay aligned segments of a time series by start date
+#' Overlay aligned daily segments with pre-start context
 #'
-#' Slice a single series into multiple segments that begin at user–specified
-#' start dates, align those segments so that each begins at \eqn{t = 0} (months
-#' since start), and overlay them on a single chart. Optionally index-normalize
-#' each segment so their values are comparable (e.g., all start at 100).
+#' Slice a single series into segments around user-specified start dates,
+#' aligning each so \eqn{t = 0} is the start date. The x-axis runs from
+#' \eqn{-prev\_days} to \eqn{+window\_days}. Optionally index-normalize each
+#' segment so values start at a common base (e.g., 100).
 #'
-#' @param datadf A data.frame with a \code{date} column (class \code{Date})
-#'   and the series column indicated by \code{datay}.
-#' @param datay Character scalar. Name of the numeric column in \code{datadf}
-#'   to plot (e.g., \code{"UNRATE.Value"}).
-#' @param starts Vector of start dates (Date or coercible) — one for each
-#'   segment to overlay.
-#' @param window_days Integer; number of **days** to include per segment
-#'   (default 365).
-#' @param index_base Numeric or \code{NULL}. If not \code{NULL}, each segment
-#'   is rescaled so that its value at \eqn{t=0} equals \code{index_base}
-#'   (e.g., \code{100}). Default \code{NULL} (no rescaling).
-#' @param ylim Optional numeric length-2 vector giving y-axis limits.
-#' @param title Optional plot title. If \code{NULL}, a title is composed
-#'   from \code{datay}.
-#' @param ylabel Optional y-axis label. If \code{NULL}, uses \code{datay};
-#'   if a helper \code{getPlotYLabel(df.symbols, datay)} exists in the calling
-#'   environment, that will be used instead.
-#' @param bindex Optional boolean for index. If \code{NULL} data is overlaid 
-#'   without indexing
+#' @param datadf Data frame with a \code{date} column (class \code{Date})
+#'   and the series column named by \code{datay}.
+#' @param datay Character scalar; column name to plot (e.g., "UNRATE.Value").
+#' @param starts Vector of start dates (Date or coercible) — one per segment.
+#' @param window_days Integer; number of days **after** each start to include
+#'   (default \code{365L}).
+#' @param prev_days Integer; number of days **before** each start to include
+#'   (default \code{0L}).
+#' @param index_base Numeric or \code{NULL}. If not \code{NULL} and
+#'   \code{bindex = TRUE}, each segment is rescaled so its value at \eqn{t=0}
+#'   equals \code{index_base} (e.g., 100). Default \code{NULL}.
+#' @param ylim Optional numeric length-2 vector for y-axis limits.
+#' @param title Optional character title. If \code{NULL}, a title is composed.
+#' @param ylabel Optional y-axis label. Defaults to \code{datay}.
+#' @param bindex Logical; if \code{TRUE} and \code{index_base} not \code{NULL},
+#'   segments are index-normalized. Default \code{FALSE}.
 #'
-#' @return A \code{ggplot} object (invisibly). The plot is also printed.
-#'
-#' @examples
-#' \dontrun{
-#' p <- plotOverlay(
-#'   datadf = df.data,
-#'   datay  = "UNRATE.Value",
-#'   starts = as.Date(c("2001-03-01","2007-12-01","2020-02-01","2022-03-01")),
-#'   window_days = 365L,
-#'   index_base = 100
-#' )
-#' }
-#' @export
-#' Overlay aligned segments of a time series by start date (daily)
-#'
+#' @return Invisibly, a \code{ggplot} object; the plot is also printed.
 #' @export
 plotOverlay <- function(datadf,
                         datay,
                         starts,
                         window_days = 365L,
-                        index_base = NULL,
-                        ylim = NULL,
-                        title = NULL,
-                        ylabel = NULL,
-                        bindex = FALSE) {
+                        prev_days   = 0L,
+                        index_base  = NULL,
+                        ylim        = NULL,
+                        title       = NULL,
+                        ylabel      = NULL,
+                        bindex      = FALSE) {
   # ---- Validation ----
   if (!is.data.frame(datadf)) stop("`datadf` must be a data.frame/tibble.")
   if (!("date" %in% names(datadf))) stop("`datadf` must contain a 'date' column.")
@@ -1751,88 +1735,109 @@ plotOverlay <- function(datadf,
     stop("`datay` must be a character scalar naming the series column.")
   if (!(datay %in% names(datadf)))
     stop(sprintf("Column '%s' not found in `datadf`.", datay))
+  
   if (!inherits(datadf$date, "Date")) datadf$date <- as.Date(datadf$date)
   if (anyNA(datadf$date)) stop("`datadf$date` could not be coerced to Date cleanly.")
   
   starts <- as.Date(starts)
   if (anyNA(starts)) stop("`starts` must be Date or coercible to Date (no NA).")
+  
   if (!is.numeric(window_days) || length(window_days) != 1L || window_days < 1)
     stop("`window_days` must be a positive integer.")
+  if (!is.numeric(prev_days) || length(prev_days) != 1L || prev_days < 0)
+    stop("`prev_days` must be a non-negative integer.")
+  
   if (!is.null(index_base) && (!is.numeric(index_base) || length(index_base) != 1L))
     stop("`index_base` must be NULL or a numeric scalar.")
-  
   if (is.null(ylabel)) ylabel <- datay
   if (is.null(title))  title  <- paste0(datay, " — Daily Overlayed Segments")
   
-  # ---- Build long data for plotting ----
-  datadf <- datadf[order(datadf$date), , drop = FALSE]
+  # Label once
+  ylab_final <- if (isTRUE(bindex) && !is.null(index_base)) {
+    paste0(ylabel, " (Indexed, base=", index_base, ")")
+  } else {
+    ylabel
+  }
+  
+  # ---- Build long data ----
+  datadf   <- datadf[order(datadf$date), , drop = FALSE]
   out_list <- vector("list", length(starts))
   
   for (i in seq_along(starts)) {
     s <- starts[i]
-    e <- s + window_days                 # exclusive end
-    seg <- datadf[datadf$date >= s & datadf$date < e, c("date", datay), drop = FALSE]
+    # inclusive window: [s - prev_days, s + window_days)
+    beg <- s - prev_days
+    end <- s + window_days
+    
+    seg <- datadf[datadf$date >= beg & datadf$date < end, c("date", datay), drop = FALSE]
     if (!nrow(seg)) next
     
-    seg$t_days <- as.integer(seg$date - s)
+    seg$t_days <- as.integer(seg$date - s)  # negative before start, 0 at start, positive after
     
-    # base at day 0 (or first non-NA)
+    # Base value at t == 0 (or first non-NA after 0 if missing on the exact date)
     base_row <- seg[seg$t_days == 0L & !is.na(seg[[datay]]), , drop = FALSE]
     if (!nrow(base_row)) {
-      idx <- which(!is.na(seg[[datay]]))
+      idx <- which(seg$t_days >= 0L & !is.na(seg[[datay]]))
       if (!length(idx)) next
       base_row <- seg[idx[1], , drop = FALSE]
     }
     base_val <- as.numeric(base_row[[datay]])
     
-    # Should the data be indexed?
-    if (!is.null(index_base) & bindex ) {
+    if (isTRUE(bindex) && !is.null(index_base)) {
+      if (isTRUE(base_val == 0)) next
       seg$value_plot <- (seg[[datay]] / base_val) * index_base
-      ylab_final <- paste0(ylabel, " (Indexed, base=", index_base, ")")
     } else {
       seg$value_plot <- seg[[datay]]
-      ylab_final <- ylabel
     }
     
-    seg$start_label <- format(s, "%Y-%m-%d")   # <- plain name, no dots
-    out_list[[i]] <- seg[, c("t_days", "value_plot", "start_label")]  # <- write to out_list
+    seg <- seg[is.finite(seg$value_plot), , drop = FALSE]
+    if (!nrow(seg)) next
+    
+    seg$start_label <- format(s, "%Y-%m-%d")
+    out_list[[i]] <- seg[, c("t_days", "value_plot", "start_label")]
   }
   
   df_long <- do.call(rbind, out_list)
   if (is.null(df_long) || !nrow(df_long))
-    stop("No data found for the provided start dates within the requested window.")
+    stop("No data found for the provided start windows (check `starts`, `prev_days`, `window_days`).")
   
-  # (names already correct: t_days, value_plot, start_label)
+  # ---- Palette (fallback-safe) ----
+  pal <- if (exists("colorblind_palettes", mode = "function")) {
+    colorblind_palettes()$cbbPalette
+  } else {
+    c("#000000","#E69F00","#56B4E9","#009E73","#F0E442","#0072B2","#D55E00","#CC79A7")
+  }
+  pal <- rep_len(pal, length(unique(df_long$start_label)))
   
   # ---- Plot ----
-  
-  # Get the palettes:
-  cbbPalette <- getPaletteBlack()
-  cbPalette <- getPaletteGrey()
-
-  # Create the plot  
   p <- ggplot2::ggplot(
     df_long,
-    ggplot2::aes(
-      x = t_days,
-      y = value_plot,
-      colour = start_label,
-      group = start_label)
-      ) +
+    ggplot2::aes(x = t_days, y = value_plot, colour = start_label, group = start_label)
+  ) +
     ggplot2::geom_line(linewidth = 0.7, na.rm = TRUE) +
-    scale_colour_manual(values = cbbPalette) +
-    ggplot2::scale_x_continuous(name = "Days since start",
-                                breaks = scales::pretty_breaks()) +
+    ggplot2::scale_colour_manual(values = pal) +
+    ggplot2::scale_x_continuous(
+      name   = "Days relative to start (t = 0)",
+      limits = c(-prev_days, window_days),
+      breaks = scales::pretty_breaks()
+    ) +
     ggplot2::labs(y = ylab_final, title = title, colour = "Start date") +
     ggplot2::theme_minimal(base_size = 12) +
     ggplot2::theme(legend.position = "right")
   
   if (!is.null(ylim) && is.numeric(ylim) && length(ylim) == 2L) {
-    p <- p + ggplot2::coord_cartesian(ylim = ylim)
+    rng <- range(df_long$value_plot, na.rm = TRUE)
+    if (ylim[2] < rng[1] || ylim[1] > rng[2]) {
+      warning(sprintf("`ylim` (%.3f, %.3f) excludes all data (range %.3f–%.3f); ignoring it.",
+                      ylim[1], ylim[2], rng[1], rng[2]))
+    } else {
+      p <- p + ggplot2::coord_cartesian(ylim = ylim)
+    }
   }
   
   print(p)
   invisible(p)
 }
+
 
 
