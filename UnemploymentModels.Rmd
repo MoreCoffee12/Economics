@@ -410,7 +410,8 @@ if( exists("lst_syms")){
 
 ```
 
-Compare periods of unemployment trends
+Compare periods of unemployment trends by overlaying them. In this first, the
+code does not normalize the values.
 
 ```{r U3_overlay_plot, echo=FALSE, fig.width = 10, fig.asp = .62}
 
@@ -424,9 +425,10 @@ if ( require_columns(df.data, lst_syms ) ){
     datadf = df.data,
     datay  = lst_syms[[1]],
     starts = as.Date(c(
-      "1969-05-01","1979-05-01", "1989-06-01", "2000-07-01", "2007-12-01", "2023-02-01"
+      "1969-05-01","1979-05-01", "1989-06-01", "2000-07-01", "2007-6-01", "2023-02-01"
     )),
     window_days = 365*3,
+    prev_days = 365*2,
     index_base = 100,
     ylim = c(3, 10)
   )
@@ -446,7 +448,44 @@ if( exists("lst_syms")){
 }
 
 ```
+
+Lets take a look at the unemployment data, normalized
+
+```{r U3_overlay_plot_norm, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+# Define the symbols in the plot
+lst_syms <- c("UNRATE.Value", "ICSA__by__CLF16OV__lm__POPTHM")
+
+# Do they exist in the data frame?
+if ( require_columns(df.data, lst_syms ) ){
   
+  my_plot <- plotOverlay(
+    datadf = df.data,
+    datay  = lst_syms[[1]],
+    starts = as.Date(c(
+      "1969-05-01","1979-05-01", "1989-06-01", "2000-07-01", "2007-6-01", "2023-02-01"
+    )),
+    window_days = 365*3,
+    prev_days = 365*2,
+    index_base = 100,
+    bindex = TRUE
+  )
+
+  #print(my_plot)
+  
+  # Free up memory
+  if( exists("my_plot")){
+    rm(my_plot)
+  }
+  
+}
+
+# Free up memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
+
+```
   
 ```{r lf.lm.ICSA.norm.plot, echo=FALSE, fig.width = 10, fig.asp = .62}
 
