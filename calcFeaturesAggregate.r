@@ -2,13 +2,13 @@
 
 
 # Loans + reserves to compare to deposits
-lst.sym <- c("TOTLLNSA.Value", "WRESBAL.Value")
-if ( require_columns(df.data, lst.sym ) ){
+list.sym <- c("TOTLLNSA.Value", "WRESBAL.Value")
+if ( require_columns(df.data, list.sym ) ){
 
   # Define the new symbol and make the calculation
   str.symbol.new <- "TOTLLNSA__plus__WRESBAL"
   df.data[[str.symbol.new]] <- 
-    ( df.data[[lst.sym[[1]]]] + df.data[[lst.sym[[2]]]] )
+    ( df.data[[list.sym[[1]]]] + df.data[[list.sym[[2]]]] )
 
   # Update the symbols table    
   df.symbols <- symbols_append_row(
@@ -37,7 +37,7 @@ if ( require_columns(df.data, lst.sym ) ){
 }
 
 # Free up memory
-rm(lst.sym)
+rm(list.sym)
 
 # Compare GDP growth the 1-year treasury
 if ( require_columns(df.data, c("GDP_YoY", "DGS1") ) ){
@@ -175,13 +175,13 @@ if ( require_columns(df.data, c("X_GSPC.GSPC.Open", "X_GSPC.GSPC.Open__mva200") 
 }
 
 # S&P 200 day SMA minus 50 day SMA
-lst.syms <- c("X_GSPC.GSPC.Open__mva050", "X_GSPC.GSPC.Open__mva200")
-if ( require_columns(df.data, lst.syms ) ){
+list.sym <- c("X_GSPC.GSPC.Open__mva050", "X_GSPC.GSPC.Open__mva200")
+if ( require_columns(df.data, list.sym ) ){
 
   # Define the new symbol and make the calculation
   str.symbol.new <- "GSPC__Open__mva050__minus__mva200"
   df.data[[str.symbol.new]] <- 
-    df.data[[lst.syms[[1]]]] - df.data[[lst.syms[[2]]]]
+    df.data[[list.sym[[1]]]] - df.data[[list.sym[[2]]]]
 
   # Update the symbols table    
   df.symbols <- symbols_append_row(
@@ -194,13 +194,13 @@ if ( require_columns(df.data, lst.syms ) ){
       float.expense.ratio = -1.00,
       date.series.start = as.Date(max(
         c(
-          df.symbols$date.series.start[df.symbols$string.symbol == lst.syms[[1]]],
-          df.symbols$date.series.start[df.symbols$string.symbol == lst.syms[[2]]]
+          df.symbols$date.series.start[df.symbols$string.symbol == list.sym[[1]]],
+          df.symbols$date.series.start[df.symbols$string.symbol == list.sym[[2]]]
         )
       )) ,
       date.series.end = as.Date(min(
-        c(df.symbols$date.series.end[df.symbols$string.symbol == lst.syms[[1]]],
-          df.symbols$date.series.end[df.symbols$string.symbol == lst.syms[[2]]])
+        c(df.symbols$date.series.end[df.symbols$string.symbol == list.sym[[1]]],
+          df.symbols$date.series.end[df.symbols$string.symbol == list.sym[[2]]])
       )),
       string.symbol_safe = safe_symbol_name(str.symbol.new),
       string.object_name = safe_symbol_name(str.symbol.new)
@@ -214,16 +214,16 @@ if ( require_columns(df.data, lst.syms ) ){
 }
 
 # Tidy memory
-rm(lst.syms)
+rm(list.sym)
 
 # Trading signal based on S&P 50 day SMA minus 200 day SMA
-lst.syms <- c("GSPC__Open__mva050__minus__mva200")
-if ( require_columns(df.data, lst.syms) ){
+list.sym <- c("GSPC__Open__mva050__minus__mva200")
+if ( require_columns(df.data, list.sym) ){
 
   # Define the new symbol and make the calculation
   str.symbol.new <- "GSPC__Open__mva050__mva200__sig"
   df.data[[str.symbol.new]] <-
-    as.numeric( df.data[[lst.syms[[1]]]] > 0 )
+    as.numeric( df.data[[list.sym[[1]]]] > 0 )
   
   # Update the symbols table    
   df.symbols <- symbols_append_row(
@@ -248,7 +248,7 @@ if ( require_columns(df.data, lst.syms) ){
 }
 
 # Tidy memory
-rm(lst.syms)
+rm(list.sym)
 
 # These are dashboard metrics
 getRecentHighCol <- function(iDays) {
@@ -517,7 +517,7 @@ if ( require_columns(df.data, list.sym ) ){
 
   
 }else{
-  print(paste("Failed to find: ", lst.syms))  
+  print(paste("Failed to find: ", list.sym))  
 }
 
 # Clean and tidy memory
@@ -560,10 +560,12 @@ if ( require_columns(df.data, list.sym ) ){
   )  
   
   # Tidy memory
-  rm(str.symbol.new)
+  if( exists("str.symbol.new")){
+    rm(str.symbol.new)
+  }
 
 }else{
-  print(paste("Failed to find: ", lst.syms))  
+  print(paste("Failed to find: ", list.sym))  
 }
 
 # Clean and tidy memory
@@ -611,7 +613,7 @@ if ( require_columns(df.data, list.sym ) ){
   }
   
 }else{
-  print(paste("Failed to find: ", lst.syms))  
+  print(paste("Failed to find: ", list.sym))  
 }
 
 # Clean and tidy memory
@@ -920,13 +922,13 @@ if ( require_columns(df.data, c("DGS10TOTB3MS") ) ){
 }
 
 # Gross Private Domestic Investment to GDP
-lst.sym <- c("GDP.Value", "GDPI.Value")
-if ( require_columns(df.data, lst.sym ) ){
+list.sym <- c("GDP.Value", "GDPI.Value")
+if ( require_columns(df.data, list.sym ) ){
 
   # Define the new symbol and make the calculation
   str.symbol.new <- "GPDI__by__GDP"
   df.data[[str.symbol.new]] <- 
-    ( df.data[[lst.sym[[1]]]] / df.data[[lst.sym[[2]]]] )
+    ( df.data[[list.sym[[1]]]] / df.data[[list.sym[[2]]]] )
   df.data[[str.symbol.new]] <- na.approx(df.data[[str.symbol.new]], rule = 2)
   
   # Update the symbols table    
@@ -958,7 +960,7 @@ if ( require_columns(df.data, lst.sym ) ){
 }
 
 # Clean up memory
-rm(lst.sym)
+rm(list.sym)
 
 
 #--------------------------------------------------------------------------
@@ -966,13 +968,13 @@ rm(lst.sym)
 #--------------------------------------------------------------------------
 
 # returns for base case (S&P 500)
-lst.syms <- c("X_GSPC.GSPC.Close")
+list.sym <- c("X_GSPC.GSPC.Close")
 
-if ( require_columns( df.data, lst.syms ) ){
+if ( require_columns( df.data, list.sym ) ){
 
   # Define the new symbol and make the calculation
   str.symbol.new <- "retBase"
-  df.data[[str.symbol.new]] <- ROC(df.data[[lst.syms[[1]]]])
+  df.data[[str.symbol.new]] <- ROC(df.data[[list.sym[[1]]]])
   df.data[[str.symbol.new]][is.na(df.data[[str.symbol.new]])] <- 0
   
   # Update the symbols table    
@@ -1000,7 +1002,7 @@ if ( require_columns( df.data, lst.syms ) ){
 }
 
 # Tidy up
-rm(lst.syms)
+rm(list.sym)
 
 # returns for 3-month t-bills (assumed to be short position)
 if ( require_columns(df.data, c("TB3MS") ) ){
