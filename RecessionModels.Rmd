@@ -1,0 +1,366 @@
+---
+title: "RecessionModels"
+author: "Brian Howard"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 4
+    smart: false
+output_file: "RecessionModels.html"    
+---
+
+```{r setup, echo=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+options("getSymbols.warning4.0"=FALSE)
+
+```
+
+```{r libraries, echo=FALSE, message=FALSE}
+
+library(tidyverse)
+library(tidyquant)
+library(Hmisc)
+library(gridExtra)
+library(signal)
+library(caret)
+library(data.table)
+library(lubridate)
+#install.packages("NeuralNetTools")
+library(NeuralNetTools)
+
+```
+
+```{r helper functions, echo=FALSE}
+
+# Call helper functions
+source("plotHelper.r")
+source("modelHelper.r")
+
+```
+
+
+```{r load.data, echo=FALSE}
+
+str.data.dir <- "C:/Users/Rainy/OneDrive/Documents/IssaquahDynamical/Datasets/2529RS0082_HistEconData"
+out.file <- file.path(str.data.dir, "RecessionIndicator_Buffer.RData")
+
+# Load data
+load(out.file)
+
+rm(str.data.dir)
+rm(out.file)
+
+```
+
+
+```{r plot.limits, echo=FALSE}
+
+# Define the plotting ranges
+dt.recent = as.Date("2017-01-01")
+
+# Define the start of the prediction
+dt.start.prediction <- as.Date("01/02/1962", "%d/%m/%Y")
+
+# Back test range
+dt_start_back_test = as.Date('1960-01-01')
+
+# Define the S&P 500 limits
+source("SetGSPCMax.r")
+
+```
+
+```{r clean_data, echo=FALSE}
+
+# Keep only the symbols needed by this code
+df.symbols <- dplyr::filter(df.symbols,
+                            string.symbol %in% c("USREC",
+                                                 "GDP",
+                                                 "GDPC1",
+                                                 "CPROFIT",
+                                                 "NPPTTL",
+                                                 "ADPWNUSNERSA",
+                                                 "CCSA",
+                                                 "PCE",
+                                                 "U6RATE",
+                                                 "UNRATE",
+                                                 "ICSA",
+                                                 "POPTHM",
+                                                 "CLF16OV"))
+
+if( exists("b.refresh.models")){
+  rm(b.refresh.models)
+}
+
+if( exists("bRefresh")){
+  rm(bRefresh)
+}
+
+if( exists("d.income")){
+  rm(d.income)
+}
+
+if( exists("d.Russell.max")){
+  rm(d.Russell.max)
+}
+
+if( exists("dt.date")){
+  rm(dt.date)
+}
+
+if( exists("dt.date.c")){
+  rm(dt.date.c)
+}
+
+if( exists("i.cols")){
+  rm(i.cols)
+}
+
+if( exists("idx")){
+  rm(idx)
+}
+
+if( exists("iDays")){
+  rm(iDays)
+}
+
+if( exists("list.margin.names")){
+  rm(list.margin.names)
+}
+
+if( exists("list.options.names")){
+  rm(list.options.names)
+}
+
+if( exists("str.name")){
+  rm(str.name)
+}
+
+if( exists("str.safe.name")){
+  rm(str.safe.name)
+}
+
+if( exists("str_symbol")){
+  rm(str_symbol)
+}
+
+if( exists("str.symbol")){
+  rm(str.symbol)
+}
+
+if( exists("str_out")){
+  rm(str_out)
+}
+
+if( exists("str.symbol.raw")){
+  rm(str.symbol.raw)
+}
+
+if( exists("str_symbol.raw")){
+  rm(str_symbol.raw)
+}
+
+if( exists("ylimBackTest")){
+  rm(ylimBackTest)
+}
+
+if( exists("df.farm.income")){
+  rm(df.farm.income)
+}
+
+```
+
+## Feature Extraction
+
+With the raw data downloaded, some of the interesting features can be extracted.
+The first step is reconcile the time intervals. Some of the data is released
+monthly and some daily. I chose to interpolate all data to a daily interval. The
+first section of code adds the daily rows to the data frame.
+
+The code performs interpolation for continuous data or carries it forward for
+binary data like the recession indicators.
+
+```{r aggsyms}
+
+source("calcInterpolate.r")
+df.data <- calcInterpolate(df.symbols)
+
+```
+
+## Truncate data
+
+```{r data.trunc, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+# A very few data series do go back to 1854, but most
+# don't even go past WWII so truncate the data frame.
+df.data <- df.data[as.Date(rownames(df.data)) > as.Date("1940-01-01"),]
+
+```
+
+## Create aggregate series
+
+Some analysis requires that two or more series be combined. For example, normallizing debt by GDP to get a sense of the proportion of debt to the total economy helps understand the debt cycle.
+
+```{r create aggregate, echo=FALSE}
+
+source("calcAggregateSeries.r")
+
+```
+
+Year over year, smoothed derivative, and log trends tend to smooth out seasonal variation. It gets used so often that I do this for every series downloaded.
+
+```{r calcsYoYSmoothLog}
+
+source("calcFeatures.r")
+lst.df <- calcFeatures(df.data, df.symbols)
+df.data <- lst.df[[1]]
+df.symbols <- lst.df[[2]]
+
+```
+
+
+```{r calc.features.for.aggregate, echo=FALSE}
+
+# Calculate the features for the aggregated series
+source("calcFeaturesAggregate.r")
+
+```
+
+
+# Recession initiation and termination dates/times
+
+Build the recession and recession initiation dates
+
+```{r recframe}
+
+source("calcRecession.r")
+
+```
+
+# Recession models
+
+## Input data series
+
+The labor market is one of the clearest, most reliable signals of broad economic
+turning points—but it lags.
+
+```{r rec_model_unrate_base, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+# Define the symbols in the plot
+lst_syms <- c("UNRATE.Value", "UNRATE.Value__Smooth")
+
+if (require_columns(df.data, lst_syms)) {
+  ylim <- c(2, 12)
+  b.legend <- TRUE
+  b.percentile <- TRUE
+  myPlot <- plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay = lst_syms[[1]],
+    getPlotTitle(df.symbols, lst_syms[[1]]),
+    "Date",
+    getPlotYLabel(df.symbols, lst_syms[[1]]),
+    c(as.Date("1jan1950", "%d%b%Y"), Sys.Date()),
+    ylim,
+    b.legend,
+    b.percentile
+  )
+  myPlot + geom_line(
+    data = df.data,
+    aes(
+      x = .data[["date"]],
+      y = .data[[lst_syms[[2]]]],
+      colour = getPlotYLabel(df.symbols, lst_syms[[2]])
+    ),
+    na.rm = TRUE
+  )
+}
+
+```
+
+```{r rec_model_GDP_base, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+# Define the symbols in the plot
+lst_syms <- c("GDP.Value")
+
+# Do they exist in the data frame?
+if ( require_columns(df.data, lst_syms ) ){
+
+  my_plot <-
+    plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_syms[[1]],
+      getPlotTitle(df.symbols, lst_syms[[1]]),
+      "Date",
+      getPlotYLabel(df.symbols, lst_syms[[1]]),
+      c(dt.start.prediction, Sys.Date()),
+      ylim = c(1, round_up_to(max(df.data[[lst_syms[[1]]]]),5000)),
+      b.legend = TRUE,
+      b.percentile = FALSE,
+      b.long.legend = TRUE
+    )
+
+  print(my_plot)
+  
+  # Free up memory
+  if( exists("my_plot")){
+    rm(my_plot)
+  }
+}
+
+
+# Free up memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
+
+
+```
+
+```{r rec_model_cprofit_by_gdp_base, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+# Define the symbols in the plot
+lst_syms <- c("CPROFIT__by__GDP")
+
+# Do they exist in the data frame?
+if ( require_columns(df.data, lst_syms ) ){
+
+  my_plot <-
+    plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_syms[[1]],
+      getPlotTitle(df.symbols, lst_syms[[1]]),
+      "Date",
+      getPlotYLabel(df.symbols, lst_syms[[1]]),
+      c(dt.start.prediction, Sys.Date()),
+      ylim = c(5, round_up_to(max(df.data[[lst_syms[[1]]]]),5)),
+      b.legend = TRUE,
+      b.percentile = FALSE,
+      b.long.legend = TRUE
+    )
+
+  print(my_plot)
+  
+  # Free up memory
+  if( exists("my_plot")){
+    rm(my_plot)
+  }
+}
+
+
+# Free up memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
+
+
+```
+
+
+

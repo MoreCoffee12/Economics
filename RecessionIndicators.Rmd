@@ -7,6 +7,10 @@ output:
     toc: true
     toc_depth: 4
     smart: false
+output_file: "RecessionIndicators.html"    
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 ```{r}
@@ -114,16 +118,25 @@ d.Russell.max = 5000
 
 # Introduction
 
-For one of my machine learning classes we had a project that consumed financial data. I have extended that project to use machine learning to see if an indicator, or predictor, can be found that identifies market tops that occur prior to recessions. Then I use the model to build a trading strategy and backtest it to see how it performs.
+For one of my machine learning classes we had a project that consumed
+financial data. I have extended that project to use machine learning to
+see if an indicator, or predictor, can be found that identifies market
+tops that occur prior to recessions. Then I use the model to build a
+trading strategy and backtest it to see how it performs.
 
 # Get Economic and Financial Data
 
-Acquiring the data consists of two steps. First the code pulls the data into zoo objects which are then collapsed into a single data frame (df.data). Features are extracted from these series and added to the df.data data frame.
+Acquiring the data consists of two steps. First the code pulls the data
+into zoo objects which are then collapsed into a single data frame
+(df.data). Features are extracted from these series and added to the
+df.data data frame.
 
 ## Sample call to pull economic data
 
-Data is pulled from several sources include FRED, yahoo, and Google. The code below shows an example that pulls in the consumer price index (CPI) from the FRED. I pull data using quantmod, Quandl, and some manual extractions stored in spreadsheets. 
-
+Data is pulled from several sources include FRED, yahoo, and Google. The
+code below shows an example that pulls in the consumer price index (CPI)
+from the FRED. I pull data using quantmod, Quandl, and some manual
+extractions stored in spreadsheets.
 
 ```{r defsyms, echo=FALSE}
 
@@ -200,7 +213,6 @@ if (bRefresh == TRUE) {
   getSymbols("CPIAUCSL", src = "FRED", auto.assign = TRUE)
 }
 ```
-
 
 ```{r getsyms, echo=FALSE}
 
@@ -371,277 +383,6 @@ if (bRefresh) {
 
 
 ```
-
-
-```{r getQuandl, echo = FALSE}
-
-# # This adds the Quandl symbols and pulls those in.
-# 
-# if(bRefresh) {
-#   # There are a few symbols I wasn't able to include with quantmod so this section uses Quandl to get those data pieces.
-#   
-#   # Get the PMI composite index
-#   str.symbol.raw <- "ISM/MAN_PMI"
-#   df.symbols <-
-#     rbind(
-#       df.symbols,
-#       data.frame(
-#         string.symbol = str.symbol.raw,
-#         string.source = "QUANDL",
-#         string.description = "Institute of Supply Managment PMI Composite Index",
-#         string.label.y = "Index",
-#         float.expense.ratio = -1.00,
-#         date.series.start = as.Date("1900-01-01")  ,
-#         date.series.end = as.Date("1900-01-01")
-#       )
-#     )
-#   # Set the API key
-#   Quandl.api_key('d9LUhcBVPa_8MFdtiFda')
-#   dfPMIComp <-
-#     Quandl(
-#       "ISM/MAN_PMI",
-#       type = "raw",
-#       collapse = "daily",
-#       start_date = "1910-01-01",
-#       end_date = Sys.Date()
-#     )
-#   str.name <-
-#     str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-#   assign(str.name, xts(dfPMIComp[,-1], order.by = dfPMIComp[, 1]))
-#   colnames(ISMMANPMI) <- c(str.name)
-#   df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(dfPMIComp$Date, 1)
-#   df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = dfPMIComp$Date[[1]]
-#   
-#   # PE Ratio for the S&P 500
-#   str.symbol.raw = "MULTPL/SP500_PE_RATIO_MONTH"
-#   df.symbols <-
-#     rbind(
-#       df.symbols,
-#       data.frame(
-#         string.symbol = str.symbol.raw,
-#         string.source = "QUANDL",
-#         string.description =  "S&P 500 TTM P/E",
-#         string.label.y = "Index",
-#         float.expense.ratio = -1.00,
-#         date.series.start = as.Date("1900-01-01")  ,
-#         date.series.end = as.Date("1900-01-01")
-#       )
-#     )
-#   df.temp <- Quandl(
-#     str.symbol.raw,
-#     type = "raw",
-#     collapse = "daily",
-#     start_date = "1910-01-01",
-#     end_date = Sys.Date()
-#   )
-#   
-#   str.name <-
-#     str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-#   assign(str.name, xts(df.temp[, -1], order.by = df.temp[, 1]))
-#   colnames(MULTPLSP500PERATIOMONTH) <- c(str.name)
-#   df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(df.temp$Date, 1)
-#   df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = df.temp$Date[[1]]
-#   
-#   
-#   # S&P 500 sales multiple
-#   str.symbol.raw = "MULTPL/SP500_SALES_QUARTER"
-#   df.symbols <-
-#     rbind(
-#       df.symbols,
-#       data.frame(
-#         string.symbol = str.symbol.raw,
-#         string.source = "QUANDL",
-#         string.description =  "S&P 500 TTM Sales\n(Not Inflation Adjusted)",
-#         string.label.y = "Index",
-#         float.expense.ratio = -1.00,
-#         date.series.start = as.Date("1900-01-01")  ,
-#         date.series.end = as.Date("1900-01-01")
-#       )
-#     )
-#   df.temp <-
-#     oil_daily <- Quandl(
-#       str.symbol.raw,
-#       type = "raw",
-#       collapse = "daily",
-#       start_date = "1910-01-01",
-#       end_date = Sys.Date()
-#     )
-#   
-#   str.name <-
-#     str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-#   assign(str.name, xts(df.temp[, -1], order.by = df.temp[, 1]))
-#   colnames(MULTPLSP500SALESQUARTER) <- c(str.name)
-#   df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(df.temp$Date, 1)
-#   df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = df.temp$Date[[1]]
-#   
-#   
-#   # S&P 500 Dividend ratio
-#   str.symbol.raw = "MULTPL/SP500_DIV_YIELD_MONTH"
-#   df.symbols <-
-#     rbind(
-#       df.symbols,
-#       data.frame(
-#         string.symbol = str.symbol.raw,
-#         string.source = "QUANDL",
-#         string.description =  "S&P 500 Dividend Yield by Month",
-#         string.label.y = "Percentage",
-#         float.expense.ratio = -1.00,
-#         date.series.start = as.Date("1900-01-01") ,
-#         date.series.end = as.Date("1900-01-01")
-#       )
-#     )
-#   df.temp <-
-#     oil_daily <- Quandl(
-#       str.symbol.raw,
-#       type = "raw",
-#       collapse = "daily",
-#       start_date = "1910-01-01",
-#       end_date = Sys.Date()
-#     )
-#   
-#   str.name <-
-#     str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-#   assign(str.name, xts(df.temp[, -1], order.by = df.temp[, 1]))
-#   colnames(MULTPLSP500DIVYIELDMONTH) <- c(str.name)
-#   df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.start = tail(df.temp$Date, 1)
-#   df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw, ]$date.series.end = df.temp$Date[[1]]
-#   
-#   # S&P 500 dividend yield
-#   str.symbol.raw = "MULTPL/SP500_DIV_MONTH"
-#   df.symbols <-
-#     rbind(
-#       df.symbols,
-#       data.frame(
-#         string.symbol = str.symbol.raw,
-#         string.source = "QUANDL",
-#         string.description =  "S&P 500 Dividend by Month \n (Inflation Adjusted)",
-#         string.label.y = "2018 Dollars",
-#         float.expense.ratio = -1.00,
-#         date.series.start = as.Date("1871-01-01")  ,
-#         date.series.end = as.Date("1900-01-01")
-#       )
-#     )
-#   df.temp <-
-#     Quandl(
-#       str.symbol.raw,
-#       type = "raw",
-#       collapse = "daily",
-#       start_date = "1871-01-01",
-#       end_date = Sys.Date()
-#     )
-#   
-#   str.name <-
-#     str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-#   assign(str.name, xts(df.temp[,-1], order.by = df.temp[, 1]))
-#   colnames(MULTPLSP500DIVMONTH) <- c(str.name)
-#   df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw,]$date.series.start = tail(df.temp$Date, 1)
-#   df.symbols[df.symbols[, "string.symbol"] == str.symbol.raw,]$date.series.end = df.temp$Date[[1]]
-#   
-#   # Copper prices
-#   str.symbol.raw = "CHRIS/CME_HG1"
-#   df.symbols <-
-#     rbind(
-#       df.symbols,
-#       data.frame(
-#         string.symbol = str.symbol.raw,
-#         string.source = "QUANDL",
-#         string.description =  "Copper Futures, Continuous Contract #1 (HG1) \n(Front Month)",
-#         string.label.y = "Dollars/pound",
-#         float.expense.ratio = -1.00,
-#         date.series.start = as.Date("1871-01-01")  ,
-#         date.series.end = as.Date("1900-01-01")
-#       )
-#     )
-#   df.temp <- Quandl(
-#     str.symbol.raw,
-#     type = "raw",
-#     collapse = "daily",
-#     start_date = "1871-01-01",
-#     end_date = Sys.Date()
-#   )
-#   # Needed because this series include open, close, high, low, etc.
-#   df.temp <-
-#     df.temp[, (colnames(df.temp) == 'Open') |
-#              (colnames(df.temp) == 'Date')]
-#   # This series also has zero values. Not sure why, tho.
-#   df.temp[df.temp == 0] = NA
-#   str.name <-
-#     str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-#   assign(str.name, xts(df.temp[, -1], order.by = df.temp[, 1]))
-#   colnames(CHRISCMEHG1) <- c(str.name)
-#   
-#   # Air freight data
-#   str.symbol.raw = "WWDI/WLD_IS_AIR_GOOD_MT_K1"
-#   df.symbols <-
-#     rbind(
-#       df.symbols,
-#       data.frame(
-#         string.symbol = str.symbol.raw,
-#         string.source = "QUANDL",
-#         string.description =  "Air transport, freight",
-#         string.label.y = "million ton-km",
-#         float.expense.ratio = -1.00,
-#         date.series.start = as.Date("1871-01-01") ,
-#         date.series.end = as.Date("1900-01-01")
-#       )
-#     )
-#   df.temp <- Quandl(
-#     str.symbol.raw,
-#     type = "raw",
-#     collapse = "daily",
-#     start_date = "1973-12-31",
-#     end_date = Sys.Date()
-#   )
-#   
-#   str.name <-
-#     str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-#   assign(str.name, xts(df.temp[, -1], order.by = df.temp[, 1]))
-#   colnames(WWDIWLDISAIRGOODMTK1) <- c(str.name)
-#   
-#   # Gold prices. site: https://data.nasdaq.com/data/LBMA/GOLD
-#   str.symbol.raw = "LBMA/GOLD"
-#   df.temp <- Quandl(
-#     str.symbol.raw,
-#     type = "raw",
-#     collapse = "daily",
-#     start_date = "1871-01-01",
-#     end_date = Sys.Date()
-#   )
-#   
-#   # Update the symbol table
-#   df.symbols <-
-#     rbind(
-#       df.symbols,
-#       data.frame(
-#         string.symbol = str.symbol.raw,
-#         string.source = "QUANDL",
-#         string.description = "Gold Price: London Fixings,\nLondon Bullion Market Association (LBMA).\n",
-#         string.label.y = "USD/ounce (PM)",
-#         float.expense.ratio = -1.00,
-#         date.series.start = as.Date("1871-01-01")  ,
-#         date.series.end = as.Date("1900-01-01")
-#       )
-#     )
-#   
-#   # Make the name safe
-#   str.name <- str_replace_all(tail(df.symbols, 1)$string.symbol, "[^[:alnum:]]", "")
-# 
-#   # Update the column names to include the ticker symbol. This triggers 
-#   # unique handling later.
-#   lst_cols <- colnames(df.temp)
-#   lst_cols <- str_replace_all(lst_cols, " ", "")
-#   lst_cols <- str_replace_all(lst_cols, "\\(", "_")
-#   lst_cols <- str_replace_all(lst_cols, "\\)", "")
-#   colnames(df.temp) <-
-#     paste(str.name, ".", lst_cols , sep = "")
-#   
-#   # Create the xts object from the dataframe
-#   assign(str.name, xts(df.temp[, -1], order.by = df.temp[, 1]))
-# 
-# }
-
-```
-
 
 ## Load up the EIA data
 
@@ -916,13 +657,19 @@ The Baker Hughes rig count numbers
 ```{r bkr.rig.count.load, echo=FALSE}
 
 if(bRefresh){
-  
-  # Manually change dirs for testing
-  #setwd('C:/Users/Rainy/OneDrive/Documents/Hobby/GitHub/Economics')
+
+  # Set the path
+  rig_path <- file.path(str.data.dir,
+                        "Oil Rigs/North America Rotary Rig Count (Jan 2000 - Current).xlsx")
   
   # Read in the data
-  df.rig.raw <- data.frame(read_excel('North America Rotary Rig Count (Jan 2000 - Current).xlsx', sheet = "US Oil & Gas Split", skip=5))
+  df.rig.raw <- data.frame(read_excel(rig_path, sheet = "US Oil & Gas Split", skip=5))
   df.rig.raw$Date <- as.Date(df.rig.raw$Date)
+  
+  # Clean up memory
+  if( exists("rig_path")){
+    rm(rig_path)
+  }
   
   # Create the zoo object for total rig count
   str.symbol <- 'BKR/Total'
@@ -1080,7 +827,8 @@ if(bRefresh){
 
 ```
 
-Loading in Silverblatt's S&P 500 spreadsheet starting with the quarterly data.
+Loading in Silverblatt's S&P 500 spreadsheet starting with the quarterly
+data.
 
 ```{r silverblatt.data, echo=FALSE}
 
@@ -1395,7 +1143,6 @@ if(bRefresh){
 
 ```
 
-
 ```{r margin.debt.load, echo=FALSE}
 if(bRefresh){
 
@@ -1466,7 +1213,6 @@ if(bRefresh){
 }
 
 ```
-
 
 ```{r options.volume, echo=FALSE }
 
@@ -1542,7 +1288,6 @@ colnames(OCC_NonEquityVolume)[[1]] <- c(str.safe.name)
 
 ```
 
-
 ```{r SaveData, echo=FALSE}
 
 # Either save or load data depending on the flag
@@ -1562,9 +1307,14 @@ if( bRefresh ){
 
 ## Feature Extraction
 
-With the raw data downloaded, some of the interesting features can be extracted. The first step is reconcile the time intervals. Some of the data is released monthly and some daily. I chose to interpolate all data to a daily interval. The first section of code adds the daily rows to the dataframe. 
+With the raw data downloaded, some of the interesting features can be
+extracted. The first step is reconcile the time intervals. Some of the
+data is released monthly and some daily. I chose to interpolate all data
+to a daily interval. The first section of code adds the daily rows to
+the dataframe.
 
-The code performs interpolation for continuous data or carries it forward for binary data like the recession indicators.
+The code performs interpolation for continuous data or carries it
+forward for binary data like the recession indicators.
 
 ```{r aggsyms}
 
@@ -1583,10 +1333,11 @@ df.data <- df.data[as.Date(rownames(df.data)) > as.Date("1950-01-01"),]
 
 ```
 
-
 ## Create aggregate series
 
-Some analysis requires that two or more series be combined. For example, normalizing debt by GDP to get a sense of the proportion of debt to the total economy helps understand the debt cycle.
+Some analysis requires that two or more series be combined. For example,
+normalizing debt by GDP to get a sense of the proportion of debt to the
+total economy helps understand the debt cycle.
 
 ```{r create aggregate, echo=FALSE}
 
@@ -1594,7 +1345,9 @@ source("calcAggregateSeries.r")
 
 ```
 
-Year over year, smoothed derivative, and log trends tend to smooth out seasonal variation. It gets used so often that I do this for every series downloaded.
+Year over year, smoothed derivative, and log trends tend to smooth out
+seasonal variation. It gets used so often that I do this for every
+series downloaded.
 
 ```{r calcsYoYSmoothLog}
 
@@ -1603,7 +1356,6 @@ lst.df <- calcFeatures(df.data, df.symbols)
 df.data <- lst.df[[1]]
 df.symbols <- lst.df[[2]]
 ```
-
 
 ```{r calc.features.for.aggregate, echo=FALSE}
 
@@ -1681,17 +1433,23 @@ rm(out.file)
 
 ```
 
-
 # Summary calculations
 
 These values are used below
 
 # Conclusion
 
-In this worksheet a model predicting the onset of recession was built. From the model a trading rule was derived to allow back testing. The model performed well and the trading rule backtesting showed that applying this in the post-WWII period would have resulted in an increase in returns. That is not too bad, but there are a few changes that would likely improve the model:
+In this worksheet a model predicting the onset of recession was built.
+From the model a trading rule was derived to allow back testing. The
+model performed well and the trading rule backtesting showed that
+applying this in the post-WWII period would have resulted in an increase
+in returns. That is not too bad, but there are a few changes that would
+likely improve the model:
 
-- Go long on short term bonds, rather than just roll out of the market. That way at least some returns would be generated during recessions.
-- Refine the recession indicator. 
+-   Go long on short term bonds, rather than just roll out of the
+    market. That way at least some returns would be generated during
+    recessions.
+-   Refine the recession indicator.
 
 ## Market Conditions
 
@@ -1707,7 +1465,6 @@ In this worksheet a model predicting the onset of recession was built. From the 
 
 <!-- P/E ratio of `r sprintf("%3.2f", tail(df.data$MULTPLSP500PERATIOMONTH,1))` compares to a historical mean value over the last decade of `r sprintf("%3.2f", df.data$MULTPLSP500PERATIOMONTH_Mean[1])`. Since 2008 recession P/E has only fallen below historical norm a few times. The current value is high, but well off the peaks. If earnings are +2-4% year-over-year then it is not unrealistic. -->
 
-
 ```{r bullet1, echo = FALSE}
 # datay <- "MULTPLSP500PERATIOMONTH"
 # datay.aux <- "MULTPLSP500PERATIOMONTH_Mean"
@@ -1719,8 +1476,10 @@ In this worksheet a model predicting the onset of recession was built. From the 
 # my.plot + geom_line(data=df.data, aes_string(x="date", y=datay.aux, colour=shQuote(datay.aux)), na.rm = TRUE)
 ```
 
-- S&P 500 Volume, last updated on `r index(tail(X_GSPC,1))`, is `r getTrendString(df.data, 'X_GSPC.GSPC.Volume', 365)` over the last year and `r getTrendString(df.data, 'X_GSPC.GSPC.Volume', 30)` over the last month. 
-
+-   S&P 500 Volume, last updated on `r index(tail(X_GSPC,1))`, is
+    `r getTrendString(df.data, 'X_GSPC.GSPC.Volume', 365)` over the last
+    year and `r getTrendString(df.data, 'X_GSPC.GSPC.Volume', 30)` over
+    the last month.
 
 ```{r bullet2, echo=FALSE}
 datay.input = "X_GSPC.GSPC.Volume"
@@ -1747,9 +1506,16 @@ rm(my.plot)
 
 ```
 
-## Unemployment 
+## Unemployment
 
-- Headline unemployment (U-3) stands at `r paste(sprintf("%3.2f", tail(df.data$UNRATE.Value,1)),"%", sep="")` (last updated on `r index(tail(UNRATE,1))`) which is near the 1-year average of `r paste(sprintf("%3.2f",mean(tail(df.data$UNRATE.Value, 365))),"%",sep="")` and rising with respect to the low in the last twelve months of `r paste(sprintf("%3.2f", min(tail(UNRATE,12))),"%",sep="")`. Unlikely the rate will drop again. 
+-   Headline unemployment (U-3) stands at
+    `r paste(sprintf("%3.2f", tail(df.data$UNRATE.Value,1)),"%", sep="")`
+    (last updated on `r index(tail(UNRATE,1))`) which is near the 1-year
+    average of
+    `r paste(sprintf("%3.2f",mean(tail(df.data$UNRATE.Value, 365))),"%",sep="")`
+    and rising with respect to the low in the last twelve months of
+    `r paste(sprintf("%3.2f", min(tail(UNRATE,12))),"%",sep="")`.
+    Unlikely the rate will drop again.
 
 ```{r bullet3, echo=FALSE}
 
@@ -1766,9 +1532,12 @@ rm(datay.input)
 
 ```
 
-
-
-- Payrolls (BLS data, NSA) year-over-year stands at `r paste(sprintf("%3.2f", tail(df.data$PAYNSA.Value__YoY,1)),"%", sep="")` which is above the 1-year average of `r paste(sprintf("%3.2f",mean(tail(df.data$PAYNSA.Value__YoY, 365))),"%",sep="")` and falling with respect to the peak, in the last twelve months, of `r paste(sprintf("%3.2f", max(tail(df.data$PAYNSA.Value__YoY,365))),"%",sep="")`.  
+-   Payrolls (BLS data, NSA) year-over-year stands at
+    `r paste(sprintf("%3.2f", tail(df.data$PAYNSA.Value__YoY,1)),"%", sep="")`
+    which is above the 1-year average of
+    `r paste(sprintf("%3.2f",mean(tail(df.data$PAYNSA.Value__YoY, 365))),"%",sep="")`
+    and falling with respect to the peak, in the last twelve months, of
+    `r paste(sprintf("%3.2f", max(tail(df.data$PAYNSA.Value__YoY,365))),"%",sep="")`.
 
 ```{r bullet4, echo=FALSE}
 
@@ -1785,7 +1554,13 @@ rm(datay.input)
 
 ```
 
-- Jobless claims (ICSA data) year-over-year stands at `r paste(sprintf("%3.2f", tail(df.data$ICSA.Value__YoY,1)),"%", sep="")` (last updated on `r index(tail(ICSA,1))`) which is in-line with the 1-year average of `r paste(sprintf("%3.2f", mean(tail(df.data$ICSA.Value__YoY, 365))),"%",sep="")` and below the peak, in the last twelve months, of `r paste(sprintf("%3.2f", max(tail(df.data$ICSA.Value__YoY,365))),"%",sep="")`. 
+-   Jobless claims (ICSA data) year-over-year stands at
+    `r paste(sprintf("%3.2f", tail(df.data$ICSA.Value__YoY,1)),"%", sep="")`
+    (last updated on `r index(tail(ICSA,1))`) which is in-line with the
+    1-year average of
+    `r paste(sprintf("%3.2f", mean(tail(df.data$ICSA.Value__YoY, 365))),"%",sep="")`
+    and below the peak, in the last twelve months, of
+    `r paste(sprintf("%3.2f", max(tail(df.data$ICSA.Value__YoY,365))),"%",sep="")`.
 
 ```{r bullet5, echo=FALSE}
 
@@ -1807,7 +1582,12 @@ rm(dt.start)
 
 ## Personal Income
 
-- Real personal income year over year growth stands at `r paste(sprintf("%3.2f", tail(df.data$W875RX1.Value__YoY,1)),"%", sep="")` (last updated on `r df.symbols[df.symbols$string.symbol == 'W875RX1.Value__YoY',]$date.series.end`). This is below the recent peak of `r paste(sprintf("%3.2f", max(tail(df.data$W875RX1.Value__YoY,365))),"%",sep="")`.
+-   Real personal income year over year growth stands at
+    `r paste(sprintf("%3.2f", tail(df.data$W875RX1.Value__YoY,1)),"%", sep="")`
+    (last updated on
+    `r df.symbols[df.symbols$string.symbol == 'W875RX1.Value__YoY',]$date.series.end`).
+    This is below the recent peak of
+    `r paste(sprintf("%3.2f", max(tail(df.data$W875RX1.Value__YoY,365))),"%",sep="")`.
 
 ```{r bullet6, echo=FALSE}
 
@@ -1827,10 +1607,17 @@ rm(dt.start)
 
 ```
 
-
 ## Yield Curve and Bond Market
 
-- The 10-year to 3-month yield stands at `r paste(sprintf("%3.2f", tail(df.data$DGS10TODTB3,1)),"%", sep="")` (last updated on `r df.symbols[df.symbols$string.symbol == 'DGS10TODTB3',]$date.series.end`). This is above the recent low of `r paste(sprintf("%3.2f", min(tail(df.data$DGS10TODTB3,365))),"%",sep="")`. The trend is `r getTrendString(df.data, 'DGS10TODTB3', 365)` over the last year and `r getTrendString(df.data, 'DGS10TODTB3', 30)` over the last month.
+-   The 10-year to 3-month yield stands at
+    `r paste(sprintf("%3.2f", tail(df.data$DGS10TODTB3,1)),"%", sep="")`
+    (last updated on
+    `r df.symbols[df.symbols$string.symbol == 'DGS10TODTB3',]$date.series.end`).
+    This is above the recent low of
+    `r paste(sprintf("%3.2f", min(tail(df.data$DGS10TODTB3,365))),"%",sep="")`.
+    The trend is `r getTrendString(df.data, 'DGS10TODTB3', 365)` over
+    the last year and `r getTrendString(df.data, 'DGS10TODTB3', 30)`
+    over the last month.
 
 ```{r bullet7, echo=FALSE}
 
@@ -1850,14 +1637,12 @@ rm(dt.start)
 
 ```
 
-
-- Auto sales flat?
-
+-   Auto sales flat?
 
 # Auxillary Series
 
-I explored additional data series. The sections below have those data series along with comments.
-
+I explored additional data series. The sections below have those data
+series along with comments.
 
 ## Recent Highs
 
@@ -1877,12 +1662,13 @@ kable(df.symbolsTrue, caption = "6-Month High") %>%
 
 ```
 
-
 ## Equities
 
 ### S&P 500 SMA Trends
 
-Take a look at recent activity in the equities market. This section looks at the S&P 500 close value to the 50 day and 200 day simple moving average (SMA).
+Take a look at recent activity in the equities market. This section
+looks at the S&P 500 close value to the 50 day and 200 day simple moving
+average (SMA).
 
 ```{r SP500pltNear, echo=FALSE }
 datay.input <- "X_GSPC.GSPC.Close"
@@ -2015,7 +1801,8 @@ rm(my.plot)
 
 ```
 
-The last two years compare favorably with the period around the late 1950's. Need to dig into this one.
+The last two years compare favorably with the period around the late
+1950's. Need to dig into this one.
 
 ```{r SP500SPpltNear.similar, echo=FALSE}
 datay.input <- "GDPSP500"
@@ -2071,7 +1858,8 @@ rm(b.percentile)
 
 ### S&P 500 Normalized moving average
 
-Look at moving average relationship by dividing the S&P 500 open price by the 200 day SMA.
+Look at moving average relationship by dividing the S&P 500 open price
+by the 200 day SMA.
 
 ```{r SP500MA200Norm}
 
@@ -2090,7 +1878,8 @@ rm(dt.start)
 
 ### Crossovers
 
-Look at the 50 DMA versus 200 DMA, often used as a technical indicator of market direction.
+Look at the 50 DMA versus 200 DMA, often used as a technical indicator
+of market direction.
 
 ```{r SP500MA050MinusMA200}
 
@@ -2206,7 +1995,6 @@ rm(dataRet)
 rm(dataEq)
 
 ```
-
 
 ### S&P 500 TTM P/E
 
@@ -2473,6 +2261,7 @@ my.plot <-
 my.plot
 
 ```
+
 ```{r SP500TTMPE.Silver.ar,  echo=FALSE, fig.width = 9, fig.asp = 0.4 }
 
 datay <- "AREARNINGSTTM"
@@ -2588,7 +2377,6 @@ rm(dt.start )
 
 ```
 
-
 Market prices can out-run earnings so take a look at price to earnings.
 
 ```{r SP500TTMPE,  echo=FALSE, fig.width = 9, fig.asp = 0.4 }
@@ -2637,7 +2425,6 @@ Market prices can out-run earnings so take a look at price to earnings.
 
 ```
 
-
 Focus on some of the more recent activity
 
 ```{r SP500TTMPE.recent, echo=FALSE }
@@ -2674,24 +2461,9 @@ Focus on some of the more recent activity
 
 ### S&P 500 Sales
 
-# ```{r SP500Sales }
-# 
-# datay <- "MULTPLSP500SALESQUARTER"
-# ylim <- c(500, 2000)
-# dt.start <- as.Date('1999-01-01')
-# plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
-# 
-# ```
+# `{r SP500Sales } #  # datay <- "MULTPLSP500SALESQUARTER" # ylim <- c(500, 2000) # dt.start <- as.Date('1999-01-01') # plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start) #  #`
 
-# ```{r SP500SalesShort }
-# 
-# datay <- "MULTPLSP500SALESQUARTER"
-# ylim <- c(500, 2000)
-# dt.start = as.Date('2001-01-01')
-# plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
-# 
-# ```
-
+# `{r SP500SalesShort } #  # datay <- "MULTPLSP500SALESQUARTER" # ylim <- c(500, 2000) # dt.start = as.Date('2001-01-01') # plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start) #  #`
 
 ### Unit Profits
 
@@ -2711,13 +2483,12 @@ rm(dt.start)
 
 ```
 
-
-
 ### S&P 500 dividends
 
-12-month real dividend per share inflation adjusted November, 2018 dollars. Data courtesy Standard & Poor's and Robert Shiller.
+12-month real dividend per share inflation adjusted November, 2018
+dollars. Data courtesy Standard & Poor's and Robert Shiller.
 
-https://www.quandl.com/data/MULTPL/SP500_DIV_MONTH-S-P-500-Dividend-by-Month
+<https://www.quandl.com/data/MULTPL/SP500_DIV_MONTH-S-P-500-Dividend-by-Month>
 
 ```{r SP500Dividend.dollar, echo=FALSE, fig.width = 7, fig.asp = 1.1 }
 
@@ -2762,19 +2533,26 @@ Real value dividend growth.
  
 ```
 
-
 <!-- ```{r SP500Dividend.dollar.yoy.recent} -->
 
 <!-- datay <- "MULTPLSP500DIVMONTH_YoY" -->
+
 <!-- ylim <- c(-40, 20) -->
+
 <!-- dt.start = as.Date('2001-01-01') -->
+
 <!-- plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = FALSE) -->
 
 <!-- ``` -->
 
-S&P 500 dividend yield (12 month dividend per share)/price. Yields following September 2018 (including the current yield) are estimated based on 12 month dividends through September 2018, as reported by S&P. Sources: Standard & Poor's for current S&P 500 Dividend Yield. Robert Shiller and his book Irrational Exuberance for historic S&P 500 Dividend Yields.
+S&P 500 dividend yield (12 month dividend per share)/price. Yields
+following September 2018 (including the current yield) are estimated
+based on 12 month dividends through September 2018, as reported by S&P.
+Sources: Standard & Poor's for current S&P 500 Dividend Yield. Robert
+Shiller and his book Irrational Exuberance for historic S&P 500 Dividend
+Yields.
 
-https://www.quandl.com/data/MULTPL/SP500_DIV_YIELD_MONTH-S-P-500-Dividend-Yield-by-Month
+<https://www.quandl.com/data/MULTPL/SP500_DIV_YIELD_MONTH-S-P-500-Dividend-Yield-by-Month>
 
 ```{r SP500Dividend.yied}
 
@@ -2797,7 +2575,8 @@ https://www.quandl.com/data/MULTPL/SP500_DIV_YIELD_MONTH-S-P-500-Dividend-Yield-
 
 ### S&P 500 Volume
 
-The log of the S&P volume has some interesting patterns, but nothing that seems to help with a recession indicator.
+The log of the S&P volume has some interesting patterns, but nothing
+that seems to help with a recession indicator.
 
 ```{r SP500Vol, echo=FALSE}
 
@@ -2810,7 +2589,6 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 ```
 
 That is one spiky data series. Not sure there is a lot to help us here.
-
 
 ```{r SP500Vol_Smoott, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
@@ -2928,7 +2706,6 @@ rm(ylim)
 
 #### Correlation
 
-
 ```{r rollingcorS&PtoRussell, echo=FALSE, fig.width = 10, fig.asp = .62}
 
 datay1 <- "X_RLG.RLG.Open"
@@ -2984,23 +2761,27 @@ rm(ylim2)
 
 ```
 
-
 ### Dividend Stocks
 
-This is an interesting series, they should perform better through the recessions. Unfortunately they are short lived so there is not much data so this is more of a place holder for now.
+This is an interesting series, they should perform better through the
+recessions. Unfortunately they are short lived so there is not much data
+so this is more of a place holder for now.
 
-#### ProShares S&P 500 Dividend Aristocrats ETF (NOBL) 
+#### ProShares S&P 500 Dividend Aristocrats ETF (NOBL)
 
-The fund invests in financial instruments that ProShare Advisors believes, in
-combination, should track the performance of the index. The index is designed to
-measure the performance of companies in the S&P 500 Index that have consistently
-increased dividends each year for at least 25 years. Under normal circumstances,
-it will invest at least 80% of its total assets in components of the index or in
-instruments with similar economic characteristics.
+The fund invests in financial instruments that ProShare Advisors
+believes, in combination, should track the performance of the index. The
+index is designed to measure the performance of companies in the S&P 500
+Index that have consistently increased dividends each year for at least
+25 years. Under normal circumstances, it will invest at least 80% of its
+total assets in components of the index or in instruments with similar
+economic characteristics.
 
 Suggested Citation:
 
-“ProShares S\&P 500 Dividend Aristocrats ETF (NOBL) Company Profile & Facts.” *Yahoo Finance*, [https://finance.yahoo.com/quote/NOBL/profile/](https://finance.yahoo.com/quote/NOBL/profile/). Accessed 3 Sept. 2025.
+“ProShares S&P 500 Dividend Aristocrats ETF (NOBL) Company Profile &
+Facts.” *Yahoo Finance*,
+<https://finance.yahoo.com/quote/NOBL/profile/>. Accessed 3 Sept. 2025.
 
 ```{r DivStocks_NOBL, echo=FALSE, fig.width = 10, fig.asp = .62 }
 
@@ -3060,16 +2841,16 @@ if( exists ("lst_sym")){
 
 #### Schwab U.S. Dividend Equity ETF (SCHD)
 
-To pursue its goal, the fund generally invests in stocks that are included in
-the index. The index is designed to measure the performance of high dividend
-yielding stocks issued by U.S. companies that have a record of consistently
-paying dividends, selected for fundamental strength relative to their peers,
-based on financial ratios. The fund will invest at least 90% of its net assets
-in these stocks.
+To pursue its goal, the fund generally invests in stocks that are
+included in the index. The index is designed to measure the performance
+of high dividend yielding stocks issued by U.S. companies that have a
+record of consistently paying dividends, selected for fundamental
+strength relative to their peers, based on financial ratios. The fund
+will invest at least 90% of its net assets in these stocks.
 
-Suggested Citation:
-“Schwab U.S. Dividend Equity ETF (SCHD).” *Yahoo Finance*, [https://finance.yahoo.com/quote/SCHD/](https://finance.yahoo.com/quote/SCHD/). Accessed 3 Sept. 2025.
-
+Suggested Citation: “Schwab U.S. Dividend Equity ETF (SCHD).” *Yahoo
+Finance*, <https://finance.yahoo.com/quote/SCHD/>. Accessed 3 Sept.
+2025.
 
 ```{r DivStocks_SCHD, echo=FALSE, fig.width = 10, fig.asp = .62 }
 
@@ -3128,8 +2909,8 @@ if( exists ("lst_sym")){
 
 #### Dividend year-over-year growth
 
-This plot shows the year-over-year  growth of the NOBL and SCHD funds to see if
-there could be a buying opportunity.
+This plot shows the year-over-year growth of the NOBL and SCHD funds to
+see if there could be a buying opportunity.
 
 ```{r DivStocks_yoy, echo=FALSE, fig.width = 10, fig.asp = .62 }
 
@@ -3181,17 +2962,24 @@ if( exists ("lst_sym")){
 
 ### Energy Stocks
 
-This is a highly cyclical sector so it pays to watch for movements in this this
-sector.
+This is a highly cyclical sector so it pays to watch for movements in
+this this sector.
 
 #### The Energy Select Sector SPDR Fund (XLE)
 
-In seeking to track the performance of the index, the fund employs a replication strategy. It generally invests substantially all, but at least 95%, of its total assets in the securities comprising the index. The index includes companies that have been identified as Energy companies by the GICS®, including securities of companies from the following industries: oil, gas and consumable fuels; and energy equipment and services. It is non-diversified.
+In seeking to track the performance of the index, the fund employs a
+replication strategy. It generally invests substantially all, but at
+least 95%, of its total assets in the securities comprising the index.
+The index includes companies that have been identified as Energy
+companies by the GICS®, including securities of companies from the
+following industries: oil, gas and consumable fuels; and energy
+equipment and services. It is non-diversified.
 
 Suggested Citation:
 
-“Energy Select Sector SPDR Fund (XLE) Company Profile & Facts.” Yahoo Finance, https://finance.yahoo.com/quote/XLE/profile/
-. Accessed 8 Sept. 2025.
+“Energy Select Sector SPDR Fund (XLE) Company Profile & Facts.” Yahoo
+Finance, <https://finance.yahoo.com/quote/XLE/profile/> . Accessed 8
+Sept. 2025.
 
 ```{r energy_stocks_xls, echo=FALSE, fig.width = 10, fig.asp = .62 }
 
@@ -3250,17 +3038,19 @@ if( exists ("lst_sym")){
 
 #### Invesco S&P 500 Equal Weight Energy ETF (RSPG)
 
-The fund generally will invest at least 90% of its total assets in securities
-that comprise the underlying index. The underlying index is composed of all of
-the components of the S&P 500® Energy Index, an index that contains the common
-stocks of all companies included in the S&P 500® Index that are classified as
-members of the energy sector, as defined according to the Global Industry
-Classification Standard ("GICS").
+The fund generally will invest at least 90% of its total assets in
+securities that comprise the underlying index. The underlying index is
+composed of all of the components of the S&P 500® Energy Index, an index
+that contains the common stocks of all companies included in the S&P
+500® Index that are classified as members of the energy sector, as
+defined according to the Global Industry Classification Standard
+("GICS").
 
 Suggested Citation:
 
-“Invesco S&P 500 Equal Weight Growth ETF (RSPG) Company Profile & Facts.” Yahoo Finance, https://finance.yahoo.com/quote/RSPG/profile/
-. Accessed 8 Sept. 2025.
+“Invesco S&P 500 Equal Weight Growth ETF (RSPG) Company Profile &
+Facts.” Yahoo Finance, <https://finance.yahoo.com/quote/RSPG/profile/> .
+Accessed 8 Sept. 2025.
 
 ```{r energy_stocks_rspg, echo=FALSE, fig.width = 10, fig.asp = .62 }
 
@@ -3317,11 +3107,10 @@ if( exists ("lst_sym")){
 
 ```
 
-
 #### Energy year-over-year growth
 
-This plot shows the year-over-year  growth of the XLE and RSPG funds to see if
-there could be a buying opportunity.
+This plot shows the year-over-year growth of the XLE and RSPG funds to
+see if there could be a buying opportunity.
 
 ```{r energy_stock_yoy, echo=FALSE, fig.width = 10, fig.asp = .62 }
 
@@ -3384,8 +3173,11 @@ if( exists ("lst_sym")){
 
 ### NYSE Margin Debt
 
-Taking a look at margin debt. NYXDATA stopped providing NYSE margin debt data on Dec 2017. Data is available from FINRA, but it includes more accounts than the data did for NYXdata. I stitched togeter the data sets: data after Jan 2010 include NYSE+Others, data prior is just NYSE account data scaled up to match the FINRA data.
-
+Taking a look at margin debt. NYXDATA stopped providing NYSE margin debt
+data on Dec 2017. Data is available from FINRA, but it includes more
+accounts than the data did for NYXdata. I stitched togeter the data
+sets: data after Jan 2010 include NYSE+Others, data prior is just NYSE
+account data scaled up to match the FINRA data.
 
 It tends to creep up when there is a frenzy in the stock market.
 
@@ -3485,7 +3277,6 @@ rm(dt.start)
 
 Take a look at some of the correlations
 
-
 ```{r rollingcor.FINRAMarginDebt_YoY.by.GSPC.Close_YoY, fig.width = 10, fig.asp = .62}
 
 datay1 <- "FINRA_MarginDebt__YoY"
@@ -3554,7 +3345,8 @@ rm(w)
 
 ### OCC Options Volumes
 
-See what is happening with the options volumes for equities. (From: https://www.theocc.com/webapps/historical-volume-query)
+See what is happening with the options volumes for equities. (From:
+<https://www.theocc.com/webapps/historical-volume-query>)
 
 ```{r OCC.equity.volume, echo=FALSE, fig.width = 7, fig.asp = 1.1 }
 
@@ -3689,7 +3481,8 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
-As markets become complacent (low VIX) and high values, peaks often occur.
+As markets become complacent (low VIX) and high values, peaks often
+occur.
 
 ```{r VIX_near, echo=FALSE, fig.width = 7, fig.asp = 1.1 }
 
@@ -3871,7 +3664,7 @@ grid.arrange(p1,
 
 ```
 
-There 
+There
 
 ```{r VIXtoGSPCCorr, echo = FALSE, fig.width = 7, fig.asp = 1.1}
 
@@ -3888,7 +3681,8 @@ corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, dat
 
 ```
 
-Not much predictive in VIX, take a quick look at the smoothed derivative.
+Not much predictive in VIX, take a quick look at the smoothed
+derivative.
 
 ```{r VIX_SmoothDer, echo=FALSE }
 
@@ -4005,12 +3799,15 @@ rm(p1)
 rm(p2)
 ```
 
-
 ## Employment and payrolls
 
 ### Unemployment rates
 
-Unemployment rates will probably be useful, let's take a look at the U-3. The data is a little noisy so there is also a smoothed version plotted. There seems to be a relationship between the unemployment rate and the recessions, but it could be a lagging indicator.  This will be explored a little bit more later.
+Unemployment rates will probably be useful, let's take a look at the
+U-3. The data is a little noisy so there is also a smoothed version
+plotted. There seems to be a relationship between the unemployment rate
+and the recessions, but it could be a lagging indicator. This will be
+explored a little bit more later.
 
 ```{r unrate, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 datay <- "UNRATE.Value"
@@ -4045,7 +3842,8 @@ my.plot + geom_line(
 
 ```
 
-Suggested by Charlie and a Wealthian video the 12 month-MA might be helpful to look at.
+Suggested by Charlie and a Wealthian video the 12 month-MA might be
+helpful to look at.
 
 ```{r unrate.ma, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 datay <- "UNRATE.Value"
@@ -4080,9 +3878,11 @@ my.plot + geom_line(
 
 ```
 
-
-
-Looking at the unemployment rate, the eye is drawn to the rise and fall of the data, this suggests that the derivative might be helpful as well. The figure below shows the results, using a Savitzky-Golay FIR filter. It looks like the unemployment rate peaks in the middel of the recession. That peak might be a good buy signal.
+Looking at the unemployment rate, the eye is drawn to the rise and fall
+of the data, this suggests that the derivative might be helpful as well.
+The figure below shows the results, using a Savitzky-Golay FIR filter.
+It looks like the unemployment rate peaks in the middel of the
+recession. That peak might be a good buy signal.
 
 ```{r UnrateDer, echo=FALSE}
 
@@ -4094,11 +3894,16 @@ plotSingleQuick(dfRecession, df.data, datay="UNRATE.Value__SmoothDer",
 
 ### Continuing Claims
 
-A good measure of how much unemployment is growing. 
+A good measure of how much unemployment is growing.
 
-Continued claims, also referred to as insured unemployment, is the number of people who have already filed an initial claim and who have experienced a week of unemployment and then filed a continued claim to claim benefits for that week of unemployment. Continued claims data are based on the week of unemployment, not the week when the initial claim was filed
+Continued claims, also referred to as insured unemployment, is the
+number of people who have already filed an initial claim and who have
+experienced a week of unemployment and then filed a continued claim to
+claim benefits for that week of unemployment. Continued claims data are
+based on the week of unemployment, not the week when the initial claim
+was filed
 
-https://fred.stlouisfed.org/series/CCNSA
+<https://fred.stlouisfed.org/series/CCNSA>
 
 ```{r CCSA, echo=FALSE}
 
@@ -4115,7 +3920,6 @@ rm(b.percentile)
 rm(dt.start)
 
 ```
-
 
 A good measure of how much unemployment is growing
 
@@ -4137,11 +3941,13 @@ rm(dt.start)
 
 ### Initial Claims
 
-A good measure of how much unemployment is growing. 
+A good measure of how much unemployment is growing.
 
-An initial claim is a claim filed by an unemployed individual after a separation from an employer. The claim requests a determination of basic eligibility for the Unemployment Insurance program.
+An initial claim is a claim filed by an unemployed individual after a
+separation from an employer. The claim requests a determination of basic
+eligibility for the Unemployment Insurance program.
 
-https://fred.stlouisfed.org/series/ICSA
+<https://fred.stlouisfed.org/series/ICSA>
 
 ```{r ICSA, echo=FALSE}
 
@@ -4159,10 +3965,11 @@ rm(dt.start)
 
 ```
 
-
 ### Unemployment rates, year-over-year
 
-Both the headline unemployment and U-6 number changes are similar. During the upswing on the cycle it does look like the headline number falls faster than U-6
+Both the headline unemployment and U-6 number changes are similar.
+During the upswing on the cycle it does look like the headline number
+falls faster than U-6
 
 ```{r UnrateDer.yoy, echo=FALSE}
 
@@ -4179,9 +3986,11 @@ rm(b.percentile)
 rm(dt.start)
 
 ```
+
 ### Unemployment rates, similar periods
 
-Historically the last two years of record low unemployment appear most similar to the 1971-1973 time frame. Just before inflation took off.
+Historically the last two years of record low unemployment appear most
+similar to the 1971-1973 time frame. Just before inflation took off.
 
 ```{r unrate.similar, echo=FALSE}
 datay <- "UNRATE.Value"
@@ -4192,10 +4001,11 @@ my.data[[1]]
 
 ```
 
-### Unemployment rates, U-6 and headline number. 
+### Unemployment rates, U-6 and headline number.
 
-Let's also take a look at the total unemployed, U-6. It continues to fall as the headline number stabilizes as people return to the work force. An indicator the cycle is beginning to top out.
-
+Let's also take a look at the total unemployed, U-6. It continues to
+fall as the headline number stabilizes as people return to the work
+force. An indicator the cycle is beginning to top out.
 
 ```{r unrateU6, echo=FALSE}
 
@@ -4227,7 +4037,8 @@ my.plot + geom_line(
 
 ```
 
-Difference between U6 and U3 to see how close the economy is getting to full employment.
+Difference between U6 and U3 to see how close the economy is getting to
+full employment.
 
 ```{r unrateU6toU3, echo=FALSE}
 
@@ -4277,10 +4088,10 @@ my.plot + scale_y_continuous(sec.axis = sec_axis( ~ . * (1 / datay.aux.scale), n
 
 ```
 
-
 ### Initial jobless claims
 
-We will also take a look at initial jobless claims, this should start to rise just before the unemployment rate.
+We will also take a look at initial jobless claims, this should start to
+rise just before the unemployment rate.
 
 ```{r initclaims, echo=FALSE}
 
@@ -4291,7 +4102,9 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
-It looks like the jobless claim tend to peak more towards the end of the recession. It does not seem to be as strong of a sell indicator as the U-3 rate.
+It looks like the jobless claim tend to peak more towards the end of the
+recession. It does not seem to be as strong of a sell indicator as the
+U-3 rate.
 
 ```{r initclaimsDer, echo=FALSE}
 datay <- "ICSA.Value__SmoothDer"
@@ -4301,7 +4114,9 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = TRUE
 
 ```
 
-Jobless claims have a seasonal component to them. One way to reduce this effect is to calculate year over year growth. That helps some, the peaks seem to be more closely aligned with the middle to end of recessions.
+Jobless claims have a seasonal component to them. One way to reduce this
+effect is to calculate year over year growth. That helps some, the peaks
+seem to be more closely aligned with the middle to end of recessions.
 
 ```{r initialclaimsYoy, echo=FALSE}
 datay <- "ICSA.Value__YoY"
@@ -4351,18 +4166,18 @@ my.plot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuo
 
 ### Unemployment Level
 
-This plot shows three smooth lines tracking employment levels across cycles,
-with downturns/recoveries highlighted by the recession shading. The ADP line
-often moves similarly to the BLS series but can lead slightly month-to-month;
-the PAYEMS line sits above the private series because it includes government
-jobs.
+This plot shows three smooth lines tracking employment levels across
+cycles, with downturns/recoveries highlighted by the recession shading.
+The ADP line often moves similarly to the BLS series but can lead
+slightly month-to-month; the PAYEMS line sits above the private series
+because it includes government jobs.
 
-Payrolls roll over ahead of or early in recessions and re-accelerate during
-recoveries. The shaded bands, indicating recessions, let you see that
-relationship.
+Payrolls roll over ahead of or early in recessions and re-accelerate
+during recoveries. The shaded bands, indicating recessions, let you see
+that relationship.
 
-Comparing private (NPPTTL) to total (PAYEMS) highlights whether the public
-sector is cushioning weakness (or amplifying strength).
+Comparing private (NPPTTL) to total (PAYEMS) highlights whether the
+public sector is cushioning weakness (or amplifying strength).
 
 ```{r NPPTTL, echo=FALSE, fig.width = 10, fig.asp = .32}
 
@@ -4414,19 +4229,19 @@ if( exists("my_plot")){
 }  
 ```
 
-This plot shows three tightly related growth-rate curves. ADP YoY often turns a
-bit earlier; PAYEMS YoY is the benchmark; private YoY isolates underlying
-business hiring (government swings can make PAYEMS look sturdier or weaker than
-the private economy).
+This plot shows three tightly related growth-rate curves. ADP YoY often
+turns a bit earlier; PAYEMS YoY is the benchmark; private YoY isolates
+underlying business hiring (government swings can make PAYEMS look
+sturdier or weaker than the private economy).
 
-Inflections in YoY often precede (or coincide with) NBER recession starts and
-equity draw downs.
+Inflections in YoY often precede (or coincide with) NBER recession
+starts and equity draw downs.
 
 Payroll growth ≈ breadth of labor demand; sustained deceleration usually
 foreshadows softer PCE and revenue growth.
 
-Weakening YoY increases odds of easing; re-acceleration keeps policy tighter for
-longer—key for duration, curve, and equity style.
+Weakening YoY increases odds of easing; re-acceleration keeps policy
+tighter for longer—key for duration, curve, and equity style.
 
 ```{r NPPTTL.YoY, echo=FALSE, fig.width = 10, fig.asp = .32}
 
@@ -4504,8 +4319,6 @@ dt.start <- as.Date('2000-01-01')
 
 ```
 
-
-
 ```{r UNEMPLOY, echo=FALSE}
 datay <- "UNEMPLOY.Value"
 datay.aux <- "NPPTTL.Value"
@@ -4537,7 +4350,8 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ### Payrolls
 
-Look at the BLS data on payrolls. Check the NSA series, then we will look at YoY data.
+Look at the BLS data on payrolls. Check the NSA series, then we will
+look at YoY data.
 
 ```{r PAYNSA, echo=FALSE}
 datay <- "PAYNSA.Value"
@@ -4581,6 +4395,7 @@ if( exists("lst_syms")){
 }
 
 ```
+
 GDP should lag payrolls, check out the relationship
 
 ```{r PAYNSA_GDP_YoY, echo=FALSE}
@@ -4646,7 +4461,9 @@ plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay),
 
 ### Hours worked
 
-Sparked by an article at Mises (https://mises.org/wire/how-alexandria-ocasio-cortez-misunderstands-american-poverty), take a look at average weekly hours
+Sparked by an article at Mises
+(<https://mises.org/wire/how-alexandria-ocasio-cortez-misunderstands-american-poverty>),
+take a look at average weekly hours
 
 ```{r avghours, echo=FALSE}
 
@@ -4684,7 +4501,10 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile)
 
 ## Industrial Production
 
-Industrial production is also known to fall during an economic downturn, let's take a look at some of the data from the FRED on industrial production. It does seem to peak prior to a recession so let's smooth and look at the derivative as it might be a good indicator as well.
+Industrial production is also known to fall during an economic downturn,
+let's take a look at some of the data from the FRED on industrial
+production. It does seem to peak prior to a recession so let's smooth
+and look at the derivative as it might be a good indicator as well.
 
 ```{r indpro, echo=FALSE}
 datay <- "INDPRO.Value"
@@ -4703,8 +4523,9 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = TRUE
 
 ```
 
-
-The derivative isn't bad, but it sometimes crosses zeros well into a recession. That is less helpful as either a buy or sell indicator. A better measure might year over year (YoY) change.
+The derivative isn't bad, but it sometimes crosses zeros well into a
+recession. That is less helpful as either a buy or sell indicator. A
+better measure might year over year (YoY) change.
 
 ```{r indproderplot, echo=FALSE}
 datay <- "INDPRO.Value__SmoothDer"
@@ -4714,7 +4535,9 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = TRUE
 
 ```
 
-The year over year change has a similar appearance. The low values at the beginning make the year over year values larger than the more recent values. Seems like it will rank low a reliable indicator.
+The year over year change has a similar appearance. The low values at
+the beginning make the year over year values larger than the more recent
+values. Seems like it will rank low a reliable indicator.
 
 ```{r indproYoY, echo=FALSE}
 
@@ -4724,7 +4547,6 @@ dt.start <- as.Date('1968-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = TRUE)
 
 ```
-
 
 ```{r rollingcor.indpro, fig.width = 10, fig.asp = .62}
 
@@ -4745,7 +4567,10 @@ corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, dat
 
 ### Retail sales, aggregate
 
-Retail sales also change during recession. As the plot below shows, it seems to follow the trend of industrial production. It might be too strongly correlated to add much to the model. The will be examined in the correlation section.
+Retail sales also change during recession. As the plot below shows, it
+seems to follow the trend of industrial production. It might be too
+strongly correlated to add much to the model. The will be examined in
+the correlation section.
 
 ```{r rsalesagg, echo=FALSE}
 datay <- "RSALESAGG"
@@ -4754,7 +4579,9 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
 
-The derivative of retail sales is a little more erratic than is was the industrial products. Looks like it might be helpful to include in the model as well.
+The derivative of retail sales is a little more erratic than is was the
+industrial products. Looks like it might be helpful to include in the
+model as well.
 
 ```{r rsalesderplot, echo=FALSE}
 datay <- "RSALESAGG__SmoothDer" 
@@ -4793,7 +4620,8 @@ my.plot
 
 ### Retail sales and unemployment correlations
 
-Let's see how that looks on year over year basis. Interesting to compare to unemployment rates there appears to a correlation over the long term.
+Let's see how that looks on year over year basis. Interesting to compare
+to unemployment rates there appears to a correlation over the long term.
 
 ```{r rsalesYoYToUNRATE.yoy, echo=FALSE}
 datay <- "RSALESAGG__YoY" 
@@ -4808,8 +4636,8 @@ my.plot + scale_y_continuous(sec.axis = sec_axis(~.*(1/datay.aux.scale), name = 
 
 ```
 
-
-There is some similarity. The rolling correlation shows the inverse relationship prior to a recession.
+There is some similarity. The rolling correlation shows the inverse
+relationship prior to a recession.
 
 ```{r rollingcor.rsalesagg.yoy.by.unrate.yoy, fig.width = 10, fig.asp = .62}
 
@@ -4828,7 +4656,10 @@ corrName <- calcRollingCorr(dfRecession,df.data, df.symbols, datay1, ylim1, data
 
 ### Retail sales correlation and industrial production
 
-Industrial production and retail sales look very similar so the plot below shows the 360 correlation. The corerlation does tend to fall around a recession, although 2008 was so bad that they both fell together. Not sure if it is that useful.
+Industrial production and retail sales look very similar so the plot
+below shows the 360 correlation. The corerlation does tend to fall
+around a recession, although 2008 was so bad that they both fell
+together. Not sure if it is that useful.
 
 ```{r rollingcortest, fig.width = 10, fig.asp = .62}
 
@@ -4845,7 +4676,10 @@ corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, dat
 
 ```
 
-It is interesting to see the strong correlation; however, I suspect this is due to more to the shape of the trends. How do the YoY correlations look? They are a little less correlated, probably better to use in the machine learning later.
+It is interesting to see the strong correlation; however, I suspect this
+is due to more to the shape of the trends. How do the YoY correlations
+look? They are a little less correlated, probably better to use in the
+machine learning later.
 
 ```{r rollingcortestYoY, fig.width = 10, fig.asp = .62}
 
@@ -4930,7 +4764,8 @@ my.plot
 
 ### Real Personal Income (Excluding Transfer, Annual)
 
-During a recession real personal income falls. In the plot the peaks can be seen prior to each recession.
+During a recession real personal income falls. In the plot the peaks can
+be seen prior to each recession.
 
 ```{r realperincex}
 datay <- "W875RX1.Value"
@@ -4939,7 +4774,10 @@ plotSingleQuickModern(datay, ylim)
 
 ```
 
-The features we are interested in are the peaks and valleys so we'll use the derivative to get to those. Interesting, there is usually a first zero crossing before a recession and a second during or just after the recession.
+The features we are interested in are the peaks and valleys so we'll use
+the derivative to get to those. Interesting, there is usually a first
+zero crossing before a recession and a second during or just after the
+recession.
 
 ```{r rperincderplot, echo=FALSE}
 datay <- "W875RX1.Value__SmoothDer"
@@ -4948,7 +4786,8 @@ plotSingleQuickModern(datay, ylim)
 
 ```
 
-Real personal income might have some seasonal variance, but it seems the year over year change tells the same story.
+Real personal income might have some seasonal variance, but it seems the
+year over year change tells the same story.
 
 ```{r rperincYoYplotex, echo=FALSE}
 datay <- "W875RX1.Value__YoY"
@@ -4958,14 +4797,25 @@ plotSingleQuickModern(datay, ylim, b.percentile)
 
 ```
 
-
 ## Price and cost measures
 
-This section shows price and cost measures. 
+This section shows price and cost measures.
 
-Two commonly used indexes are the CPI (consumer price index) and PPI (producer price index). CPI tries to show final prices paid for goods and services by urban U.S. consumers. This index includes sales tax and imports. The PPI attempts to reflect the prices paid at all stages of production, including goods and services purchases as inputs as well as goods and services purchased by consumers from retail and producer sellers. The PPI does not include imports or sales tax. The CPI reflects all rebates and financing plans wherease the PPI reflects only those rebate and financing plans provided by the producer. For example if an automotive manufacturer offers a rebate of \$500 and the dealer offers an additional rebate of \$500 then the PPI would reflect only the automotive manufacturer rebate, but the CPI would reflect both rebates.
+Two commonly used indexes are the CPI (consumer price index) and PPI
+(producer price index). CPI tries to show final prices paid for goods
+and services by urban U.S. consumers. This index includes sales tax and
+imports. The PPI attempts to reflect the prices paid at all stages of
+production, including goods and services purchases as inputs as well as
+goods and services purchased by consumers from retail and producer
+sellers. The PPI does not include imports or sales tax. The CPI reflects
+all rebates and financing plans wherease the PPI reflects only those
+rebate and financing plans provided by the producer. For example if an
+automotive manufacturer offers a rebate of \$500 and the dealer offers
+an additional rebate of \$500 then the PPI would reflect only the
+automotive manufacturer rebate, but the CPI would reflect both rebates.
 
-Sources; https://www.bls.gov/opub/hom/pdf/cpihom.pdf and https://www.bls.gov/opub/hom/pdf/ppi-20111028.pdf.
+Sources; <https://www.bls.gov/opub/hom/pdf/cpihom.pdf> and
+<https://www.bls.gov/opub/hom/pdf/ppi-20111028.pdf>.
 
 ### Consumer price index
 
@@ -4989,8 +4839,8 @@ plotSingleQuickModern(datay, ylim)
 
 ### CPI to PPI
 
-Suggested by Charlie, it can be helpful to look at the relationship between
-producer prices and consumer prices.
+Suggested by Charlie, it can be helpful to look at the relationship
+between producer prices and consumer prices.
 
 ```{r CPItoPPI_long, echo=FALSE,  fig.width = 10, fig.asp = .62}
 
@@ -5008,6 +4858,7 @@ if( exists("lst_syms")){
 }
 
 ```
+
 ```{r CPItoPPI_short, echo=FALSE,  fig.width = 10, fig.asp = .62}
 
 lst_syms <- c("CPIAUCSL.Value__YoY", "PPIACO.Value__YoY", "PCEPI.Value__YoY")
@@ -5050,8 +4901,6 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
-
-
 This plot examines commodity performance relative to the GDP deflator
 
 ```{r comm.basket.gdp, echo=FALSE}
@@ -5062,7 +4911,6 @@ dt.start = as.Date('2005-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
-
 
 ```{r comm.basket.GSPC, echo=FALSE}
 
@@ -5125,9 +4973,7 @@ rm(p3)
 
 ```
 
-
-
-Take a look at both WTI and Brent crude. 
+Take a look at both WTI and Brent crude.
 
 ```{r crude.recent, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
@@ -5173,7 +5019,6 @@ rm(dt.start )
 
 
 ```
-
 
 Real price of crude using producer price index for commodities
 
@@ -5247,7 +5092,9 @@ rm(b.percentile)
 
 ### Gold
 
-As risks increase investors often flock to safe haven assets like gold. An up-tick in prices can indicate investor uncertainty. This can be seen in the nominal price plot around 1980 and again in 2007.
+As risks increase investors often flock to safe haven assets like gold.
+An up-tick in prices can indicate investor uncertainty. This can be seen
+in the nominal price plot around 1980 and again in 2007.
 
 ```{r gold_plot_fun, echo=FALSE, fig.width = 10, fig.asp = .62}
 
@@ -5387,6 +5234,7 @@ plot_gold_with_mas <- function(start_date = as.Date("2020-01-01")) {
 p <- plot_gold_with_mas(start_date = "2020-01-01")
 
 ```
+
 What has gold done over the last year?
 
 ```{r gold_nominal_price_near, echo=FALSE, fig.width = 10, fig.asp = .62}
@@ -5395,7 +5243,10 @@ p <- plot_gold_with_mas(start_date = Sys.Date() %m-% years(1))
 
 ```
 
-This plots out the real price of gold by two different deflators. PPI corrected price is a little higher, to be expected since CPI also includes the effects of sales tax and imports. The spike in 1980 is especially pronounced in this series.
+This plots out the real price of gold by two different deflators. PPI
+corrected price is a little higher, to be expected since CPI also
+includes the effects of sales tax and imports. The spike in 1980 is
+especially pronounced in this series.
 
 ```{r gold.by.index, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
@@ -5418,7 +5269,10 @@ plotSingle(
 
 ```
 
-See how nominal and real prices look year over year. From the long-term view seems like there is little difference in the three series. Although not shown, even over the near-term there is little difference in the series.
+See how nominal and real prices look year over year. From the long-term
+view seems like there is little difference in the three series. Although
+not shown, even over the near-term there is little difference in the
+series.
 
 ```{r gold.YoY, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
@@ -5464,7 +5318,8 @@ See how nominal and real prices look year over year. From the long-term view see
 
 ```
 
-See how gold correlates with the VIX. Both gold and VIX should respond to investor axiety, but it doesn't look like it correlates very well.
+See how gold correlates with the VIX. Both gold and VIX should respond
+to investor axiety, but it doesn't look like it correlates very well.
 
 ```{r corrGoldYoYVix, echo=FALSE}
 
@@ -5483,10 +5338,12 @@ See how gold correlates with the VIX. Both gold and VIX should respond to invest
 
 ```
 
-
 ### Copper
 
-Dr. Copper has a reputation as an indicator of economic malaise, but it does not seem to have much of a correlation with the recessions. The series below is from CME via Quandl. It has a lot of data so I am also looking at the smoothed version.
+Dr. Copper has a reputation as an indicator of economic malaise, but it
+does not seem to have much of a correlation with the recessions. The
+series below is from CME via Quandl. It has a lot of data so I am also
+looking at the smoothed version.
 
 ```{r plot.CHRISCMEHG1, echo=FALSE}
 # datay <- "CHRISCMEHG1"
@@ -5510,7 +5367,8 @@ Dr. Copper has a reputation as an indicator of economic malaise, but it does not
 
 ```
 
-Copper is one of the commodities in the PPI so it is a bit of a proxy for how copper is doing relative to the basket of commodities.
+Copper is one of the commodities in the PPI so it is a bit of a proxy
+for how copper is doing relative to the basket of commodities.
 
 ```{r coppyer.by.index, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
@@ -5544,7 +5402,11 @@ Copper is one of the commodities in the PPI so it is a bit of a proxy for how co
 
 ```
 
-The change in prices, year over year, do generally peak prior to a recession. The time and shape of this peak varies, but it still might be helpful. A couple of the large troughs do seem to correlate with the end of the recession. Likely this is because industrial production has also fallen.
+The change in prices, year over year, do generally peak prior to a
+recession. The time and shape of this peak varies, but it still might be
+helpful. A couple of the large troughs do seem to correlate with the end
+of the recession. Likely this is because industrial production has also
+fallen.
 
 ```{r plot.CHRISCMEHG1.yoy, echo=FALSE}
 # datay <- "CHRISCMEHG1_YoY"
@@ -5554,7 +5416,8 @@ The change in prices, year over year, do generally peak prior to a recession. Th
 
 ```
 
-There is some correlation between copper and the smooth recession initiator, especially at the end of the recession.
+There is some correlation between copper and the smooth recession
+initiator, especially at the end of the recession.
 
 ```{r rollingcor.indpro.copper.yoy, echo=FALSE, fig.width = 10, fig.asp = .62}
 # 
@@ -5593,8 +5456,8 @@ Might be easier to see correlation in a dot plot format.
 
 ```
 
-
-This is a legacy series from FRED. It has not been updated in a couple of years so I am assuming it will go away. 
+This is a legacy series from FRED. It has not been updated in a couple
+of years so I am assuming it will go away.
 
 ```{r cuprice, echo=FALSE}
 
@@ -5954,10 +5817,10 @@ grid.arrange(p1,
 
 ```
 
-
 ## Federal Reserve
 
-The federal reserve has an impact on the economy, here are some data series relating to that.
+The federal reserve has an impact on the economy, here are some data
+series relating to that.
 
 ```{r WALCL, echo=FALSE}
 
@@ -5991,7 +5854,6 @@ plotSingleQuick(dfRecession, df.data, datay = "WLRRAL.Value",
 
 Take a look at more recent trends
 
-
 ```{r WLRRAL.close, echo=FALSE}
 
 plotSingleQuick(dfRecession, df.data, datay = "WLRRAL.Value",
@@ -6023,10 +5885,26 @@ plotSingleQuick(dfRecession, df.data, datay = "WLRRAL__by__GDP",
 
 ### Overnight Bank Funding Rate
 
-"The overnight bank funding rate is calculated using federal funds transactions and certain Eurodollar transactions. The federal funds market consists of domestic unsecured borrowings in U.S. dollars by depository institutions from other depository institutions and certain other entities, primarily government-sponsored enterprises, while the Eurodollar market consists of unsecured U.S. dollar deposits held at banks or bank branches outside of the United States. U.S.-based banks can also take Eurodollar deposits domestically through international banking facilities (IBFs). The overnight bank funding rate (OBFR) is calculated as a volume-weighted median of overnight federal funds transactions and Eurodollar transactions reported in the FR 2420 Report of Selected Money Market Rates.
-Volume-weighted median is the rate associated with transactions at the 50th percentile of transaction volume. Specifically, the volume-weighted median rate is calculated by ordering the transactions from lowest to highest rate, taking the cumulative sum of volumes of these transactions, and identifying the rate associated with the trades at the 50th percentile of dollar volume. The published rates are the volume-weighted median transacted rate, rounded to the nearest basis point."
-https://www.newyorkfed.org/markets/obfrinfo.
-
+"The overnight bank funding rate is calculated using federal funds
+transactions and certain Eurodollar transactions. The federal funds
+market consists of domestic unsecured borrowings in U.S. dollars by
+depository institutions from other depository institutions and certain
+other entities, primarily government-sponsored enterprises, while the
+Eurodollar market consists of unsecured U.S. dollar deposits held at
+banks or bank branches outside of the United States. U.S.-based banks
+can also take Eurodollar deposits domestically through international
+banking facilities (IBFs). The overnight bank funding rate (OBFR) is
+calculated as a volume-weighted median of overnight federal funds
+transactions and Eurodollar transactions reported in the FR 2420 Report
+of Selected Money Market Rates. Volume-weighted median is the rate
+associated with transactions at the 50th percentile of transaction
+volume. Specifically, the volume-weighted median rate is calculated by
+ordering the transactions from lowest to highest rate, taking the
+cumulative sum of volumes of these transactions, and identifying the
+rate associated with the trades at the 50th percentile of dollar volume.
+The published rates are the volume-weighted median transacted rate,
+rounded to the nearest basis point."
+<https://www.newyorkfed.org/markets/obfrinfo>.
 
 ```{r OBFR_Near, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
@@ -6077,8 +5955,14 @@ my.plot + geom_vline(xintercept=as.numeric(x.date), linetype=4)
 
 ### Secured Overnight Financing Rate
 
-"The Secured Overnight Financing Rate (SOFR) is a broad measure of the cost of borrowing cash overnight collateralized by Treasury securities. The SOFR includes all trades in the Broad General Collateral Rate plus bilateral Treasury repurchase agreement (repo) transactions cleared through the Delivery-versus-Payment (DVP) service offered by the Fixed Income Clearing Corporation (FICC), which is filtered to remove a portion of transactions considered “specials” "
-https://apps.newyorkfed.org/markets/autorates/sofr
+"The Secured Overnight Financing Rate (SOFR) is a broad measure of the
+cost of borrowing cash overnight collateralized by Treasury securities.
+The SOFR includes all trades in the Broad General Collateral Rate plus
+bilateral Treasury repurchase agreement (repo) transactions cleared
+through the Delivery-versus-Payment (DVP) service offered by the Fixed
+Income Clearing Corporation (FICC), which is filtered to remove a
+portion of transactions considered “specials” "
+<https://apps.newyorkfed.org/markets/autorates/sofr>
 
 ```{r SOFR_Near, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
@@ -6187,8 +6071,8 @@ my.plot
 
 ```
 
-
-Hard to get a sense of these series in the absolute. Take a look relative to GDP.
+Hard to get a sense of these series in the absolute. Take a look
+relative to GDP.
 
 ```{r WRESBALspread.GPD, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
@@ -6238,7 +6122,8 @@ my.plot
 
 ```
 
-By double entry book-keeping reserves+loans (assets) = deposit (liabilities). Does that really work?
+By double entry book-keeping reserves+loans (assets) = deposit
+(liabilities). Does that really work?
 
 ```{r double.entrey.check, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
@@ -6301,10 +6186,10 @@ my.plot
 
 ```
 
-
 ### Correlation Between Reserves and Total Loans
 
-As reserves increase there should be less lending. That correlation generally holds.
+As reserves increase there should be less lending. That correlation
+generally holds.
 
 ```{r WRESBAL_YoY, echo=FALSE, fig.width = 11, fig.asp = 0.4}
 
@@ -6348,7 +6233,9 @@ my.plot
 
 ```
 
-Did the reserve balances increase after the 2016 and 2018 drops? Not in the same way. There are some relationships between the equities market and the reserves though.
+Did the reserve balances increase after the 2016 and 2018 drops? Not in
+the same way. There are some relationships between the equities market
+and the reserves though.
 
 ```{r WRESBAL_YoY.to.market, echo=FALSE, fig.width = 7, fig.asp = 1.1 }
 
@@ -6442,7 +6329,8 @@ grid.arrange(p1,
 
 ```
 
-Explicitly correlate reserve balances and total loans. It is a weak and noisy correlation.
+Explicitly correlate reserve balances and total loans. It is a weak and
+noisy correlation.
 
 ```{r corrWRESBAL_YoY, echo=FALSE}
 
@@ -6489,7 +6377,6 @@ my.plot <-
 my.plot
 
 ```
-
 
 ```{r MB.to.Gold, echo=FALSE, fig.width = 7, fig.asp = 1.1 }
 
@@ -6582,7 +6469,6 @@ my.plot
 
 ```
 
-
 This used to trend along with GDP. It doesn't anymore.
 
 ```{r BOGMBASE.trend.by.GDP, echo=FALSE}
@@ -6625,7 +6511,6 @@ rm(myplot)
 
 ```
 
-
 ```{r currrency.trend.yoy.close}
 
 datay <- "WCURRNS.Value__YoY"
@@ -6636,8 +6521,8 @@ myplot
 
 ```
 
-
-The rate of change of money supply could be an indicator of a recession. Let's see how that compares.
+The rate of change of money supply could be an indicator of a recession.
+Let's see how that compares.
 
 ```{r M1_YoY, echo=FALSE}
 
@@ -6655,8 +6540,8 @@ my.plot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuo
 
 ### Intervention in the repo market
 
-The federal reserve provides liquidity to the repo market, summary of that action
-
+The federal reserve provides liquidity to the repo market, summary of
+that action
 
 ```{r RPONTSYD, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
@@ -6706,7 +6591,8 @@ ylim <- c(0, 80)
 
 ## European central bank
 
-The European central band (ECB) has taken a different path compared to the US Federal Reserve bank.
+The European central band (ECB) has taken a different path compared to
+the US Federal Reserve bank.
 
 ```{r ECBASSETS, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
@@ -6742,7 +6628,6 @@ my.plot <-
 my.plot
 
 ```
-
 
 ```{r ECBASSETS.by.GDP, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
@@ -6789,7 +6674,8 @@ my.plot
 
 ## Federal Debt
 
-The government is a big driver of the economy, let's see what it is doing in the debt markets.
+The government is a big driver of the economy, let's see what it is
+doing in the debt markets.
 
 ```{r GFDEBTN}
 
@@ -6806,7 +6692,6 @@ ylim <- c(12, 18)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
-
 
 ```{r GFDEBTN_YoY}
 
@@ -6858,7 +6743,8 @@ plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, yl
 
 ## Nonfinancial Corporate Business Debt
 
-What about Nonfinancial corporate business and debt securities? Hopefully this doesn't follow the business loan trends.
+What about Nonfinancial corporate business and debt securities?
+Hopefully this doesn't follow the business loan trends.
 
 ```{r nonfin, echo=FALSE}
 
@@ -6868,8 +6754,9 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
 
-That is crazy steep. Time for a log format, see if that brings out the peaks and troughs. That's a litte better, it looks like there might be a change in slope prior to the recessions.
-
+That is crazy steep. Time for a log format, see if that brings out the
+peaks and troughs. That's a litte better, it looks like there might be a
+change in slope prior to the recessions.
 
 ```{r nonfinlogplot, echo=FALSE}
 
@@ -6879,7 +6766,8 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
 
-The derivative doesn't seem to be much help. There is not much correlation between the zero crossings and the NEBR recessions.
+The derivative doesn't seem to be much help. There is not much
+correlation between the zero crossings and the NEBR recessions.
 
 ```{r nonfinderplot, echo=FALSE}
 
@@ -6899,11 +6787,16 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ## Debt cycle
 
-This analysis roughly follows the ideas in the "Big Debt Crises" book by Ray Dalio. 
+This analysis roughly follows the ideas in the "Big Debt Crises" book by
+Ray Dalio.
 
 ### Total loans
 
-One business cycle theory describes recessions as a market adjustment to mis-allocated assets, often fueled by an credit expansion. That makes the volume of loans an interesting feature to look at. In the presentation of data it looks like the great recession had the largest impact.
+One business cycle theory describes recessions as a market adjustment to
+mis-allocated assets, often fueled by an credit expansion. That makes
+the volume of loans an interesting feature to look at. In the
+presentation of data it looks like the great recession had the largest
+impact.
 
 ```{r realloans, echo=FALSE}
 
@@ -6913,7 +6806,9 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
 
-Plotting the year over year growth rate helps pull out those small changes in the early years in the data. Peaks can be seen prior to most recessions.
+Plotting the year over year growth rate helps pull out those small
+changes in the early years in the data. Peaks can be seen prior to most
+recessions.
 
 ```{r totloans, echo=FALSE}
 
@@ -6942,7 +6837,9 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
 
-As long term interest rates rise, loans should start to tick down. To check this, the total loans and 10 to 1 year spreads are plotted. This is generally the trend observed.
+As long term interest rates rise, loans should start to tick down. To
+check this, the total loans and 10 to 1 year spreads are plotted. This
+is generally the trend observed.
 
 ```{r totloansYield, echo=FALSE}
 
@@ -6957,12 +6854,14 @@ my.plot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuo
 
 ```
 
-There is a good correlation between these two variables. This next section plots that correction explicitly.
-
+There is a good correlation between these two variables. This next
+section plots that correction explicitly.
 
 ### Total loans as percent of GDP
 
-This is the total loans. I think the picture is too broad to point to a specific sector of the economy. The debt burden assumes interest rates are tied to the 10-year treasury: (TOTLNNSA * DGS10) / 100
+This is the total loans. I think the picture is too broad to point to a
+specific sector of the economy. The debt burden assumes interest rates
+are tied to the 10-year treasury: (TOTLNNSA \* DGS10) / 100
 
 ```{r USTotalDebt.by.GDP, echo=FALSE, fig.width = 7, fig.asp = 1.1}
 
@@ -6987,19 +6886,25 @@ grid.arrange(p1, p2, ncol = 1, top = "Total Debt and Debt Burdens")
 
 ### Commercial and industral loans
 
-Business loans should slow before the recession (a contraction in credit as rates rise).
-
-
+Business loans should slow before the recession (a contraction in credit
+as rates rise).
 
 ### Commercial and industrial loans as percent of GDP and and income
 
-Look at business debt normalized by GDP over the entire time series. This ratio often peaks at the mid-point of a recession.
+Look at business debt normalized by GDP over the entire time series.
+This ratio often peaks at the mid-point of a recession.
 
-https://www.wsj.com/articles/this-isnt-your-fathers-corporate-bond-market-11590574555
+<https://www.wsj.com/articles/this-isnt-your-fathers-corporate-bond-market-11590574555>
 
-"Bonds are behaving more like bank debt, which tends to remain stable or even increase at the onset of recessions, as lenders keep distressed clients afloat—and only later turn off the taps. This was confirmed by a recent report from the Bank for International Settlements. It also found a tight link between this lending cycle and the “real” economy’s booms and busts."
+"Bonds are behaving more like bank debt, which tends to remain stable or
+even increase at the onset of recessions, as lenders keep distressed
+clients afloat—and only later turn off the taps. This was confirmed by a
+recent report from the Bank for International Settlements. It also found
+a tight link between this lending cycle and the “real” economy’s booms
+and busts."
 
-I assume that interest is related to the 10-year treasure: (TOTCINSA * DGS10) / 100
+I assume that interest is related to the 10-year treasure: (TOTCINSA \*
+DGS10) / 100
 
 ```{r BusinessDebt.by.GDP, echo = FALSE, fig.width = 7, fig.asp = 1.3}
 
@@ -7154,9 +7059,13 @@ grid.arrange(p1, p2, p3, ncol = 1, top = "Farm Loans and Debt Burdens")
 
 ### Real estate loans
 
-Data taken from H.8 Assets and Liabilities of Commercial Banks in the United States. Take a look at SA and NSA data series as weekly and month updates. It should all be similar at this scale.
+Data taken from H.8 Assets and Liabilities of Commercial Banks in the
+United States. Take a look at SA and NSA data series as weekly and month
+updates. It should all be similar at this scale.
 
-This gives a big picture, but makes it hard to connect the loans with the income needed to cover those loans. In the next section, loans will be broken up by commercial and residential.
+This gives a big picture, but makes it hard to connect the loans with
+the income needed to cover those loans. In the next section, loans will
+be broken up by commercial and residential.
 
 ```{r realestate, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
@@ -7213,7 +7122,8 @@ my.plot
 
 ### Real Estate (Residential)
 
-In absolute terms the mortgages have increased, but it does not appear to be out of line with the overall economy.
+In absolute terms the mortgages have increased, but it does not appear
+to be out of line with the overall economy.
 
 ```{r realestate.res, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
@@ -7278,8 +7188,10 @@ my.plot
 
 ```
 
-
-Normalized by GDP it is easier to see the peak in 2008 and that loan levels appear reasonable at the commercial banks. I updated this plot to include the estimated single-family home sales volume to give a sense of percentage of home sales that are cash.
+Normalized by GDP it is easier to see the peak in 2008 and that loan
+levels appear reasonable at the commercial banks. I updated this plot to
+include the estimated single-family home sales volume to give a sense of
+percentage of home sales that are cash.
 
 ```{r realestate.by.gdp, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
@@ -7346,7 +7258,9 @@ my.plot
 
 ```
 
-Maybe the GSE's are making loans. Take a look at the total mortgages from Z.1 as a percentage of GDP. That does not look too far off trend (ignoring that peak in 2008).
+Maybe the GSE's are making loans. Take a look at the total mortgages
+from Z.1 as a percentage of GDP. That does not look too far off trend
+(ignoring that peak in 2008).
 
 I am assuming that personal income is paying for the mortgages.
 
@@ -7451,7 +7365,12 @@ my.plot
 
 ### Consumer loans
 
-Focusing on the consumer sector the growth in debt and incomes can be directly compared. Personal income, as a percent of GDP, remains nearly constant. It is not uncommon for the personal income to rise prior to a recession. Likely this reflect increasing asset prices and market returns. Also interesting to see the loans pick up after interest rates dropped in 1982.
+Focusing on the consumer sector the growth in debt and incomes can be
+directly compared. Personal income, as a percent of GDP, remains nearly
+constant. It is not uncommon for the personal income to rise prior to a
+recession. Likely this reflect increasing asset prices and market
+returns. Also interesting to see the loans pick up after interest rates
+dropped in 1982.
 
 ### Consumer loans as percent of GDP and and income
 
@@ -7507,7 +7426,12 @@ rm(p4)
 
 ```
 
-Take a closer look since the 2008 recession. Looks like loans are starting to slow as the interest burden rises and incomes remain stable. There are some anomolies in the A065RC1A027NBEA data series because it only updates onces a year. the PI series updates once a month but is noisier and seasonally adjusted. It also shows incomes rising in the middle of the 2008 recession, which doesn't seem to be accurate.
+Take a closer look since the 2008 recession. Looks like loans are
+starting to slow as the interest burden rises and incomes remain stable.
+There are some anomolies in the A065RC1A027NBEA data series because it
+only updates onces a year. the PI series updates once a month but is
+noisier and seasonally adjusted. It also shows incomes rising in the
+middle of the 2008 recession, which doesn't seem to be accurate.
 
 ```{r ConsumerDebt.by.GDP.near, echo=FALSE, fig.width = 7, fig.asp = 1.3}
 
@@ -7540,10 +7464,11 @@ grid.arrange(p1, p2, p3, ncol = 1, top = "Consumer Debt and Debt Burdens")
 ```
 
 ## Repo market
-This market went through some stress in 2008, it is happening again so setup some plots to watch it.
+
+This market went through some stress in 2008, it is happening again so
+setup some plots to watch it.
 
 ### Nonfincial corporate business security repo asset level
-
 
 ```{r nonfin.corp.securty.repo.asset.by.GDP, echo=FALSE, fig.width = 7, fig.asp = 1.0}
 
@@ -7572,7 +7497,10 @@ p1
 
 ### T-Bills and Yield Curve
 
-Speaking of loans, interest rates also play into this. This analysis will focus on treasure bills. The 3-month is plotted below. The yield flattens before a recession as investors go long on bonds and short on equities.
+Speaking of loans, interest rates also play into this. This analysis
+will focus on treasure bills. The 3-month is plotted below. The yield
+flattens before a recession as investors go long on bonds and short on
+equities.
 
 ```{r bond3month }
 
@@ -7595,24 +7523,10 @@ p1 <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, d
 p1 + geom_line(data=df.data, aes_string(x="date", y=datay.aux, colour=shQuote(datay.aux)), na.rm = TRUE)
 
 ```
-# ```{r bond3monthlibor, echo=FALSE }
-# 
-# datay <- "TB3MS"
-# datay_aux <- "USD1MTD156N"
-# ylim <- c(0, 12)
-# dt.start = as.Date('1985-01-01')
-# my.plot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay), "Date", 
-#             getPlotYLabel(df.symbols, datay), c(dt.start, Sys.Date()), ylim, TRUE)
-# my.plot <- my.plot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuote(datay_aux)), na.rm = TRUE)
-# 
-# my.plot
-# 
-# ```
-Check out LIBOR and fed funds rate
 
 
-
-The 1-year is plotted below. The yield flattens before a recession as investors go long on bonds and short on equities.
+The 1-year is plotted below. The yield flattens before a recession as
+investors go long on bonds and short on equities.
 
 ```{r bond1, echo=FALSE }
 
@@ -7630,7 +7544,8 @@ p1 + geom_line(data=df.data, aes_string(x="date", y=datay.aux, colour=shQuote(da
 
 ```
 
-Close in, the trend towards inversion be more easily seen. I am also comparing data from the CBOE as well as FRED. 
+Close in, the trend towards inversion be more easily seen. I am also
+comparing data from the CBOE as well as FRED.
 
 ```{r bond10.recent, echo=FALSE, fig.width = 9, fig.asp = 0.4 }
 
@@ -7702,7 +7617,8 @@ if (exists("lst_syms")) {
 
 ```
 
-Bond yields are a good proxy for interest rates. As rates rise the theory goes that loans should decrease (inverse correlation).
+Bond yields are a good proxy for interest rates. As rates rise the
+theory goes that loans should decrease (inverse correlation).
 
 ```{r rollingcorLoansInterest, echo=FALSE, fig.width = 10, fig.asp = .62}
 
@@ -7736,8 +7652,9 @@ corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, dat
 
 ```
 
-
-The yield curve (30 year bond rate minus the 10 year bond rate) may not be a good recession indicator, but a collapse is not good (https://blogs.wsj.com/moneybeat/2018/04/30/theres-more-than-one-part-of-the-yield-curve-getting-flatter/).
+The yield curve (30 year bond rate minus the 10 year bond rate) may not
+be a good recession indicator, but a collapse is not good
+(<https://blogs.wsj.com/moneybeat/2018/04/30/theres-more-than-one-part-of-the-yield-curve-getting-flatter/>).
 
 ```{r Yieldcurve_DGS30TO10, echo=FALSE}
 datay <- "DGS30TO10"
@@ -7746,7 +7663,9 @@ plotSingleQuickModern(datay, ylim = c(-1, 2.5), b.percentile = TRUE)
 
 ```
 
-The yield curve (10 year bond rate minus the 1 year bond rate) seems to a good indicator of an oncoming recession. It could be a buy indicator by itself.
+The yield curve (10 year bond rate minus the 1 year bond rate) seems to
+a good indicator of an oncoming recession. It could be a buy indicator
+by itself.
 
 ```{r Yieldcurve_DGS10TO1,echo=FALSE}
 datay <- "DGS10TO1"
@@ -7802,7 +7721,8 @@ my.plot + geom_line(data=df.data, aes_string(x="date", y=datay_aux3, colour=shQu
 
 ```
 
-Plot the 10 Year to 3 month over a few decades to see what the outling cases look like
+Plot the 10 Year to 3 month over a few decades to see what the outling
+cases look like
 
 ```{r YieldcurveRecent.twoyears.stats, echo=FALSE}
 
@@ -7816,7 +7736,9 @@ plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbols, datay),
 
 ```
 
-The last two year compare favorably with the period around the 2015-2016 turndown, driven primarily by slowing of the Chinese GDP. Not a debt-driven cycle.
+The last two year compare favorably with the period around the 2015-2016
+turndown, driven primarily by slowing of the Chinese GDP. Not a
+debt-driven cycle.
 
 ```{r YieldcurveRecent.twoyears.similar, echo=FALSE}
 datay <- "DGS10TOTB3MS"
@@ -7827,8 +7749,6 @@ my.data[[1]]
 
 ```
 
-
-
 ```{r Yieldcurve_DGS10TO2, echo=FALSE}
 datay <- "DGS10TO2"
 
@@ -7836,7 +7756,10 @@ plotSingleQuickModern(datay, ylim = c(-2.5, 5), b.percentile = TRUE)
 
 ```
 
-This plot format was suggested by a mises.org article (https://mises.org/wire/yield-curve-accordion-theory), but they only went back to 1988. The date seemed arbitrary so I went back further in time.
+This plot format was suggested by a mises.org article
+(<https://mises.org/wire/yield-curve-accordion-theory>), but they only
+went back to 1988. The date seemed arbitrary so I went back further in
+time.
 
 ```{r YieldAccordian, echo=FALSE}
 
@@ -7892,7 +7815,7 @@ GS5Yr <- period.apply(GS5, endpoints(GS5,"years", 1), mean)
 
 ```
 
-### High quality bonds 
+### High quality bonds
 
 ```{r AAA}
 
@@ -7916,7 +7839,6 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
-
 High quality bonds near-term trend.
 
 ```{r AAADGS10.near}
@@ -7930,11 +7852,22 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ### High yield spread
 
-"This data represents the Option-Adjusted Spread (OAS) of the ICE BofAML US Corporate A Index, a subset of the ICE BofAML US Corporate Master Index tracking the performance of US dollar denominated investment grade rated corporate debt publicly issued in the US domestic market. This subset includes all securities with a given investment grade rating A.
-The ICE BofAML OASs are the calculated spreads between a computed OAS index of all bonds in a given rating category and a spot Treasury curve. An OAS index is constructed using each constituent bond‚Äôs OAS, weighted by market capitalization. When the last calendar day of the month takes place on the weekend, weekend observations will occur as a result of month ending accrued interest adjustments."
+"This data represents the Option-Adjusted Spread (OAS) of the ICE BofAML
+US Corporate A Index, a subset of the ICE BofAML US Corporate Master
+Index tracking the performance of US dollar denominated investment grade
+rated corporate debt publicly issued in the US domestic market. This
+subset includes all securities with a given investment grade rating A.
+The ICE BofAML OASs are the calculated spreads between a computed OAS
+index of all bonds in a given rating category and a spot Treasury curve.
+An OAS index is constructed using each constituent bond‚Äôs OAS,
+weighted by market capitalization. When the last calendar day of the
+month takes place on the weekend, weekend observations will occur as a
+result of month ending accrued interest adjustments."
 
-- ICE Benchmark Administration Limited (IBA), ICE BofAML US Corporate A Option-Adjusted Spread [BAMLC0A3CA], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/BAMLC0A3CA, July 4, 2019.
-
+-   ICE Benchmark Administration Limited (IBA), ICE BofAML US Corporate
+    A Option-Adjusted Spread [BAMLC0A3CA], retrieved from FRED, Federal
+    Reserve Bank of St. Louis;
+    <https://fred.stlouisfed.org/series/BAMLC0A3CA>, July 4, 2019.
 
 ```{r ASpread, echo=FALSE}
 
@@ -7948,9 +7881,10 @@ plotSingleQuick(dfRecession, df.data,
 
 ### Municipal bond market
 
-Suggest by a WSJ article, change in volume for high-risk muni's. Doesn't look like there is much too it yet.
+Suggest by a WSJ article, change in volume for high-risk muni's. Doesn't
+look like there is much too it yet.
 
-https://www.wsj.com/articles/risky-municipal-bonds-are-on-a-hot-streak-11558949401?mod=hp_lead_pos3
+<https://www.wsj.com/articles/risky-municipal-bonds-are-on-a-hot-streak-11558949401?mod=hp_lead_pos3>
 
 ```{r HYMB.plot.near, fig.width = 7, fig.asp = 1.3 }
 
@@ -8080,7 +8014,9 @@ grid.arrange(p1,
 
 ### Total Loans and yield curve correlation
 
-This relationship was suggest by Charlie and it is an interesting one. As the yield curve flattens (10-year and 1-year rates converge), total loans grow. The generalization is not always accurate, but it does fit.
+This relationship was suggest by Charlie and it is an interesting one.
+As the yield curve flattens (10-year and 1-year rates converge), total
+loans grow. The generalization is not always accurate, but it does fit.
 
 ```{r corrLoansYield, echo=FALSE}
 
@@ -8102,7 +8038,6 @@ plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, yl
 
 I wanted to see how this looked compared to the 3 month
 
-
 ```{r corrLoansYield.threemonth, echo=FALSE}
 
 datax = "TOTLLNSA.Value__YoY"
@@ -8123,7 +8058,8 @@ plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, yl
 
 ### Consumer loans and yield curve correlation
 
-Compared to business loans, consumer loans seem to have to response to the 10Y to 3M yield curve. 
+Compared to business loans, consumer loans seem to have to response to
+the 10Y to 3M yield curve.
 
 ```{r corrConsumerYield.threemonth, echo=FALSE}
 
@@ -8163,7 +8099,8 @@ plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, yl
 
 ```
 
-That's pretty good correlation. Let's see what the rolling correlation looks like.
+That's pretty good correlation. Let's see what the rolling correlation
+looks like.
 
 ```{r rollingcorTOTLNNSA_YoYPSAVE, fig.width = 10, fig.asp = .62}
 
@@ -8197,7 +8134,6 @@ corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, dat
 
 One other items, let's see how loans do versus the federal funds rate
 
-
 ```{r corrLoansFedFunds, echo=FALSE}
 
 datax = "TOTLLNSA.Value__YoY"
@@ -8219,7 +8155,7 @@ plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, yl
 
 ### Petroleum
 
-#### Consumption/Sales > Refiner Motor Gasoline Sales Volumes > by Product > Motor Gasoline > by Area > U.S.
+#### Consumption/Sales \> Refiner Motor Gasoline Sales Volumes \> by Product \> Motor Gasoline \> by Area \> U.S.
 
 ```{r petro_gasoline_us, echo=FALSE, , fig.width = 10, fig.asp = .62 }
 
@@ -8290,15 +8226,21 @@ if (exists("lst_syms")) {
 
 ```
 
-### Total Energy
+# Total Energy
 
-#### Crude Oil and Natural Gas Resource Development > Crude Oil and Natural Gas Drilling Activity Measurements
+## EIA Data Drilling Activity
 
-```{r eia.total.Oilgasdrilling, echo=FALSE, , fig.width = 10, fig.asp = .62 }
+This data series comes from the EIA and shows drilling activity in the
+US.
 
-lst_syms <- c("TOTAL_NGNRPUS_M",
-              "TOTAL_OGNRPUS_M",
-              "TOTAL_NGNRPUS_M")
+```{r eia_total_Oilgasdrilling, echo=FALSE, fig.width = 10, fig.asp = .62 }
+
+lst_syms <- c("TOTAL_OGNRPUS_M",
+              "TOTAL_NGNRPUS_M",
+              "TOTAL_PANRPUS_M")
+
+dt_rigs <- as.Date('1983-01-01')
+ylim_rigs <- c(7.5, 3000)
 
 if (require_columns(df.data, lst_syms)) {
   my_plot <-
@@ -8310,28 +8252,28 @@ if (require_columns(df.data, lst_syms)) {
       getPlotTitle(df.symbols, lst_syms[[1]]),
       "Date",
       getPlotYLabel(df.symbols, lst_syms[[1]]),
-      c(as.Date('1983-01-01'), Sys.Date()),
-      ylim = c(7.5, 2500),
+      c(dt_rigs, Sys.Date()),
+      ylim = ylim_rigs,
       b.legend = TRUE,
       b.long.legend = TRUE
     )
   my_plot <-
     my_plot + geom_line(
       data = df.data,
-      aes_string(
-        x = "date",
-        y = lst_syms[[2]],
-        colour = shQuote(getPlotTitle(df.symbols, lst_syms[[2]], str.sep = "\n"))
+      aes(
+        x = .data[["date"]],
+        y = .data[[lst_syms[[2]]]],
+        colour = getPlotTitle(df.symbols, lst_syms[[2]], str.sep = "\n")
       ),
       na.rm = TRUE
     )
   my_plot <-
     my_plot + geom_line(
       data = df.data,
-      aes_string(
-        x = "date",
-        y = lst_syms[[3]],
-        colour = shQuote(getPlotTitle(df.symbols, lst_syms[[3]], str.sep = "\n"))
+      aes(
+        x = .data[["date"]],
+        y = .data[[lst_syms[[3]]]],
+        colour = getPlotTitle(df.symbols, lst_syms[[3]], str.sep = "\n")
       ),
       na.rm = TRUE
     )
@@ -8352,132 +8294,175 @@ if (exists("lst_syms")) {
 
 ```
 
-
 ## Baker Hughes Rig Count
 
-```{r bkr.total.Oilgasdrilling, echo=FALSE, fig.width = 9, fig.asp = 0.4 }
+Baker Hughes publishes their rig count data and up until Mar of 2024 it
+had a form that was simple to ingest. They greatly improved the data
+granularity, but it is hard to read. I'm not going to update this,
+instead relying on the data published by EIA
 
-datay <- "BKR_Total"
-#datay.aux.1 <- "TOTALOGNRPUSM"
-datay.aux.1 <- "BKR_Total"
-datay.aux.2 <- "BKR_Oil"
-datay.aux.3 <- "BKR_Gas"
-ylim <- c(7.5, 2500)
-dt.start = as.Date('1983-01-01')
-p1 <-
-  plotSingleQuick(
-    dfRecession,
-    df.data,
-    datay,
-    ylim,
-    dt.start,
-    b.legend = TRUE,
-    b.percentile = FALSE,
-    b.long.legend = TRUE
+The plot includes the series from EIA to confirm it is the same data.
+
+Also, this is the US count only. The more recent data from Baker Hughes
+includes Canada as well.
+
+```{r bkr_total_oil_gas_drilling, echo=FALSE, fig.width = 10, fig.asp = .62 }
+
+lst_syms <- c("BKR_Total",
+              "TOTAL_OGNRPUS_M",
+              "BKR_Oil",
+              "BKR_Gas")
+
+if (require_columns(df.data, lst_syms)) {
+
+  p1 <-
+    plotSingleQuick(
+      dfRecession,
+      df.data,
+      datay = lst_syms[[1]],
+      ylim = ylim_rigs,
+      dt.start = dt_rigs,
+      b.legend = TRUE,
+      b.percentile = FALSE,
+      b.long.legend = TRUE
+    )
+  p1 <- p1 + geom_line(
+    data = df.data,
+    aes(
+      x = .data[["date"]],
+      y = .data[[lst_syms[[2]]]],
+      colour = getPlotTitle(df.symbols, lst_syms[[2]], str.sep = "\n")
+    ),
+    na.rm = TRUE
   )
-p1 <- p1 + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay.aux.1,
-    colour = shQuote(getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n"))
-  ),
-  na.rm = TRUE
-)
-p1 <- p1 + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay.aux.2,
-    colour = shQuote(getPlotTitle(df.symbols, datay.aux.2, str.sep = "\n"))
-  ),
-  na.rm = TRUE
-)
-p1 <- p1 + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = datay.aux.3,
-    colour = shQuote(getPlotTitle(df.symbols, datay.aux.3, str.sep = "\n"))
-  ),
-  na.rm = TRUE
-)
-p1
+  p1 <- p1 + geom_line(
+    data = df.data,
+    aes(
+      x = .data[["date"]],
+      y = .data[[lst_syms[[3]]]],
+      colour = getPlotTitle(df.symbols, lst_syms[[3]], str.sep = "\n")
+    ),
+    na.rm = TRUE
+  )
+  p1 <- p1 + geom_line(
+    data = df.data,
+    aes(
+      x = .data[["date"]],
+      y = .data[[lst_syms[[4]]]],
+      colour = getPlotTitle(df.symbols, lst_syms[[4]], str.sep = "\n")
+    ),
+    na.rm = TRUE
+  )
+  
+  print(p1)
+  
+  # Clean and tidy memory
+  if( exists("p1")){
+    rm(p1)
+  }
 
+}
 
-```
+# Free up memory
+if (exists("lst_syms")) {
+  rm(lst_syms)
+}
 
+if (exists("dt_rigs")) {
+  rm(dt_rigs)
+}
 
-```{r bkr.total.Oilgasdrilling.near, echo=FALSE, fig.width = 9, fig.asp = 0.4 }
-# 
-# datay <- "BKR_Total"
-# datay.aux.1 <- "TOTALOGNRPUSM"
-# datay.aux.2 <- "BKR_Oil"
-# datay.aux.3 <- "BKR_Gas"
-# ylim <- c(7.5, 1200)
-# dt.start = as.Date('2019-01-01')
-# p1 <-
-#   plotSingleQuick(
-#     dfRecession,
-#     df.data,
-#     datay,
-#     ylim,
-#     dt.start,
-#     b.legend = TRUE,
-#     b.percentile = FALSE,
-#     b.long.legend = TRUE
-#   )
-# p1 <- p1 + geom_line(
-#   data = df.data,
-#   aes_string(
-#     x = "date",
-#     y = datay.aux.1,
-#     colour = shQuote(getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n"))
-#   ),
-#   na.rm = TRUE
-# )
-# p1 <- p1 + geom_line(
-#   data = df.data,
-#   aes_string(
-#     x = "date",
-#     y = datay.aux.2,
-#     colour = shQuote(getPlotTitle(df.symbols, datay.aux.2, str.sep = "\n"))
-#   ),
-#   na.rm = TRUE
-# )
-# p1 <- p1 + geom_line(
-#   data = df.data,
-#   aes_string(
-#     x = "date",
-#     y = datay.aux.3,
-#     colour = shQuote(getPlotTitle(df.symbols, datay.aux.3, str.sep = "\n"))
-#   ),
-#   na.rm = TRUE
-# )
-# p1
-
+if ( exists("ylim_rigs")){
+  rm(ylim_rigs)
+}
 
 ```
 
-## BEA Supplemental Estimates, Motor Vehicles  
+```{r eia_total_oil_gas_drilling_near, echo=FALSE, fig.width = 10, fig.asp = .62 }
 
-Definitions								
-								
-  Autos--all passenger cars, including station wagons.								
-  Light trucks--trucks up to 14,000 pounds gross vehicle weight, including minivans and								
-  sport utility vehicles.  Prior to the 2003 Benchmark Revision light trucks were up to 10,000 pounds.								
-  Heavy trucks--trucks more than 14,000 pounds gross vehicle weight.								
-  Prior to the 2003 Benchmark Revision heavy trucks were more than 10,000 pounds.								
-  Domestic sales--United States (U.S.) sales of vehicles assembled in the U.S., Canada, and Mexico.								
-  Foreign sales--U.S. sales of vehicles produced elsewhere.								
-  Domestic auto production--Autos assembled in the U.S.								
-  Domestic auto inventories--U.S. inventories of vehicles assembled in the U.S., Canada, and Mexico.								
-								
+lst_syms <- c("TOTAL_OGNRPUS_M",
+              "TOTAL_NGNRPUS_M",
+              "TOTAL_PANRPUS_M")
+
+
+if (require_columns(df.data, lst_syms)) {
+  my_plot <-
+    plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_syms[[1]],
+      getPlotTitle(df.symbols, lst_syms[[1]]),
+      "Date",
+      getPlotYLabel(df.symbols, lst_syms[[1]]),
+      c(as.Date('2020-01-01'), Sys.Date()),
+      ylim = c(7.5, 1000),
+      b.legend = TRUE,
+      b.long.legend = TRUE
+    )
+  my_plot <-
+    my_plot + geom_line(
+      data = df.data,
+      aes(
+        x = .data[["date"]],
+        y = .data[[lst_syms[[2]]]],
+        colour = getPlotTitle(df.symbols, lst_syms[[2]], str.sep = "\n")
+      ),
+      na.rm = TRUE
+    )
+  my_plot <-
+    my_plot + geom_line(
+      data = df.data,
+      aes(
+        x = .data[["date"]],
+        y = .data[[lst_syms[[3]]]],
+        colour = getPlotTitle(df.symbols, lst_syms[[3]], str.sep = "\n")
+      ),
+      na.rm = TRUE
+    )
+
+  print(my_plot)
+  
+  # Free up memory
+  if (exists("my_plot")) {
+    rm(my_plot)
+  }
+  
+}
+
+# Free up memory
+if (exists("lst_syms")) {
+  rm(lst_syms)
+}
+
+```
+
+## BEA Supplemental Estimates, Motor Vehicles
+
+Definitions
+
+Autos--all passenger cars, including station wagons.\
+Light trucks--trucks up to 14,000 pounds gross vehicle weight, including
+minivans and\
+sport utility vehicles. Prior to the 2003 Benchmark Revision light
+trucks were up to 10,000 pounds.\
+Heavy trucks--trucks more than 14,000 pounds gross vehicle weight.\
+Prior to the 2003 Benchmark Revision heavy trucks were more than 10,000
+pounds.\
+Domestic sales--United States (U.S.) sales of vehicles assembled in the
+U.S., Canada, and Mexico.\
+Foreign sales--U.S. sales of vehicles produced elsewhere.\
+Domestic auto production--Autos assembled in the U.S.\
+Domestic auto inventories--U.S. inventories of vehicles assembled in the
+U.S., Canada, and Mexico.
+
 ### TAble 6 - Light Vehicle and Total Vehicle Sales
 
 #### Auto sales
 
-A WSJ article suggested that auto sales might be a good indicator so bring that to the mix. It does have troughs that correlate with recessions
+A WSJ article suggested that auto sales might be a good indicator so
+bring that to the mix. It does have troughs that correlate with
+recessions
 
 ```{r LightAutoSales, echo=FALSE}
 
@@ -8489,7 +8474,9 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
-There might be some seasonal variance in the auto sales so lets take a look at the year over year. The data is pretty noisy, it probably will not make a very good indicator.
+There might be some seasonal variance in the auto sales so lets take a
+look at the year over year. The data is pretty noisy, it probably will
+not make a very good indicator.
 
 ```{r LightAutoSales_YoY, echo=FALSE}
 
@@ -8511,9 +8498,13 @@ Data in this section come from the Bureau of Economic Analysis.
 
 #### A191RC: Gross Domestic Product - Line 1
 
-GDP numbers tend to lag so this series is truly an afterthought. But it does have some correlation with the recessions.
+GDP numbers tend to lag so this series is truly an afterthought. But it
+does have some correlation with the recessions.
 
-GDP does not reflect the capacity of the economy nor the efficiency. Shrinking capacity and lower prices at constant volumes would indicate improvements in effeciency/productivity which is good for the economy, but does not move the GDP upward.
+GDP does not reflect the capacity of the economy nor the efficiency.
+Shrinking capacity and lower prices at constant volumes would indicate
+improvements in effeciency/productivity which is good for the economy,
+but does not move the GDP upward.
 
 ```{r GDP, echo=FALSE}
 
@@ -8524,7 +8515,8 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
 
-Looks like the year over year change on the GDP should correlate well with unemployment.
+Looks like the year over year change on the GDP should correlate well
+with unemployment.
 
 ```{r GDPYoy, echo=FALSE}
 
@@ -8541,7 +8533,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, b.percentile = TRUE)
 
 #### A191RD: Gross Domestic Product - Line 1
 
-This is GDP price deflator series. 
+This is GDP price deflator series.
 
 ```{r GDPDEF, echo=FALSE}
 
@@ -8567,7 +8559,11 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ### Economic yield curve (GDP to 1-year treasury)
 
-GDP versus the yield on the 1-year. This series was prompted by an article suggesting that the "economic yield curve" should be used to indicate a recession rather than an inverted yield curve. Less of indicator and more of concurrent confirmation of recession. Not sure why they would be related either.
+GDP versus the yield on the 1-year. This series was prompted by an
+article suggesting that the "economic yield curve" should be used to
+indicate a recession rather than an inverted yield curve. Less of
+indicator and more of concurrent confirmation of recession. Not sure why
+they would be related either.
 
 ```{r GDPFundRateDiff, echo=FALSE}
 
@@ -8580,7 +8576,9 @@ GDP versus the yield on the 1-year. This series was prompted by an article sugge
 
 ### Economic yield curve (GDP to 3-month treasury)
 
-Same idea as above, but applied the 3-month treasury.This one has fewer false triggers, but is not as helpful as 10Y to 3M spread in predicting a recession.
+Same idea as above, but applied the 3-month treasury.This one has fewer
+false triggers, but is not as helpful as 10Y to 3M spread in predicting
+a recession.
 
 ```{r GDPFundRate3MonthDiff, echo=FALSE}
 
@@ -8593,7 +8591,10 @@ Same idea as above, but applied the 3-month treasury.This one has fewer false tr
 
 #### A824RC: National defense Federal Gov't Expenditures - Line 24
 
-U.S. Bureau of Economic Analysis, Federal Government: National Defense Consumption Expenditures and Gross Investment [FDEFX], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/FDEFX, April 6, 2021.
+U.S. Bureau of Economic Analysis, Federal Government: National Defense
+Consumption Expenditures and Gross Investment [FDEFX], retrieved from
+FRED, Federal Reserve Bank of St. Louis;
+<https://fred.stlouisfed.org/series/FDEFX>, April 6, 2021.
 
 ```{r FDEFX, echo=FALSE}
 
@@ -8603,10 +8604,12 @@ plotSingleQuickModern(datay, ylim)
 
 ```
 
-
 #### A825RC: Nondefense Federal Gov't Expenditures - Line 25
 
-U.S. Bureau of Economic Analysis, Federal Government: Nondefense Consumption Expenditures and Gross Investment [FNDEFX], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/FNDEFX, April 6, 2021.
+U.S. Bureau of Economic Analysis, Federal Government: Nondefense
+Consumption Expenditures and Gross Investment [FNDEFX], retrieved from
+FRED, Federal Reserve Bank of St. Louis;
+<https://fred.stlouisfed.org/series/FNDEFX>, April 6, 2021.
 
 ```{r FNDEFX, echo=FALSE}
 
@@ -8622,13 +8625,23 @@ Select series from Table 6.16D
 
 #### A051RC: Corporate profits with inventory and capital consumption adjustment
 
-From BEA's documentation (https://www.bea.gov/media/5671):
+From BEA's documentation (<https://www.bea.gov/media/5671>):
 
-"BEA’s featured measure of corporate profits — profits from current production - provides a comprehensive and consistent economic measure of the income earned by all U.S. corporations. As such, it is unaffected by changes in tax laws, and it is adjusted for nonreported and misreported income. It excludes dividend income, capital gains and
-losses, and other financial flows and adjustments, such as deduction for “bad debt.” Thus, the NIPA measure of profits is a particularly useful analytical measure of the health of the corporate sector. For example, in contrast to other popular measures of corporate profits, the NIPA measure did not show the large run-up in profits during the late 1990s that was primarily attributable to capital gains.
+"BEA’s featured measure of corporate profits — profits from current
+production - provides a comprehensive and consistent economic measure of
+the income earned by all U.S. corporations. As such, it is unaffected by
+changes in tax laws, and it is adjusted for nonreported and misreported
+income. It excludes dividend income, capital gains and losses, and other
+financial flows and adjustments, such as deduction for “bad debt.” Thus,
+the NIPA measure of profits is a particularly useful analytical measure
+of the health of the corporate sector. For example, in contrast to other
+popular measures of corporate profits, the NIPA measure did not show the
+large run-up in profits during the late 1990s that was primarily
+attributable to capital gains.
 
-
-Profits after tax with IVA and CCAdj is equal to corporate profits with IVA and CCAdj less taxes on corporate income. It provides an after-tax measure of profits from current production." 
+Profits after tax with IVA and CCAdj is equal to corporate profits with
+IVA and CCAdj less taxes on corporate income. It provides an after-tax
+measure of profits from current production."
 
 Data is Line 1 of Table 6.16D
 
@@ -8659,11 +8672,23 @@ Billions of dollars; months are seasonally adjusted at annual rates.
 
 BEA Account Code: A065RC
 
-Personal income is the income that persons receive in return for their provision of labor, land, and capital used in current production and the net current transfer payments that they receive from business and from government.25 Personal income is equal to national income minus corporate profits with inventory valuation and capital consumption adjustments, taxes on production and imports less subsidies, contributions for government social insurance, net interest and miscellaneous payments on assets, business current transfer payments (net), current surplus of government enterprises, and wage accruals less disbursements, plus personal income receipts on assets and personal current transfer receipts.
-A Guide to the National Income and Product Accounts of the United States (NIPA) - (http://www.bea.gov/national/pdf/nipaguid.pdf)
+Personal income is the income that persons receive in return for their
+provision of labor, land, and capital used in current production and the
+net current transfer payments that they receive from business and from
+government.25 Personal income is equal to national income minus
+corporate profits with inventory valuation and capital consumption
+adjustments, taxes on production and imports less subsidies,
+contributions for government social insurance, net interest and
+miscellaneous payments on assets, business current transfer payments
+(net), current surplus of government enterprises, and wage accruals less
+disbursements, plus personal income receipts on assets and personal
+current transfer receipts. A Guide to the National Income and Product
+Accounts of the United States (NIPA) -
+(<http://www.bea.gov/national/pdf/nipaguid.pdf>)
 
-Suggested Citation:
-U.S. Bureau of Economic Analysis, Personal Income [PI], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/PI, July 11, 2019.
+Suggested Citation: U.S. Bureau of Economic Analysis, Personal Income
+[PI], retrieved from FRED, Federal Reserve Bank of St. Louis;
+<https://fred.stlouisfed.org/series/PI>, July 11, 2019.
 
 ```{r PI, echo=FALSE}
 
@@ -8674,16 +8699,20 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
 
-
 #### DPCERC: Personal consumption expenditures (PCE) - Table 2.1, Line 29
 
-BEA Account Code: DPCERC
-Personal consumption expenditures (PCE) is the primary measure of consumer spending on goods and services in the U.S. economy. 1 It accounts for about two-thirds of domestic final spending, and thus it is the primary engine that drives future economic growth. PCE shows how much of the income earned by households is being spent on
-current consumption as opposed to how much is being saved for future consumption. -https://www.bea.gov/system/files/2019-12/Chapter-5.pdf
+BEA Account Code: DPCERC Personal consumption expenditures (PCE) is the
+primary measure of consumer spending on goods and services in the U.S.
+economy. 1 It accounts for about two-thirds of domestic final spending,
+and thus it is the primary engine that drives future economic growth.
+PCE shows how much of the income earned by households is being spent on
+current consumption as opposed to how much is being saved for future
+consumption. -<https://www.bea.gov/system/files/2019-12/Chapter-5.pdf>
 
-Suggested Citation:
-U.S. Bureau of Economic Analysis, Personal Consumption Expenditures [PCE], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/PCE, June 12, 2020
-
+Suggested Citation: U.S. Bureau of Economic Analysis, Personal
+Consumption Expenditures [PCE], retrieved from FRED, Federal Reserve
+Bank of St. Louis; <https://fred.stlouisfed.org/series/PCE>, June 12,
+2020
 
 ```{r PCE, echo=FALSE}
 
@@ -8711,22 +8740,43 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
-
 #### DPCERG: Personal consumption expenditures Price Index (PCEPI) - Table 2.1, Line 29
 
-BEA Account Code: DPCERG
-The gross domestic product price index measures changes in prices paid for goods and services produced in the United States, including those exported to other countries. Prices of imports are excluded. The gross domestic product implicit price deflator, or GDP deflator, basically measures the same things and closely mirrors the GDP price index, although the two price measures are calculated differently. The GDP deflator is used by some firms to adjust payments in contracts.
+BEA Account Code: DPCERG The gross domestic product price index measures
+changes in prices paid for goods and services produced in the United
+States, including those exported to other countries. Prices of imports
+are excluded. The gross domestic product implicit price deflator, or GDP
+deflator, basically measures the same things and closely mirrors the GDP
+price index, although the two price measures are calculated differently.
+The GDP deflator is used by some firms to adjust payments in contracts.
 
-The gross domestic purchases price index is BEA's featured measure of inflation for the U.S. economy overall. It measures changes in prices paid by consumers, businesses, and governments in the United States, including the prices of the imports they buy.
+The gross domestic purchases price index is BEA's featured measure of
+inflation for the U.S. economy overall. It measures changes in prices
+paid by consumers, businesses, and governments in the United States,
+including the prices of the imports they buy.
 
-BEA's closely followed personal consumption expenditures price index, or PCE price index, is a narrower measure. It looks at the changing prices of goods and services purchased by consumers in the United States. It's similar to the Bureau of Labor Statistics' consumer price index for urban consumers. The two indexes, which have their own purposes and uses, are constructed differently, resulting in different inflation rates.
+BEA's closely followed personal consumption expenditures price index, or
+PCE price index, is a narrower measure. It looks at the changing prices
+of goods and services purchased by consumers in the United States. It's
+similar to the Bureau of Labor Statistics' consumer price index for
+urban consumers. The two indexes, which have their own purposes and
+uses, are constructed differently, resulting in different inflation
+rates.
 
-The PCE price index is known for capturing inflation (or deflation) across a wide range of consumer expenses and for reflecting changes in consumer behavior. For example, if the price of beef rises, shoppers may buy less beef and more chicken. Also, BEA revises previously published PCE data to reflect updated information or new methodology, providing consistency across decades of data that’s valuable for researchers. The PCE price index is used primarily for macroeconomic analysis and forecasting.
--https://www.bea.gov/resources/learning-center/what-to-know-prices-inflation
+The PCE price index is known for capturing inflation (or deflation)
+across a wide range of consumer expenses and for reflecting changes in
+consumer behavior. For example, if the price of beef rises, shoppers may
+buy less beef and more chicken. Also, BEA revises previously published
+PCE data to reflect updated information or new methodology, providing
+consistency across decades of data that’s valuable for researchers. The
+PCE price index is used primarily for macroeconomic analysis and
+forecasting.
+-<https://www.bea.gov/resources/learning-center/what-to-know-prices-inflation>
 
-Suggested Citation:
-U.S. Bureau of Economic Analysis, Personal Consumption Expenditures: Chain-type Price Index [PCEPI], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/PCEPI, April 25, 2021.
-
+Suggested Citation: U.S. Bureau of Economic Analysis, Personal
+Consumption Expenditures: Chain-type Price Index [PCEPI], retrieved from
+FRED, Federal Reserve Bank of St. Louis;
+<https://fred.stlouisfed.org/series/PCEPI>, April 25, 2021.
 
 ```{r PCEPI, echo=FALSE}
 
@@ -8754,26 +8804,29 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
-
-
-
-
-
-
-
 #### A072RC: Personal Savings Rate - Line 35
 
-Consumers tend to pull down their savings rates as unemployment decreases and market conditions improve. This series has tended to be unreliable due to the size of revisions during the comprehensive update carried out by the BEA. The last update on this series moved the rate from 4.2 to 6.7 percent.
+Consumers tend to pull down their savings rates as unemployment
+decreases and market conditions improve. This series has tended to be
+unreliable due to the size of revisions during the comprehensive update
+carried out by the BEA. The last update on this series moved the rate
+from 4.2 to 6.7 percent.
 
-(https://www.bloomberg.com/news/articles/2018-07-27/americans-have-been-saving-much-more-than-thought-new-data-show)
+(<https://www.bloomberg.com/news/articles/2018-07-27/americans-have-been-saving-much-more-than-thought-new-data-show>)
 
-BEA Account Code: A072RC
-Personal saving as a percentage of disposable personal income (DPI), frequently referred to as "the personal saving rate," is calculated as the ratio of personal saving to DPI.
-Personal saving is equal to personal income less personal outlays and personal taxes; it may generally be viewed as the portion of personal income that is used either to provide funds to capital markets or to invest in real assets such as residences.(https://www.bea.gov/national/pdf/all-chapters.pdf)
-A Guide to the National Income and Product Accounts of the United States (NIPA).
+BEA Account Code: A072RC Personal saving as a percentage of disposable
+personal income (DPI), frequently referred to as "the personal saving
+rate," is calculated as the ratio of personal saving to DPI. Personal
+saving is equal to personal income less personal outlays and personal
+taxes; it may generally be viewed as the portion of personal income that
+is used either to provide funds to capital markets or to invest in real
+assets such as
+residences.(<https://www.bea.gov/national/pdf/all-chapters.pdf>) A Guide
+to the National Income and Product Accounts of the United States (NIPA).
 
-Suggested Citation:
-U.S. Bureau of Economic Analysis, Personal Saving Rate [PSAVERT], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/PSAVERT, July 9, 2019.
+Suggested Citation: U.S. Bureau of Economic Analysis, Personal Saving
+Rate [PSAVERT], retrieved from FRED, Federal Reserve Bank of St. Louis;
+<https://fred.stlouisfed.org/series/PSAVERT>, July 9, 2019.
 
 ```{r PSAVERT, echo=FALSE}
 
@@ -8785,7 +8838,6 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 ```
 
 Take a closer look at the last decade
-
 
 ```{r PSAVERT.plot.close, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
@@ -8810,7 +8862,8 @@ my.plot
 
 ```
 
-The relationship between personal savings and unemployment (U-3) can be better visualized with a scatter plot
+The relationship between personal savings and unemployment (U-3) can be
+better visualized with a scatter plot
 
 ```{r corrU6PSVT, echo=FALSE}
 
@@ -8829,8 +8882,8 @@ plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, yl
 
 ```
 
-
-The fit does not explain most of what is in the plot. Lets take a look at the rolling correlation. 
+The fit does not explain most of what is in the plot. Lets take a look
+at the rolling correlation.
 
 ```{r rollingcor.unrate.u3.psavert, fig.width = 10, fig.asp = .62}
 
@@ -8849,7 +8902,9 @@ corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, dat
 
 ### Personal savings to household net worth
 
-A relationship between personal savings and household networth can be seen in a scatter plot. This was suggested by a WSJ article (https://blogs.wsj.com/dailyshot/2018/02/23/the-daily-shot-reasons-for-declining-u-s-household-savings-rate/).
+A relationship between personal savings and household networth can be
+seen in a scatter plot. This was suggested by a WSJ article
+(<https://blogs.wsj.com/dailyshot/2018/02/23/the-daily-shot-reasons-for-declining-u-s-household-savings-rate/>).
 
 ```{r corrHNONWPDPIPSVT, echo=FALSE}
 
@@ -8873,7 +8928,10 @@ plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, yl
 
 ### U.S. International Trade in Goods and Services (FT900)
 
-U.S. Bureau of Economic Analysis and U.S. Census Bureau, U.S. Imports of Goods by Customs Basis from China [IMPCH], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/IMPCH, October 5, 2019.
+U.S. Bureau of Economic Analysis and U.S. Census Bureau, U.S. Imports of
+Goods by Customs Basis from China [IMPCH], retrieved from FRED, Federal
+Reserve Bank of St. Louis; <https://fred.stlouisfed.org/series/IMPCH>,
+October 5, 2019.
 
 ```{r IMPCH.plot, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
@@ -8909,7 +8967,6 @@ my.plot
 
 ```
 
-
 ```{r IMPCH.IMPMX.plot, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
 datay <- "EXPCH__minus__IMPCH"
@@ -8943,7 +9000,6 @@ my.plot <- my.plot + geom_line(
 my.plot
 
 ```
-
 
 ```{r IMPCH.plot.yoy, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
@@ -8980,7 +9036,8 @@ my.plot
 
 ### New Houses Sold and For Sale by Stage of Construction and Median Number of Months on Sales Market
 
-Read an article suggesting that housing sales and sales growth could be useful. FRED only has new home data so start there.
+Read an article suggesting that housing sales and sales growth could be
+useful. FRED only has new home data so start there.
 
 ```{r newhousing, fig.width = 7, fig.asp = 1.3 }
 
@@ -9052,10 +9109,17 @@ grid.arrange(p1,
 
 ### New Privately-Owned Housing Units Authorized in Permit-Issuing Places
 
-As provided by the Census, start occurs when excavation begins for the footings or foundation of a building. All housing units in a multifamily building are defined as being started when this excavation begins. Beginning with data for September 1992, estimates of housing starts include units in structures being totally rebuilt on an existing foundation.
+As provided by the Census, start occurs when excavation begins for the
+footings or foundation of a building. All housing units in a multifamily
+building are defined as being started when this excavation begins.
+Beginning with data for September 1992, estimates of housing starts
+include units in structures being totally rebuilt on an existing
+foundation.
 
-Suggested Citation:
-U.S. Census Bureau and U.S. Department of Housing and Urban Development, Housing Starts: Total: New Privately Owned Housing Units Started [HOUST], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/HOUST, June 13, 2020.
+Suggested Citation: U.S. Census Bureau and U.S. Department of Housing
+and Urban Development, Housing Starts: Total: New Privately Owned
+Housing Units Started [HOUST], retrieved from FRED, Federal Reserve Bank
+of St. Louis; <https://fred.stlouisfed.org/series/HOUST>, June 13, 2020.
 
 ```{r HOUST.plot, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
@@ -9080,7 +9144,6 @@ my.plot <- plotSingle(
 my.plot
 
 ```
-
 
 Take a look at privately owned starts
 
@@ -9108,12 +9171,12 @@ my.plot
 
 ```
 
-
 ### New Privately-Owned Houses Sold and For Sale
 
-Suggested Citation:
-U.S. Census Bureau and U.S. Department of Housing and Urban Development, Median Sales Price of Houses Sold for the United States [MSPUS], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/MSPUS, June 13, 2020.
-
+Suggested Citation: U.S. Census Bureau and U.S. Department of Housing
+and Urban Development, Median Sales Price of Houses Sold for the United
+States [MSPUS], retrieved from FRED, Federal Reserve Bank of St. Louis;
+<https://fred.stlouisfed.org/series/MSPUS>, June 13, 2020.
 
 ```{r MSPUS.plot, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
@@ -9165,12 +9228,11 @@ my.plot
 
 ```
 
-
 ### Durable Goods
 
-Suggested Citation:
-U.S. Census Bureau, Manufacturers' New Orders: Durable Goods [UMDMNO], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/UMDMNO, April 26, 2021.
-
+Suggested Citation: U.S. Census Bureau, Manufacturers' New Orders:
+Durable Goods [UMDMNO], retrieved from FRED, Federal Reserve Bank of St.
+Louis; <https://fred.stlouisfed.org/series/UMDMNO>, April 26, 2021.
 
 ```{r UMDMNO.plot, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
@@ -9221,7 +9283,6 @@ my.plot <- plotSingle(
 my.plot
 
 ```
-
 
 ```{r DGORDER.plot, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
@@ -9279,10 +9340,14 @@ Durable goods, seasonally adjusted, divided by GDP
 
 #### Commercial and industrial loans, all commercial banks - Line 10
 
-Data taken from H.8 Assets and Liabilities of Commercial Banks in the United States. Take a look at SA and NSA data series as weekly and month updates. It should all be similar at this scale.
+Data taken from H.8 Assets and Liabilities of Commercial Banks in the
+United States. Take a look at SA and NSA data series as weekly and month
+updates. It should all be similar at this scale.
 
-Suggested Citation:
-Board of Governors of the Federal Reserve System (US), Commercial and Industrial Loans, All Commercial Banks [BUSLOANS], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/BUSLOANS, July 11, 2019.
+Suggested Citation: Board of Governors of the Federal Reserve System
+(US), Commercial and Industrial Loans, All Commercial Banks [BUSLOANS],
+retrieved from FRED, Federal Reserve Bank of St. Louis;
+<https://fred.stlouisfed.org/series/BUSLOANS>, July 11, 2019.
 
 ```{r cureal, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
@@ -9337,7 +9402,6 @@ my.plot
 
 ```
 
-
 ```{r businessloans.by.gdp, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
 datay <- "BUSLOANS__by__GDP"
@@ -9391,7 +9455,8 @@ my.plot
 
 ```
 
-Taking a look at the difference in SA and NSA series. Seasonal adjustments do vary, but do not seem to be related to recessions.
+Taking a look at the difference in SA and NSA series. Seasonal
+adjustments do vary, but do not seem to be related to recessions.
 
 ```{r busloans.monthly.sa.nsa, echo=FALSE}
 # datay <- "BUSLOANS__minus__BUSLOANSNSA__by__GDP"
@@ -9400,7 +9465,8 @@ Taking a look at the difference in SA and NSA series. Seasonal adjustments do va
 
 ```
 
-The raw series is just too steep for any kind of machine learnine. This needs to be converted to log scale.
+The raw series is just too steep for any kind of machine learnine. This
+needs to be converted to log scale.
 
 ```{r busloanslogplot, echo=FALSE}
 datay <- "BUSLOANS.Value__Log"
@@ -9409,7 +9475,8 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
 
-That's a little better, let's see what the smoothed derivative looks like.
+That's a little better, let's see what the smoothed derivative looks
+like.
 
 ```{r busloansderplot, echo=FALSE}
 # datay <- "BUSLOANS.Value__Log__Der"
@@ -9418,7 +9485,9 @@ That's a little better, let's see what the smoothed derivative looks like.
 
 ```
 
-That is odd...looks like this doesn't cross zero unless we are getting close to, or into, a recession. The year over year tells about the same story. Might be a good indication of the end of a recession.
+That is odd...looks like this doesn't cross zero unless we are getting
+close to, or into, a recession. The year over year tells about the same
+story. Might be a good indication of the end of a recession.
 
 ```{r BusLoansYoYplot, echo=FALSE}
 
@@ -9428,18 +9497,25 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
 
-
 #### Consumer loans, all commercial banks - Line 20
 
-Suggested Citation:
-Board of Governors of the Federal Reserve System (US), Consumer Loans, All Commercial Banks [CONSUMERNSA], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/CONSUMERNSA, July 11, 2019.
+Suggested Citation: Board of Governors of the Federal Reserve System
+(US), Consumer Loans, All Commercial Banks [CONSUMERNSA], retrieved from
+FRED, Federal Reserve Bank of St. Louis;
+<https://fred.stlouisfed.org/series/CONSUMERNSA>, July 11, 2019.
 
-That spike in consumer loans is due to 
+That spike in consumer loans is due to
 
-"April 9, 2010 (Last revised September 23, 2011): As of the week ending March 31, 2010, domestically chartered banks and foreign-related institutions had consolidated onto their balance sheets the following assets and liabilities of off-balance-sheet vehicles, owing to the adoption of FASB's Financial Accounting Statements No. 166 (FAS 166), "Accounting for Transfers of Financial Assets," and No. 167 (FAS 167), "Amendments to FASB Interpretation No. 46(R)."
+"April 9, 2010 (Last revised September 23, 2011): As of the week ending
+March 31, 2010, domestically chartered banks and foreign-related
+institutions had consolidated onto their balance sheets the following
+assets and liabilities of off-balance-sheet vehicles, owing to the
+adoption of FASB's Financial Accounting Statements No. 166 (FAS 166),
+"Accounting for Transfers of Financial Assets," and No. 167 (FAS 167),
+"Amendments to FASB Interpretation No. 46(R)."
 
-This included a consumer loans, credit cards and other revolving plans change of $321.9B. That was a lot of off-balance-sheet bank assets.
-
+This included a consumer loans, credit cards and other revolving plans
+change of \$321.9B. That was a lot of off-balance-sheet bank assets.
 
 ```{r consumer.loans, echo=FALSE}
 
@@ -9451,10 +9527,14 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 #### Deposits, All Commercial Banks, all commercial banks - Line 34
 
-Data taken from H.8 Assets and Liabilities of Commercial Banks in the United States. Take a look at SA and NSA data series as weekly and month updates. It should all be similar at this scale.
+Data taken from H.8 Assets and Liabilities of Commercial Banks in the
+United States. Take a look at SA and NSA data series as weekly and month
+updates. It should all be similar at this scale.
 
-Suggested Citation:
-Board of Governors of the Federal Reserve System (US), Deposits, All Commercial Banks [DPSACBW027SBOG], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/DPSACBW027SBOG, May 14, 2020.
+Suggested Citation: Board of Governors of the Federal Reserve System
+(US), Deposits, All Commercial Banks [DPSACBW027SBOG], retrieved from
+FRED, Federal Reserve Bank of St. Louis;
+<https://fred.stlouisfed.org/series/DPSACBW027SBOG>, May 14, 2020.
 
 ```{r DPSACBW027SBOG.plots, echo=FALSE}
 
@@ -9466,22 +9546,54 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ## Federal reserve board Z.1: Financial Accounts of the United States
 
-From the FRED website (https://fred.stlouisfed.org/release?rid=52):
+From the FRED website (<https://fred.stlouisfed.org/release?rid=52>):
 
-"The Financial Accounts (formerly known as the Flow of Funds accounts) are a set of financial accounts used to track the sources and uses of funds by sector. They are a component of a system of macroeconomic accounts including the National Income and Product accounts (NIPA) and balance of payments accounts, all of which serve as a comprehensive set of information on the economy’s performance.(1) Some important inferences that can be drawn from the Financial accounts are the financial strength of a given sector, new economic trends, changes in the composition of wealth, and development of new financial instruments over time.(1) 
+"The Financial Accounts (formerly known as the Flow of Funds accounts)
+are a set of financial accounts used to track the sources and uses of
+funds by sector. They are a component of a system of macroeconomic
+accounts including the National Income and Product accounts (NIPA) and
+balance of payments accounts, all of which serve as a comprehensive set
+of information on the economy’s performance.(1) Some important
+inferences that can be drawn from the Financial accounts are the
+financial strength of a given sector, new economic trends, changes in
+the composition of wealth, and development of new financial instruments
+over time.(1)
 
-Sectors are compiled into three categories: households, nonfinancial businesses, and banks. The sources of funds for a sector are its internal funds (savings from income after consumption) and external funds (loans from banks and other financial intermediaries). (1) Funds for a given sector are used for its investments in physical and financial assets. Dividing sources and uses of funds into two categories helps the staff of the Federal Reserve System pay particular attention to external sources of funds and financial uses of funds.(2) One example is whether households are borrowing more from banks—or in other words, whether household debt is rising. Another example might be whether banks are using more of their funds to provide loans to consumers. Transactions within a sector are not shown in the accounts; however, transactions between sectors are.(2) Monitoring the external flows of funds provides insights into a sector’s health and the performance of the economy as a whole.
+Sectors are compiled into three categories: households, nonfinancial
+businesses, and banks. The sources of funds for a sector are its
+internal funds (savings from income after consumption) and external
+funds (loans from banks and other financial intermediaries). (1) Funds
+for a given sector are used for its investments in physical and
+financial assets. Dividing sources and uses of funds into two categories
+helps the staff of the Federal Reserve System pay particular attention
+to external sources of funds and financial uses of funds.(2) One example
+is whether households are borrowing more from banks—or in other words,
+whether household debt is rising. Another example might be whether banks
+are using more of their funds to provide loans to consumers.
+Transactions within a sector are not shown in the accounts; however,
+transactions between sectors are.(2) Monitoring the external flows of
+funds provides insights into a sector’s health and the performance of
+the economy as a whole.
 
-Data for the Financial accounts are compiled from a large number of reports and publications, including regulatory reports such as those submitted by banks, tax filings, and surveys conducted by the Federal Reserve System.(2) The Financial accounts are published quarterly as a set of tables in the Federal Reserve’s Z.1 statistical release.
+Data for the Financial accounts are compiled from a large number of
+reports and publications, including regulatory reports such as those
+submitted by banks, tax filings, and surveys conducted by the Federal
+Reserve System.(2) The Financial accounts are published quarterly as a
+set of tables in the Federal Reserve’s Z.1 statistical release.
 
-(1)	Teplin, Albert M. “The U.S. Flow of Funds Accounts and Their Uses.” Federal Reserve Bulletin, July 2001; http://www.federalreserve.gov/pubs/bulletin/2001/0701lead.pdf. 
-(2)	Board of Governors of the Federal Reserve System. “Guide to the Flow of Funds Accounts.” 2000, http://www.federalreserve.gov/apps/fof/."
+(1) Teplin, Albert M. “The U.S. Flow of Funds Accounts and Their Uses.”
+    Federal Reserve Bulletin, July 2001;
+    <http://www.federalreserve.gov/pubs/bulletin/2001/0701lead.pdf>.
+(2) Board of Governors of the Federal Reserve System. “Guide to the Flow
+    of Funds Accounts.” 2000,
+    <http://www.federalreserve.gov/apps/fof/>."
 
 ### L.102 Nonfinancial Business
 
 #### FL102051003.Q: Nonfinancial corporate business; security repurchase agreements; asset
 
-Asset level of nonfinancial business security repo agreements. federalreserve.gov/apps/fof/SeriesAnalyzer.aspx?s=FL102051003&t=
+Asset level of nonfinancial business security repo agreements.
+federalreserve.gov/apps/fof/SeriesAnalyzer.aspx?s=FL102051003&t=
 
 ```{r SRPSABSNNCB.z.1, echo=FALSE}
 
@@ -9518,8 +9630,9 @@ plotSingleQuick(dfRecession,
 
 #### FL894123005.Q: All sectors; total loans; liability
 
-Sum of domestic financial sectors, all sectors, total mortgages, and households/non-profits. federalreserve.gov/apps/fof/SeriesAnalyzer.aspx?s=FL894123005&t=L.107&bc=L.107:FL793068005&suf=Q
-
+Sum of domestic financial sectors, all sectors, total mortgages, and
+households/non-profits.
+federalreserve.gov/apps/fof/SeriesAnalyzer.aspx?s=FL894123005&t=L.107&bc=L.107:FL793068005&suf=Q
 
 ```{r ASTLL.z.1, echo=FALSE}
 
@@ -9531,8 +9644,10 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 #### FL793068005.Q: Domestic financial sectors; depository institution loans n.e.c.; asset
 
-Sum of Monetary authority; depository institution loans n.e.c.; asset and Private depository institutions; depository institution loans n.e.c.; asset. federalreserve.gov/apps/fof/SeriesAnalyzer.aspx?s=FL793068005&t=L.214&suf=Q
-
+Sum of Monetary authority; depository institution loans n.e.c.; asset
+and Private depository institutions; depository institution loans
+n.e.c.; asset.
+federalreserve.gov/apps/fof/SeriesAnalyzer.aspx?s=FL793068005&t=L.214&suf=Q
 
 ```{r FBDILNECA.z.1, echo=FALSE}
 
@@ -9544,8 +9659,8 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 #### FL893169005.Q: All sectors; other loans and advances; liability
 
-Sum of finance, government, and chartered institutions asset levels. https://www.federalreserve.gov/apps/fof/SeriesAnalyzer.aspx?s=FL893169005&t=L.214&suf=Q
-
+Sum of finance, government, and chartered institutions asset levels.
+<https://www.federalreserve.gov/apps/fof/SeriesAnalyzer.aspx?s=FL893169005&t=L.214&suf=Q>
 
 ```{r ASOLAL.z.1, echo=FALSE}
 
@@ -9557,7 +9672,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 #### FL893065005.Q: All sectors; total mortgages; asset
 
-https://www.federalreserve.gov/apps/fof/SeriesAnalyzer.aspx?s=FL893065005&t=L.214&suf=Q
+<https://www.federalreserve.gov/apps/fof/SeriesAnalyzer.aspx?s=FL893065005&t=L.214&suf=Q>
 
 ```{r ASTMA.z.1, echo=FALSE}
 
@@ -9569,7 +9684,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 #### FL893065105.Q: All sectors; home mortgages; asset
 
-https://www.federalreserve.gov/apps/fof/DisplayTable.aspx?t=L.214
+<https://www.federalreserve.gov/apps/fof/DisplayTable.aspx?t=L.214>
 
 ```{r ASHMA.z.1, echo=FALSE}
 
@@ -9581,7 +9696,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 #### FL893065405.Q: All sectors; multifamily residential mortgages; asset
 
-https://www.federalreserve.gov/apps/fof/SeriesAnalyzer.aspx?s=FL893065405&t=L.214&suf=Q
+<https://www.federalreserve.gov/apps/fof/SeriesAnalyzer.aspx?s=FL893065405&t=L.214&suf=Q>
 
 ```{r ASMRMA.z.1, echo=FALSE}
 
@@ -9593,7 +9708,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 #### FL893065505.Q: All sectors; commercial mortgages; asset
 
-https://www.federalreserve.gov/apps/fof/SeriesAnalyzer.aspx?s=FL893065505&t=L.214&suf=Q
+<https://www.federalreserve.gov/apps/fof/SeriesAnalyzer.aspx?s=FL893065505&t=L.214&suf=Q>
 
 ```{r ASCMA.z.1, echo=FALSE}
 
@@ -9605,7 +9720,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 #### FL893065603.Q: All sectors; farm mortgages; asset
 
-https://www.federalreserve.gov/apps/fof/SeriesAnalyzer.aspx?s=FL893065603&t=L.214&suf=Q
+<https://www.federalreserve.gov/apps/fof/SeriesAnalyzer.aspx?s=FL893065603&t=L.214&suf=Q>
 
 ```{r ASFMA.z.1, echo=FALSE}
 # 
@@ -9614,7 +9729,6 @@ https://www.federalreserve.gov/apps/fof/SeriesAnalyzer.aspx?s=FL893065603&t=L.21
 # plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
-
 
 #### FL153166000.Q: Households and nonprofit organizations; consumer credit; liability
 
@@ -9632,7 +9746,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 #### FL152000005.Q: Households and nonprofit organizations; total assets, Level
 
-string.source ID: FL152000005.Q. 
+string.source ID: FL152000005.Q.
 
 ```{r TABSHNO, echo=FALSE}
 
@@ -9645,7 +9759,8 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 #### FL152090006.Q: Household Net Worth as Percentage of Disposable Personal Income
 
-string.source ID: FL152090006.Q. Household networth tends to fall as a recession start.
+string.source ID: FL152090006.Q. Household networth tends to fall as a
+recession start.
 
 ```{r HNONWPDPI, echo=FALSE}
 
@@ -9654,7 +9769,6 @@ ylim <- c(450, 850)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
-
 
 ## Productivity Yield Curve
 
@@ -9671,6 +9785,7 @@ my.plot <- plotSingle(dfRecession, df.data, "date", datay, getPlotTitle(df.symbo
 my.plot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuote(datay_aux)), na.rm = TRUE)
 
 ```
+
 ```{r ProdFundRateDiff, echo=FALSE}
 
 # datay <- "OPHNFB_YoYTODGS1"
@@ -9682,7 +9797,8 @@ my.plot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuo
 
 ## Manufacturing output and employees
 
-Not sure if these relates to a recession, but fascinating to see how output and employees change with time.
+Not sure if these relates to a recession, but fascinating to see how
+output and employees change with time.
 
 ```{r manoutput}
 
@@ -9731,7 +9847,6 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
-
 Freight, loosely, moves inversely to the trade deficit.
 
 ```{r BOPGTB.yoy}
@@ -9743,8 +9858,8 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
-
-World bank air transportation. Only updated annually so less usefull, but interesting reference to above.
+World bank air transportation. Only updated annually so less usefull,
+but interesting reference to above.
 
 ```{r WWDIWLDISAIRGOODMTK1}
 
@@ -9756,7 +9871,10 @@ World bank air transportation. Only updated annually so less usefull, but intere
 ```
 
 ## Gross private domestic investment
-Spending most certainly tips down prior to a recession. The gross private domestic investment data series, plotted in log format below, show how private investment pulls back prior to recessions.
+
+Spending most certainly tips down prior to a recession. The gross
+private domestic investment data series, plotted in log format below,
+show how private investment pulls back prior to recessions.
 
 ```{r GPDI.by.GDP, echo=FALSE}
 
@@ -9782,7 +9900,8 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
 
-The change in direction is a little easier to see if the derivative is plotted, first YoY then the smoothed derivative
+The change in direction is a little easier to see if the derivative is
+plotted, first YoY then the smoothed derivative
 
 ```{r GPDI_YoY, echo=FALSE}
 
@@ -9821,18 +9940,18 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ## Productivity
 
-Frequency:  Quarterly
-The Productivity and Costs release on August 7, 2003, will reflect the June 2003
-benchmark revision to payroll employment. Since employment is now reported on a
-North American Industry Classification System (NAICS) basis, all of the
-historical data will be revised. Changes as a consequence of the move to NAICS
-should not be significant since this release carries data at high levels of
+Frequency: Quarterly The Productivity and Costs release on August 7,
+2003, will reflect the June 2003 benchmark revision to payroll
+employment. Since employment is now reported on a North American
+Industry Classification System (NAICS) basis, all of the historical data
+will be revised. Changes as a consequence of the move to NAICS should
+not be significant since this release carries data at high levels of
 aggregation.
 
-Suggested Citation: U.S. Bureau of Labor Statistics, Nonfarm Business Sector:
-Labor Productivity (Output per Hour) for All Employed Persons [OPHNFB],
-retrieved from FRED, Federal Reserve Bank of St. Louis;
-https://fred.stlouisfed.org/series/OPHNFB, December 24, 2022.
+Suggested Citation: U.S. Bureau of Labor Statistics, Nonfarm Business
+Sector: Labor Productivity (Output per Hour) for All Employed Persons
+[OPHNFB], retrieved from FRED, Federal Reserve Bank of St. Louis;
+<https://fred.stlouisfed.org/series/OPHNFB>, December 24, 2022.
 
 ```{r OPHNFB, echo=FALSE}
 
@@ -9841,7 +9960,6 @@ ylim <- c(20, 120)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
-
 
 ```{r OPHNFB_YoY, echo=FALSE}
 
@@ -9886,7 +10004,8 @@ plotSingleQuick(
 
 ## Industrial Production
 
-This is a look at manufacturing industrial production. The yoY change should be a leading indicator of unemployment.
+This is a look at manufacturing industrial production. The yoY change
+should be a leading indicator of unemployment.
 
 ```{r IPMan, echo=FALSE}
 
@@ -9896,7 +10015,6 @@ dt.start = as.Date('1972-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
-
 
 ```{r IPMan_YoY, echo=FALSE}
 
@@ -9908,23 +10026,23 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile)
 
 ```
 
-## Housing 
+## Housing
 
 Take a look at housing starts. These can drop as rates rise.
 
-Frequency:  Monthly
+Frequency: Monthly
 
-As provided by the Census, start occurs when excavation begins for the footings
-or foundation of a building. All housing units in a multifamily building are
-defined as being started when this excavation begins. Beginning with data for
-September 1992, estimates of housing starts include units in structures being
-totally rebuilt on an existing foundation.
+As provided by the Census, start occurs when excavation begins for the
+footings or foundation of a building. All housing units in a multifamily
+building are defined as being started when this excavation begins.
+Beginning with data for September 1992, estimates of housing starts
+include units in structures being totally rebuilt on an existing
+foundation.
 
-Suggested Citation:
-U.S. Census Bureau and U.S. Department of Housing and Urban Development, New
-Privately-Owned Housing Units Started: Total Units [HOUST], retrieved from FRED,
-Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/HOUST,
-December 24, 2022.
+Suggested Citation: U.S. Census Bureau and U.S. Department of Housing
+and Urban Development, New Privately-Owned Housing Units Started: Total
+Units [HOUST], retrieved from FRED, Federal Reserve Bank of St. Louis;
+<https://fred.stlouisfed.org/series/HOUST>, December 24, 2022.
 
 ```{r Houst, echo=FALSE}
 
@@ -9934,20 +10052,20 @@ dt.start = as.Date('1960-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
+
 Housing starts, NSA
 
-HOUST reports at annual rate, but HOUSTNSA just reports the monthly numbers. I
-scale up the NSA to the annual rate.
+HOUST reports at annual rate, but HOUSTNSA just reports the monthly
+numbers. I scale up the NSA to the annual rate.
 
-Units:  Thousands of Units, Not Seasonally Adjusted
+Units: Thousands of Units, Not Seasonally Adjusted
 
-Frequency:  Monthly
+Frequency: Monthly
 
-Suggested Citation:
-U.S. Census Bureau and U.S. Department of Housing and Urban Development, New
-Privately-Owned Housing Units Started: Total Units [HOUSTNSA], retrieved from
-FRED, Federal Reserve Bank of St. Louis;
-https://fred.stlouisfed.org/series/HOUSTNSA, December 24, 2022.
+Suggested Citation: U.S. Census Bureau and U.S. Department of Housing
+and Urban Development, New Privately-Owned Housing Units Started: Total
+Units [HOUSTNSA], retrieved from FRED, Federal Reserve Bank of St.
+Louis; <https://fred.stlouisfed.org/series/HOUSTNSA>, December 24, 2022.
 
 ```{r Houst.NSA, echo=FALSE}
 
@@ -9998,11 +10116,10 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
-
 ## Population data
 
-Many of the economic series can be better understood if normalized by population. Basic population and worker data from FRED.
-
+Many of the economic series can be better understood if normalized by
+population. Basic population and worker data from FRED.
 
 ```{r population, echo=FALSE}
 
@@ -10012,7 +10129,6 @@ dt.start = as.Date('1959-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
-
 
 ```{r population.yoy, echo=FALSE}
 
@@ -10047,8 +10163,9 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
-Look at GDP divided by CPI per person. It flattens and even dips a little prior
-to a recession. Might be worth looking at the derivative of this series.
+Look at GDP divided by CPI per person. It flattens and even dips a
+little prior to a recession. Might be worth looking at the derivative of
+this series.
 
 ```{r GDPBYCPIAUCSLBYPOPTHM, echo=FALSE}
 
@@ -10109,11 +10226,13 @@ That is worth a closer look
 
 # Correlation Study
 
-Detailed correlations are explored above. Before concluding, let's take a look at some overall correlation values to see if anything pops out.
+Detailed correlations are explored above. Before concluding, let's take
+a look at some overall correlation values to see if anything pops out.
 
 ## Commodities
 
-As mentioned above, copper, year over year, has some correlation with the recession initiation. It could be useful.
+As mentioned above, copper, year over year, has some correlation with
+the recession initiation. It could be useful.
 
 ```{r corplot.commodities, echo=FALSE, fig.width=10,fig.height=10}
 # # Correlation for the entire data set
@@ -10128,8 +10247,8 @@ As mentioned above, copper, year over year, has some correlation with the recess
 
 ## GDP Series
 
-GDP, normalized first by CPI and then by population, looks like it migh correlate inversely with the recession indicators
-
+GDP, normalized first by CPI and then by population, looks like it migh
+correlate inversely with the recession indicators
 
 ```{r corplot.gdp, echo=FALSE, fig.width=10,fig.height=10}
 # 
@@ -10144,10 +10263,16 @@ GDP, normalized first by CPI and then by population, looks like it migh correlat
 
 ## Financials
 
-Let's see where we are so far. The correlation plot confirms some of the speculation above. The S&P 500 (X_GSPC.GSPC.Open) is well correlated with industrial production (INDPRO), business loans (BUSLOANS), total loans (TOTLNNSA) , and nonfinancial corporate business debt (NCBDBIQ027S). 
+Let's see where we are so far. The correlation plot confirms some of the
+speculation above. The S&P 500 (X_GSPC.GSPC.Open) is well correlated
+with industrial production (INDPRO), business loans (BUSLOANS), total
+loans (TOTLNNSA) , and nonfinancial corporate business debt
+(NCBDBIQ027S).
 
-In this case, I want and indicator that rises prior to a recession. It looks like the unemployment rate (UNRATE), real personal income (W875RX1), and the yield curve (DGS10TO1) are all inversely correlated with the recession initiation indicator.
-
+In this case, I want and indicator that rises prior to a recession. It
+looks like the unemployment rate (UNRATE), real personal income
+(W875RX1), and the yield curve (DGS10TO1) are all inversely correlated
+with the recession initiation indicator.
 
 ```{r corplot1, echo=FALSE, fig.width=12,fig.height=12}
 # # Correlation for the entire data set
@@ -10170,13 +10295,18 @@ In this case, I want and indicator that rises prior to a recession. It looks lik
 #            tl.col="black", tl.srt=45, title ="Financial data")
 ```
 
-I thought the modified recession initiation would be a harder match, but there are quite a few correlated variables. Lets take a look at some of those in more detail
+I thought the modified recession initiation would be a harder match, but
+there are quite a few correlated variables. Lets take a look at some of
+those in more detail
 
 # Complete list of symbols
 
-Since it is tedious to do this one at a time, all the symbols were entered into a data frame, loaded, and aggregated together in a single `xts` object. 
+Since it is tedious to do this one at a time, all the symbols were
+entered into a data frame, loaded, and aggregated together in a single
+`xts` object.
 
-This is the complete list of symbol names and sources used in the project.
+This is the complete list of symbol names and sources used in the
+project.
 
 ```{r listsyms, echo=FALSE}
 # string.colnames <- colnames(df.symbols);
