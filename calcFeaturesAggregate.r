@@ -476,13 +476,15 @@ if ( require_columns(df.data, c("U6RATE") ) ){
 }
 
 # Smoothed derivative of the S&P 500 log values
-if ( require_columns(df.data, c("GSPC.Open_Log") ) ){
+list.sym <- c("X_GSPC.GSPC.Open__Log")
+if ( require_columns(df.data, list.sym ) ){
 
   # Define the new symbol and make the calculation
   str.symbol.new <- "GSPC__Open__Log__SmoothDer"
+  
   df.data[[str.symbol.new]] <-
     sgolayfilt(
-      df.data$GSPC.Open_Log,
+      df.data[[list.sym[[1]]]],
       p = 3,
       n = 501,
       m = 1,
@@ -500,8 +502,8 @@ if ( require_columns(df.data, c("GSPC.Open_Log") ) ){
       float.expense.ratio = -1.00,
       Max030 = FALSE,
       Max180 = FALSE,
-      date.series.start = as.Date(index(GSPC[1])),
-      date.series.end = as.Date(index(tail(GSPC, 1))),
+      date.series.start = as.Date(index(X_GSPC[1])),
+      date.series.end = as.Date(index(tail(X_GSPC, 1))),
       string.symbol_safe = safe_symbol_name(str.symbol.new),
       string.object_name = safe_symbol_name(str.symbol.new)
       
@@ -509,18 +511,29 @@ if ( require_columns(df.data, c("GSPC.Open_Log") ) ){
   )  
   
   # Tidy memory
-  rm(str.symbol.new)
+  if( exists("str.symbol.new")){
+    rm(str.symbol.new)
+  }
+
   
+}else{
+  print(paste("Failed to find: ", lst.syms))  
+}
+
+# Clean and tidy memory
+if( exists("list.sym")){
+  rm(list.sym)
 }
 
 # Smoothed derivative of the S&P 500 log values, normalized by the GDP deflator
-if ( require_columns(df.data, c("GSPC.Open.by.GDPDEF_Log") ) ){
+list.sym <- c("X_GSPC__Open__by__GDPDEF__Log")
+if ( require_columns(df.data, list.sym ) ){
 
   # Define the new symbol and make the calculation
   str.symbol.new <- "GSPC__Open__by__GDPDEF__Log__SmoothDer"
   df.data[[str.symbol.new]] <-
     sgolayfilt(
-      df.data$GSPC.Open.by.GDPDEF_Log,
+      df.data[[list.sym[[1]]]],
       p = 3,
       n = 501,
       m = 1,
@@ -533,13 +546,13 @@ if ( require_columns(df.data, c("GSPC.Open.by.GDPDEF_Log") ) ){
     list(
       string.symbol = str.symbol.new,
       string.source = "Calc",
-      string.description =  "Derivative of Smoothed Log Scale S&P 500\ndivided by GDP deflator",
+      string.description =  "Derivative of Smoothed Log Scale S&P 500 Open\ndivided by GDP deflator",
       string.label.y = "Dollar/period",
       float.expense.ratio = -1.00,
       Max030 = FALSE,
       Max180 = FALSE,
-      date.series.start = as.Date(index(GSPC[1])),
-      date.series.end = as.Date(index(tail(GSPC, 1))),
+      date.series.start = as.Date(index(X_GSPC[1])),
+      date.series.end = as.Date(index(tail(X_GSPC, 1))),
       string.symbol_safe = safe_symbol_name(str.symbol.new),
       string.object_name = safe_symbol_name(str.symbol.new)
       
@@ -549,8 +562,62 @@ if ( require_columns(df.data, c("GSPC.Open.by.GDPDEF_Log") ) ){
   # Tidy memory
   rm(str.symbol.new)
 
+}else{
+  print(paste("Failed to find: ", lst.syms))  
 }
 
+# Clean and tidy memory
+if( exists("list.sym")){
+  rm(list.sym)
+}
+
+# Smoothed derivative of the S&P 500 log values, normalized by the GDP deflator
+list.sym <- c("X_GSPC__Close__by__GDPDEF__Log")
+if ( require_columns(df.data, list.sym ) ){
+  
+  # Define the new symbol and make the calculation
+  str.symbol.new <- "GSPC__Close__by__GDPDEF__Log__SmoothDer"
+  df.data[[str.symbol.new]] <-
+    sgolayfilt(
+      df.data[[list.sym[[1]]]],
+      p = 3,
+      n = 501,
+      m = 1,
+      ts = 1
+    )
+  
+  # Update the symbols table    
+  df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = str.symbol.new,
+      string.source = "Calc",
+      string.description =  "Derivative of Smoothed Log Scale S&P 500 Close\ndivided by GDP deflator",
+      string.label.y = "Dollar/period",
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = as.Date(index(X_GSPC[1])),
+      date.series.end = as.Date(index(tail(X_GSPC, 1))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
+      
+    )
+  )  
+  
+  # Tidy memory
+  if( exists("str.symbol.new")){
+    rm(str.symbol.new)
+  }
+  
+}else{
+  print(paste("Failed to find: ", lst.syms))  
+}
+
+# Clean and tidy memory
+if( exists("list.sym")){
+  rm(list.sym)
+}
 
 # Smoothed second derivative of the S&P 500 log values
 if ( require_columns(df.data, c("GSPC.Open_Log_SmoothDer") ) ){

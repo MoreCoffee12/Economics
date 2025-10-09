@@ -8,6 +8,9 @@ output:
     toc_depth: 4
     smart: false
 output_file: "RecessionModels.html"    
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 ```{r setup, echo=FALSE}
@@ -40,7 +43,6 @@ source("modelHelper.r")
 
 ```
 
-
 ```{r load.data, echo=FALSE}
 
 str.data.dir <- "C:/Users/Rainy/OneDrive/Documents/IssaquahDynamical/Datasets/2529RS0082_HistEconData"
@@ -53,7 +55,6 @@ rm(str.data.dir)
 rm(out.file)
 
 ```
-
 
 ```{r plot.limits, echo=FALSE}
 
@@ -79,9 +80,9 @@ df.symbols <- dplyr::filter(df.symbols,
                                                  "GDP",
                                                  "GDPC1",
                                                  "CPROFIT",
-                                                 "NPPTTL",
-                                                 "ADPWNUSNERSA",
-                                                 "CCSA",
+                                                 "RecInit",
+                                                 "^GSPC",
+                                                 "GDPDEF",
                                                  "PCE",
                                                  "U6RATE",
                                                  "UNRATE",
@@ -171,15 +172,18 @@ if( exists("df.farm.income")){
 
 ```
 
+# Clean and tidy data
+
 ## Feature Extraction
 
-With the raw data downloaded, some of the interesting features can be extracted.
-The first step is reconcile the time intervals. Some of the data is released
-monthly and some daily. I chose to interpolate all data to a daily interval. The
-first section of code adds the daily rows to the data frame.
+With the raw data downloaded, some of the interesting features can be
+extracted. The first step is reconcile the time intervals. Some of the
+data is released monthly and some daily. I chose to interpolate all data
+to a daily interval. The first section of code adds the daily rows to
+the data frame.
 
-The code performs interpolation for continuous data or carries it forward for
-binary data like the recession indicators.
+The code performs interpolation for continuous data or carries it
+forward for binary data like the recession indicators.
 
 ```{r aggsyms}
 
@@ -200,7 +204,9 @@ df.data <- df.data[as.Date(rownames(df.data)) > as.Date("1940-01-01"),]
 
 ## Create aggregate series
 
-Some analysis requires that two or more series be combined. For example, normallizing debt by GDP to get a sense of the proportion of debt to the total economy helps understand the debt cycle.
+Some analysis requires that two or more series be combined. For example,
+normallizing debt by GDP to get a sense of the proportion of debt to the
+total economy helps understand the debt cycle.
 
 ```{r create aggregate, echo=FALSE}
 
@@ -208,7 +214,9 @@ source("calcAggregateSeries.r")
 
 ```
 
-Year over year, smoothed derivative, and log trends tend to smooth out seasonal variation. It gets used so often that I do this for every series downloaded.
+Year over year, smoothed derivative, and log trends tend to smooth out
+seasonal variation. It gets used so often that I do this for every
+series downloaded.
 
 ```{r calcsYoYSmoothLog}
 
@@ -219,14 +227,12 @@ df.symbols <- lst.df[[2]]
 
 ```
 
-
 ```{r calc.features.for.aggregate, echo=FALSE}
 
 # Calculate the features for the aggregated series
 source("calcFeaturesAggregate.r")
 
 ```
-
 
 # Recession initiation and termination dates/times
 
@@ -242,8 +248,8 @@ source("calcRecession.r")
 
 ## Input data series
 
-The labor market is one of the clearest, most reliable signals of broad economic
-turning points—but it lags.
+The labor market is one of the clearest, most reliable signals of broad
+economic turning points—but it lags.
 
 ```{r rec_model_unrate_base, echo=FALSE, fig.width = 10, fig.asp = .62}
 
@@ -362,5 +368,278 @@ if( exists("lst_syms")){
 
 ```
 
+## Recession Initiation (Switch Model)
 
+Plot the initiation period of each recession, defined retroactively by
+the NEBR, using a state of 0 or 1.
+
+```{r rec_model_rec_init_switch, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+# Define the symbols in the plot
+lst_syms <- c("RecInit")
+
+# Do they exist in the data frame?
+if ( require_columns(df.data, lst_syms ) ){
+
+  my_plot <-
+    plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_syms[[1]],
+      getPlotTitle(df.symbols, lst_syms[[1]]),
+      "Date",
+      getPlotYLabel(df.symbols, lst_syms[[1]]),
+      c(dt.start.prediction, Sys.Date()),
+      ylim = c(-0.1, 1.1),
+      b.legend = TRUE,
+      b.percentile = FALSE,
+      b.long.legend = TRUE
+    )
+
+  print(my_plot)
+  
+  # Free up memory
+  if( exists("my_plot")){
+    rm(my_plot)
+  }
+}
+
+
+# Free up memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
+
+
+```
+
+## Recession Initiation (Smooth Model)
+
+The previous section used a switched model (Yes/No), but this section
+uses a smoothed version that is more like a probability value.
+
+Plot the smoothed version of the initiation period of the recession
+initiation.
+
+```{r rec_model_rec_init_smooth, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+# Define the symbols in the plot
+lst_syms <- c("RecInit_Smooth")
+
+# Do they exist in the data frame?
+if ( require_columns(df.data, lst_syms ) ){
+
+  my_plot <-
+    plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_syms[[1]],
+      getPlotTitle(df.symbols, lst_syms[[1]]),
+      "Date",
+      getPlotYLabel(df.symbols, lst_syms[[1]]),
+      c(dt.start.prediction, Sys.Date()),
+      ylim = c(-0.1, 1.1),
+      b.legend = TRUE,
+      b.percentile = FALSE,
+      b.long.legend = TRUE
+    )
+
+  print(my_plot)
+  
+  # Free up memory
+  if( exists("my_plot")){
+    rm(my_plot)
+  }
+}
+
+
+# Free up memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
+
+
+```
+
+# Data Exploration
+
+There are some great plotting and visualization tools in the `quantmod` package,
+but for the prediction work `ggplot` will be used. This section walks through
+each of the data sets and notes features and relationships that would be helpful
+in building a trading strategy.
+
+## S&P 500
+
+One place to begin is with the relationship between stock prices and recessions.
+The predictor needs to be able to identify the onset of recession before the
+market declines. In theory, this predictor would give enough warning to cycle
+out of equity and into something more like cash or bonds. The plot below shows
+the S&P 500 open values in log-linear format. The market reaches a peak before
+most recessions, typically 6-9 months before the recession, shown by the blue
+rectangles in the plot below. A good predictor will correlate with the peak
+prior to an upcoming recession.
+
+The growth of equities makes it hard to compare peaks. For example, using the
+GDP deflator the last two decades are an order of magnitude higher than the
+historical data.
+
+```{r rec_model_data_exp_GSPC_by_GPDEF, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+# Define the symbols in the plot
+lst_syms <- c("X_GSPC__Open__by__GDPDEF", "X_GSPC__Close__by__GDPDEF")
+
+# Do they exist in the data frame?
+if ( require_columns(df.data, lst_syms ) ){
+
+  my_plot <-
+    plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_syms[[1]],
+      getPlotTitle(df.symbols, lst_syms[[1]]),
+      "Date",
+      getPlotYLabel(df.symbols, lst_syms[[1]]),
+      c(dt.start.prediction, Sys.Date()),
+      ylim = c(0.0, round_up_to(max(df.data[[lst_syms[[1]]]]),5)),
+      b.legend = TRUE,
+      b.percentile = FALSE,
+      b.long.legend = TRUE
+    )
+
+  my_plot <- my_plot + geom_line(
+    data = df.data,
+    aes(
+      x = .data[["date"]],
+      y = .data[[lst_syms[[2]]]],
+      colour = getPlotTitle(df.symbols, lst_syms[[2]])
+    ),
+    
+    na.rm = TRUE
+  )
+  print(my_plot)
+  
+  # Free up memory
+  if( exists("my_plot")){
+    rm(my_plot)
+  }
+}
+
+
+# Free up memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
+
+
+```
+Taking the log of the data results in a series where the peaks in the historical data can be seen and compared to present day pricing.
+
+```{r rec_model_data_exp_GSPC_by_GPDEF_log, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+# Define the symbols in the plot
+lst_syms <- c("X_GSPC__Open__by__GDPDEF__Log", 
+              "X_GSPC__Close__by__GDPDEF__Log")
+
+# Do they exist in the data frame?
+if ( require_columns(df.data, lst_syms ) ){
+
+  my_plot <-
+    plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_syms[[1]],
+      getPlotTitle(df.symbols, lst_syms[[1]]),
+      "Date",
+      getPlotYLabel(df.symbols, lst_syms[[1]]),
+      c(dt.start.prediction, Sys.Date()),
+      ylim = c(5, round_up_to(max(df.data[[lst_syms[[1]]]]),1)),
+      b.legend = TRUE,
+      b.percentile = FALSE,
+      b.long.legend = TRUE
+    )
+
+  my_plot <- my_plot + geom_line(
+    data = df.data,
+    aes(
+      x = .data[["date"]],
+      y = .data[[lst_syms[[2]]]],
+      colour = getPlotTitle(df.symbols, lst_syms[[2]])
+    ),
+    
+    na.rm = TRUE
+  )
+  print(my_plot)
+  
+  # Free up memory
+  if( exists("my_plot")){
+    rm(my_plot)
+  }
+}
+
+
+# Free up memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
+
+
+```
+The features in the S&P curve that are most interesting are the peaks (sell signal) and the troughs (buy signal). One way to quantify the peaks is look at the derivative and see where it crosses zero. The crossing of interest are positive to negative indicating the market is rolling over. Most of the peaks occur just prior to or during the blue intervals used for training.
+
+```{r rec_model_data_exp_GSPC_by_GPDEF_log_smooth_der, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+# Define the symbols in the plot
+lst_syms <- c("X_GSPC__Open__by__GDPDEF__SmoothDer", 
+              "X_GSPC__Close__by__GDPDEF__SmoothDer")
+
+# Do they exist in the data frame?
+if ( require_columns(df.data, lst_syms ) ){
+
+  my_plot <-
+    plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_syms[[1]],
+      getPlotTitle(df.symbols, lst_syms[[1]]),
+      "Date",
+      getPlotYLabel(df.symbols, lst_syms[[1]]),
+      c(dt.start.prediction, Sys.Date()),
+      ylim = c(-round_up_to(max(df.data[[lst_syms[[1]]]]),1), 
+               +round_up_to(max(df.data[[lst_syms[[1]]]]),1)),
+      b.legend = TRUE,
+      b.percentile = FALSE,
+      b.long.legend = TRUE
+    )
+
+  my_plot <- my_plot + geom_line(
+    data = df.data,
+    aes(
+      x = .data[["date"]],
+      y = .data[[lst_syms[[2]]]],
+      colour = getPlotTitle(df.symbols, lst_syms[[2]])
+    ),
+    
+    na.rm = TRUE
+  )
+  print(my_plot)
+  
+  # Free up memory
+  if( exists("my_plot")){
+    rm(my_plot)
+  }
+}
+
+
+# Free up memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
+
+
+```
 
