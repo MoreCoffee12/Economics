@@ -257,9 +257,7 @@ economic turning points—but it lags.
 lst_syms <- c("UNRATE.Value", "UNRATE.Value__Smooth")
 
 if (require_columns(df.data, lst_syms)) {
-  ylim <- c(2, 12)
-  b.legend <- TRUE
-  b.percentile <- TRUE
+
   myPlot <- plotSingle(
     dfRecession,
     df.data,
@@ -269,10 +267,11 @@ if (require_columns(df.data, lst_syms)) {
     "Date",
     getPlotYLabel(df.symbols, lst_syms[[1]]),
     c(as.Date("1jan1950", "%d%b%Y"), Sys.Date()),
-    ylim,
-    b.legend,
-    b.percentile
+    ylim = c(2, 12),
+    b.legend = TRUE,
+    b.percentile = TRUE
   )
+  
   myPlot + geom_line(
     data = df.data,
     aes(
@@ -643,3 +642,169 @@ if( exists("lst_syms")){
 
 ```
 
+## Synthesize S&P 500 recession initiation feature
+
+The derivative data suggests a way to improve the indicator by adding a single
+rule: if there is a negative slope zero crossing before the default training
+period, move the training date to that point. This approach will allow the
+algorithm to capture more of the gains of the market. It is also going to be a
+more challenging fit.
+
+```{r rec_model_data_exp_GSPC_by_GPDEF_log_smooth_der_fit, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+dPeakGSPC <- diff(sign(df.data$X_GSPC__Open__by__GDPDEF__SmoothDer))
+dPeakGSPC <- append(dPeakGSPC, tail(dPeakGSPC,1))
+df.data$dPeakGSPC <- dPeakGSPC
+
+if( exists("dPeakGSPC")){
+  rm(dPeakGSPC)
+}
+
+# keep only the negative slopes and get rid of any dates
+# while the fixed recession indicator is zero
+df.data$dPeakGSPC[df.data$dPeakGSPC>0] <- 0
+df.data$dPeakGSPC <- (df.data$dPeakGSPC * df.data$RecInit)
+dtPeakRec <- df.data$date[which(df.data$dPeakGSPC<0)]
+
+dfRecession$initStartMod <- dfRecession$initStart
+for (idxRec in 1:nrow(dfRecession)) {
+  for (idx in 1:length(dtPeakRec)) {
+    if (dtPeakRec[idx] > dfRecession$initStart[idxRec] &
+        dtPeakRec[idx] < dfRecession$initEnd[idxRec]) {
+      dfRecession$initStartMod[idxRec] <- dtPeakRec[idx]
+      
+    }
+    
+  }
+}
+
+if( exists("idxRec")){
+  rm(idxRec)
+}
+if( exists("idx")){
+  rm(idx)
+}
+if( exists("dtPeakRec")){
+  rm(dtPeakRec)
+}
+
+dfRecession$initEndMod <- dfRecession$start + floor((dfRecession$end-dfRecession$start)/2)
+
+# Add the recession initiation date as a time series
+df.data$RecInitMod <- rep(0, nrow(df.data))
+
+for (idx in 1:nrow(dfRecession)) {
+  df.data$RecInitMod[which(df.data$date > dfRecession$initStartMod[idx] &
+                            df.data$date < dfRecession$initEndMod[idx])] = 1
+}
+
+df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = "RecInitMod",
+      string.source = "Calc",
+      string.description =  "1 for Recession Initiation Period, 0 For All Else (Modified)",
+      string.label.y = "(-)",
+      float.expense.ratio = -1.00,
+      Max030 = FALSE,
+      Max180 = FALSE,
+      date.series.start = as.Date(df.data$date[1]),
+      date.series.end = as.Date(tail(df.data$date, 1))
+    )
+)
+
+```
+
+## Plot S&P 500 recession initiation feature
+
+Plot out this modified recession initiation feature
+
+```{r rec_model_data_exp_GSPC_by_GPDEF_log_smooth_der_fit_plot, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+lst_syms <- c("RecInitMod")
+
+if (require_columns(df.data, lst_syms)) {
+  
+  myPlot <- plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay = lst_syms[[1]],
+    getPlotTitle(df.symbols, lst_syms[[1]]),
+    "Date",
+    getPlotYLabel(df.symbols, lst_syms[[1]]),
+    c(as.Date("1jan1945", "%d%b%Y"), Sys.Date()),
+    ylim = c(0.00, 1.00),
+    FALSE
+  )
+  myPlot + geom_rect(
+    data = dfRecession,
+    aes(
+      xmin = initStartMod,
+      xmax = initEndMod,
+      ymin = -Inf,
+      ymax = Inf
+    ),
+    fill = "green",
+    alpha = 0.25,
+    na.rm = TRUE
+  )
+  
+
+  
+  
+}
+
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
+
+```
+## Plot S&P 500 trends and initiation feature
+
+Finally, overlay the S&P 500 trends to see how using the decline in the S&P 500
+helped move the initiator. In most cases the new initiator (green) has moved to
+the left, providing and early indication of recession. It is interesting that
+the market declines often preceed the calls of recession by the NEBR.
+
+```{r rec_model_data_exp_GSPC_by_GPDEF_log_smooth_der_fit_plot2, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+lst_syms <- c("X_GSPC__Open__by__GDPDEF__SmoothDer")
+
+if (require_columns(df.data, lst_syms)) {
+  
+  myPlot <- plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay = lst_syms[[1]],
+    getPlotTitle(df.symbols, lst_syms[[1]]),
+    "Date",
+    getPlotYLabel(df.symbols, lst_syms[[1]]),
+    c(as.Date("1jan1945", "%d%b%Y"), Sys.Date()),
+    ylim = c(-5.0, 5.0 ),
+    FALSE
+  )
+  myPlot + geom_rect(
+    data = dfRecession,
+    aes(
+      xmin = initStartMod,
+      xmax = initEndMod,
+      ymin = -Inf,
+      ymax = Inf
+    ),
+    fill = "green",
+    alpha = 0.25,
+    na.rm = TRUE
+  )
+  
+
+  
+  
+}
+
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
+
+```
