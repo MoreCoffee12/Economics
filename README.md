@@ -4,7 +4,7 @@
 
 Welcome! This document has topics related to my interest in economics, using R. Most of my experience is in vibration analysis. On the surface, there may not seem to be much common ground between vibration analysis and economic analysis. Yet, many of the tools I apply in vibration analysis time series analysis also apply to economics. In addition, economics handles large sets of data, much like most vibration analysis. Lastly, machine learning and artificial intelligence modeling apply to both vibration analysis and economic data series.
 
-![A blue background with a graph and a head and a line of arrow pointing up AI-generated content may be incorrect.](media/bd5f9a2fa37343e306a2173d0dc09444.png)
+![Illustration showing symbols related recession prediction, data analytics, economics, data, and data science	](https://robotsquirrelproductions.com/wp-content/uploads/2025/10/ChatGPT-Image-Oct-15-2025-09_50_26-AM.png)
 
 ## About this project
 
