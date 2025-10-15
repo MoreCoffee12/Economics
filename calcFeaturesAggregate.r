@@ -895,6 +895,12 @@ if ( require_columns(df.data, c("DGS10TOTB3MS") ) ){
   # recession probabilities predicted using data through Sep 2025. The parameter
   # estimates are =-0.5333, =-0.6330.
   
+  # I do have one source that uses bond-equivalent basis and another that uses
+  # constant maturity BC_10YEAR and BC_3MONTH. See 2529RS0082 for more
+  # discussion on the basis for spread calculations.
+  
+  # This code uses 
+  
   nyfed.alpha = -0.5333
   nyfed.beta = -0.6330
   

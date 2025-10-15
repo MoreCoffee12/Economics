@@ -140,22 +140,10 @@ extractions stored in spreadsheets.
 
 ```{r defsyms, echo=FALSE}
 
-## --- Save symbols_catalog.csv from the df.symbols dataframe -----------------
-# Call code that defines the desired symbols.
-# source("SymbolList.r")
-# 
-# catalog_path <- file.path(str.data.dir, "symbols_catalog.csv")
-# tmp <- subset(df.symbols,
-#               select = c(string.symbol,string.source,string.description,
-#                          string.label.y,float.expense.ratio,
-#                          date.series.start,date.series.end))
-# # store \n literally so it’s one line per row in the CSV
-# tmp$string.description <- gsub("\n", "\\\\n", tmp$string.description)
-# write.csv(tmp, catalog_path, row.names = FALSE, na = "")
-
-
 ## --- Load symbols_catalog.csv into df.symbols -------------------------------
-
+# Download the template for this faile at:
+# https://robotsquirrelproductions.com/download/recession-indicators-symbols/
+  
 # Pick a path that exists in your project
 catalog_path <- file.path(str.data.dir, "symbols_catalog.csv")
 
@@ -7676,18 +7664,65 @@ p1
 
 ```
 
-```{r Yieldcurve_DGS10TOTB3MS, echo=FALSE}
-datay <- "DGS10TOTB3MS"
+This plot shows the yield curve using DGS10 and TB3MS (constant maturity) data
+series provided by FRED. 
 
-ylim <- c(-5, 5)
-p1 <- plotSingleQuickModern(datay, ylim)
-p1
+FRED also has another data series, `T10Y3M` that uses
+the spread between 10-Year Treasury Constant Maturity (BC_10YEAR) and 3-Month
+Treasury Constant Maturity (BC_3MONTH). Note the variable names in this
+reference are placeholders, not FRED data series.
+
+```{r Yieldcurve_DGS10TOTB3MS, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+
+lst_syms <- c("DGS10TOTB3MS" , "T10Y3M.Value")
+if (require_columns(df.data, lst_syms)) {
+  
+  # Create the  first plot
+  my_plot <- plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay = lst_syms[[1]],
+    getPlotTitle(df.symbols, lst_syms[[1]]),
+    "Date",
+    getPlotYLabel(df.symbols, lst_syms[[1]]),
+    c(as.Date("1jan1945", "%d%b%Y"), Sys.Date()),
+    ylim = c(-5.0, 5.0 ),
+    b.legend = TRUE,
+    b.percentile,
+    b.long.legend = FALSE
+  )
+  
+  my_plot <- my_plot + geom_line(
+    data = df.data,
+    aes(
+      x = .data[["date"]],
+      y = .data[[lst_syms[[2]]]],
+      colour = getPlotTitle(df.symbols, lst_syms[[2]])
+    ),
+    na.rm = TRUE
+  )
+  
+  print(my_plot)
+  
+  # Clean and tidy memory
+  if( exists("my_plot")){
+    rm(my_plot)
+  }
+  
+}
+
+# Clean memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
 
 ```
 
 More recent data
 
-```{r YieldcurveRecent, echo=FALSE}
+```{r YieldcurveRecent, echo=FALSE, fig.width = 10, fig.asp = .62}
 
 datay <- "DGS10TOTB3MS"
 datay_aux <- "DGS10TO1"
@@ -8437,7 +8472,7 @@ if (exists("lst_syms")) {
 
 ```
 
-## BEA Supplemental Estimates, Motor Vehicles
+# BEA Supplemental Estimates, Motor Vehicles
 
 Definitions
 
@@ -8456,9 +8491,9 @@ Domestic auto production--Autos assembled in the U.S.\
 Domestic auto inventories--U.S. inventories of vehicles assembled in the
 U.S., Canada, and Mexico.
 
-### TAble 6 - Light Vehicle and Total Vehicle Sales
+## TAble 6 - Light Vehicle and Total Vehicle Sales
 
-#### Auto sales
+### Auto sales
 
 A WSJ article suggested that auto sales might be a good indicator so
 bring that to the mix. It does have troughs that correlate with
@@ -8488,15 +8523,15 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start,
 
 ```
 
-## BEA Gross Domestic Product
+# BEA Gross Domestic Product
 
 Data in this section come from the Bureau of Economic Analysis.
 
-### Table 1.1.5. Gross Domestic Product
+## Table 1.1.5. Gross Domestic Product
 
 [Billions of dollars] Seasonally adjusted at annual rates
 
-#### A191RC: Gross Domestic Product - Line 1
+### A191RC: Gross Domestic Product - Line 1
 
 GDP numbers tend to lag so this series is truly an afterthought. But it
 does have some correlation with the recessions.
@@ -8527,11 +8562,11 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, b.percentile = TRUE)
 
 ```
 
-### Table 1.1.9. Implicit Price Deflators for Gross Domestic Product
+## Table 1.1.9. Implicit Price Deflators for Gross Domestic Product
 
 [Index numbers, 2012=100] Seasonally adjusted
 
-#### A191RD: Gross Domestic Product - Line 1
+### A191RD: Gross Domestic Product - Line 1
 
 This is GDP price deflator series.
 
@@ -8544,7 +8579,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
 
-### GDP normalized by CPI
+## GDP normalized by CPI
 
 Normalize GDP by CPI
 
@@ -8557,7 +8592,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
-### Economic yield curve (GDP to 1-year treasury)
+## Economic yield curve (GDP to 1-year treasury)
 
 GDP versus the yield on the 1-year. This series was prompted by an
 article suggesting that the "economic yield curve" should be used to
@@ -8574,7 +8609,7 @@ they would be related either.
 
 ```
 
-### Economic yield curve (GDP to 3-month treasury)
+## Economic yield curve (GDP to 3-month treasury)
 
 Same idea as above, but applied the 3-month treasury.This one has fewer
 false triggers, but is not as helpful as 10Y to 3M spread in predicting
@@ -8589,7 +8624,7 @@ a recession.
 
 ```
 
-#### A824RC: National defense Federal Gov't Expenditures - Line 24
+### A824RC: National defense Federal Gov't Expenditures - Line 24
 
 U.S. Bureau of Economic Analysis, Federal Government: National Defense
 Consumption Expenditures and Gross Investment [FDEFX], retrieved from
@@ -8604,7 +8639,7 @@ plotSingleQuickModern(datay, ylim)
 
 ```
 
-#### A825RC: Nondefense Federal Gov't Expenditures - Line 25
+### A825RC: Nondefense Federal Gov't Expenditures - Line 25
 
 U.S. Bureau of Economic Analysis, Federal Government: Nondefense
 Consumption Expenditures and Gross Investment [FNDEFX], retrieved from
@@ -8619,11 +8654,11 @@ plotSingleQuickModern(datay, ylim)
 
 ```
 
-### Table 6.16D. Corporate Profits by Industry
+## Table 6.16D. Corporate Profits by Industry
 
 Select series from Table 6.16D
 
-#### A051RC: Corporate profits with inventory and capital consumption adjustment
+### A051RC: Corporate profits with inventory and capital consumption adjustment
 
 From BEA's documentation (<https://www.bea.gov/media/5671>):
 
@@ -8651,7 +8686,7 @@ plotSingleQuickModern(datay = "CPROFIT.Value", yli = c(0, 5000))
 
 ```
 
-#### A053RC: Corporate profits without inventory and capital consumption adjustment
+### A053RC: Corporate profits without inventory and capital consumption adjustment
 
 Profits look a bit flat over the last several years in this series.
 
@@ -8664,11 +8699,11 @@ plotSingleQuickModern(datay, ylim)
 
 ```
 
-### Table 2.6. Personal Income and Its Disposition, Monthly
+## Table 2.6. Personal Income and Its Disposition, Monthly
 
 Billions of dollars; months are seasonally adjusted at annual rates.
 
-#### A065RC Personal Income - Line 1
+### A065RC Personal Income - Line 1
 
 BEA Account Code: A065RC
 
@@ -8699,7 +8734,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
 
-#### DPCERC: Personal consumption expenditures (PCE) - Table 2.1, Line 29
+### DPCERC: Personal consumption expenditures (PCE) - Table 2.1, Line 29
 
 BEA Account Code: DPCERC Personal consumption expenditures (PCE) is the
 primary measure of consumer spending on goods and services in the U.S.
@@ -8740,7 +8775,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
-#### DPCERG: Personal consumption expenditures Price Index (PCEPI) - Table 2.1, Line 29
+### DPCERG: Personal consumption expenditures Price Index (PCEPI) - Table 2.1, Line 29
 
 BEA Account Code: DPCERG The gross domestic product price index measures
 changes in prices paid for goods and services produced in the United
@@ -8804,7 +8839,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 ```
 
-#### A072RC: Personal Savings Rate - Line 35
+### A072RC: Personal Savings Rate - Line 35
 
 Consumers tend to pull down their savings rates as unemployment
 decreases and market conditions improve. This series has tended to be
@@ -8900,7 +8935,7 @@ corrName <- calcRollingCorr(dfRecession, df.data, df.symbols, datay1, ylim1, dat
 
 ```
 
-### Personal savings to household net worth
+## Personal savings to household net worth
 
 A relationship between personal savings and household networth can be
 seen in a scatter plot. This was suggested by a WSJ article
@@ -8924,9 +8959,9 @@ plotXvY(df.data, dfRecession, datax, datay, titlelabel, xlabel, ylabel, xlim, yl
 
 ```
 
-## U.S. Census Bureau
+# U.S. Census Bureau
 
-### U.S. International Trade in Goods and Services (FT900)
+## U.S. International Trade in Goods and Services (FT900)
 
 U.S. Bureau of Economic Analysis and U.S. Census Bureau, U.S. Imports of
 Goods by Customs Basis from China [IMPCH], retrieved from FRED, Federal
@@ -9034,7 +9069,7 @@ my.plot
 
 ```
 
-### New Houses Sold and For Sale by Stage of Construction and Median Number of Months on Sales Market
+## New Houses Sold and For Sale by Stage of Construction and Median Number of Months on Sales Market
 
 Read an article suggesting that housing sales and sales growth could be
 useful. FRED only has new home data so start there.
@@ -9107,7 +9142,7 @@ grid.arrange(p1,
              top = "New Housing Sales Year-Over-Year")
 ```
 
-### New Privately-Owned Housing Units Authorized in Permit-Issuing Places
+## New Privately-Owned Housing Units Authorized in Permit-Issuing Places
 
 As provided by the Census, start occurs when excavation begins for the
 footings or foundation of a building. All housing units in a multifamily
@@ -9171,7 +9206,7 @@ my.plot
 
 ```
 
-### New Privately-Owned Houses Sold and For Sale
+## New Privately-Owned Houses Sold and For Sale
 
 Suggested Citation: U.S. Census Bureau and U.S. Department of Housing
 and Urban Development, Median Sales Price of Houses Sold for the United
@@ -9228,7 +9263,7 @@ my.plot
 
 ```
 
-### Durable Goods
+## Durable Goods
 
 Suggested Citation: U.S. Census Bureau, Manufacturers' New Orders:
 Durable Goods [UMDMNO], retrieved from FRED, Federal Reserve Bank of St.
@@ -9334,11 +9369,11 @@ Durable goods, seasonally adjusted, divided by GDP
 
 ```
 
-## Federal reserve board H.8: Assets and Liabilities of Commercial Banks in the United States
+# Federal reserve board H.8: Assets and Liabilities of Commercial Banks in the United States
 
-### Page 4: Not Seasonally adjusted, billions of dollars
+## Page 4: Not Seasonally adjusted, billions of dollars
 
-#### Commercial and industrial loans, all commercial banks - Line 10
+### Commercial and industrial loans, all commercial banks - Line 10
 
 Data taken from H.8 Assets and Liabilities of Commercial Banks in the
 United States. Take a look at SA and NSA data series as weekly and month
@@ -9497,7 +9532,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
 
-#### Consumer loans, all commercial banks - Line 20
+### Consumer loans, all commercial banks - Line 20
 
 Suggested Citation: Board of Governors of the Federal Reserve System
 (US), Consumer Loans, All Commercial Banks [CONSUMERNSA], retrieved from
@@ -9525,7 +9560,7 @@ plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
 
-#### Deposits, All Commercial Banks, all commercial banks - Line 34
+### Deposits, All Commercial Banks, all commercial banks - Line 34
 
 Data taken from H.8 Assets and Liabilities of Commercial Banks in the
 United States. Take a look at SA and NSA data series as weekly and month
