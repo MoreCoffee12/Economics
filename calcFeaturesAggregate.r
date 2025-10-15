@@ -889,6 +889,12 @@ if ( require_columns(df.data, list.sym  ) ){
 # This is the NY Fed's model for recession based on the 10 y to 3 month spread
 if ( require_columns(df.data, c("DGS10TOTB3MS") ) ){
   
+  
+  # From: https://www.newyorkfed.org/medialibrary/media/research/capital_markets/prob_rec.pdf
+  # *Parameters estimated using data from January 1959 to December 2009,
+  # recession probabilities predicted using data through Sep 2025. The parameter
+  # estimates are =-0.5333, =-0.6330.
+  
   nyfed.alpha = -0.5333
   nyfed.beta = -0.6330
   
