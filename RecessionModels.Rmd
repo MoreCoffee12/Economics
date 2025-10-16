@@ -51,7 +51,6 @@ out.file <- file.path(str.data.dir, "RecessionIndicator_Buffer.RData")
 # Load data
 load(out.file)
 
-rm(str.data.dir)
 rm(out.file)
 
 ```
@@ -83,12 +82,14 @@ df.symbols <- dplyr::filter(df.symbols,
                                                  "RecInit",
                                                  "^GSPC",
                                                  "GDPDEF",
-                                                 "PCE",
-                                                 "U6RATE",
+                                                 "DGS10",
+                                                 "TB3MS",
                                                  "UNRATE",
                                                  "ICSA",
-                                                 "POPTHM",
-                                                 "CLF16OV"))
+                                                 "W875RX1",
+                                                 "HSN1FNSA",
+                                                 "CPIAUCSL",
+                                                 "POPTHM"))
 
 if( exists("b.refresh.models")){
   rm(b.refresh.models)
@@ -806,5 +807,239 @@ if (require_columns(df.data, lst_syms)) {
 if( exists("lst_syms")){
   rm(lst_syms)
 }
+
+```
+
+Take a look at year-over-year as related to the recessions
+
+```{r rec_model_SP500_YoY, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+lst_syms <- c("X_GSPC.GSPC.Open__YoY")
+
+if (require_columns(df.data, lst_syms)) {
+
+  plotSingleQuick(
+    dfRecession,
+    df.data,
+    datay = lst_syms[[1]],
+    ylim = c(-55, 55),
+    dt.start = as.Date("1jan1950", "%d%b%Y") ,
+    b.percentile = TRUE
+  )
+  
+}
+
+if (exists("lst_syms")) {
+  rm(lst_syms)
+}
+
+```
+## GDP Derivative
+
+This series tends to dip prior to a recession. Derivatives are noisy so I do not
+expect it to be a strong predictor, but I think it is worth considering.
+
+```{r GDPBYCPIAUCSLBYPOPTHM_SmoothDer, echo=FALSE}
+
+lst_syms <- c("GDPBYCPIAUCSLBYPOPTHM__SmoothDer")
+if ( require_columns(df.data, lst_syms ) ){
+  
+  plotSingleQuick(dfRecession, 
+                  df.data, 
+                  datay = lst_syms[[1]],
+                  ylim = c(-5, 5), 
+                  dt.start = as.Date('1960-01-01'), 
+                  b.percentile = TRUE)
+
+}
+
+# Clean and tidy memory  
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
+
+```
+
+# Prior art
+
+There are some models out there with claims to predict recessions. This section
+summarizes some of those.
+
+## New York Federal Reserve
+
+I really like this for the simplicity; however, it is recently not the best
+predictor. Refer to the website
+https://www.newyorkfed.org/research/capital_markets/ycfaq.html for details. 
+
+I had to read through the reference papers to understand how the alpha and beta
+factors were used.
+
+The fed shifts their data so the predictor aligns with the recessions; however I
+wanted the predictor to appear before the recessions so I do not shift it.
+
+```{r rec_model_ny_fed, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+# Save this one off to a vector-based .pdf
+str_pdf_path = paste(str.data.dir, "/Fed_Model",".pdf",sep="")
+pdf(file = str_pdf_path,  width = 8, height = 6, , useDingbats = FALSE)   
+
+# Create the plot, if the data series exists
+lst_syms <- c("nyfed.recession")
+
+if (require_columns(df.data, lst_syms)) {
+  
+  my_plot <- plotSingleQuick(dfRecession,
+                            df.data,
+                            datay = lst_syms[[1]],
+                            ylim = c(-0.1, 1.1))
+  print(my_plot)
+
+  # Close the device to finalize the file
+  dev.off()
+  
+  # Free up memory
+  if (exists("my_plot")) {
+    rm(my_plot)
+  }
+
+}
+
+# Free up memory
+if (exists("lst_syms")) {
+  rm(lst_syms)
+}
+
+```
+
+# Machine learning
+
+## Select data features and date range for training, testing, and validation
+
+```{r rec_model_features, echo=TRUE, fig.width = 10, fig.asp = .62}
+
+# Define symbols to be used in the study
+lst_syms <- c("DGS10TOTB3MS", "UNRATE.Value", "W875RX1.Value__YoY",
+              "ICSA.Value__YoY","GDPBYCPIAUCSLBYPOPTHM__SmoothDer",
+              "HSN1FNSA.Value__YoY")
+
+model.features <- list(
+  c(lst_syms[[1]]),
+  c(
+    lst_syms[[1]],
+    lst_syms[[2]]
+    ),
+  c(
+    lst_syms[[1]],
+    lst_syms[[3]]
+    ),
+  c(
+    lst_syms[[1]],
+    lst_syms[[4]]
+    ),
+  c(
+    lst_syms[[1]],
+    lst_syms[[5]]
+    ),
+  c(
+    lst_syms[[1]],
+    lst_syms[[6]]
+    ),
+  c(
+    lst_syms[[1]],
+    lst_syms[[2]],
+    lst_syms[[3]]
+    ),
+  c(
+    lst_syms[[1]],
+    lst_syms[[2]],
+    lst_syms[[4]]
+    ),
+  c(
+    lst_syms[[1]],
+    lst_syms[[3]],
+    lst_syms[[4]]
+    ),
+  c(
+    lst_syms[[1]],
+    lst_syms[[3]],
+    lst_syms[[4]],
+    lst_syms[[5]]
+  ),
+  c(
+    lst_syms[[1]],
+    lst_syms[[2]],
+    lst_syms[[3]],
+    lst_syms[[4]]
+    ),
+  c(
+    lst_syms[[1]],
+    lst_syms[[2]],
+    lst_syms[[3]],
+    lst_syms[[4]],
+    lst_syms[[6]]
+  ),
+  c(
+    lst_syms[[1]],
+    lst_syms[[2]],
+    lst_syms[[3]],
+    lst_syms[[4]]),
+  c(
+    lst_syms[[1]],
+    lst_syms[[2]],
+    lst_syms[[3]],
+    lst_syms[[4]],
+    lst_syms[[5]]
+  ),
+  c(
+    lst_syms[[1]],
+    lst_syms[[2]],
+    lst_syms[[3]],
+    lst_syms[[4]],
+    lst_syms[[5]],
+    lst_syms[[6]]
+  )
+)
+
+# Save off the number of feature series
+i.model.count <- length(model.features)
+
+```
+
+
+## Select date range for training, testing, and validation
+
+The data series have different start dates and they are not updated at the same
+time. This bit of code selects a valid data range to develop the model.
+
+```{r rec_model_date_twiddling, echo=TRUE, fig.width = 10, fig.asp = .62}
+
+
+# Pick the most recent data sample. TODO: this is done manually, but needs to be automated
+#dt.start.prediction <- index(get(model.features[1])[1])
+dt.start.prediction <- as.Date("01/02/1962", "%d/%m/%Y")
+
+# If the series was downloaded as a zoo object, check that the start date is valid
+for (strSeries in model.features[-1]){
+  result = tryCatch({
+    dtThis <- index(get(strSeries)[1])
+    if( dtThis > dt.start.prediction){
+      dtStart <- dtThis
+    }
+  }, error = function(e){
+    # do nothing for now...TO DO: adjust dates.
+  })
+}
+
+dt.end.prediction <- as.Date("2018-06-30")
+df.dataModel <-
+  df.data[df.data$date >= dt.start.prediction &
+            df.data$date <= dt.end.prediction, ]
+str.training.date.range <-
+  paste("Training Date Range: ",
+        dt.start.prediction,
+        " to ",
+        dt.end.prediction,
+        sep = "")
+print(str.training.date.range)
 
 ```
