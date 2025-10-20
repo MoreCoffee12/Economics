@@ -96,7 +96,7 @@ source("utilSyms.r")
 ```{r RefreshFlag, echo=FALSE}
 
 # Define the source of the data (local or web) and whether to update the models.
-bRefresh = FALSE
+bRefresh = TRUE
 b.refresh.models = FALSE
 str.data.dir <- "C:/Users/Rainy/OneDrive/Documents/IssaquahDynamical/Datasets/2529RS0082_HistEconData"
 
@@ -3243,7 +3243,7 @@ if ( require_columns(df.data,lst_syms ) ){
                         dt.start = dt_plot_start, 
                         b.percentile = FALSE)
   
-  grid.arrange(p1, p2, ncol = 1, top = "Options Volumes")
+  grid.arrange(p1, p2, ncol = 1, top = "Options Trends")
 
   # Tidy up memory
   if( exists("dt_plot_start")){
