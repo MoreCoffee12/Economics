@@ -96,7 +96,7 @@ source("utilSyms.r")
 ```{r RefreshFlag, echo=FALSE}
 
 # Define the source of the data (local or web) and whether to update the models.
-bRefresh = TRUE
+bRefresh = FALSE
 b.refresh.models = FALSE
 str.data.dir <- "C:/Users/Rainy/OneDrive/Documents/IssaquahDynamical/Datasets/2529RS0082_HistEconData"
 
@@ -1632,24 +1632,6 @@ rm(dt.start)
 I explored additional data series. The sections below have those data
 series along with comments.
 
-## Recent Highs
-
-Print out the new 180 day high values
-
-```{r New180}
-df.symbolsTrue <-
-  df.symbols[df.symbols$'Max180' == TRUE, c("string.symbol", "string.description")]
-df.symbolsTrue <-
-  df.symbolsTrue[!(is.na(df.symbolsTrue$string.symbol)), ]
-df.symbolsTrue <-
-  df.symbolsTrue[!(df.symbolsTrue$string.symbol == 'USREC'), ]
-#print(head(df.symbolsTrue,20))
-
-kable(df.symbolsTrue, caption = "6-Month High") %>%
-  kable_styling(bootstrap_options = c("striped", "hover"))  
-
-```
-
 ## Equities
 
 ### S&P 500 SMA Trends
@@ -2449,9 +2431,7 @@ Focus on some of the more recent activity
 
 ### S&P 500 Sales
 
-# `{r SP500Sales } #  # datay <- "MULTPLSP500SALESQUARTER" # ylim <- c(500, 2000) # dt.start <- as.Date('1999-01-01') # plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start) #  #`
-
-# `{r SP500SalesShort } #  # datay <- "MULTPLSP500SALESQUARTER" # ylim <- c(500, 2000) # dt.start = as.Date('2001-01-01') # plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start) #  #`
+This series was discontinued. I need to find a substitute
 
 ### Unit Profits
 
@@ -2963,64 +2943,119 @@ companies by the GICS®, including securities of companies from the
 following industries: oil, gas and consumable fuels; and energy
 equipment and services. It is non-diversified.
 
+
+XLE stands at
+    `r paste("$",sprintf("%3.2f", tail(df.data$XLE.Close,1)),sep="")`
+    (last updated on `r index(tail(XLE,1))`). 
+    
+The 50-day MVA stands at `r paste("$",sprintf("%3.2f", tail(df.data$XLE.Close__mva050,1)), sep="")`. 
+    
+The 200-day MVA stands at `r paste("$",sprintf("%3.2f", tail(df.data$XLE.Close__mva200,1)), sep="")`
+
 Suggested Citation:
 
 “Energy Select Sector SPDR Fund (XLE) Company Profile & Facts.” Yahoo
 Finance, <https://finance.yahoo.com/quote/XLE/profile/> . Accessed 8
 Sept. 2025.
 
-```{r energy_stocks_xls, echo=FALSE, fig.width = 10, fig.asp = .62 }
 
-lst_sym <- c( "XLE.Close", "XLE.Close__mva050", "XLE.Close__mva200")
+```{r energy_stocks_xls_func, echo=FALSE, fig.width = 10, fig.asp = .62}
 
-if (require_columns(df.data, lst_sym)) {
-  
-  my.plot <-
-    plotSingle(
-      dfRecession,
-      df.data,
-      "date",
-      datay = lst_sym[[1]],
-      getPlotTitle(df.symbols, lst_sym[[1]]),
-      "Date",
-      getPlotYLabel(df.symbols, lst_sym[[1]]),
-      c(as.Date('2024-01-01'), Sys.Date()),
-      ylim =  c(75, round_up_to(max(df.data[[lst_sym[[1]]]]),1)),
-      b.legend = TRUE,
-      b.percentile = FALSE,
-      b.long.legend = TRUE
+#' Plot XLE with 50- and 200-day Moving Averages
+#'
+#' Creates a time-series plot of \code{XLE.Close} with its 50-day and 200-day
+#' moving averages over a specified date range. The function expects the data
+#' frames \code{df.data}, \code{df.symbols}, and \code{dfRecession} to exist
+#' in the calling environment. Y-limits are set from 75 to the rounded-up max
+#' of \code{XLE.Close}.
+#'
+#' @param dt.start \code{Date}. Start date of the plot window. Defaults to
+#'   \code{as.Date("2024-01-01")}.
+#'
+#' @return A \pkg{ggplot2} object (invisibly). The plot is also printed.
+#'
+#' @details
+#' The function checks for required columns via \code{require_columns()} and
+#' uses custom helpers \code{plotSingle()}, \code{getPlotTitle()}, and
+#' \code{getPlotYLabel()} that are assumed to be available in your project.
+#'
+#' @examples
+#' \dontrun{
+#'   p <- plot_xle_mva(dt.start = as.Date("2024-06-01"))
+#'   # ggplot2::ggsave("xle_mva.svg", p, width = 9, height = 5)
+#' }
+#'
+#' @export
+plot_xle_mva <- function(dt.start = as.Date("2024-01-01"), ylim_low = 75) {
+  lst_sym <- c("XLE.Close", "XLE.Close__mva050", "XLE.Close__mva200")
+
+  if (!require_columns(df.data, lst_sym)) {
+    warning("Required columns are missing in df.data: ",
+            paste(setdiff(lst_sym, intersect(names(df.data), lst_sym)),
+                  collapse = ", "))
+    return(invisible(NULL))
+  }
+
+  dt.end <- Sys.Date()
+  y_max <- suppressWarnings(
+    round_up_to(max(df.data[[lst_sym[[1]]]], na.rm = TRUE), 1)
+  )
+  if (!is.finite(y_max)) y_max <- 100
+
+  p <- plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay = lst_sym[[1]],
+    getPlotTitle(df.symbols, lst_sym[[1]]),
+    "Date",
+    getPlotYLabel(df.symbols, lst_sym[[1]]),
+    c(dt.start, dt.end),
+    ylim = c(ylim_low, y_max),
+    b.legend = TRUE,
+    b.percentile = FALSE,
+    b.long.legend = TRUE
+  )
+
+  p <- p +
+    ggplot2::geom_line(
+      data = df.data,
+      ggplot2::aes(
+        x = .data[["date"]],
+        y = .data[[lst_sym[[2]]]],
+        colour = getPlotTitle(df.symbols, lst_sym[[2]])
+      ),
+      na.rm = TRUE
+    ) +
+    ggplot2::geom_line(
+      data = df.data,
+      ggplot2::aes(
+        x = .data[["date"]],
+        y = .data[[lst_sym[[3]]]],
+        colour = getPlotTitle(df.symbols, lst_sym[[3]])
+      ),
+      na.rm = TRUE
     )
 
-  my.plot <- my.plot + geom_line(
-    data = df.data,
-    aes_string(
-      x = "date",
-      y = lst_sym[[2]],
-      colour = shQuote(getPlotTitle(df.symbols, lst_sym[[2]]))
-    ),
-    na.rm = TRUE
-  )
-  my.plot <- my.plot + geom_line(
-    data = df.data,
-    aes_string(
-      x = "date",
-      y = lst_sym[[3]],
-      colour = shQuote(getPlotTitle(df.symbols, lst_sym[[3]]))
-    ),
-    na.rm = TRUE
-  )
-  
-  print(my.plot)
-  
-  if( exists("my.plot")){
-    rm(my.plot)
-  }  
+  print(p)
+  invisible(p)
 }
+ 
 
-# Clean and tidy
-if( exists ("lst_sym")){
-  rm(lst_sym)
-}
+
+```
+
+```{r energy_stocks_xls_far, echo=FALSE, fig.width = 10, fig.asp = .62 }
+
+plot_xle_mva(dt.start = as.Date("1998-06-01"),
+             ylim_low = 5)
+
+```
+
+
+```{r energy_stocks_xls, echo=FALSE, fig.width = 10, fig.asp = .62 }
+
+plot_xle_mva(dt.start = as.Date("2024-06-01"))
 
 ```
 
@@ -5216,6 +5251,14 @@ plot_gold_with_mas <- function(start_date = as.Date("2020-01-01")) {
 }
 
 ```
+
+Gold (GC_F) stands at
+    `r paste("$",sprintf("%3.2f", tail(df.data$GC_F.Close,1)),sep="")`
+    (last updated on `r index(tail(GC_F,1))`). 
+    
+The 50-day MVA stands at `r paste("$",sprintf("%3.2f", tail(df.data$GC_F.Close__mva050,1)), sep="")`. 
+    
+The 200-day MVA stands at `r paste("$",sprintf("%3.2f", tail(df.data$GC_F.Close__mva200,1)), sep="")`
 
 ```{r gold_nominal_price, echo=FALSE, fig.width = 10, fig.asp = .62}
 
