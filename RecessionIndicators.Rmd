@@ -2745,65 +2745,120 @@ Index that have consistently increased dividends each year for at least
 total assets in components of the index or in instruments with similar
 economic characteristics.
 
+NOBL stands at
+    `r paste("$",sprintf("%3.2f", tail(df.data$NOBL.Close,1)),sep="")`
+    (last updated on `r index(tail(NOBL,1))`). 
+    
+The 50-day MVA stands at `r paste("$",sprintf("%3.2f", tail(df.data$NOBL.Close__mva050,1)), sep="")`. 
+    
+The 200-day MVA stands at `r paste("$",sprintf("%3.2f", tail(df.data$NOBL.Close__mva200,1)), sep="")`
+
 Suggested Citation:
 
 “ProShares S&P 500 Dividend Aristocrats ETF (NOBL) Company Profile &
 Facts.” *Yahoo Finance*,
 <https://finance.yahoo.com/quote/NOBL/profile/>. Accessed 3 Sept. 2025.
 
-```{r DivStocks_NOBL, echo=FALSE, fig.width = 10, fig.asp = .62 }
 
-lst_sym <- c( "NOBL.Close", "NOBL.Close__mva050", "NOBL.Close__mva200")
+```{r DivStocks_NOBL_plot_fun, echo=FALSE, fig.width = 10, fig.asp = .62 }
 
-if (require_columns(df.data, lst_sym)) {
-  
-  my.plot <-
-    plotSingle(
-      dfRecession,
-      df.data,
-      "date",
-      datay = lst_sym[[1]],
-      getPlotTitle(df.symbols, lst_sym[[1]]),
-      "Date",
-      getPlotYLabel(df.symbols, lst_sym[[1]]),
-      c(as.Date('2014-01-01'), Sys.Date()),
-      ylim =  c(30, round_up_to(max(df.data[[lst_sym[[1]]]]),1)),
-      b.legend = TRUE,
-      b.percentile = FALSE,
-      b.long.legend = TRUE
+#' Plot NOBL with 50- and 200-day Moving Averages
+#'
+#' Create a time-series plot of \code{NOBL.Close} with its 50-day and 200-day
+#' moving averages over a specified date range. The function expects the data
+#' frames \code{df.data}, \code{df.symbols}, and \code{dfRecession} to exist
+#' in the calling environment. The upper y-limit is computed from the data as
+#' \code{round_up_to(max(NOBL.Close), 1)}.
+#'
+#' @param dt.start Date. Start date of the plot window. Default is
+#'   \code{as.Date("2014-01-01")}.
+#' @param ylim.lower numeric. Lower bound for the y-axis. Default is \code{30}.
+#'
+#' @return A \pkg{ggplot2} object (returned invisibly). The plot is also printed.
+#'
+#' @details
+#' This function relies on project helpers \code{require_columns()},
+#' \code{plotSingle()}, \code{getPlotTitle()}, and \code{getPlotYLabel()}.
+#'
+#' @examples
+#' \dontrun{
+#'   p <- plot_nobl_mva(dt.start = as.Date("2016-01-01"), ylim.lower = 40)
+#'   # ggplot2::ggsave("nobl_mva.svg", p, width = 9, height = 5)
+#' }
+#'
+#' @export
+plot_nobl_mva <- function(dt.start = as.Date("2014-01-01"),
+                          ylim.lower = 30) {
+
+  lst_sym <- c("NOBL.Close", "NOBL.Close__mva050", "NOBL.Close__mva200")
+
+  if (!require_columns(df.data, lst_sym)) {
+    missing_cols <- setdiff(lst_sym, names(df.data))
+    warning("Required columns missing in df.data: ",
+            paste(missing_cols, collapse = ", "))
+    return(invisible(NULL))
+  }
+
+  dt.end <- Sys.Date()
+
+  y_max <- suppressWarnings(
+    round_up_to(max(df.data[[lst_sym[[1]]]], na.rm = TRUE), 1)
+  )
+  if (!is.finite(y_max)) y_max <- ylim.lower + 10
+
+  p <- plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay = lst_sym[[1]],
+    getPlotTitle(df.symbols, lst_sym[[1]]),
+    "Date",
+    getPlotYLabel(df.symbols, lst_sym[[1]]),
+    c(dt.start, dt.end),
+    ylim = c(ylim.lower, y_max),
+    b.legend = TRUE,
+    b.percentile = FALSE,
+    b.long.legend = TRUE
+  )
+
+  p <- p +
+    ggplot2::geom_line(
+      data = df.data,
+      ggplot2::aes(
+        x = .data[["date"]],
+        y = .data[[lst_sym[[2]]]],
+        colour = getPlotTitle(df.symbols, lst_sym[[2]])
+      ),
+      na.rm = TRUE
+    ) +
+    ggplot2::geom_line(
+      data = df.data,
+      ggplot2::aes(
+        x = .data[["date"]],
+        y = .data[[lst_sym[[3]]]],
+        colour = getPlotTitle(df.symbols, lst_sym[[3]])
+      ),
+      na.rm = TRUE
     )
 
-  my.plot <- my.plot + geom_line(
-    data = df.data,
-    aes_string(
-      x = "date",
-      y = lst_sym[[2]],
-      colour = shQuote(getPlotTitle(df.symbols, lst_sym[[2]]))
-    ),
-    na.rm = TRUE
-  )
-  
-  my.plot <- my.plot + geom_line(
-    data = df.data,
-    aes_string(
-      x = "date",
-      y = lst_sym[[3]],
-      colour = shQuote(getPlotTitle(df.symbols, lst_sym[[3]]))
-    ),
-    na.rm = TRUE
-  )
-
-  print(my.plot)
-  
-  if( exists("my.plot")){
-    rm(my.plot)
-  }    
+  print(p)
+  invisible(p)
 }
 
-# Clean and tidy
-if( exists ("lst_sym")){
-  rm(lst_sym)
-}
+
+```
+
+```{r DivStocks_NOBL, echo=FALSE, fig.width = 10, fig.asp = .62 }
+
+plot_nobl_mva(dt.start = as.Date("2014-01-01"),
+                          ylim.lower = 35)
+
+```
+
+```{r DivStocks_NOBL_near, echo=FALSE, fig.width = 10, fig.asp = .62 }
+
+plot_nobl_mva(dt.start = seq(Sys.Date(), by = "-1 year", length.out = 2)[2],
+                          ylim.lower = 90)
 
 ```
 
@@ -2896,7 +2951,7 @@ if (require_columns(df.data, lst_sym)) {
       "Date",
       getPlotYLabel(df.symbols, lst_sym[[1]]),
       c(as.Date('2014-01-01'), Sys.Date()),
-      ylim =  c(-50, 110),
+      ylim =  c(-25, 50),
       b.legend = TRUE,
       b.percentile = FALSE,
       b.long.legend = TRUE
