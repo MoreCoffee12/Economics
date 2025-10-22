@@ -5176,7 +5176,7 @@ contracts traded on COMEX, the Commodity Exchange division of the New York
 Mercantile Exchange (NYMEX). These contracts are standardized agreements to buy
 or sell 100 troy ounces of gold at a specified future date and price.
 
-#### Historical Trends
+#### Nominal Trends
 
 As risks increase investors often flock to safe haven assets like gold.
 An up-tick in prices can indicate investor uncertainty. This can be seen
@@ -5341,80 +5341,144 @@ p <- plot_gold_with_mas(start_date = Sys.Date() %m-% years(1),
 
 ```
 
-#### Real Price
+#### Real Price Trends
 
 This plots out the real price of gold by two different deflators. PPI
 corrected price is a little higher, to be expected since CPI also
 includes the effects of sales tax and imports. The spike in 1980 is
 especially pronounced in this series.
 
-```{r gold.by.index, echo=FALSE, fig.width = 9, fig.asp = 0.4}
+```{r gold_real_plot_fun, echo=FALSE, fig.width = 10, fig.asp = .62}
 
-sym_plot <- "GC_F.Close__by__PPIACO.Value"
-ylim <- c(0, 12)
-dt.start = as.Date('1970-01-01')
-plotSingle(
-  dfRecession,
-  df.data,
-  datax = "date",
-  datay = sym_plot,
-  titlelabel =  getPlotTitle(df.symbols, sym_plot),
-  xlabel = "Date",
-  ylabel = getPlotYLabel(df.symbols, sym_plot),
-  ylim,
-  xlim = c(dt.start, Sys.Date()),
-  b.legend = TRUE,
-  b.long.legend = TRUE
-)
+#' Plot Gold (Front Month) Adjusted by PPI (Ratio Series)
+#'
+#' Plots the series \code{GC_F.Close__by__PPIACO.Value} over a specified date range,
+#' with a configurable lower y-axis limit. The upper y-limit is computed from the
+#' data via \code{round_up_to(max(series), 1)}. This function expects the project
+#' helpers \code{require_columns()}, \code{plotSingle()}, \code{getPlotTitle()},
+#' and \code{getPlotYLabel()} as well as the data frames \code{df.data},
+#' \code{df.symbols}, and \code{dfRecession} to be available in the environment.
+#'
+#' @param dt.start Date. Start date for the x-axis range. Default \code{as.Date("2000-01-01")}.
+#' @param ylim.lower numeric. Lower bound for the y-axis. Default \code{1.5}.
+#'
+#' @return A \pkg{ggplot2} object (returned invisibly). The plot is also printed.
+#' @examples
+#' \dontrun{
+#'   p <- plot_gc_over_ppi(dt.start = as.Date("2005-01-01"), ylim.lower = 2)
+#'   # ggplot2::ggsave("gc_over_ppi.svg", p, width = 9, height = 5)
+#' }
+#' @export
+plot_gc_over_ppi <- function(dt.start = as.Date("2000-01-01"),
+                             ylim.lower = 1.5) {
+
+  lst_syms <- c("GC_F.Close__by__PPIACO.Value")
+
+  if (!require_columns(df.data, lst_syms)) {
+    missing_cols <- setdiff(lst_syms, names(df.data))
+    warning("Required columns missing in df.data: ",
+            paste(missing_cols, collapse = ", "))
+    return(invisible(NULL))
+  }
+
+  dt.end <- Sys.Date()
+
+  y_max <- suppressWarnings(
+    round_up_to(max(df.data[[lst_syms[[1]]]], na.rm = TRUE), 1)
+  )
+  if (!is.finite(y_max)) y_max <- ylim.lower + 1
+
+  p <- plotSingle(
+    dfRecession,
+    df.data,
+    datax = "date",
+    datay = lst_syms[[1]],
+    titlelabel = getPlotTitle(df.symbols, lst_syms[[1]]),
+    xlabel = "Date",
+    ylabel = getPlotYLabel(df.symbols, lst_syms[[1]]),
+    ylim = c(ylim.lower, y_max),
+    xlim = c(dt.start, dt.end),
+    b.legend = TRUE,
+    b.long.legend = TRUE
+  )
+
+  print(p)
+  invisible(p)
+}
+
 
 ```
+
+```{r gold.by.index, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+plot_gc_over_ppi(dt.start = as.Date("2000-01-01"),
+                             ylim.lower = 1.5)
+
+```
+
+Take a look at the movement over the last year. As of Oct 2025, this was a
+pretty exciting series.
+
+```{r gold.by.index, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+plot_gc_over_ppi(dt.start = seq(Sys.Date(), by = "-1 year", length.out = 2)[2],
+                             ylim.lower = 9.5)
+
+```
+
+#### Year-Over-Year Trends
 
 See how nominal and real prices look year over year. From the long-term
 view seems like there is little difference in the three series. Although
 not shown, even over the near-term there is little difference in the
 series.
 
-```{r gold.YoY, echo=FALSE, fig.width = 9, fig.asp = 0.4}
+```{r gold_YoY, echo=FALSE, fig.width = 10, fig.asp = .62}
 
-# datay <- "LBMAGOLD.USD_PM_YoY"
-# ylim <- c(-75, 75)
-# dt.start = as.Date('1970-01-01')
-# datay.aux <- "LBMAGOLD.USD_PM.by.CPIAUCSL_YoY"
-# datay.aux.1 <- "LBMAGOLD.USD_PM.by.PPIACO_YoY"
-# my.plot <- plotSingle(
-#   dfRecession,
-#   df.data,
-#   datax = "date",
-#   datay,
-#   titlelabel = "Price of Gold Year-Over-Year change",
-#   xlabel = "Date",
-#   ylabel = getPlotYLabel(df.symbols, datay),
-#   ylim,
-#   xlim = c(dt.start, Sys.Date()),
-#   b.legend = TRUE,
-#   b.long.legend = TRUE
-# )
-# 
-# my.plot <- my.plot + geom_line(
-#   data = df.data,
-#   aes_string(
-#     x = "date",
-#     y = datay.aux,
-#     colour = shQuote(getPlotTitle(df.symbols, datay.aux, str.sep = "\n"))
-#   ),
-#   na.rm = TRUE
-# )
-# 
-# my.plot + geom_line(
-#   data = df.data,
-#   aes_string(
-#     x = "date",
-#     y = datay.aux.1,
-#     colour = shQuote(getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n"))
-#   ),
-#   na.rm = TRUE
-# )
+# Define the symbols in the plot
+lst_syms <- c("GC_F.Close__YoY", "GC_F.Close__by__PPIACO.Value__YoY")
 
+# Do they exist in the data frame?
+if ( require_columns(df.data, lst_syms ) ){
+  
+  ylim <- c(-45, 75)
+  dt.start = as.Date('2000-01-01')
+  my_plot <- plotSingle(
+    dfRecession,
+    df.data,
+    datax = "date",
+    datay = lst_syms[[1]],
+    titlelabel = "Price of Gold Year-Over-Year change",
+    xlabel = "Date",
+    ylabel = getPlotYLabel(df.symbols, lst_syms[[1]]),
+    ylim,
+    xlim = c(dt.start, Sys.Date()),
+    b.legend = TRUE,
+    b.long.legend = TRUE
+  )
+
+  my_plot <- my_plot + geom_line(
+    data = df.data,
+    aes(
+      x = .data[["date"]],
+      y = .data[[lst_syms[[2]]]],
+      colour = getPlotTitle(df.symbols, lst_syms[[2]], str.sep = "\n")
+    ),
+    na.rm = TRUE
+  )
+
+  print(my_plot)
+  
+  # Free up memory
+  if( exists("my_plot")){
+    rm(my_plot)
+  }
+}
+
+# Free up memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
 
 ```
 
@@ -5445,7 +5509,7 @@ designed to track the price of gold. Each share represents a fractional
 undivided beneficial interest in the SPDR® Gold Trust, which holds physical gold
 bullion.
 
-#### Historical Trends
+#### Nominal Price Trends
 
 ```{r spdr_gld_plot_fun, echo=FALSE, fig.width = 10, fig.asp = .62}
 
