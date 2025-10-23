@@ -2205,26 +2205,46 @@ if ( require_columns(df.data, lst.syms ) ){
 # Free up memory
 rm(lst.syms)
 
-# # Normalize gold by GDP
-# df.data$LBMAGOLD.USD_PM.by.GDP <-
-#   (df.data$LBMAGOLD.USD_PM / df.data$GDP)
-# df.symbols <-
-#   rbind(
-#     df.symbols,
-#     data.frame(
-#       string.symbol = "LBMAGOLD.USD_PM.by.GDP",
-#       string.source = "Calc",
-#       string.description = "Gold, USD/Troy OUnce, Normalized by GDP",
-#       string.label.y = "$/t oz/Index",
-#       float.expense.ratio = -1.00,
-#       date.series.start =  as.Date(max(c(
-#         index(LBMAGOLD[1]), index(GDP[1])
-#       ))) ,
-#       date.series.end = as.Date(min(c(
-#         index(tail(LBMAGOLD, 1)), index(tail(GDP, 1))
-#       )))
-#     )
-#   )
+# Normalize gold by GDP deflator
+lst.syms <- c("GC_F.Close", "GDPDEF.Value")
+
+if ( require_columns(df.data, lst.syms ) ){
+  
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "GC_F.Close__by__GDPDEF.Value"    
+  df.data[[str.symbol.new]] <-
+    ( df.data[[lst.syms[[1]]]] / df.data[[lst.syms[[2]]]] )
+  
+  # Update the symbols table    
+  df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = str.symbol.new,
+      string.source = "Calc",
+      string.description = "Gold, USD/Troy Ounce, Normalized by GDP Deflator",
+      string.label.y = "$/t oz (Real Dollars)",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(c(
+        index(GC_F[1]), index(PPIACO[1])
+      ))) ,
+      date.series.end = as.Date(min(c(
+        index(tail(GC_F, 1)), index(tail(GDPDEF, 1))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
+    )
+  )
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
+}else{
+  print(paste("Failed to find: ", lst.syms))
+}
+
+# Free up memory
+rm(lst.syms)
+
 
 # Normalize nominal GDP commodities by GDP deflator
 if ( require_columns(df.data, c("GDP.Value", "GDPDEF.Value") ) ){
