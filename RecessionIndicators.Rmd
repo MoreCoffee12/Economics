@@ -6987,48 +6987,75 @@ my.plot + geom_line(data=df.data, aes_string(x="date", y=datay_aux, colour=shQuo
 The federal reserve provides liquidity to the repo market, summary of
 that action
 
-```{r RPONTSYD, echo=FALSE, fig.width = 9, fig.asp = 0.4}
+```{r RPONTSYD_fun, echo=FALSE, fig.width = 10, fig.asp = .62}
 
-datay.input <- "RPONTSYD.Value"
-datay.title <- getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n")
-ylim <- c(0, 80)
-  plotSingle(
+#' Plot Federal Overnight Reserve Repo Market (RPONTSYD)
+#'
+#' Plots the \code{RPONTSYD.Value} time series over a specified date range with
+#' a configurable lower y-axis limit. The upper y-limit is fixed at 80 to match
+#' the source snippet. This function expects project helpers
+#' \code{require_columns()} and \code{plotSingle()}, as well as data frames
+#' \code{df.data}, \code{df.symbols}, and \code{dfRecession} to be available
+#' in the calling environment.
+#'
+#' @param dt.start Date. Start date for the x-axis range.
+#'   Default \code{as.Date("2003-01-01")}.
+#' @param ylim.lower numeric. Lower bound for the y-axis. Default \code{0}.
+#'
+#' @return A \pkg{ggplot2} object (returned invisibly). The plot is also printed.
+#'
+#' @examples
+#' \dontrun{
+#'   p <- plot_rpontsyd(dt.start = as.Date("2008-01-01"), ylim.lower = 0)
+#'   # ggplot2::ggsave("rpontsyd.svg", p, width = 9, height = 5)
+#' }
+#' @export
+plot_rpontsyd <- function(dt.start = as.Date("2003-01-01"),
+                          ylim.lower = 0) {
+  lst_syms <- c("RPONTSYD.Value")
+
+  if (!require_columns(df.data, lst_syms)) {
+    missing_cols <- setdiff(lst_syms, names(df.data))
+    warning("Required columns missing in df.data: ",
+            paste(missing_cols, collapse = ", "))
+    return(invisible(NULL))
+  }
+
+  dt.end <- Sys.Date()
+
+  p <- plotSingle(
     dfRecession,
     df.data,
     "date",
-    datay = datay.input,
-    "Federal Overnight Reserve Repo Market",
-    "Date",
-    "Billions of Dollars/Euros",
-    c(as.Date("1jan2003", "%d%b%Y"), Sys.Date()),
-    ylim,
-    b.legend = TRUE,
+    datay      = lst_syms[[1]],
+    titlelabel = "Federal Overnight Reserve Repo Market",
+    xlabel     = "Date",
+    ylabel     = getPlotYLabel(df.symbols, lst_syms[[1]]),
+    xlim       = c(dt.start, dt.end),
+    ylim       = c(ylim.lower, 80),
+    b.legend   = TRUE,
     b.percentile = FALSE,
     b.long.legend = TRUE
   )
 
+  print(p)
+  invisible(p)
+}
+
+
+```
+
+```{r RPONTSYD, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+plot_rpontsyd(dt.start = as.Date("2003-01-01"),
+                          ylim.lower = 0)
 
 ```
 
 ```{r RPONTSYD.near, echo=FALSE, fig.width = 9, fig.asp = 0.4}
 
-datay.input <- "RPONTSYD.Value"
-datay.title <- getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n")
-ylim <- c(0, 80)
-  plotSingle(
-    dfRecession,
-    df.data,
-    "date",
-    datay = datay.input,
-    "Federal Overnight Reserve Repo Market",
-    "Date",
-    "Billions of Dollars/Euros",
-    c(as.Date("1jan2023", "%d%b%Y"), Sys.Date()),
-    ylim,
-    b.legend = TRUE,
-    b.percentile = FALSE,
-    b.long.legend = TRUE
-  )
+plot_rpontsyd(dt.start = seq(Sys.Date(), by = "-1 year", length.out = 2)[2],
+                          ylim.lower = 0)
 
 
 ```
