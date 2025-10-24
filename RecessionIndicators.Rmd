@@ -5498,7 +5498,7 @@ pretty exciting series.
 
 ```{r gold.by.index, echo=FALSE, fig.width = 10, fig.asp = .62}
 
-plot_gc_over_ppi(dt.start = seq(Sys.Date(), by = "-1 year", length.out = 2)[2],
+plot_gc_over_ppi_with_rhs(dt.start = seq(Sys.Date(), by = "-1 year", length.out = 2)[2],
                              ylim.lower = 9.5)
 
 ```
@@ -6428,6 +6428,41 @@ dt.start = as.Date('2018-01-01')
 my.plot <- plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 
 add.quarter.lines(my.plot, dt.start.year = 2016)
+
+```
+Take a look at the last year.
+
+```{r SOFR.dist_year, echo=FALSE}
+
+# Define the symbols in the plot
+lst_syms <- c("SOFR99__minus__SOFR1")
+
+# Do they exist in the data frame?
+if ( require_columns(df.data, lst_syms ) ){
+
+  my_plot <- plotSingleQuick(
+    dfRecession,
+    df.data,
+    lst_syms[[1]],
+    ylim = c(0, 0.50),
+    dt.start = seq(Sys.Date(), by = "-1 year", length.out = 2)[2]
+  )
+  
+  my_plot <- add.quarter.lines(my_plot, dt.start.year = 2016)
+  
+  print(my_plot)
+  
+  # Free up memory
+  if( exists("my_plot")){
+    rm(my_plot)
+  }
+  
+}
+
+# Free up memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
 
 ```
 
