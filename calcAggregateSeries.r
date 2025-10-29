@@ -2145,28 +2145,7 @@ if ( require_columns(df.data, lst.syms ) ){
 # Free up memory
 rm(lst.syms)
 
-# # Normalize gold by commodities producer price index (PPIACO)
-# df.data$LBMAGOLD.USD_PM.by.PPIACO <-
-#   (df.data$LBMAGOLD.USD_PM / df.data$PPIACO)
-# df.symbols <-
-#   rbind(
-#     df.symbols,
-#     data.frame(
-#       string.symbol = "LBMAGOLD.USD_PM.by.PPIACO",
-#       string.source = "Calc",
-#       string.description = "Gold, USD PM/Troy Ounce, Normalized by\ncommodities producer price index",
-#       string.label.y = "$/t oz/Index",
-#       float.expense.ratio = -1.00,
-#       date.series.start =  as.Date(max(c(
-#         index(LBMAGOLD[1]), index(PPIACO[1])
-#       ))) ,
-#       date.series.end = as.Date(min(c(
-#         index(tail(LBMAGOLD, 1)), index(tail(PPIACO, 1))
-#       )))
-#     )
-#   )
-
-# Normalize gold by consumer price index (CPI)
+# Normalize COMEX gold by consumer price index (CPI)
 lst.syms <- c("GC_F.Close", "PPIACO.Value")
 if ( require_columns(df.data, lst.syms ) ){
 
@@ -2244,6 +2223,93 @@ if ( require_columns(df.data, lst.syms ) ){
 
 # Free up memory
 rm(lst.syms)
+
+
+
+
+# Normalize GLD ETF gold by consumer price index (CPI)
+lst.syms <- c("GLD.Close", "PPIACO.Value")
+if ( require_columns(df.data, lst.syms ) ){
+  
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "GLD.Close__by__PPIACO.Value"    
+  df.data[[str.symbol.new]] <-
+    ( df.data[[lst.syms[[1]]]] / df.data[[lst.syms[[2]]]] )
+  
+  # Update the symbols table    
+  df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = str.symbol.new,
+      string.source = "Calc",
+      string.description = "GLD, USD, Normalized by\nconsumer price index",
+      string.label.y = "$/t oz/Index",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(c(
+        index(GLD[1]), index(PPIACO[1])
+      ))) ,
+      date.series.end = as.Date(min(c(
+        index(tail(GLD, 1)), index(tail(PPIACO, 1))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
+    )
+  )
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
+}else{
+  print(paste("Failed to find: ", lst.syms))
+}
+
+# Free up memory
+rm(lst.syms)
+
+# Normalize GLD by GDP deflator
+lst.syms <- c("GLD.Close", "GDPDEF.Value")
+
+if ( require_columns(df.data, lst.syms ) ){
+  
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "GLD.Close__by__GDPDEF.Value"    
+  df.data[[str.symbol.new]] <-
+    ( df.data[[lst.syms[[1]]]] / df.data[[lst.syms[[2]]]] )
+  
+  # Update the symbols table    
+  df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = str.symbol.new,
+      string.source = "Calc",
+      string.description = "Gold, USD, Normalized by GDP Deflator",
+      string.label.y = "$/t oz (Real Dollars)",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(c(
+        index(GLD[1]), index(PPIACO[1])
+      ))) ,
+      date.series.end = as.Date(min(c(
+        index(tail(GLD, 1)), index(tail(GDPDEF, 1))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
+    )
+  )
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
+}else{
+  print(paste("Failed to find: ", lst.syms))
+}
+
+# Free up memory
+rm(lst.syms)
+
+
+
+
+
 
 
 # Normalize nominal GDP commodities by GDP deflator

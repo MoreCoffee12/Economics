@@ -2884,58 +2884,105 @@ Suggested Citation:
 “Schwab U.S. Dividend Equity ETF (SCHD).” *Yahoo Finance*,
 <https://finance.yahoo.com/quote/SCHD/>. Accessed 3 Sept. 2025.
 
-```{r DivStocks_SCHD, echo=FALSE, fig.width = 10, fig.asp = .62 }
+```{r DivStocks_SCHD_fun, echo=FALSE, fig.width = 10, fig.asp = .62 }
 
-lst_sym <- c( "SCHD.Close", "SCHD.Close__mva050", "SCHD.Close__mva200")
+#' Plot SCHD with 50- and 200-day Moving Averages
+#'
+#' Creates a time-series plot of \code{SCHD.Close} with overlays for its
+#' 50-day and 200-day moving averages. The x-axis start date is fixed at
+#' \code{2014-01-01}; the lower y-axis limit is provided by the caller and
+#' the upper y-axis limit is computed from the data as
+#' \code{round_up_to(max(SCHD.Close, na.rm = TRUE), 1)}.
+#'
+#' Expects project helpers \code{require_columns()}, \code{plotSingle()},
+#' \code{getPlotTitle()}, and \code{getPlotYLabel()}, and data frames
+#' \code{df.data}, \code{df.symbols}, and \code{dfRecession} to be available
+#' in the calling environment.
+#'
+#' @param dt.start Date. Start date for the x-axis range.
+#'   Default \code{as.Date("2014-01-01")}.
+#' @param ylim.lower numeric(1). Lower bound for the y-axis.
+#'
+#' @return A \pkg{ggplot2} object (returned invisibly). The plot is also printed.
+#'
+#' @examples
+#' \dontrun{
+#'   p <- plot_schd_mva_min(ylim.lower = 10)
+#'   # ggplot2::ggsave("schd_mva.svg", p, width = 9, height = 5)
+#' }
+#' @export
+plot_schd_mva_min <- function(dt.start = as.Date("2014-01-01"),
+                              ylim.lower) {
+  stopifnot(is.numeric(ylim.lower), length(ylim.lower) == 1, is.finite(ylim.lower))
 
-if (require_columns(df.data, lst_sym)) {
-  
-  my.plot <-
-    plotSingle(
-      dfRecession,
-      df.data,
-      "date",
-      datay = lst_sym[[1]],
-      getPlotTitle(df.symbols, lst_sym[[1]]),
-      "Date",
-      getPlotYLabel(df.symbols, lst_sym[[1]]),
-      c(as.Date('2014-01-01'), Sys.Date()),
-      ylim =  c(10, round_up_to(max(df.data[[lst_sym[[1]]]]),1)),
-      b.legend = TRUE,
-      b.percentile = FALSE,
-      b.long.legend = TRUE
+  lst_sym <- c("SCHD.Close", "SCHD.Close__mva050", "SCHD.Close__mva200")
+
+  if (!require_columns(df.data, lst_sym)) {
+    missing_cols <- setdiff(lst_sym, names(df.data))
+    warning("Required columns missing in df.data: ",
+            paste(missing_cols, collapse = ", "))
+    return(invisible(NULL))
+  }
+
+  dt.end   <- Sys.Date()
+
+  y_max <- suppressWarnings(
+    round_up_to(max(df.data[[lst_sym[[1]]]], na.rm = TRUE), 1)
+  )
+  if (!is.finite(y_max)) y_max <- ylim.lower + 10
+
+  p <- plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay       = lst_sym[[1]],
+    titlelabel  = getPlotTitle(df.symbols, lst_sym[[1]]),
+    xlabel      = "Date",
+    ylabel      = getPlotYLabel(df.symbols, lst_sym[[1]]),
+    xlim        = c(dt.start, dt.end),
+    ylim        = c(ylim.lower, y_max),
+    b.legend    = TRUE,
+    b.percentile = FALSE,
+    b.long.legend = TRUE
+  )
+
+  p <- p +
+    ggplot2::geom_line(
+      data = df.data,
+      ggplot2::aes(
+        x = .data[["date"]],
+        y = .data[[lst_sym[[2]]]],
+        colour = getPlotTitle(df.symbols, lst_sym[[2]])
+      ),
+      na.rm = TRUE
+    ) +
+    ggplot2::geom_line(
+      data = df.data,
+      ggplot2::aes(
+        x = .data[["date"]],
+        y = .data[[lst_sym[[3]]]],
+        colour = getPlotTitle(df.symbols, lst_sym[[3]])
+      ),
+      na.rm = TRUE
     )
 
-  my.plot <- my.plot + geom_line(
-    data = df.data,
-    aes_string(
-      x = "date",
-      y = lst_sym[[2]],
-      colour = shQuote(getPlotTitle(df.symbols, lst_sym[[2]]))
-    ),
-    na.rm = TRUE
-  )
-  my.plot <- my.plot + geom_line(
-    data = df.data,
-    aes_string(
-      x = "date",
-      y = lst_sym[[3]],
-      colour = shQuote(getPlotTitle(df.symbols, lst_sym[[3]]))
-    ),
-    na.rm = TRUE
-  )
-  
-  print(my.plot)
-  
-  if( exists("my.plot")){
-    rm(my.plot)
-  }  
+  print(p)
+  invisible(p)
 }
 
-# Clean and tidy
-if( exists ("lst_sym")){
-  rm(lst_sym)
-}
+```
+
+```{r DivStocks_SCHD, echo=FALSE, fig.width = 10, fig.asp = .62 }
+
+plot_schd_mva_min(dt.start = as.Date("2014-01-01"),
+                          ylim.lower = 10)
+
+```
+
+```{r DivStocks_SCHD_near, echo=FALSE, fig.width = 10, fig.asp = .62 }
+
+plot_schd_mva_min(dt.start = seq(Sys.Date(), by = "-1 year", length.out = 2)[2],
+                          ylim.lower = 21)
 
 ```
 
@@ -3025,7 +3072,7 @@ See how these stocks have done over the last year:
 ```{r DivStocks_yoy_near, echo=FALSE, fig.width = 10, fig.asp = .62 }
 
 plot_dividend_yoy(dt.start = seq(Sys.Date(), length = 2, by = "-1 year")[2],
-                              ylim = c(-25, 50)) 
+                              ylim = c(-11, 31)) 
 ```
 
 ### Energy Stocks
@@ -5555,54 +5602,98 @@ view seems like there is little difference in the three series. Although
 not shown, even over the near-term there is little difference in the
 series.
 
-```{r gold_YoY, echo=FALSE, fig.width = 10, fig.asp = .62}
 
-# Define the symbols in the plot
-lst_syms <- c("GC_F.Close__YoY", "GC_F.Close__by__PPIACO.Value__YoY")
+```{r gold_YoY_fun, echo=FALSE, fig.width = 10, fig.asp = .62}
 
-# Do they exist in the data frame?
-if ( require_columns(df.data, lst_syms ) ){
-  
-  ylim <- c(-45, 75)
-  dt.start = as.Date('2000-01-01')
-  my_plot <- plotSingle(
+#' Plot Gold Year-Over-Year Change (Nominal vs PPI-Adjusted)
+#'
+#' Plots \code{GC_F.Close__YoY} (nominal gold YoY %) with an overlay of
+#' \code{GC_F.Close__by__PPIACO.Value__YoY} (PPI-adjusted gold YoY %) over a
+#' specified date range. Expects project helpers \code{require_columns()},
+#' \code{plotSingle()}, \code{getPlotTitle()}, and \code{getPlotYLabel()},
+#' and data frames \code{df.data}, \code{df.symbols}, and \code{dfRecession}
+#' to be available in the calling environment.
+#'
+#' @param dt.start Date. Start date for the x-axis range.
+#'   Default \code{as.Date("2000-01-01")}.
+#' @param ylim numeric(2). Y-axis limits as \code{c(ymin, ymax)}.
+#'   Default \code{c(-45, 75)}.
+#'
+#' @return A \pkg{ggplot2} object (returned invisibly). The plot is also printed.
+#'
+#' @examples
+#' \dontrun{
+#'   p <- plot_gold_yoy(dt.start = as.Date("2005-01-01"), ylim = c(-50, 80))
+#'   # ggplot2::ggsave("gold_yoy.svg", p, width = 9, height = 5)
+#' }
+#' @export
+plot_gold_yoy <- function(dt.start = as.Date("2000-01-01"),
+                          ylim = c(-45, 75)) {
+
+  lst_syms <- c("GC_F.Close__YoY", "GC_F.Close__by__PPIACO.Value__YoY")
+
+  if (!require_columns(df.data, lst_syms)) {
+    missing_cols <- setdiff(lst_syms, names(df.data))
+    warning("Required columns missing in df.data: ",
+            paste(missing_cols, collapse = ", "))
+    return(invisible(NULL))
+  }
+
+  dt.end <- Sys.Date()
+
+  p <- plotSingle(
     dfRecession,
     df.data,
-    datax = "date",
-    datay = lst_syms[[1]],
-    titlelabel = "Price of Gold Year-Over-Year change",
-    xlabel = "Date",
-    ylabel = getPlotYLabel(df.symbols, lst_syms[[1]]),
-    ylim,
-    xlim = c(dt.start, Sys.Date()),
-    b.legend = TRUE,
-    b.long.legend = TRUE
+    datax       = "date",
+    datay       = lst_syms[[1]],
+    titlelabel  = "Price of Gold Year-Over-Year change",
+    xlabel      = "Date",
+    ylabel      = getPlotYLabel(df.symbols, lst_syms[[1]]),
+    ylim        = ylim,
+    xlim        = c(dt.start, dt.end),
+    b.legend    = TRUE,
+    b.long.legend = TRUE,
+    b.percentile  = TRUE
   )
 
-  my_plot <- my_plot + geom_line(
-    data = df.data,
-    aes(
-      x = .data[["date"]],
-      y = .data[[lst_syms[[2]]]],
-      colour = getPlotTitle(df.symbols, lst_syms[[2]], str.sep = "\n")
-    ),
-    na.rm = TRUE
-  )
+  p <- p +
+    ggplot2::geom_line(
+      data = df.data,
+      ggplot2::aes(
+        x = .data[["date"]],
+        y = .data[[lst_syms[[2]]]],
+        colour = getPlotTitle(df.symbols, lst_syms[[2]], str.sep = "\n")
+      ),
+      na.rm = TRUE
+    )
 
-  print(my_plot)
-  
-  # Free up memory
-  if( exists("my_plot")){
-    rm(my_plot)
-  }
+  print(p)
+  invisible(p)
 }
 
-# Free up memory
-if( exists("lst_syms")){
-  rm(lst_syms)
-}
 
 ```
+
+
+```{r gold_YoY, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+plot_gold_yoy(dt.start = as.Date("2000-01-01"),
+                          ylim = c(-45, 75))
+
+```
+
+
+Take a look at COMEX movement over the last year
+
+
+```{r gold_YoY_near, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+plot_gold_yoy(dt.start = seq(Sys.Date(), by = "-1 year", length.out = 2)[2],
+                          ylim = c(20, 60))
+
+```
+
+#### COMEX gold and the VIX
 
 See how gold correlates with the VIX. Both gold and VIX should respond
 to investor axiety, but it doesn't look like it correlates very well.
@@ -5789,6 +5880,145 @@ What has the SPDR GLD ETF done over the last year?
 
 p <- plot_gld_with_mas(start_date = Sys.Date() %m-% years(1),
                         ylim_min=200)
+
+```
+
+#### Real Price Trends
+
+This plots out the real price of the GLD corrected with different deflators. PPI
+corrected price is a little higher, to be expected since CPI also
+includes the effects of sales tax and imports. The spike in 1980 is
+especially pronounced in this series.
+
+```{r gld_real_plot_fun, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+#' Plot GLD/PPI with a Secondary (Right) Y-Axis for Gold/GDP Deflator
+#'
+#' Plots \code{GLD.Close__by__PPIACO.Value} on the left y-axis and overlays
+#' \code{GLD.Close__by__GDPDEF.Value} on a secondary right y-axis over a
+#' specified date range. The upper left y-limit is computed from the data via
+#' \code{round_up_to(max(series), 1)}. This function expects project helpers
+#' \code{require_columns()}, \code{plotSingle()}, \code{getPlotTitle()}, and
+#' \code{getPlotYLabel()}, as well as data frames \code{df.data}, \code{df.symbols},
+#' and \code{dfRecession} to be available in the calling environment.
+#'
+#' @param dt.start Date. Start date for the x-axis range. Default \code{as.Date("2000-01-01")}.
+#' @param ylim.lower numeric. Lower bound for the **left** y-axis. Default \code{1.5}.
+#'
+#' @return A \pkg{ggplot2} object (returned invisibly). The plot is also printed.
+#'
+#' @examples
+#' \dontrun{
+#'   p <- plot_gc_over_ppi_with_rhs(dt.start = as.Date("2005-01-01"), ylim.lower = 2)
+#'   # ggplot2::ggsave("gc_over_ppi_rhs.svg", p, width = 9, height = 5)
+#' }
+#' @export
+plot_gld_over_ppi_with_rhs <- function(dt.start = as.Date("2000-01-01"),
+                                      ylim.lower = 1.5) {
+
+  # Left-axis (primary) and right-axis (secondary) series
+  lst_syms <- c("GLD.Close__by__PPIACO.Value",   # left axis
+                "GLD.Close__by__GDPDEF.Value")   # right axis
+
+  # Ensure columns exist
+  if (!require_columns(df.data, lst_syms)) {
+    missing_cols <- setdiff(lst_syms, names(df.data))
+    warning("Required columns missing in df.data: ",
+            paste(missing_cols, collapse = ", "))
+    return(invisible(NULL))
+  }
+
+  dt.end <- Sys.Date()
+
+  # Left axis limits
+  y1_min <- ylim.lower
+  y1_max <- suppressWarnings(
+    round_up_to(max(df.data[[lst_syms[[1]]]], na.rm = TRUE), 1)
+  )
+  if (!is.finite(y1_max)) y1_max <- y1_min + 1
+
+  # Right axis series range
+  y2_vec <- df.data[[lst_syms[[2]]]]
+  y2_min <- suppressWarnings(min(y2_vec, na.rm = TRUE))
+  y2_max <- suppressWarnings(max(y2_vec, na.rm = TRUE))
+
+  # Guard against a flat/NA series on the right axis
+  if (!is.finite(y2_min) || !is.finite(y2_max) || y2_min == y2_max) {
+    y2_min <- if (is.finite(y2_min)) y2_min else 0
+    y2_max <- y2_min + 1
+  }
+
+  # Linear mapping: right-axis values -> left-axis scale (so we can draw on left scale)
+  scale_y2_to_y1 <- function(y) {
+    ( (y - y2_min) / (y2_max - y2_min) ) * (y1_max - y1_min) + y1_min
+  }
+  # Inverse mapping for the secondary axis ticks
+  inv_map <- function(yl) {
+    ( (yl - y1_min) / (y1_max - y1_min) ) * (y2_max - y2_min) + y2_min
+  }
+
+  # Build a small frame for the scaled secondary series (no mutation of df.data)
+  df_rhs <- data.frame(
+    date = df.data[["date"]],
+    y2_scaled = scale_y2_to_y1(y2_vec)
+  )
+
+  # --- Base plot on the left axis ------------------------------------------
+  p <- plotSingle(
+    dfRecession,
+    df.data,
+    datax = "date",
+    datay = lst_syms[[1]],
+    titlelabel = getPlotTitle(df.symbols, lst_syms[[1]]),
+    xlabel = "Date",
+    ylabel = getPlotYLabel(df.symbols, lst_syms[[1]]),
+    ylim = c(y1_min, y1_max),
+    xlim = c(dt.start, dt.end),
+    b.legend = TRUE,
+    b.long.legend = TRUE
+  )
+
+  # Overlay right-axis series (drawn on left scale)
+  p <- p +
+    ggplot2::geom_line(
+      data = df_rhs,
+      ggplot2::aes(
+        x = .data[["date"]],
+        y = .data[["y2_scaled"]],
+        colour = getPlotTitle(df.symbols, lst_syms[[2]])
+      ),
+      na.rm = TRUE
+    )
+
+  # Add secondary axis — suppress the warning about replacing y scale
+  p <- suppressWarnings(
+    p + ggplot2::scale_y_continuous(
+      limits = c(y1_min, y1_max),
+      sec.axis = ggplot2::sec_axis(~ inv_map(.),
+                                   name = getPlotYLabel(df.symbols, lst_syms[[2]]))
+    )
+  )
+
+  print(p)
+  invisible(p)
+}
+
+```
+
+```{r gld.by.index, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+plot_gld_over_ppi_with_rhs(dt.start = as.Date("2000-01-01"),
+                             ylim.lower = 0.0)
+
+```
+
+Take a look at the movement over the last year. As of Oct 2025, this was a
+pretty exciting series.
+
+```{r gld_by_index_near, echo=FALSE, fig.width = 10, fig.asp = .62}
+
+plot_gld_over_ppi_with_rhs(dt.start = seq(Sys.Date(), by = "-1 year", length.out = 2)[2],
+                             ylim.lower = 0.8)
 
 ```
 
@@ -6475,6 +6705,7 @@ my.plot <- plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
 add.quarter.lines(my.plot, dt.start.year = 2016)
 
 ```
+
 Take a look at the last year.
 
 ```{r SOFR.dist_year, echo=FALSE}
