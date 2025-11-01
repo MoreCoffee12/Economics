@@ -3216,6 +3216,14 @@ that contains the common stocks of all companies included in the S&P
 defined according to the Global Industry Classification Standard
 ("GICS").
 
+RSPG stands at
+    `r paste("$",sprintf("%3.2f", tail(df.data$RSPG.Close,1)),sep="")`
+    (last updated on `r index(tail(RSPG,1))`). 
+    
+The 50-day MVA stands at `r paste("$",sprintf("%3.2f", tail(df.data$RSPG.Close__mva050,1)), sep="")`. 
+    
+The 200-day MVA stands at `r paste("$",sprintf("%3.2f", tail(df.data$RSPG.Close__mva200,1)), sep="")`
+
 Suggested Citation:
 
 “Invesco S&P 500 Equal Weight Growth ETF (RSPG) Company Profile &
