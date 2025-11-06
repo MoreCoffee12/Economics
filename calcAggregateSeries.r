@@ -1617,15 +1617,6 @@ if ( require_columns(df.data, c("FARMINCOME", "GDP.Value") ) ){
   
 }
 
-
-# Millions to billions
-# TODO - Update the df.symbols units to billions
-if ( require_columns(df.data, c("BOGMBASE.Value") ) ){
-  
-  df.data$BOGMBASE.Value <- df.data$BOGMBASE.Value / 1000
-
-}
-
 # Monetary base (in billions) divided by GDP
 if ( require_columns(df.data, c("BOGMBASE.Value", "GDP.Value") ) ){
   

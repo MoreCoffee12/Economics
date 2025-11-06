@@ -7095,105 +7095,143 @@ my.plot
 
 Currency trend, base
 
+Suggested Citation:
+
+Board of Governors of the Federal Reserve System (US), Monetary Base: Total
+[BOGMBASE], retrieved from FRED, Federal Reserve Bank of St. Louis;
+https://fred.stlouisfed.org/series/BOGMBASE, November 5, 2025.
+
 ```{r BOGMBASE.trend, echo=FALSE}
-# The billions and trillions conversion is not working here
-datay <- "BOGMBASE.Value"
-dt.start = as.Date('1959-01-01')
-ylim <- c(0, 7000)
-my.plot <-
-  plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
-my.plot
+
+lst_syms <- c( "BOGMBASE.Value")
+
+if (require_columns(df.data, lst_syms)) {
+  
+  my_plot <- plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay = lst_syms[[1]],
+    getPlotTitle(df.symbols, lst_syms[[1]]),
+    "Date",
+    getPlotYLabel(df.symbols, lst_syms[[1]]),
+    c(as.Date('1959-01-01'), Sys.Date()),
+    ylim = c(0, 7000),
+    b.legend = TRUE,
+    b.percentile = FALSE
+  )  
+  
+  print(my_plot)
+  
+  # Clean and tidy memory
+  if( exists ("my_plot")){
+    rm(my_plot)
+  }
+
+}
+
+# Clean and tidy
+if( exists ("lst_syms")){
+  rm(lst_syms)
+}
 
 ```
+This plot explores the relatationship between the change in the price of gold
+and the monetary base.
 
-```{r MB.to.Gold, echo=FALSE, fig.width = 7, fig.asp = 1.1 }
+The vertical lines highlight key events in the market:
+- Aug 24, 2015: Flash crash, Dow drops by 1,100 pints in thefirst five minutes 
+  of trading.
+- Jan 8, 2016: Dow ends one of the worst weeks ever.
+
+```{r MB.to.Gold, echo=FALSE, fig.width = 10, fig.asp = .62 }
 
 
-# datay <- "BOGMBASE"
-# dt.start = as.Date('1959-01-01')
-# ylim <- c(0, 7000)
-# p1 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
-# p1 <-
-#   p1 + geom_vline(
-#     xintercept = as.Date("2015-08-24"),
-#     linetype = "dashed",
-#     color = "grey",
-#     size = 1.0
-#   )
-# p1 <-
-#   p1 + geom_vline(
-#     xintercept = as.Date("2016-01-08"),
-#     linetype = "dashed",
-#     color = "grey",
-#     size = 1.0
-#   )
-# p1 <-
-#   p1 + geom_vline(
-#     xintercept = as.Date("2018-02-05"),
-#     linetype = "dashed",
-#     color = "grey",
-#     size = 1.0
-#   )
-# p1 <-
-#   p1 + geom_vline(
-#     xintercept = as.Date("2018-10-11"),
-#     linetype = "dashed",
-#     color = "grey",
-#     size = 1.0
-#   )
-# 
-# datay <- "LBMAGOLD.USD_PM"
-# ylim <- c(0, 2500)
-# p2 <-
-#   plotSingle(
-#     dfRecession,
-#     df.data,
-#     "date",
-#     datay,
-#     getPlotTitle(df.symbols, datay),
-#     "Date",
-#     getPlotYLabel(df.symbols, datay),
-#     c(dt.start, Sys.Date()),
-#     ylim,
-#     b.legend = FALSE,
-#     b.percentile = FALSE,
-#     b.long.legend = FALSE
-#   )
-# 
-# p2 <-
-#   p2 + geom_vline(
-#     xintercept = as.Date("2015-08-24"),
-#     linetype = "dashed",
-#     color = "grey",
-#     size = 1.0
-#   )
-# p2 <-
-#   p2 + geom_vline(
-#     xintercept = as.Date("2016-01-08"),
-#     linetype = "dashed",
-#     color = "grey",
-#     size = 1.0
-#   )
-# p2 <-
-#   p2 + geom_vline(
-#     xintercept = as.Date("2018-02-05"),
-#     linetype = "dashed",
-#     color = "grey",
-#     size = 1.0
-#   )
-# p2 <-
-#   p2 + geom_vline(
-#     xintercept = as.Date("2018-10-11"),
-#     linetype = "dashed",
-#     color = "grey",
-#     size = 1.0
-#   )
-# 
-# 
-# grid.arrange(p1,
-#              p2,
-#              ncol = 1,
-#              top = "Monetary base and gold")
+datay <- "BOGMBASE.Value__YoY"
+dt.start = as.Date('2000-01-01')
+ylim <- c(-50, 100)
+p1 <- plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
+p1 <-
+  p1 + geom_vline(
+    xintercept = as.Date("2015-08-24"),
+    linetype = "dashed",
+    color = "grey",
+    size = 1.0
+  )
+p1 <-
+  p1 + geom_vline(
+    xintercept = as.Date("2016-01-08"),
+    linetype = "dashed",
+    color = "grey",
+    size = 1.0
+  )
+p1 <-
+  p1 + geom_vline(
+    xintercept = as.Date("2018-02-05"),
+    linetype = "dashed",
+    color = "grey",
+    size = 1.0
+  )
+p1 <-
+  p1 + geom_vline(
+    xintercept = as.Date("2018-10-11"),
+    linetype = "dashed",
+    color = "grey",
+    size = 1.0
+  )
+
+datay <- "GC_F.Close__YoY"
+ylim <- c(-50, 100)
+p2 <-
+  plotSingle(
+    dfRecession,
+    df.data,
+    "date",
+    datay,
+    getPlotTitle(df.symbols, datay),
+    "Date",
+    getPlotYLabel(df.symbols, datay),
+    c(dt.start, Sys.Date()),
+    ylim,
+    b.legend = FALSE,
+    b.percentile = TRUE,
+    b.long.legend = FALSE
+  )
+
+p2 <-
+  p2 + geom_vline(
+    xintercept = as.Date("2015-08-24"),
+    linetype = "dashed",
+    color = "grey",
+    size = 1.0
+  )
+p2 <-
+  p2 + geom_vline(
+    xintercept = as.Date("2016-01-08"),
+    linetype = "dashed",
+    color = "grey",
+    size = 1.0
+  )
+p2 <-
+  p2 + geom_vline(
+    xintercept = as.Date("2018-02-05"),
+    linetype = "dashed",
+    color = "grey",
+    size = 1.0
+  )
+p2 <-
+  p2 + geom_vline(
+    xintercept = as.Date("2018-10-11"),
+    linetype = "dashed",
+    color = "grey",
+    size = 1.0
+  )
+
+
+grid.arrange(p1,
+             p2,
+             ncol = 1,
+             top = "Monetary base and gold")
 
 ```
 
