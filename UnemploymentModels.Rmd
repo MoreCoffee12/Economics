@@ -240,14 +240,41 @@ source("calcRecession.r")
 
 ### Labor force normalization
 
-The BLS statistics (U3, U6, etc.) calculates labor force by summing the number of employed and unemployed people (https://www.bls.gov/cps/lfcharacteristics.htm#laborforce). The problem is that when the survey is troubled, as it was during Covid19, the labor force shows a sudden drop. For example, during the Covid19 outbreak in the spring of 2020 the labor force dropped from 164MM to 155MM. In reality, the labor force did not really drop by this much. In other words there were approximately the same number of people who wanted to work on March 1st of 2020 as there were on June 1st of 2020.
+The BLS statistics (U3, U6, etc.) calculates labor force by summing the number
+of employed and unemployed people
+(https://www.bls.gov/cps/lfcharacteristics.htm#laborforce). The problem is that
+when the survey is troubled, as it was during Covid19, the labor force shows a
+sudden drop. For example, during the Covid19 outbreak in the spring of 2020 the
+labor force dropped from 164MM to 155MM. In reality, the labor force did not
+really drop by this much. In other words there were approximately the same
+number of people who wanted to work on March 1st of 2020 as there were on June
+1st of 2020.
 
-This makes the BLS measures of labor force less useful when I want to normalized by working force population. To get around this I do a linear fit of BLS labor force to general U.S. population (POPTHM) and take the slope of that fit as the average labor force participation rate. I then multiply POPTHM this value to get a constant labor force rate. This has some drawbacks, especially in that it cannot account for demographic shifts. But it should be an okay first order approximation.
+This makes the BLS measures of labor force less useful when I want to normalized
+by working force population. To get around this I do a linear fit of BLS labor
+force (CLF16OV) to general U.S. population (POPTHM) and take the slope of that
+fit as the average labor force participation rate. I then multiply POPTHM this
+value to get a constant labor force rate. This has some drawbacks, especially in
+that it cannot account for demographic shifts. But it should be an okay first
+order approximation.
 
 ```{r lf.lm.setup, echo=FALSE}
 
 dt.start.prediction <- as.Date(max(c(index(CLF16OV[1]), index(POPTHM[1]))))
 dt.end.prediction <- as.Date("2020-01-01")
+
+nice_date <- function(d, long_fmt = "%B %d, %Y", iso_fmt = "%Y-%m-%d") {
+  if (is.na(d)) return("NA")
+  sprintf("%s (%s)", format(d, long_fmt), format(d, iso_fmt))
+}
+
+cat(
+  sprintf(
+    "== CLF160 Prediction Given POPTHM training interval: ==\n  Start: %s\n  End:   %s\n",
+    nice_date(dt.start.prediction),
+    nice_date(dt.end.prediction)
+  )
+)
 
 lst_syms <- c("CLF16OV.Value", "POPTHM.Value")
 if ( require_columns(df.data, lst_syms ) ){
