@@ -3347,6 +3347,97 @@ if( exists ("lst_sym")){
 
 ```
 
+### Sector Rotation
+
+This section looks at rotation across the sectors.
+
+#### Technology to Staples (XLK to XLP)
+
+Since about 2023 these two sectors have had a strong inverse correlation.
+
+XLK stands at
+    `r paste("$",sprintf("%3.2f", tail(df.data$XLK.Close,1)),sep="")`
+    (last updated on `r index(tail(XLK,1))`). 
+    
+The 50-day MVA stands at `r paste("$",sprintf("%3.2f", tail(df.data$XLK.Close__mva050,1)), sep="")`. 
+    
+The 200-day MVA stands at `r paste("$",sprintf("%3.2f", tail(df.data$XLK.Close__mva200,1)), sep="")`
+
+XLP stands at
+    `r paste("$",sprintf("%3.2f", tail(df.data$XLP.Close,1)),sep="")`
+    (last updated on `r index(tail(XLP,1))`). 
+    
+The 50-day MVA stands at `r paste("$",sprintf("%3.2f", tail(df.data$XLP.Close__mva050,1)), sep="")`. 
+    
+The 200-day MVA stands at `r paste("$",sprintf("%3.2f", tail(df.data$XLP.Close__mva200,1)), sep="")`
+
+Suggested Citations:
+
+“Technology Select Sector SPDR Fund (XLK) Company Profile & Facts.” Yahoo
+Finance, <https://finance.yahoo.com/quote/XLE/profile/> . Accessed 18
+Nov. 2025.
+
+“Consumer Staples Select Sector SPDR Fund (XLP) Company Profile & Facts.” Yahoo
+Finance, <https://finance.yahoo.com/quote/XLE/profile/> . Accessed 18
+Nov. 2025.
+
+```{r eq_rot_xlp_xlk, echo=FALSE, fig.width = 10, fig.asp = .62 }
+
+lst_sym <- c( "X_GSPC.GSPC.Close__YoY", "XLP.Close__YoY", "XLK.Close__YoY")
+
+if (require_columns(df.data, lst_sym)) {
+  
+  my.plot <-
+    plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_sym[[1]],
+      getPlotTitle(df.symbols, lst_sym[[1]]),
+      "Date",
+      getPlotYLabel(df.symbols, lst_sym[[1]]),
+      c(as.Date(Sys.Date()) - 365, Sys.Date()),
+      ylim =  c(-25, 50),
+      b.legend = TRUE,
+      b.percentile = FALSE,
+      b.long.legend = TRUE
+    )
+
+  my.plot <- my.plot + geom_line(
+    data = df.data,
+    aes_string(
+      x = "date",
+      y = lst_sym[[2]],
+      colour = shQuote(getPlotTitle(df.symbols, lst_sym[[2]]))
+    ),
+    na.rm = TRUE
+  )
+
+  my.plot <- my.plot + geom_line(
+    data = df.data,
+    aes_string(
+      x = "date",
+      y = lst_sym[[3]],
+      colour = shQuote(getPlotTitle(df.symbols, lst_sym[[3]]))
+    ),
+    na.rm = TRUE
+  )
+  
+  print(my.plot)
+  
+  if( exists("my.plot")){
+    rm(my.plot)
+  }
+  
+}
+
+# Clean and tidy
+if( exists ("lst_sym")){
+  rm(lst_sym)
+}
+
+```
+
 ## Margin and option data
 
 ### NYSE Margin Debt
