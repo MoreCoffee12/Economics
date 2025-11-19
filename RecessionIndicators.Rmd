@@ -3438,6 +3438,183 @@ if( exists ("lst_sym")){
 
 ```
 
+Normalize the ETF funds by the S&P 500 to get a sense of movement relative to
+the large cap index.
+
+```{r eq_rot_xlp_xlk_Relative, echo=FALSE, fig.width = 10, fig.asp = .62 }
+
+lst_sym <- c( "XLP__Close__by__X_GSPC__GSPC__Close",
+              "XLK__Close__by__X_GSPC__GSPC__Close")
+
+if (require_columns(df.data, lst_sym)) {
+  
+  my.plot <-
+    plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_sym[[1]],
+      getPlotTitle(df.symbols, lst_sym[[1]]),
+      "Date",
+      getPlotYLabel(df.symbols, lst_sym[[1]]),
+      c(as.Date(Sys.Date()) - 365, Sys.Date()),
+      ylim =  c(0, 5),
+      b.legend = TRUE,
+      b.percentile = FALSE,
+      b.long.legend = TRUE
+    )
+
+  # Set the relative scaling between the two y-axis
+  datay.aux.scale <- 0.45
+  
+  my.plot <- my.plot + geom_line(
+  data = df.data,
+  aes_string(
+    x = "date",
+    y = df.data[[lst_sym[[2]]]] * datay.aux.scale,
+    colour = shQuote(getPlotTitle(df.symbols, lst_sym[[2]]))
+  ),
+  na.rm = TRUE
+  )
+  
+  my.plot <-
+    my.plot + scale_y_continuous(
+      sec.axis = sec_axis( ~ . * (1 / datay.aux.scale), 
+      name = "PERCENT"), 
+      limits = ylim
+    )
+
+  print(my.plot)
+  
+  if( exists("my.plot")){
+    rm(my.plot)
+  }
+  if( exists("datay.aux.scale"))
+  {
+    rm(datay.aux.scale)
+  }
+  
+}
+
+# Clean and tidy
+if( exists ("lst_sym")){
+  rm(lst_sym)
+}
+
+```
+
+Lastly, plot  out the index pricing along with the moving averages
+
+```{r rotation_stocks_xlp, echo=FALSE, fig.width = 10, fig.asp = .62 }
+
+lst_sym <- c( "XLP.Close", "XLP.Close__mva050", "XLP.Close__mva200")
+
+if (require_columns(df.data, lst_sym)) {
+  
+  my.plot <-
+    plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_sym[[1]],
+      getPlotTitle(df.symbols, lst_sym[[1]]),
+      "Date",
+      getPlotYLabel(df.symbols, lst_sym[[1]]),
+      c(as.Date('2024-01-01'), Sys.Date()),
+      ylim =  c(70, round_up_to(max(df.data[[lst_sym[[1]]]]),1)),
+      b.legend = TRUE,
+      b.percentile = FALSE,
+      b.long.legend = TRUE
+    )
+
+  my.plot <- my.plot + geom_line(
+    data = df.data,
+    aes_string(
+      x = "date",
+      y = lst_sym[[2]],
+      colour = shQuote(getPlotTitle(df.symbols, lst_sym[[2]]))
+    ),
+    na.rm = TRUE
+  )
+  my.plot <- my.plot + geom_line(
+    data = df.data,
+    aes_string(
+      x = "date",
+      y = lst_sym[[3]],
+      colour = shQuote(getPlotTitle(df.symbols, lst_sym[[3]]))
+    ),
+    na.rm = TRUE
+  )
+  
+  print(my.plot)
+  
+  if( exists("my.plot")){
+    rm(my.plot)
+  }  
+}
+
+# Clean and tidy
+if( exists ("lst_sym")){
+  rm(lst_sym)
+}
+
+```
+
+```{r rotation_stocks_xlk, echo=FALSE, fig.width = 10, fig.asp = .62 }
+
+lst_sym <- c( "XLK.Close", "XLK.Close__mva050", "XLK.Close__mva200")
+
+if (require_columns(df.data, lst_sym)) {
+  
+  my.plot <-
+    plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_sym[[1]],
+      getPlotTitle(df.symbols, lst_sym[[1]]),
+      "Date",
+      getPlotYLabel(df.symbols, lst_sym[[1]]),
+      c(as.Date('2024-01-01'), Sys.Date()),
+      ylim =  c(150, round_up_to(max(df.data[[lst_sym[[1]]]]),1)),
+      b.legend = TRUE,
+      b.percentile = FALSE,
+      b.long.legend = TRUE
+    )
+
+  my.plot <- my.plot + geom_line(
+    data = df.data,
+    aes_string(
+      x = "date",
+      y = lst_sym[[2]],
+      colour = shQuote(getPlotTitle(df.symbols, lst_sym[[2]]))
+    ),
+    na.rm = TRUE
+  )
+  my.plot <- my.plot + geom_line(
+    data = df.data,
+    aes_string(
+      x = "date",
+      y = lst_sym[[3]],
+      colour = shQuote(getPlotTitle(df.symbols, lst_sym[[3]]))
+    ),
+    na.rm = TRUE
+  )
+  
+  print(my.plot)
+  
+  if( exists("my.plot")){
+    rm(my.plot)
+  }  
+}
+
+# Clean and tidy
+if( exists ("lst_sym")){
+  rm(lst_sym)
+}
+
+```
+
 ## Margin and option data
 
 ### NYSE Margin Debt

@@ -22,6 +22,7 @@ rm(lst_syms)
 
 
 #------------------------ Create the aggregate series--------------------------
+
 # Create an aggregate column for retail sales (mean of RRSFS.Value and RSALES.Value)
 if (require_columns(df.data, c("RRSFS.Value", "RSALES.Value"))) {
   
@@ -3009,3 +3010,486 @@ if ( require_columns(df.data, c("CCSA.Value", "CLF16OV.Value") ) ){
   rm(str.symbol.new)
   
 }
+
+# Materials SPDR Fund divided by S&P 500
+lst.sym <- c("XLB.Close", "X_GSPC.GSPC.Close")
+if ( require_columns(df.data, lst.sym ) ){
+  
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "XLB__Close__by__X_GSPC__GSPC__Close"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data[[lst.sym[[1]]]] / df.data[[lst.sym[[2]]]]) * 100.0 )
+  
+  # Update the symbols table    
+  df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = str.symbol.new,
+      string.source = "Calc",
+      string.description = "Materials SPDR Fund divided by S&P 500",
+      string.label.y = "PERCENT",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(
+        c(df.symbols$date.series.start[df.symbols$Symbol == lst.sym[[1]]], index(X_GSPC[1]))
+      ))  ,
+      date.series.end = as.Date(min(c(
+        df.symbols$date.series.end[df.symbols$Symbol == lst.sym[[1]]], index(tail(X_GSPC, 1))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
+    )
+  )
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
+}
+
+# Tidy memory
+rm (lst.sym)
+
+# # Materials SPDR Fund divided by S&P 500, year over year
+# lst.sym <- c("XLB.Close__YoY", "X_GSPC.GSPC.Close__YoY")
+# if ( require_columns(df.data, lst.sym ) ){
+#   
+#   # Add the aggregate to the main data frame
+#   str.symbol.new <- "XLB__Close__YoY__by__X_GSPC__GSPC__Close__YoY"
+#   df.data[[str.symbol.new]] <-
+#     ( ( df.data[[lst.sym[[1]]]] / df.data[[lst.sym[[2]]]]) * 100.0 )
+#   
+#   # Update the symbols table    
+#   df.symbols <- symbols_append_row(
+#     df.symbols,
+#     list(
+#       string.symbol = str.symbol.new,
+#       string.source = "Calc",
+#       string.description = "Materials SPDR Fund divided by S&P 500 YoY",
+#       string.label.y = "PERCENT",
+#       float.expense.ratio = -1.00,
+#       date.series.start =  as.Date(max(
+#         c(df.symbols$date.series.start[df.symbols$Symbol == lst.sym[[1]]], index(X_GSPC[1]))
+#       ))  ,
+#       date.series.end = as.Date(min(c(
+#         df.symbols$date.series.end[df.symbols$Symbol == lst.sym[[1]]], index(tail(X_GSPC, 1))
+#       ))),
+#       string.symbol_safe = safe_symbol_name(str.symbol.new),
+#       string.object_name = safe_symbol_name(str.symbol.new)
+#     )
+#   )
+#   
+#   # Tidy memory
+#   rm(str.symbol.new)
+#   
+# }
+# 
+# # Tidy memory
+# rm (lst.sym)
+
+# Communication Services SPDR Fund divided by S&P 500
+lst.sym <- c("XLC.Close", "X_GSPC.GSPC.Close")
+if ( require_columns(df.data, lst.sym ) ){
+  
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "XLC__Close__by__X_GSPC__GSPC__Close"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data[[lst.sym[[1]]]] / df.data[[lst.sym[[2]]]]) * 100.0 )
+  
+  # Update the symbols table    
+  df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = str.symbol.new,
+      string.source = "Calc",
+      string.description = "Communication Services SPDR Fund divided by S&P 500",
+      string.label.y = "PERCENT",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(
+        c(df.symbols$date.series.start[df.symbols$Symbol == lst.sym[[1]]], index(X_GSPC[1]))
+      ))  ,
+      date.series.end = as.Date(min(c(
+        df.symbols$date.series.end[df.symbols$Symbol == lst.sym[[1]]], index(tail(X_GSPC, 1))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
+    )
+  )
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
+}
+
+# Tidy memory
+rm (lst.sym)
+
+# Energy SPDR Fund divided by S&P 500
+lst.sym <- c("XLE.Close", "X_GSPC.GSPC.Close")
+if ( require_columns(df.data, lst.sym ) ){
+  
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "XLE__Close__by__X_GSPC__GSPC__Close"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data[[lst.sym[[1]]]] / df.data[[lst.sym[[2]]]]) * 100.0 )
+  
+  # Update the symbols table    
+  df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = str.symbol.new,
+      string.source = "Calc",
+      string.description = "Energy SPDR Fund divided by S&P 500",
+      string.label.y = "PERCENT",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(
+        c(df.symbols$date.series.start[df.symbols$Symbol == lst.sym[[1]]], index(X_GSPC[1]))
+      ))  ,
+      date.series.end = as.Date(min(c(
+        df.symbols$date.series.end[df.symbols$Symbol == lst.sym[[1]]], index(tail(X_GSPC, 1))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
+    )
+  )
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
+}
+
+# Tidy memory
+rm (lst.sym)
+
+# Financial SPDR Fund divided by S&P 500
+lst.sym <- c("XLF.Close", "X_GSPC.GSPC.Close")
+if ( require_columns(df.data, lst.sym ) ){
+  
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "XLF__Close__by__X_GSPC__GSPC__Close"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data[[lst.sym[[1]]]] / df.data[[lst.sym[[2]]]]) * 100.0 )
+  
+  # Update the symbols table    
+  df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = str.symbol.new,
+      string.source = "Calc",
+      string.description = "Financial SPDR Fund divided by S&P 500",
+      string.label.y = "PERCENT",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(
+        c(df.symbols$date.series.start[df.symbols$Symbol == lst.sym[[1]]], index(X_GSPC[1]))
+      ))  ,
+      date.series.end = as.Date(min(c(
+        df.symbols$date.series.end[df.symbols$Symbol == lst.sym[[1]]], index(tail(X_GSPC, 1))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
+    )
+  )
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
+}
+
+# Tidy memory
+rm (lst.sym)
+
+# Industrial SPDR Fund divided by S&P 500
+lst.sym <- c("XLI.Close", "X_GSPC.GSPC.Close")
+if ( require_columns(df.data, lst.sym ) ){
+  
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "XLI__Close__by__X_GSPC__GSPC__Close"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data[[lst.sym[[1]]]] / df.data[[lst.sym[[2]]]]) * 100.0 )
+  
+  # Update the symbols table    
+  df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = str.symbol.new,
+      string.source = "Calc",
+      string.description = "Industrial SPDR Fund divided by S&P 500",
+      string.label.y = "PERCENT",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(
+        c(df.symbols$date.series.start[df.symbols$Symbol == lst.sym[[1]]], index(X_GSPC[1]))
+      ))  ,
+      date.series.end = as.Date(min(c(
+        df.symbols$date.series.end[df.symbols$Symbol == lst.sym[[1]]], index(tail(X_GSPC, 1))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
+    )
+  )
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
+}
+
+# Tidy memory
+rm (lst.sym)
+
+# Technology SPDR Fund divided by S&P 500
+lst.sym <- c("XLK.Close", "X_GSPC.GSPC.Close")
+if ( require_columns(df.data, lst.sym ) ){
+  
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "XLK__Close__by__X_GSPC__GSPC__Close"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data[[lst.sym[[1]]]] / df.data[[lst.sym[[2]]]]) * 100.0 )
+  
+  # Update the symbols table    
+  df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = str.symbol.new,
+      string.source = "Calc",
+      string.description = "Technology SPDR Fund divided by S&P 500",
+      string.label.y = "PERCENT",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(
+        c(df.symbols$date.series.start[df.symbols$Symbol == lst.sym[[1]]], index(X_GSPC[1]))
+      ))  ,
+      date.series.end = as.Date(min(c(
+        df.symbols$date.series.end[df.symbols$Symbol == lst.sym[[1]]], index(tail(X_GSPC, 1))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
+    )
+  )
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
+}
+
+# Tidy memory
+rm (lst.sym)
+
+# Consumer Staples SPDR Fund divided by S&P 500
+lst.sym <- c("XLP.Close", "X_GSPC.GSPC.Close")
+if ( require_columns(df.data, lst.sym ) ){
+  
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "XLP__Close__by__X_GSPC__GSPC__Close"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data[[lst.sym[[1]]]] / df.data[[lst.sym[[2]]]]) * 100.0 )
+  
+  # Update the symbols table    
+  df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = str.symbol.new,
+      string.source = "Calc",
+      string.description = "Consumer Staples SPDR Fund divided by S&P 500",
+      string.label.y = "PERCENT",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(
+        c(df.symbols$date.series.start[df.symbols$Symbol == lst.sym[[1]]], index(X_GSPC[1]))
+      ))  ,
+      date.series.end = as.Date(min(c(
+        df.symbols$date.series.end[df.symbols$Symbol == lst.sym[[1]]], index(tail(X_GSPC, 1))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
+    )
+  )
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
+}
+
+# Tidy memory
+rm (lst.sym)
+
+# Real Estate SPDR Fund divided by S&P 500
+lst.sym <- c("XLRE.Close", "X_GSPC.GSPC.Close")
+if ( require_columns(df.data, lst.sym ) ){
+  
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "XLRE__Close__by__X_GSPC__GSPC__Close"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data[[lst.sym[[1]]]] / df.data[[lst.sym[[2]]]]) * 100.0 )
+  
+  # Update the symbols table    
+  df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = str.symbol.new,
+      string.source = "Calc",
+      string.description = "Real Estate SPDR Fund divided by S&P 500",
+      string.label.y = "PERCENT",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(
+        c(df.symbols$date.series.start[df.symbols$Symbol == lst.sym[[1]]], index(X_GSPC[1]))
+      ))  ,
+      date.series.end = as.Date(min(c(
+        df.symbols$date.series.end[df.symbols$Symbol == lst.sym[[1]]], index(tail(X_GSPC, 1))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
+    )
+  )
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
+}
+
+# Tidy memory
+rm (lst.sym)
+
+# Utilities SPDR Fund divided by S&P 500
+lst.sym <- c("XLU.Close", "X_GSPC.GSPC.Close")
+if ( require_columns(df.data, lst.sym ) ){
+  
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "XLU__Close__by__X_GSPC__GSPC__Close"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data[[lst.sym[[1]]]] / df.data[[lst.sym[[2]]]]) * 100.0 )
+  
+  # Update the symbols table    
+  df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = str.symbol.new,
+      string.source = "Calc",
+      string.description = "Utilities SPDR Fund divided by S&P 500",
+      string.label.y = "PERCENT",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(
+        c(df.symbols$date.series.start[df.symbols$Symbol == lst.sym[[1]]], index(X_GSPC[1]))
+      ))  ,
+      date.series.end = as.Date(min(c(
+        df.symbols$date.series.end[df.symbols$Symbol == lst.sym[[1]]], index(tail(X_GSPC, 1))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
+    )
+  )
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
+}
+
+# Tidy memory
+rm (lst.sym)
+
+# Healthcare SPDR Fund divided by S&P 500
+lst.sym <- c("XLV.Close", "X_GSPC.GSPC.Close")
+if ( require_columns(df.data, lst.sym ) ){
+  
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "XLV__Close__by__X_GSPC__GSPC__Close"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data[[lst.sym[[1]]]] / df.data[[lst.sym[[2]]]]) * 100.0 )
+  
+  # Update the symbols table    
+  df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = str.symbol.new,
+      string.source = "Calc",
+      string.description = "Healthcare SPDR Fund divided by S&P 500",
+      string.label.y = "PERCENT",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(
+        c(df.symbols$date.series.start[df.symbols$Symbol == lst.sym[[1]]], index(X_GSPC[1]))
+      ))  ,
+      date.series.end = as.Date(min(c(
+        df.symbols$date.series.end[df.symbols$Symbol == lst.sym[[1]]], index(tail(X_GSPC, 1))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
+    )
+  )
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
+}
+
+# Tidy memory
+rm (lst.sym)
+
+# Consumer Discretion SPDR Fund divided by S&P 500
+lst.sym <- c("XLY.Close", "X_GSPC.GSPC.Close")
+if ( require_columns(df.data, lst.sym ) ){
+  
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "XLY__Close__by__X_GSPC__GSPC__Close"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data[[lst.sym[[1]]]] / df.data[[lst.sym[[2]]]]) * 100.0 )
+  
+  # Update the symbols table    
+  df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = str.symbol.new,
+      string.source = "Calc",
+      string.description = "Consumer Discretion SPDR Fund divided by S&P 500",
+      string.label.y = "PERCENT",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(
+        c(df.symbols$date.series.start[df.symbols$Symbol == lst.sym[[1]]], index(X_GSPC[1]))
+      ))  ,
+      date.series.end = as.Date(min(c(
+        df.symbols$date.series.end[df.symbols$Symbol == lst.sym[[1]]], index(tail(X_GSPC, 1))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
+    )
+  )
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
+}
+
+# Tidy memory
+rm (lst.sym)
+
+# Transportation SPDR Fund divided by S&P 500
+lst.sym <- c("XTN.Close", "X_GSPC.GSPC.Close")
+if ( require_columns(df.data, lst.sym ) ){
+  
+  # Add the aggregate to the main data frame
+  str.symbol.new <- "XTN_Close__by__X_GSPC__GSPC__Close"
+  df.data[[str.symbol.new]] <-
+    ( ( df.data[[lst.sym[[1]]]] / df.data[[lst.sym[[2]]]]) * 100.0 )
+  
+  # Update the symbols table    
+  df.symbols <- symbols_append_row(
+    df.symbols,
+    list(
+      string.symbol = str.symbol.new,
+      string.source = "Calc",
+      string.description = "Transportation SPDR Fund divided by S&P 500",
+      string.label.y = "PERCENT",
+      float.expense.ratio = -1.00,
+      date.series.start =  as.Date(max(
+        c(df.symbols$date.series.start[df.symbols$Symbol == lst.sym[[1]]], index(X_GSPC[1]))
+      ))  ,
+      date.series.end = as.Date(min(c(
+        df.symbols$date.series.end[df.symbols$Symbol == lst.sym[[1]]], index(tail(X_GSPC, 1))
+      ))),
+      string.symbol_safe = safe_symbol_name(str.symbol.new),
+      string.object_name = safe_symbol_name(str.symbol.new)
+    )
+  )
+  
+  # Tidy memory
+  rm(str.symbol.new)
+  
+}
+
+# Tidy memory
+rm (lst.sym)
+
+
