@@ -3510,6 +3510,7 @@ if( exists ("lst_sym")){
 
 ```
 
+
 Lastly, plot  out the index pricing along with the moving averages
 
 ```{r rotation_stocks_xlp, echo=FALSE, fig.width = 10, fig.asp = .62 }
