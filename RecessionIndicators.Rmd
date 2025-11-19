@@ -3447,7 +3447,13 @@ lst_sym <- c( "XLP__Close__by__X_GSPC__GSPC__Close",
               "XLK__Close__by__X_GSPC__GSPC__Close")
 
 if (require_columns(df.data, lst_sym)) {
+
+    # Set the relative scaling between the two y-axis
+  datay.aux.scale <- 0.45
   
+  # Set the limits
+  ylim_in <- c(1, 2)
+
   my.plot <-
     plotSingle(
       dfRecession,
@@ -3458,30 +3464,27 @@ if (require_columns(df.data, lst_sym)) {
       "Date",
       getPlotYLabel(df.symbols, lst_sym[[1]]),
       c(as.Date(Sys.Date()) - 365, Sys.Date()),
-      ylim =  c(0, 5),
+      ylim =  ylim_in,
       b.legend = TRUE,
       b.percentile = FALSE,
       b.long.legend = TRUE
     )
 
-  # Set the relative scaling between the two y-axis
-  datay.aux.scale <- 0.45
-  
   my.plot <- my.plot + geom_line(
-  data = df.data,
-  aes_string(
-    x = "date",
-    y = df.data[[lst_sym[[2]]]] * datay.aux.scale,
-    colour = shQuote(getPlotTitle(df.symbols, lst_sym[[2]]))
-  ),
-  na.rm = TRUE
+    data = df.data,
+    aes_string(
+      x = "date",
+      y = df.data[[lst_sym[[2]]]] * datay.aux.scale,
+      colour = shQuote(getPlotTitle(df.symbols, lst_sym[[2]]))
+    ),
+    na.rm = TRUE
   )
   
   my.plot <-
     my.plot + scale_y_continuous(
       sec.axis = sec_axis( ~ . * (1 / datay.aux.scale), 
       name = "PERCENT"), 
-      limits = ylim
+      limits = ylim_in
     )
 
   print(my.plot)
@@ -3492,6 +3495,10 @@ if (require_columns(df.data, lst_sym)) {
   if( exists("datay.aux.scale"))
   {
     rm(datay.aux.scale)
+  }
+  if( exists("ylim_in"))
+  {
+    rm(ylim_in)
   }
   
 }
