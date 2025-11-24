@@ -4584,10 +4584,27 @@ Take a closer look at recent data
 
 ```{r initialclaimsYoy.twoyears, echo=FALSE}
 
-datay <- "ICSA.Value__YoY"
-ylim <- c(-50, 4000)
-dt.start <- as.Date('2005-01-01')
-plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = TRUE)
+# Define the symbols in the plot
+lst_syms <- c("ICSA.Value__YoY")
+
+# Do they exist in the data frame?
+if ( require_columns(df.data, lst_syms ) ){
+  
+  plotSingleQuick(
+    dfRecession,
+    df.data,
+    lst_syms[[1]],
+    c(-20, 20),
+    seq(Sys.Date(), by = "-1 year", length.out = 2)[2],
+    b.percentile = TRUE
+  )
+}
+
+# Free up memory
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
+
 
 ```
 
