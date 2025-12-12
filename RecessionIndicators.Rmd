@@ -3202,7 +3202,8 @@ plot_xle_mva(dt.start = as.Date("1998-06-01"),
 
 ```{r energy_stocks_xls, echo=FALSE, fig.width = 10, fig.asp = .62 }
 
-plot_xle_mva(dt.start = as.Date("2024-06-01"))
+plot_xle_mva(dt.start = as.Date("2024-06-01"),
+             ylim_low = 35)
 
 ```
 
@@ -3462,7 +3463,10 @@ if (require_columns(df.data, lst_sym)) {
       datay = lst_sym[[1]],
       getPlotTitle(df.symbols, lst_sym[[1]]),
       "Date",
-      paste(lst_sym[[1]], " ", getPlotYLabel(df.symbols, lst_sym[[1]])),
+      paste(substr(lst_sym[[1]],1,3), 
+            ".Close/GSPC (", 
+            getPlotYLabel(df.symbols, lst_sym[[1]]),
+            ")"),
       c(as.Date(Sys.Date()) - 365, Sys.Date()),
       ylim =  ylim_in,
       b.legend = TRUE,
