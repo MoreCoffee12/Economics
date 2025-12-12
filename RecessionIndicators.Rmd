@@ -3449,10 +3449,10 @@ lst_sym <- c( "XLP__Close__by__X_GSPC__GSPC__Close",
 if (require_columns(df.data, lst_sym)) {
 
     # Set the relative scaling between the two y-axis
-  datay.aux.scale <- 0.45
+  datay.aux.scale <- 0.50
   
   # Set the limits
-  ylim_in <- c(1, 2)
+  ylim_in <- c(0.5, 1.75)
 
   my.plot <-
     plotSingle(
@@ -3462,7 +3462,7 @@ if (require_columns(df.data, lst_sym)) {
       datay = lst_sym[[1]],
       getPlotTitle(df.symbols, lst_sym[[1]]),
       "Date",
-      getPlotYLabel(df.symbols, lst_sym[[1]]),
+      paste(lst_sym[[1]], " ", getPlotYLabel(df.symbols, lst_sym[[1]])),
       c(as.Date(Sys.Date()) - 365, Sys.Date()),
       ylim =  ylim_in,
       b.legend = TRUE,
@@ -3472,10 +3472,10 @@ if (require_columns(df.data, lst_sym)) {
 
   my.plot <- my.plot + geom_line(
     data = df.data,
-    aes_string(
-      x = "date",
-      y = df.data[[lst_sym[[2]]]] * datay.aux.scale,
-      colour = shQuote(getPlotTitle(df.symbols, lst_sym[[2]]))
+    aes(
+      x = .data[["date"]],
+      y = (.data[[lst_sym[[2]]]] * datay.aux.scale),
+      colour = getPlotTitle(df.symbols, lst_sym[[2]])
     ),
     na.rm = TRUE
   )
@@ -3584,7 +3584,7 @@ if (require_columns(df.data, lst_sym)) {
       "Date",
       getPlotYLabel(df.symbols, lst_sym[[1]]),
       c(as.Date('2024-01-01'), Sys.Date()),
-      ylim =  c(150, round_up_to(max(df.data[[lst_sym[[1]]]]),1)),
+      ylim =  c(80, round_up_to(max(df.data[[lst_sym[[1]]]]),1)),
       b.legend = TRUE,
       b.percentile = FALSE,
       b.long.legend = TRUE
