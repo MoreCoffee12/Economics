@@ -3633,6 +3633,287 @@ if( exists ("lst_sym")){
 
 ```
 
+
+#### Financial to Staples (XLF to XLP)
+
+Since about 2023 these two sectors have had a strong inverse correlation.
+
+XLF stands at
+    `r paste("$",sprintf("%3.2f", tail(df.data$XLF.Close,1)),sep="")`
+    (last updated on `r index(tail(XLF,1))`). 
+    
+The 50-day MVA stands at `r paste("$",sprintf("%3.2f", tail(df.data$XLF.Close__mva050,1)), sep="")`. 
+    
+The 200-day MVA stands at `r paste("$",sprintf("%3.2f", tail(df.data$XLF.Close__mva200,1)), sep="")`
+
+XLP stands at
+    `r paste("$",sprintf("%3.2f", tail(df.data$XLP.Close,1)),sep="")`
+    (last updated on `r index(tail(XLP,1))`). 
+    
+The 50-day MVA stands at `r paste("$",sprintf("%3.2f", tail(df.data$XLP.Close__mva050,1)), sep="")`. 
+    
+The 200-day MVA stands at `r paste("$",sprintf("%3.2f", tail(df.data$XLP.Close__mva200,1)), sep="")`
+
+Suggested Citations:
+
+“State Street Financial Select Sector SPDR ETF (XLF).” Yahoo! Finance,
+https://finance.yahoo.com/quote/XLF/. Accessed 4 Feb. 2026.
+
+“Consumer Staples Select Sector SPDR Fund (XLP) Company Profile & Facts.” Yahoo
+Finance, <https://finance.yahoo.com/quote/XLE/profile/> . Accessed 18
+Nov. 2025.
+
+```{r eq_rot_xlp_xlf, echo=FALSE, fig.width = 10, fig.asp = .62 }
+
+lst_sym <- c( "X_GSPC.GSPC.Close__YoY", "XLP.Close__YoY", "XLF.Close__YoY")
+
+if (require_columns(df.data, lst_sym)) {
+  
+  my.plot <-
+    plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_sym[[1]],
+      getPlotTitle(df.symbols, lst_sym[[1]]),
+      "Date",
+      getPlotYLabel(df.symbols, lst_sym[[1]]),
+      c(as.Date(Sys.Date()) - 365, Sys.Date()),
+      ylim =  c(-25, 50),
+      b.legend = TRUE,
+      b.percentile = FALSE,
+      b.long.legend = TRUE
+    )
+
+  my.plot <- my.plot + geom_line(
+    data = df.data,
+    aes_string(
+      x = "date",
+      y = lst_sym[[2]],
+      colour = shQuote(getPlotTitle(df.symbols, lst_sym[[2]]))
+    ),
+    na.rm = TRUE
+  )
+
+  my.plot <- my.plot + geom_line(
+    data = df.data,
+    aes_string(
+      x = "date",
+      y = lst_sym[[3]],
+      colour = shQuote(getPlotTitle(df.symbols, lst_sym[[3]]))
+    ),
+    na.rm = TRUE
+  )
+  
+  print(my.plot)
+  
+  if( exists("my.plot")){
+    rm(my.plot)
+  }
+  
+}
+
+# Clean and tidy
+if( exists ("lst_sym")){
+  rm(lst_sym)
+}
+
+```
+
+Normalize the ETF funds by the S&P 500 to get a sense of movement relative to
+the large cap index.
+
+```{r eq_rot_xlp_xlf_Relative, echo=FALSE, fig.width = 10, fig.asp = .62 }
+
+lst_sym <- c( "XLP__Close__by__X_GSPC__GSPC__Close",
+              "XLF__Close__by__X_GSPC__GSPC__Close")
+
+if (require_columns(df.data, lst_sym)) {
+
+    # Set the relative scaling between the two y-axis
+  datay.aux.scale <- 1.50
+  
+  # Set the limits
+  ylim_in <- c(0.5, 1.75)
+
+  my.plot <-
+    plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_sym[[1]],
+      getPlotTitle(df.symbols, lst_sym[[1]]),
+      "Date",
+      paste(substr(lst_sym[[1]],1,3), 
+            ".Close/GSPC (", 
+            getPlotYLabel(df.symbols, lst_sym[[1]]),
+            ")",
+            sep=""),
+      c(as.Date(Sys.Date()) - 365, Sys.Date()),
+      ylim =  ylim_in,
+      b.legend = TRUE,
+      b.percentile = FALSE,
+      b.long.legend = TRUE
+    )
+
+  my.plot <- my.plot + geom_line(
+    data = df.data,
+    aes(
+      x = .data[["date"]],
+      y = (.data[[lst_sym[[2]]]] * datay.aux.scale),
+      colour = getPlotTitle(df.symbols, lst_sym[[2]])
+    ),
+    na.rm = TRUE
+  )
+  
+  my.plot <-
+    my.plot + scale_y_continuous(
+      sec.axis = sec_axis( ~ . * (1 / datay.aux.scale), 
+      name = paste(substr(lst_sym[[2]],1,3), 
+            ".Close/GSPC (", 
+            getPlotYLabel(df.symbols, lst_sym[[1]]),
+            ")",
+            sep="")
+      ), 
+      limits = ylim_in
+    )
+
+  print(my.plot)
+  
+  if( exists("my.plot")){
+    rm(my.plot)
+  }
+  if( exists("datay.aux.scale"))
+  {
+    rm(datay.aux.scale)
+  }
+  if( exists("ylim_in"))
+  {
+    rm(ylim_in)
+  }
+  
+}
+
+# Clean and tidy
+if( exists ("lst_sym")){
+  rm(lst_sym)
+}
+
+```
+
+
+Lastly, plot  out the index pricing along with the moving averages
+
+```{r rotation_stocks_xlp2, echo=FALSE, fig.width = 10, fig.asp = .62 }
+
+lst_sym <- c( "XLP.Close", "XLP.Close__mva050", "XLP.Close__mva200")
+
+if (require_columns(df.data, lst_sym)) {
+  
+  my.plot <-
+    plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_sym[[1]],
+      getPlotTitle(df.symbols, lst_sym[[1]]),
+      "Date",
+      getPlotYLabel(df.symbols, lst_sym[[1]]),
+      c(as.Date('2024-01-01'), Sys.Date()),
+      ylim =  c(70, round_up_to(max(df.data[[lst_sym[[1]]]]),1)),
+      b.legend = TRUE,
+      b.percentile = FALSE,
+      b.long.legend = TRUE
+    )
+
+  my.plot <- my.plot + geom_line(
+    data = df.data,
+    aes_string(
+      x = "date",
+      y = lst_sym[[2]],
+      colour = shQuote(getPlotTitle(df.symbols, lst_sym[[2]]))
+    ),
+    na.rm = TRUE
+  )
+  my.plot <- my.plot + geom_line(
+    data = df.data,
+    aes_string(
+      x = "date",
+      y = lst_sym[[3]],
+      colour = shQuote(getPlotTitle(df.symbols, lst_sym[[3]]))
+    ),
+    na.rm = TRUE
+  )
+  
+  print(my.plot)
+  
+  if( exists("my.plot")){
+    rm(my.plot)
+  }  
+}
+
+# Clean and tidy
+if( exists ("lst_sym")){
+  rm(lst_sym)
+}
+
+```
+
+```{r rotation_stocks_xlf, echo=FALSE, fig.width = 10, fig.asp = .62 }
+
+lst_sym <- c( "XLF.Close", "XLF.Close__mva050", "XLF.Close__mva200")
+
+if (require_columns(df.data, lst_sym)) {
+  
+  my.plot <-
+    plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_sym[[1]],
+      getPlotTitle(df.symbols, lst_sym[[1]]),
+      "Date",
+      getPlotYLabel(df.symbols, lst_sym[[1]]),
+      c(as.Date('2024-01-01'), Sys.Date()),
+      ylim =  c(50, round_up_to(max(df.data[[lst_sym[[1]]]]),1)),
+      b.legend = TRUE,
+      b.percentile = FALSE,
+      b.long.legend = TRUE
+    )
+
+  my.plot <- my.plot + geom_line(
+    data = df.data,
+    aes_string(
+      x = "date",
+      y = lst_sym[[2]],
+      colour = shQuote(getPlotTitle(df.symbols, lst_sym[[2]]))
+    ),
+    na.rm = TRUE
+  )
+  my.plot <- my.plot + geom_line(
+    data = df.data,
+    aes_string(
+      x = "date",
+      y = lst_sym[[3]],
+      colour = shQuote(getPlotTitle(df.symbols, lst_sym[[3]]))
+    ),
+    na.rm = TRUE
+  )
+  
+  print(my.plot)
+  
+  if( exists("my.plot")){
+    rm(my.plot)
+  }  
+}
+
+# Clean and tidy
+if( exists ("lst_sym")){
+  rm(lst_sym)
+}
+
+```
+
 ## Margin and option data
 
 ### NYSE Margin Debt
