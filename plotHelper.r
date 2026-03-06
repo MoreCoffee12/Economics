@@ -320,7 +320,14 @@ plotSingleBench <-
       strYLabel <-
         df.symbols[grep(datay, df.symbols$Symbol),]$string.label.y
     }
-    dataBench <- "GSPC.Close_Norm"
+    # Benchmark naming varies by source path; pick the first one that exists.
+    bench.candidates <- c(
+      "X_GSPC.GSPC.Close_Norm",
+      "GSPC.Close_Norm",
+      "X_GSPC.GSPC.Adjusted_Norm",
+      "GSPC.Adjusted_Norm"
+    )
+    dataBench <- bench.candidates[bench.candidates %in% names(df.data)][1]
     datax <- "date"
     my.plot <- plotSingle(datadf_rec, df.data,
                           datax,
@@ -352,17 +359,21 @@ plotSingleBench <-
         color = cbbPalette[2]
       )
     
-    my.plot <-
-      my.plot + geom_line(
-        data = df.data,
-        aes_string(
-          x = datax,
-          y = dataBench,
-          colour = factor(dataBench)
-        ),
-        na.rm = TRUE,
-        size = 0.7
-      )
+    if (!is.na(dataBench) && nzchar(dataBench)) {
+      my.plot <-
+        my.plot + geom_line(
+          data = df.data,
+          aes_string(
+            x = datax,
+            y = dataBench,
+            colour = factor(dataBench)
+          ),
+          na.rm = TRUE,
+          size = 0.7
+        )
+    } else {
+      warning("plotSingleBench: no benchmark column found; plotted only target series.")
+    }
     
     return(my.plot)
     
