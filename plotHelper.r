@@ -398,12 +398,13 @@ plotReturnVolatility <-
            df.data.in,
            df.symbols.in) {
     
-    # Setup a local dataframe with the symbols in the portfolio
+    # Setup a local data frame with the symbols in the portfolio
     dfRR <- df.symbols.in[df.symbols.in[string.portfolio.in] > 0, ]
     
     # Need a data table with just the ticker and data
     strCols <-
-      paste(dfRR$string.symbol, ".Close_Norm_YoY", sep = "")
+      paste(dfRR$string.symbol, ".Close_Norm__YoY", sep = "")
+    print(strCols)
     dfPort <- data.table(df.data.in[, strCols])
     
     # Range of expected returns from the porfolio
