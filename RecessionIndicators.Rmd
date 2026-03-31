@@ -8407,7 +8407,7 @@ Hopefully this doesn't follow the business loan trends.
 ```{r nonfin, echo=FALSE}
 
 datay <- "NCBDBIQ027S.Value"
-ylim <- c(-25, 7500000)
+ylim <- c(-25, 8500000)
 plotSingleQuick(dfRecession, df.data, datay, ylim)
 
 ```
