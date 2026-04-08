@@ -8387,9 +8387,9 @@ datax = "FYFSGDA188S.Value"
 datay = "GFDEGDQ188S.Value"
 titlelabel <- paste(datay, " | ", datax)
 ylim <- c(30, 200)
-ylabel <- paste(datay, ", ", df.symbols[grep(datay, df.symbols$string.symbol),]$yLabel, sep="")
+ylabel <- getPlotTitle(df.symbols, datay)
 xlim <- c(-20, 5)
-xlabel <- paste(datax, ", ", df.symbols[grep(datax, df.symbols$string.symbol),]$yLabel, sep="")
+xlabel <- getPlotTitle(df.symbols, datax)
 bLegend <- FALSE
 bFitLinear <- FALSE
 dt.start = as.Date('1960-01-01')

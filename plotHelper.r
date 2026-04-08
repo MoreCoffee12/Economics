@@ -706,6 +706,7 @@ getPlotTitle <- function(df.symbols, datay_safe, str.sep = " | "){
   # Format the title
   strTitle <-  paste(datay_safe, str.sep, str.desc, sep="" )
   strTitle <- gsub("\\| ", "\n", strTitle)
+  strTitle <- gsub("\\\\n", "\n", strTitle)
   
   return(strTitle)
 }
@@ -775,7 +776,8 @@ getMostRecentDateString <- function(df.symbols, datay) {
 
 plotSingleQuickRecent <- function(datay, ylim){
   
-  plotSingle(dfRecession, df.data, "date", datay, 
+  plotSingle(dfRecession, 
+             df.data, "date", datay, 
              paste(datay, " | ", df.symbols[grep(paste("^", datay, "$", sep=""), df.symbols$string.symbol),]$string.description), "Date", 
              df.symbols[grep(datay, df.symbols$string.symbol),]$string.label.y, c(as.Date("1jan2000","%d%b%Y"), Sys.Date()), ylim, FALSE)
   
