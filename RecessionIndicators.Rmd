@@ -4234,7 +4234,7 @@ if ( require_columns(df.data,lst_syms ) ){
   p1 <- plotSingleQuick(dfRecession, 
                         df.data, 
                         datay = lst_syms[[1]], 
-                        ylim =  c(1000, 1200000), 
+                        ylim =  c(1000, 1500000), 
                         dt.start = dt_plot_start, 
                         b.percentile = FALSE)
   
@@ -4242,7 +4242,7 @@ if ( require_columns(df.data,lst_syms ) ){
   p2 <- plotSingleQuick(dfRecession,
                         df.data, 
                         datay = lst_syms[[2]], 
-                        ylim = c(0, 10000), 
+                        ylim = c(0, 15000), 
                         dt.start = dt_plot_start, 
                         b.percentile = FALSE)
   
@@ -5411,6 +5411,114 @@ datay <- "UNEMPLOY.Value__YoY"
 ylim <- c(-25, 350)
 dt.start <- as.Date('1968-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start)
+
+```
+
+### Labor force participation rate
+
+This section plots out the labor force participation rates for a few of the 
+categories. I track it as an indication of consumer health.
+
+### Trends
+
+This plot shows the trends for the 24-54 and 55+ age categories.
+
+```{r LBRForce.YoY, echo=FALSE, fig.width = 10, fig.asp = .32}
+
+lst_syms <- c(
+  "LNU01300060.Value__YoY",
+              "LNS11324230.Value__YoY"
+              )
+
+if (require_columns(df.data, lst_syms )) {
+  
+  my_plot <-plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_syms[[1]],
+      "Labor Force Participation Rate YoY Trends",
+      "Date",
+      getPlotYLabel(df.symbols, lst_syms[[1]]),
+      c(as.Date('2000-01-01'), Sys.Date()),
+      ylim = c(-20, 10),
+      TRUE,
+      b.long.legend = TRUE
+    )
+
+    my_plot <- my_plot + geom_line(
+      data = df.data,
+      aes_string(
+        x = "date",
+        y = lst_syms[[2]],
+        colour = shQuote(getPlotTitle(df.symbols, lst_syms[[2]]))
+      ),
+      na.rm = TRUE
+    )
+
+    print(my_plot)  
+}
+
+# Clean and tidy memory  
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
+
+if( exists("my_plot")){
+  rm(my_plot)
+}  
+
+```
+
+
+### Year-over-year
+
+This plot shows the year-over-year growth for the 24-54 and 55+ age catagories.
+
+```{r LBRForce.YoY, echo=FALSE, fig.width = 10, fig.asp = .32}
+
+lst_syms <- c(
+  "LNU01300060.Value__YoY",
+              "LNS11324230.Value__YoY"
+              )
+
+if (require_columns(df.data, lst_syms )) {
+  
+  my_plot <-plotSingle(
+      dfRecession,
+      df.data,
+      "date",
+      datay = lst_syms[[1]],
+      "Labor Force Participation Rate YoY Trends",
+      "Date",
+      getPlotYLabel(df.symbols, lst_syms[[1]]),
+      c(as.Date('2000-01-01'), Sys.Date()),
+      ylim = c(-20, 10),
+      TRUE,
+      b.long.legend = TRUE
+    )
+
+    my_plot <- my_plot + geom_line(
+      data = df.data,
+      aes_string(
+        x = "date",
+        y = lst_syms[[2]],
+        colour = shQuote(getPlotTitle(df.symbols, lst_syms[[2]]))
+      ),
+      na.rm = TRUE
+    )
+
+    print(my_plot)  
+}
+
+# Clean and tidy memory  
+if( exists("lst_syms")){
+  rm(lst_syms)
+}
+
+if( exists("my_plot")){
+  rm(my_plot)
+}  
 
 ```
 
