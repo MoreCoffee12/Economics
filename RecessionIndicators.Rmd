@@ -5426,12 +5426,23 @@ This plot shows the trends for the 24-54 and 55+ age categories.
 ```{r LBRForce.YoY, echo=FALSE, fig.width = 10, fig.asp = .32}
 
 lst_syms <- c(
-  "LNU01300060.Value__YoY",
-              "LNS11324230.Value__YoY"
+              "LNU01300060.Value",
+              "LNS11324230.Value"
               )
 
 if (require_columns(df.data, lst_syms )) {
+
+  # Define axis limits
+  y1.min <- 75
+  y1.max <- 90
+
+  y2.min <- min(df.data[[lst_syms[[2]]]], na.rm = TRUE)
+  y2.max <- max(df.data[[lst_syms[[2]]]], na.rm = TRUE)
   
+  # Scale factor
+  scale_factor <- (y1.max - y1.min) / (y2.max - y2.min)
+  
+  # Plot the first series
   my_plot <-plotSingle(
       dfRecession,
       df.data,
@@ -5440,26 +5451,48 @@ if (require_columns(df.data, lst_syms )) {
       "Labor Force Participation Rate YoY Trends",
       "Date",
       getPlotYLabel(df.symbols, lst_syms[[1]]),
-      c(as.Date('2000-01-01'), Sys.Date()),
-      ylim = c(-20, 10),
+      c(as.Date('1980-01-01'), Sys.Date()),
+      ylim = c(y1.min, y1.max),
       TRUE,
       b.long.legend = TRUE
     )
 
-    my_plot <- my_plot + geom_line(
+  my_plot <-
+    my_plot +
+    geom_line(
       data = df.data,
-      aes_string(
-        x = "date",
-        y = lst_syms[[2]],
-        colour = shQuote(getPlotTitle(df.symbols, lst_syms[[2]]))
+      aes(
+        x = date,
+        y = ( .data[[lst_syms[[2]]]] - y2.min ) * scale_factor + y1.min,
+        colour = getPlotTitle(df.symbols, lst_syms[[2]])
       ),
       na.rm = TRUE
+    ) +
+    scale_y_continuous(
+      name = getPlotYLabel(df.symbols, lst_syms[[1]]),
+      limits = c(y1.min, y1.max),
+      sec.axis = sec_axis(
+        ~ (. - y1.min) / scale_factor + y2.min,
+        name = getPlotYLabel(df.symbols, lst_syms[[2]])
+      )
     )
 
     print(my_plot)  
 }
 
 # Clean and tidy memory  
+if( exists("scale_factor")){
+  rm(lst_syms)
+}
+
+if( exists("y1")){
+  rm(lst_syms)
+}
+
+if( exists("y2")){
+  rm(lst_syms)
+}
+
 if( exists("lst_syms")){
   rm(lst_syms)
 }
@@ -5478,7 +5511,7 @@ This plot shows the year-over-year growth for the 24-54 and 55+ age catagories.
 ```{r LBRForce.YoY, echo=FALSE, fig.width = 10, fig.asp = .32}
 
 lst_syms <- c(
-  "LNU01300060.Value__YoY",
+              "LNU01300060.Value__YoY",
               "LNS11324230.Value__YoY"
               )
 
@@ -5492,8 +5525,8 @@ if (require_columns(df.data, lst_syms )) {
       "Labor Force Participation Rate YoY Trends",
       "Date",
       getPlotYLabel(df.symbols, lst_syms[[1]]),
-      c(as.Date('2000-01-01'), Sys.Date()),
-      ylim = c(-20, 10),
+      c(as.Date('1970-01-01'), Sys.Date()),
+      ylim = c(-5, 5),
       TRUE,
       b.long.legend = TRUE
     )
