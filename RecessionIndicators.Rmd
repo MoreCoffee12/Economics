@@ -5423,7 +5423,7 @@ categories. I track it as an indication of consumer health.
 
 This plot shows the trends for the 24-54 and 55+ age categories.
 
-```{r LBRForce.YoY, echo=FALSE, fig.width = 10, fig.asp = .32}
+```{r LBRForce.Trend, echo=FALSE, fig.width = 10, fig.asp = .32}
 
 lst_syms <- c(
               "LNU01300060.Value",
