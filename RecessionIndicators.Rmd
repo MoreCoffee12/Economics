@@ -1747,7 +1747,7 @@ rm(my.plot)
 ```{r GDPSP500.close, echo=FALSE}
 
 datay.input <- "GDPSP500"
-ylim <- c(0.00, 0.22)
+ylim <- c(0.00, 0.30)
 dt.start = as.Date('1995-01-01')
 my.plot <-
   plotSingle(
