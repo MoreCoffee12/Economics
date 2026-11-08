@@ -112,7 +112,7 @@ dt.start.prediction <- as.Date("01/02/1962", "%d/%m/%Y")
 
 # Define trend limits
 source("SetGSPCMax.r")
-d.IWF.max = 1000
+d.Russell.max = 5000
 
 ```
 
@@ -1707,7 +1707,7 @@ rm(my.plot)
 ```{r GDPSP500.etal, echo=FALSE}
 
 datay.input <- "GDPSP500"
-datay.aux <- "IWFSP500"
+datay.aux <- "RUTSP500"
 datay.aux.1 <- "DJISP500"
 datay.aux.scale <- 0.1
 ylim <- c(0.00, 0.25)
@@ -2627,17 +2627,17 @@ rm(dt.start)
 
 ```
 
-### Russell 1000 Growth ETF Proxy
+### Russell 2000
 
-Take a look at recent activity in the Russell 1000 growth market.
+Take a look at recent activity in the small cap market.
 
-```{r IWF, echo=FALSE, fig.width = 9, fig.asp = 0.4 }
-datay <- "IWF.Open"
-datay.aux <- "IWF.Open__mva200"
+```{r Russell, echo=FALSE, fig.width = 9, fig.asp = 0.4 }
+datay <- "X_RUT.RUT.Open"
+datay.aux <- "X_RUT.RUT.Open__mva200"
 datay.title <- getPlotTitle(df.symbols, datay.aux, str.sep = "\n")
-datay.aux.1 <- "IWF.Open__mva050"
+datay.aux.1 <- "X_RUT.RUT.Open__mva050"
 datay.title.1 <- getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n")
-ylim <- c(0, d.IWF.max)
+ylim <- c(1000, d.Russell.max)
 my.plot <-
   plotSingle(
     dfRecession,
@@ -2682,16 +2682,16 @@ rm(ylim)
 
 ```
 
-### S&P 500 to Russell 1000 Growth ETF Proxy
+### S&P 500 to Russell 2000
 
 #### Thirty day movement
 
 #### Correlation
 
-```{r rollingcorS&PtoIWF, echo=FALSE, fig.width = 10, fig.asp = .62}
+```{r rollingcorS&PtoRussell, echo=FALSE, fig.width = 10, fig.asp = .62}
 
-datay1 <- "IWF.Open"
-ylim1 <- c(0, d.IWF.max )
+datay1 <- "X_RUT.RUT.Open"
+ylim1 <- c(0, d.Russell.max )
 
 datay2 <- "X_GSPC.GSPC.Open"
 ylim2 <- c(0, d.GSPC.max)
@@ -2714,8 +2714,8 @@ rm(ylim2)
 
 ```{r rollingcorS&PtoMDY, fig.width = 10, fig.asp = .62}
 
-datay1 <- "IWF.Open"
-ylim1 <- c(0, d.IWF.max)
+datay1 <- "X_RUT.RUT.Open"
+ylim1 <- c(0, d.Russell.max)
 
 datay2 <- "MDY.Open"
 ylim2 <- c(0, 1000)
@@ -4349,14 +4349,14 @@ rm(w)
 
 ```
 
-Comparison to the Russell 1000 Growth ETF proxy
+Comparison to the Russell 2000
 
-```{r rollingcor.FINRAMarginDebt_YoY.by.IWF.Close_YoY, fig.width = 10, fig.asp = .62}
+```{r rollingcor.FINRAMarginDebt_YoY.by.RUT.Close_YoY, fig.width = 10, fig.asp = .62}
 
 datay1 <- "FINRA_MarginDebt__YoY"
 ylim1 <- c(-100, 100)
 
-datay2 <- "IWF.Close__YoY"
+datay2 <- "X_RUT.RUT.Close__YoY"
 ylim2 <- c(-100, 100)
 
 dt.start <- as.Date("1jan1995","%d%b%Y")

@@ -1342,7 +1342,7 @@ plotSimilarPeriods <-
 #'   lst_syms = c(
 #'     "X_GSPC.GSPC.Close__YoY5",
 #'     "X_DJI.DJI.Close__YoY5",
-#'     "IWF.Close__YoY5",
+#'     "X_RUT.RUT.Close__YoY5",
 #'     "QQQ.Close__YoY5"
 #'   ),
 #'   ylim = c(-100, 300),
