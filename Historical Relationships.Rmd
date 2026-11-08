@@ -77,7 +77,7 @@ df.symbols <- dplyr::filter(df.symbols,
                                                  "PCE",
                                                  "QQQ",
                                                  "NOBL",
-                                                 "^RLG",
+                                                 "IWF",
                                                  "^GSPC",
                                                  "^DJI"))
 
@@ -93,8 +93,8 @@ if( exists("d.income")){
   rm(d.income)
 }
 
-if( exists("d.Russell.max")){
-  rm(d.Russell.max)
+if( exists("d.IWF.max")){
+  rm(d.IWF.max)
 }
 
 if( exists("dt.date")){
@@ -247,7 +247,7 @@ p <- plot_index_yoy(
   lst_syms = c(
     "X_GSPC.GSPC.Close__YoY",
     "X_DJI.DJI.Close__YoY",
-    "X_RLG.RLG.Close__YoY"
+    "IWF.Close__YoY"
   ),
   ylim = c(-50, 100),
   start_date = "1940-01-01"
@@ -263,7 +263,7 @@ p <- plot_index_yoy(
   lst_syms = c(
     "X_GSPC.GSPC.Close__YoY",
     "X_DJI.DJI.Close__YoY",
-    "X_RLG.RLG.Close__YoY"
+    "IWF.Close__YoY"
   ),
   ylim = c(-50, 100),
   start_date = "2018-01-01"
@@ -279,7 +279,7 @@ p <- plot_index_yoy(
   lst_syms = c(
     "X_GSPC.GSPC.Close__YoY4",
     "X_DJI.DJI.Close__YoY4",
-    "X_RLG.RLG.Close__YoY4",
+    "IWF.Close__YoY4",
     "QQQ.Close__YoY4"
   ),
   ylim = c(-100, 200),
@@ -311,7 +311,7 @@ p <- plot_index_yoy(
   lst_syms = c(
     "X_GSPC.GSPC.Close__YoY5",
     "X_DJI.DJI.Close__YoY5",
-    "X_RLG.RLG.Close__YoY5",
+    "IWF.Close__YoY5",
     "QQQ.Close__YoY5"
   ),
   ylim = c(-100, 300),
@@ -344,7 +344,7 @@ p <- plot_index_yoy(
   lst_syms = c(
     "X_GSPC.GSPC.Close__YoY5",
     "X_DJI.DJI.Close__YoY5",
-    "X_RLG.RLG.Close__YoY5",
+    "IWF.Close__YoY5",
     "QQQ.Close__YoY5"
   ),
   ylim = c(-100, 300),

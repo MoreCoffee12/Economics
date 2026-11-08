@@ -812,12 +812,12 @@ if ( require_columns(df.data, c("X_GSPC.GSPC.Close", "GDP.Value") ) ){
 
 }
 
-# Create the ratio of Russell 2000 close to GDP
-if ( require_columns(df.data, c("X_RLG.RLG.Close", "GDP.Value") ) ){
+# Create the ratio of the Russell 1000 Growth ETF proxy close to GDP
+if ( require_columns(df.data, c("IWF.Close", "GDP.Value") ) ){
 
   # Define the new symbol and make the calculation
-  str.symbol.new <- "RLGSP500"
-  df.data[[str.symbol.new]] <- ( df.data$X_RLG.RLG.Close / df.data$GDP.Value )
+  str.symbol.new <- "IWFSP500"
+  df.data[[str.symbol.new]] <- ( df.data$IWF.Close / df.data$GDP.Value )
   df.data[[str.symbol.new]] <- na.approx(df.data[[str.symbol.new]], rule = 2)
   
   # Update the symbols table    
@@ -826,16 +826,16 @@ if ( require_columns(df.data, c("X_RLG.RLG.Close", "GDP.Value") ) ){
     list(
       string.symbol = str.symbol.new,
       string.source = "Ratio",
-      string.description =  "Russell 2000 (RLG.Close)/GDP",
+      string.description =  "Russell 1000 Growth ETF proxy (IWF.Close)/GDP",
       string.label.y = "Ratio ($/$)" ,
       float.expense.ratio = -1.00,
       Max030 = FALSE,
       Max180 = FALSE,
       date.series.start = as.Date(max(c(
-        index(X_RLG[1]), index(GDP[1])
+        index(IWF[1]), index(GDP[1])
       ))) ,
       date.series.end = as.Date(min(c(
-        index(tail(X_RLG, 1)), index(tail(GDP, 1))
+        index(tail(IWF, 1)), index(tail(GDP, 1))
       ))),
       string.symbol_safe = safe_symbol_name(str.symbol.new),
       string.object_name = safe_symbol_name(str.symbol.new)

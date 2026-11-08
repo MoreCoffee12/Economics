@@ -5,7 +5,7 @@
 #' This snippet of code gets used by both the jupyter sheets and the rmd files
 #' to interpolate and tidy the data. At some point it needs to be put into a function
 #'
-#' @param df.symbols Data frame with symbols. Each of these must exist as a zoo object in the global environment.
+#' @param df.symbols Data frame with symbols. Available series must exist as zoo objects in the global environment.
 #'
 #' @return df.data Data frame with all series interpolated or carried forward to daily frequency
 #' @export
@@ -13,9 +13,21 @@
 #' @examples
 calcInterpolate <- function(df.symbols) {
 
-  xtsData <- get(df.symbols$string.symbol_safe[1])
-  for (idx in 2:nrow(df.symbols)) {
-    xtsData <- merge(xtsData,  get(df.symbols$string.symbol_safe[idx]))
+  available <- !is.na(df.symbols$string.symbol_safe) &
+    nzchar(df.symbols$string.symbol_safe) &
+    vapply(df.symbols$string.symbol_safe, exists, logical(1), inherits = TRUE)
+  if ("status" %in% names(df.symbols)) {
+    available <- available & !is.na(df.symbols$status) & df.symbols$status == "ok"
+  }
+
+  available_symbols <- df.symbols$string.symbol_safe[available]
+  if (!length(available_symbols)) {
+    stop("No successfully fetched symbol data is available to interpolate.")
+  }
+
+  xtsData <- get(available_symbols[1])
+  for (symbol in available_symbols[-1]) {
+    xtsData <- merge(xtsData, get(symbol))
     #print(df.symbols$string.symbol[idx])
   }
   

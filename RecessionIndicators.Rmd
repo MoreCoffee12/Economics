@@ -112,7 +112,7 @@ dt.start.prediction <- as.Date("01/02/1962", "%d/%m/%Y")
 
 # Define trend limits
 source("SetGSPCMax.r")
-d.Russell.max = 5000
+d.IWF.max = 1000
 
 ```
 
@@ -237,7 +237,9 @@ fetch_symbol <- function(symbol,
                          src  = "yahoo",
                          from = as.Date("1900-01-01"),
                          to   = Sys.Date()) {
-  x <- getSymbols(Symbols = symbol,
+  fetch_symbol_name <- symbol
+
+  x <- getSymbols(Symbols = fetch_symbol_name,
                   src = src,
                   auto.assign = FALSE,
                   from = from,
@@ -250,6 +252,11 @@ fetch_symbol <- function(symbol,
   # Strip that raw prefix, safely escaped.
   prefix_pattern <- paste0("^", escape_regex(symbol), "\\.")
   core <- sub(prefix_pattern, "", cols, perl = TRUE)
+
+  if (fetch_symbol_name != symbol) {
+    core <- sub("^[^.]+\\.", "", cols)
+    core <- paste0(sub("^\\^", "", symbol), ".", core)
+  }
 
   # Single-column series (e.g., FRED) -> SAFE.Value
   if (length(cols) == 1L) core <- "Value"
@@ -343,14 +350,21 @@ ingest_symbols <- function(df.symbols, target_env = .GlobalEnv,
 
 if (bRefresh) {
   
-  # Bring the data from the internet into this environment
-  ingest_symbols(df.symbols)
-  
-  # Update the symbols table to include the safe names
+  # Fetch each series once, assigning successful results and recording failures.
   df.symbols <- update_symbols(df.symbols)
+
+  failed_symbols <- df.symbols[df.symbols$status != "ok", c("string.symbol", "error")]
+  if (nrow(failed_symbols) > 0L) {
+    warning(
+      "Skipping unavailable symbols: ",
+      paste(failed_symbols$string.symbol, collapse = ", "),
+      call. = FALSE
+    )
+  }
   
   # Correct errors in the data series
-  for (idx in 1:nrow(df.symbols)) {
+  successful_rows <- which(df.symbols$status == "ok")
+  for (idx in successful_rows) {
 
     # Revision - 26 Mar 22
     # Remove duplicate date values (believed to be a data source error)
@@ -1693,7 +1707,7 @@ rm(my.plot)
 ```{r GDPSP500.etal, echo=FALSE}
 
 datay.input <- "GDPSP500"
-datay.aux <- "RLGSP500"
+datay.aux <- "IWFSP500"
 datay.aux.1 <- "DJISP500"
 datay.aux.scale <- 0.1
 ylim <- c(0.00, 0.25)
@@ -2440,7 +2454,7 @@ The series peaks in the middle of a bull market.
 ```{r PRS88003193, echo=FALSE }
 
 datay <- "PRS88003193.Value"
-ylim <- c(10, 200)
+ylim <- c(10, 300)
 dt.start = as.Date('1948-01-01')
 plotSingleQuick(dfRecession, df.data, datay, ylim, dt.start, b.percentile = FALSE)
 
@@ -2613,17 +2627,17 @@ rm(dt.start)
 
 ```
 
-### Russell 2000
+### Russell 1000 Growth ETF Proxy
 
-Take a look at recent activity in the small cap market.
+Take a look at recent activity in the Russell 1000 growth market.
 
-```{r Russel, echo=FALSE, fig.width = 9, fig.asp = 0.4 }
-datay <- "X_RLG.RLG.Open"
-datay.aux <- "X_RLG.RLG.Open__mva200"
+```{r IWF, echo=FALSE, fig.width = 9, fig.asp = 0.4 }
+datay <- "IWF.Open"
+datay.aux <- "IWF.Open__mva200"
 datay.title <- getPlotTitle(df.symbols, datay.aux, str.sep = "\n")
-datay.aux.1 <- "X_RLG.RLG.Open__mva050"
+datay.aux.1 <- "IWF.Open__mva050"
 datay.title.1 <- getPlotTitle(df.symbols, datay.aux.1, str.sep = "\n")
-ylim <- c(1000, d.Russell.max)
+ylim <- c(0, d.IWF.max)
 my.plot <-
   plotSingle(
     dfRecession,
@@ -2668,16 +2682,16 @@ rm(ylim)
 
 ```
 
-### S&P 500 to Rusell 2000
+### S&P 500 to Russell 1000 Growth ETF Proxy
 
 #### Thirty day movement
 
 #### Correlation
 
-```{r rollingcorS&PtoRussell, echo=FALSE, fig.width = 10, fig.asp = .62}
+```{r rollingcorS&PtoIWF, echo=FALSE, fig.width = 10, fig.asp = .62}
 
-datay1 <- "X_RLG.RLG.Open"
-ylim1 <- c(0, d.Russell.max )
+datay1 <- "IWF.Open"
+ylim1 <- c(0, d.IWF.max )
 
 datay2 <- "X_GSPC.GSPC.Open"
 ylim2 <- c(0, d.GSPC.max)
@@ -2700,8 +2714,8 @@ rm(ylim2)
 
 ```{r rollingcorS&PtoMDY, fig.width = 10, fig.asp = .62}
 
-datay1 <- "X_RLG.RLG.Open"
-ylim1 <- c(0, d.Russell.max)
+datay1 <- "IWF.Open"
+ylim1 <- c(0, d.IWF.max)
 
 datay2 <- "MDY.Open"
 ylim2 <- c(0, 1000)
@@ -4335,14 +4349,14 @@ rm(w)
 
 ```
 
-Comparison to the Russell 2000
+Comparison to the Russell 1000 Growth ETF proxy
 
-```{r rollingcor.FINRAMarginDebt_YoY.by.RLG.Close_YoY, fig.width = 10, fig.asp = .62}
+```{r rollingcor.FINRAMarginDebt_YoY.by.IWF.Close_YoY, fig.width = 10, fig.asp = .62}
 
 datay1 <- "FINRA_MarginDebt__YoY"
 ylim1 <- c(-100, 100)
 
-datay2 <- "X_RLG.RLG.Close__YoY"
+datay2 <- "IWF.Close__YoY"
 ylim2 <- c(-100, 100)
 
 dt.start <- as.Date("1jan1995","%d%b%Y")
@@ -9599,6 +9613,106 @@ my.data[[1]]
 datay <- "DGS10TO2"
 
 plotSingleQuickModern(datay, ylim = c(-2.5, 5), b.percentile = TRUE)
+
+```
+
+### 10-year/2-year un-inversions and recessions
+
+Each panel begins with the first positive observation that then stays positive
+for at least 60 days, which filters out short-lived whipsaws back into
+inversion. Closely spaced crossings are treated as one un-inversion episode. The
+panels show the seven most recent episodes and the following 18 months; shaded
+areas are NBER recessions.
+
+```{r Yieldcurve_DGS10TO2_uninversions, echo=FALSE, fig.width=10, fig.height=14}
+
+spread_col <- "DGS10TO2"
+
+if (require_columns(df.data, spread_col)) {
+  spread_data <- df.data |>
+    dplyr::select(date, spread = dplyr::all_of(spread_col)) |>
+    dplyr::filter(!is.na(date), is.finite(spread)) |>
+    dplyr::arrange(date)
+
+  crossing_rows <- which(
+    spread_data$spread > 0 &
+      dplyr::lag(spread_data$spread, default = Inf) <= 0
+  )
+
+  # Keep only crossings that stay positive for at least 60 days afterward.
+  sustained_crossings <- crossing_rows[vapply(
+    crossing_rows,
+    function(row_index) {
+      window_rows <- spread_data$date >= spread_data$date[row_index] &
+        spread_data$date <= spread_data$date[row_index] + 60
+      all(spread_data$spread[window_rows] > 0)
+    },
+    logical(1)
+  )]
+
+  crossing_dates <- spread_data$date[sustained_crossings]
+  episode_starts <- crossing_dates[
+    c(TRUE, diff(crossing_dates) > 365)
+  ]
+  event_dates <- tail(episode_starts, 7)
+
+  if (length(event_dates) > 0) {
+    event_windows <- tibble::tibble(
+      event_date = event_dates,
+      window_end = event_dates %m+% months(18),
+      event_label = paste("Un-inverted", format(event_dates, "%b %Y"))
+    )
+
+    plot_data <- tidyr::crossing(
+      spread_data,
+      event_windows
+    ) |>
+      dplyr::filter(date >= event_date, date <= window_end) |>
+      dplyr::mutate(
+        months_after = as.numeric(date - event_date) / 30.4375,
+        event_label = factor(event_label, levels = event_windows$event_label)
+      )
+
+    recession_windows <- tidyr::crossing(
+      dfRecession |> dplyr::select(recession_start = start,
+                                   recession_end = end),
+      event_windows
+    ) |>
+      dplyr::filter(recession_end >= event_date,
+                    recession_start <= window_end) |>
+      dplyr::transmute(
+        event_label = factor(event_label, levels = event_windows$event_label),
+        xmin = pmax(0, as.numeric(recession_start - event_date) / 30.4375),
+        xmax = pmin(18, as.numeric(recession_end - event_date) / 30.4375)
+      )
+
+    ggplot(plot_data, aes(x = months_after, y = spread)) +
+      geom_rect(
+        data = recession_windows,
+        aes(xmin = xmin, xmax = xmax, ymin = -Inf, ymax = Inf),
+        inherit.aes = FALSE,
+        fill = "grey75",
+        alpha = 0.6
+      ) +
+      geom_hline(yintercept = 0, colour = "grey45", linewidth = 0.35) +
+      geom_line(colour = "#176B87", linewidth = 0.55, na.rm = TRUE) +
+      facet_wrap(vars(event_label), ncol = 1) +
+      scale_x_continuous(breaks = seq(0, 18, by = 3), limits = c(0, 18)) +
+      labs(
+        title = "10Y-2Y Treasury spread after yield-curve un-inversion",
+        x = "Months after first positive spread",
+        y = "Percentage points"
+      ) +
+      theme_minimal(base_size = 10) +
+      theme(
+        panel.grid.minor = element_blank(),
+        strip.text = element_text(face = "bold"),
+        plot.title = element_text(face = "bold")
+      )
+  } else {
+    message("No sustained 10Y-2Y un-inversion events were found.")
+  }
+}
 
 ```
 
